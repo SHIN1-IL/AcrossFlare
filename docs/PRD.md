@@ -19,7 +19,7 @@
 ## 3. 핵심 기능 명세
 
 ### F-1. 사용자 서비스 분리
-* **타겟 A (글로벌 우회/백업):** Nextcloud 10GB 자동 생성 + 카링(Karing) 연동 VLESS-WS/gRPC 1초 QR 및 딥링크 발급 (`Content-Type: text/yaml`). 밴드웨곤(150GB) 소진 시 랙너드(무제한) 자동 예비 전환.
+* **타겟 A (글로벌 우회/백업):** Nextcloud 1GB 자동 생성 + 카링(Karing) 연동 VLESS-WS/gRPC 1초 QR 및 딥링크 발급 (`Content-Type: text/yaml`). 밴드웨곤(150GB) 소진 시 랙너드(무제한) 자동 예비 전환.
 * **타겟 B (마케팅 IP):** 별도 앱 설치 없는 HTTP/SOCKS5 프록시 URL(`http://id:pw@ip:port`) 및 WireGuard 설정 정보 제공. 대시보드 내 Mutex Lock 기반 1클릭 IP 변경(Rotate) 지원.
 
 ### F-2. 이원화 결제 및 자동 프로비저닝

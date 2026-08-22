@@ -1,0 +1,195 @@
+# Cloudflare origin stack. 3x-ui lives on node VPS hosts, not here.
+# Local Prisma: docker compose up -d postgres  (this file is production/staging only)
+name: acrossflare-origin
+
+networks:
+  origin:
+    driver: bridge
+
+volumes:
+  origin_pgdata:
+  nextcloud_html:
+  nextcloud_db:
+  redis_data:
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-acrossflare}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-acrossflare}
+      POSTGRES_DB: ${POSTGRES_DB:-acrossflare}
+    volumes:
+      - origin_pgdata:/var/lib/postgresql/data
+    networks: [origin]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-acrossflare} -d ${POSTGRES_DB:-acrossflare}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
+    volumes:
+      - redis_data:/data
+    networks: [origin]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  nextcloud-db:
+    image: mariadb:11
+    restart: unless-stopped
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    environment:
+      MYSQL_ROOT_PASSWORD: ${NEXTCLOUD_DB_ROOT_PASSWORD:?set NEXTCLOUD_DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nextcloud
+      MYSQL_PASSWORD: ${NEXTCLOUD_DB_PASSWORD:?set NEXTCLOUD_DB_PASSWORD}
+    volumes:
+      - nextcloud_db:/var/lib/mysql
+    networks: [origin]
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  nextcloud:
+    image: nextcloud:apache
+    restart: unless-stopped
+    depends_on:
+      nextcloud-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      MYSQL_HOST: nextcloud-db
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nextcloud
+      MYSQL_PASSWORD: ${NEXTCLOUD_DB_PASSWORD}
+      NEXTCLOUD_ADMIN_USER: ${NEXTCLOUD_ADMIN_USER:-admin}
+      NEXTCLOUD_ADMIN_PASSWORD: ${NEXTCLOUD_ADMIN_PASSWORD:?set NEXTCLOUD_ADMIN_PASSWORD}
+      NEXTCLOUD_TRUSTED_DOMAINS: files.acrossflare.com nextcloud
+      OVERWRITEPROTOCOL: https
+      OVERWRITEHOST: files.acrossflare.com
+      OVERWRITECLIURL: https://files.acrossflare.com
+      TRUSTED_PROXIES: 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16
+      REDIS_HOST: redis
+    volumes:
+      - nextcloud_html:/var/www/html
+    networks: [origin]
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  nextcloud-cron:
+    image: nextcloud:apache
+    restart: unless-stopped
+    depends_on:
+      - nextcloud
+    entrypoint: /cron.sh
+    environment:
+      MYSQL_HOST: nextcloud-db
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nextcloud
+      MYSQL_PASSWORD: ${NEXTCLOUD_DB_PASSWORD}
+      REDIS_HOST: redis
+    volumes:
+      - nextcloud_html:/var/www/html
+    networks: [origin]
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-acrossflare}:${POSTGRES_PASSWORD:-acrossflare}@postgres:5432/${POSTGRES_DB:-acrossflare}
+      APP_URL: ${APP_URL:-https://acrossflare.com}
+      NEXTCLOUD_URL: ${NEXTCLOUD_URL:-https://files.acrossflare.com}
+      NEXTCLOUD_INTERNAL_URL: http://nextcloud:80
+      NEXTCLOUD_ADMIN_USER: ${NEXTCLOUD_ADMIN_USER:-admin}
+      NEXTCLOUD_ADMIN_PASSWORD: ${NEXTCLOUD_ADMIN_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nextcloud:
+        condition: service_started
+    networks: [origin]
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/api/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  nginx:
+    build:
+      context: ./infra/nginx
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_healthy
+      nextcloud:
+        condition: service_started
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      ORIGIN_PULLS: ${ORIGIN_PULLS:-on}
+    volumes:
+      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./infra/nginx/cloudflare-real-ip.conf:/etc/nginx/cloudflare-real-ip.conf:ro
+      - ./infra/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./infra/nginx/snippets:/etc/nginx/snippets:ro
+      - ./infra/nginx/start.sh:/etc/nginx/start.sh:ro
+      - ./infra/certs:/etc/nginx/certs
+    command: ["/bin/sh", "/etc/nginx/start.sh"]
+    networks: [origin]
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

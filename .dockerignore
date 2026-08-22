@@ -1,0 +1,16 @@
+node_modules
+.next
+.git
+.github
+.cursor
+.vscode
+.env
+.env.*
+!.env.example
+infra/certs/*.pem
+infra/certs/*.key
+*.md
+coverage
+agent-transcripts
+npm-debug.log*
+.DS_Store

@@ -1,0 +1,23 @@
+# Optional local 3x-ui for provisioning tests. Do not attach this to the origin stack.
+# Xray inbound ports must not share origin Nginx 443. Panel stays on loopback.
+# In /admin, add a node with host=http://host.docker.internal:2053 (or the compose DNS from another project).
+name: acrossflare-xui
+
+services:
+  xui:
+    image: ghcr.io/mhsanaei/3x-ui:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:2053:2053"
+    volumes:
+      - xui_db:/etc/x-ui
+      - xui_cert:/root/cert
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  xui_db:
+  xui_cert:

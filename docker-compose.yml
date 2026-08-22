@@ -1,0 +1,23 @@
+# Local Postgres for Prisma (`npm run db:up`). Port 5434 avoids a host Postgres on 5432.
+# Production origin (Nginx + Cloudflare + Nextcloud) is docker-compose.origin.yml.
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: acrossflare-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: acrossflare
+      POSTGRES_PASSWORD: acrossflare
+      POSTGRES_DB: acrossflare
+    ports:
+      - "5434:5432"
+    volumes:
+      - acrossflare_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U acrossflare -d acrossflare"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  acrossflare_pgdata:

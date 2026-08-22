@@ -1,0 +1,224 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Product {
+  GLOBAL
+  MARKETING
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  UNPAID
+  PROVISIONING
+  FAILED
+}
+
+enum PaymentMethod {
+  CARD
+  ALIPAY
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+
+enum PaymentProvider {
+  PORTONE
+  STRIPE
+  PAYMENTWALL
+}
+
+enum NodeRole {
+  BANDWAGON
+  RACKNERD
+}
+
+enum NodeHealth {
+  ONLINE
+  DEGRADED
+  OFFLINE
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(USER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  sessions      Session[]
+  subscriptions Subscription[]
+  payments      Payment[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Plan {
+  id        String   @id
+  product   Product
+  name      String
+  priceKrw  Int
+  priceUsd  Int
+  priceCny  Int
+  priceJpy  Int
+  trafficGb Int?
+  backupGb  Int?
+  nodeCodes String[]
+  featured  Boolean  @default(false)
+  visible   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subscriptions Subscription[]
+  payments      Payment[]
+
+  @@index([product])
+}
+
+model Node {
+  id        String     @id @default(cuid())
+  product   Product
+  name      String
+  ddns      String
+  role      NodeRole
+  status    NodeHealth @default(ONLINE)
+  host      String
+  port      Int
+  username  String
+  password  String
+  inboundId Int?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  subscriptions Subscription[]
+
+  @@index([product])
+}
+
+model Subscription {
+  id              String             @id @default(cuid())
+  userId          String
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId          String
+  plan            Plan               @relation(fields: [planId], references: [id])
+  product         Product
+  status          SubscriptionStatus @default(PROVISIONING)
+  expiresAt       DateTime
+  memo            String             @default("")
+  provisionStep   String             @default("queued")
+  provisionError  String             @default("")
+  trafficUsedGb   Float              @default(0)
+  nextcloudUsedGb Float              @default(0)
+  failover        Boolean            @default(false)
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  nodes        Node[]
+  credentials  Credential?
+  rotateEvents RotateEvent[]
+  payments     Payment[]
+
+  @@index([userId, product])
+  @@index([status])
+}
+
+model Credential {
+  id             String       @id @default(cuid())
+  subscriptionId String       @unique
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  uuid                 String?
+  deepLink             String?
+  yamlToken            String? @unique
+  yamlBody             String?
+  nextcloudUrl         String?
+  nextcloudUser        String?
+  nextcloudAppPassword String?
+  xuiEmail             String?
+
+  exitIp            String?
+  region            String?
+  httpUser          String?
+  httpPass          String?
+  httpPort          Int?
+  socksPort         Int?
+  wgPrivateKey      String?
+  wgPublicKey       String?
+  wgAddress         String?
+  wgEndpointPort    Int?
+  lastRotateAt      DateTime?
+  rotateLockedUntil DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RotateEvent {
+  id             String       @id @default(cuid())
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  fromIp         String
+  toIp           String
+  createdAt      DateTime     @default(now())
+
+  @@index([subscriptionId])
+}
+
+model Payment {
+  id             String           @id @default(cuid())
+  userId         String
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscriptionId String?
+  subscription   Subscription?    @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  planId         String
+  plan           Plan             @relation(fields: [planId], references: [id])
+  product        Product
+  locale         String
+  provider       PaymentProvider
+  method         PaymentMethod
+  status         PaymentStatus    @default(PENDING)
+  amount         Int
+  currency       String
+  externalId     String?          @unique
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  webhookEvents WebhookEvent[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model WebhookEvent {
+  id        String           @id
+  provider  PaymentProvider
+  paymentId String?
+  payment   Payment?         @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  createdAt DateTime         @default(now())
+
+  @@index([paymentId])
+}
