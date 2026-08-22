@@ -2,7 +2,7 @@
 
 import { Check, LoaderCircle } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PaymentTabs } from "@/components/app/payment-tabs";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { Logo } from "@/components/marketing/logo";
@@ -27,9 +27,13 @@ const STEPS = [
 export function CheckoutView({
   product,
   planId,
+  paymentId,
+  canceled = false,
 }: {
   product?: string;
   planId?: string;
+  paymentId?: string;
+  canceled?: boolean;
 }) {
   const t = useTranslations("checkout");
   const tApp = useTranslations("app");
@@ -40,9 +44,12 @@ export function CheckoutView({
   const plan = useLivePlan(planId);
   const validProduct = isProductId(product) && plan?.product === product ? product : null;
   const [method, setMethod] = useState<PaymentMethod>(locale === "zh" ? "alipay" : "card");
-  const [phase, setPhase] = useState<"form" | "processing" | "provisioning">("form");
+  const [phase, setPhase] = useState<"form" | "processing" | "provisioning">(
+    paymentId && !canceled ? "processing" : "form"
+  );
   const [step, setStep] = useState(0);
-  const [error, setError] = useState<"failed" | "timeout" | null>(null);
+  const [error, setError] = useState<"failed" | "timeout" | null>(canceled ? "failed" : null);
+  const resumeRef = useRef(false);
 
   const steps = useMemo(
     () =>
@@ -50,6 +57,38 @@ export function CheckoutView({
         ? STEPS.filter((item) => item.id !== "nextcloud")
         : [...STEPS],
     [validProduct]
+  );
+
+  const finishPaidCheckout = useCallback(
+    async (id: string) => {
+      const paid = await waitForPayment(id);
+      if (paid.status !== "SUCCEEDED") {
+        throw new Error("failed");
+      }
+
+      setStep(Math.max(steps.findIndex((item) => item.id === "xui"), 1));
+      setPhase("provisioning");
+
+      await waitForProvision(id, (provisionStep) => {
+        const target =
+          provisionStep === "ready"
+            ? "ready"
+            : provisionStep === "nextcloud"
+              ? "nextcloud"
+              : "xui";
+        const index = steps.findIndex((item) => item.id === target);
+        setStep(index >= 0 ? index : 1);
+      });
+
+      setStep(steps.length - 1);
+      await sleep(500);
+      await refreshRemoteAccount();
+      if (session && validProduct && plan) {
+        provisionProduct(session.email, validProduct, plan.id, method);
+        router.push(validProduct === "global" ? "/app/global" : "/app/marketing");
+      }
+    },
+    [method, plan, router, session, steps, validProduct]
   );
 
   async function startPayment() {
@@ -72,7 +111,13 @@ export function CheckoutView({
           locale,
         }),
       });
-      const checkout = (await created.json()) as { paymentId?: string; mode?: string; error?: string };
+      const checkout = (await created.json()) as {
+        paymentId?: string;
+        mode?: string;
+        error?: string;
+        redirectUrl?: string;
+        portone?: PortOneCheckout;
+      };
       if (!created.ok || !checkout.paymentId) {
         throw new Error("failed");
       }
@@ -87,34 +132,25 @@ export function CheckoutView({
         if (!simulated.ok) {
           throw new Error("failed");
         }
+        await finishPaidCheckout(checkout.paymentId);
+        return;
       }
 
-      const paid = await waitForPayment(checkout.paymentId);
-      if (paid.status !== "SUCCEEDED") {
-        throw new Error("failed");
+      if (checkout.redirectUrl) {
+        window.location.assign(checkout.redirectUrl);
+        return;
       }
 
-      setStep(Math.max(steps.findIndex((item) => item.id === "xui"), 1));
-      setPhase("provisioning");
-
-      await waitForProvision(checkout.paymentId, (provisionStep) => {
-        const target =
-          provisionStep === "ready"
-            ? "ready"
-            : provisionStep === "nextcloud"
-              ? "nextcloud"
-              : "xui";
-        const index = steps.findIndex((item) => item.id === target);
-        setStep(index >= 0 ? index : 1);
-      });
-
-      setStep(steps.length - 1);
-      await sleep(500);
-      await refreshRemoteAccount();
-      if (session && validProduct && plan) {
-        provisionProduct(session.email, validProduct, plan.id, method);
-        router.push(validProduct === "global" ? "/app/global" : "/app/marketing");
+      if (checkout.portone) {
+        const result = await requestPortOnePayment(checkout.portone);
+        if (result === "redirect") {
+          return;
+        }
+        await finishPaidCheckout(checkout.paymentId);
+        return;
       }
+
+      throw new Error("failed");
     } catch (cause) {
       setPhase("form");
       setError(cause instanceof Error && cause.message === "timeout" ? "timeout" : "failed");
@@ -122,15 +158,27 @@ export function CheckoutView({
   }
 
   useEffect(() => {
+    if (canceled || !paymentId || resumeRef.current || !hydrated || !session || !validProduct || !plan) {
+      return;
+    }
+
+    resumeRef.current = true;
+    void finishPaidCheckout(paymentId).catch((cause: unknown) => {
+      setPhase("form");
+      setError(cause instanceof Error && cause.message === "timeout" ? "timeout" : "failed");
+    });
+  }, [canceled, finishPaidCheckout, hydrated, paymentId, plan, session, validProduct]);
+
+  useEffect(() => {
     if (hydrated && !session) {
       router.replace({
         pathname: "/login",
         query: {
-          next: `/checkout?product=${product ?? ""}&plan=${planId ?? ""}`,
+          next: `/checkout?product=${product ?? ""}&plan=${planId ?? ""}${paymentId ? `&paymentId=${paymentId}` : ""}`,
         },
       });
     }
-  }, [hydrated, planId, product, router, session]);
+  }, [hydrated, paymentId, planId, product, router, session]);
 
   if (!hydrated || !session) {
     return (
@@ -290,6 +338,86 @@ async function pollPayment(paymentId: string) {
 
 function sleep(ms: number) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+type PortOneCheckout = {
+  storeId: string;
+  channelKey: string;
+  paymentId: string;
+  orderName: string;
+  totalAmount: number;
+  currency: string;
+  payMethod: "CARD" | "ALIPAY";
+  redirectUrl: string;
+};
+
+type PortOneSdk = {
+  requestPayment: (input: {
+    storeId: string;
+    channelKey: string;
+    paymentId: string;
+    orderName: string;
+    totalAmount: number;
+    currency: string;
+    payMethod: "CARD" | "ALIPAY";
+    redirectUrl: string;
+  }) => Promise<{ code?: string } | null>;
+};
+
+declare global {
+  interface Window {
+    PortOne?: PortOneSdk;
+  }
+}
+
+async function requestPortOnePayment(checkout: PortOneCheckout): Promise<"redirect" | "complete"> {
+  const sdk = await loadPortOneSdk();
+  const href = window.location.href;
+  const result = await sdk.requestPayment(checkout);
+  if (window.location.href !== href) {
+    return "redirect";
+  }
+
+  if (result?.code) {
+    throw new Error("failed");
+  }
+
+  return "complete";
+}
+
+function loadPortOneSdk(): Promise<PortOneSdk> {
+  if (window.PortOne) {
+    return Promise.resolve(window.PortOne);
+  }
+
+  return new Promise((resolve, reject) => {
+    const existing = document.querySelector<HTMLScriptElement>("script[data-portone-sdk]");
+    if (existing) {
+      existing.addEventListener("load", () => {
+        if (window.PortOne) {
+          resolve(window.PortOne);
+        } else {
+          reject(new Error("failed"));
+        }
+      });
+      existing.addEventListener("error", () => reject(new Error("failed")));
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://cdn.portone.io/v2/browser-sdk.js";
+    script.async = true;
+    script.dataset.portoneSdk = "true";
+    script.onload = () => {
+      if (window.PortOne) {
+        resolve(window.PortOne);
+      } else {
+        reject(new Error("failed"));
+      }
+    };
+    script.onerror = () => reject(new Error("failed"));
+    document.head.appendChild(script);
+  });
 }
 
 function CheckoutFrame({ children }: { children: React.ReactNode }) {

@@ -30,6 +30,16 @@ export function MarketingDashboard() {
     return <IssuingSkeleton />;
   }
 
+  if (account.marketing.status === "unpaid" || account.marketing.status === "failed") {
+    return (
+      <ProductEmpty
+        product="marketing"
+        status={account.marketing.status}
+        planId={account.marketing.planId}
+      />
+    );
+  }
+
   const marketing = account.marketing;
   const locked = Boolean(
     rotating || (marketing.rotateLockedUntil && now > 0 && marketing.rotateLockedUntil > now)

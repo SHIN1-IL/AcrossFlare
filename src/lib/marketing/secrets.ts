@@ -8,6 +8,8 @@ import {
   marketingHttpPort,
   marketingSocksPort,
   marketingWgPort,
+  SIMULATED_WG_SERVER_PUBLIC_KEY,
+  wgServerPublicKey,
 } from "./config";
 
 export const EXIT_IPS = ["203.0.113.10", "203.0.113.44", "198.51.100.22", "198.51.100.87", "192.0.2.55"];
@@ -20,17 +22,22 @@ export type MarketingSecrets = {
   socksPort: number;
   wgPrivateKey: string;
   wgPublicKey: string;
+  wgClientPublicKey: string;
   wgAddress: string;
   wgEndpointPort: number;
 };
 
 export function generateWireGuardKeys() {
   const client = x25519Pair();
-  const server = x25519Pair();
+  const configured = wgServerPublicKey();
+
+  if (process.env.PROVISION_MODE === "live" && !configured) {
+    throw new Error("wg_server_public_key_missing");
+  }
 
   return {
     privateKey: client.privateKey,
-    publicKey: server.publicKey,
+    publicKey: configured || SIMULATED_WG_SERVER_PUBLIC_KEY,
     clientPublicKey: client.publicKey,
   };
 }
@@ -118,6 +125,7 @@ export function issueMarketingSecrets(input: {
     socksPort: marketingSocksPort(),
     wgPrivateKey: keys.privateKey,
     wgPublicKey: keys.publicKey,
+    wgClientPublicKey: keys.clientPublicKey,
     wgAddress: input.wgAddress,
     wgEndpointPort: marketingWgPort(),
   };

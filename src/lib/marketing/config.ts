@@ -22,3 +22,9 @@ export function marketingWgPort() {
   const raw = Number(process.env.MARKETING_WG_PORT);
   return Number.isFinite(raw) && raw > 0 ? raw : DEFAULT_WG_PORT;
 }
+
+export const SIMULATED_WG_SERVER_PUBLIC_KEY = "CQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQk=";
+
+export function wgServerPublicKey() {
+  return process.env.WG_SERVER_PUBLIC_KEY || "";
+}

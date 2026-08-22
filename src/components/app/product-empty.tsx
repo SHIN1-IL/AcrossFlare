@@ -9,22 +9,29 @@ import type { ProductId } from "@/lib/plans";
 
 export function ProductEmpty({
   product,
+  status = "unpaid",
+  planId,
 }: {
   product: ProductId;
+  status?: "unpaid" | "failed";
+  planId?: string;
 }) {
   const t = useTranslations("app");
-  const plan = product === "global" ? "global-standard" : "marketing-standard";
+  const plan = planId ?? (product === "global" ? "global-standard" : "marketing-standard");
+  const failed = status === "failed";
 
   return (
     <div className="rounded-2xl border border-border bg-card p-8">
-      <StatusPill label={t("statusUnpaid")} tone="warn" />
-      <h2 className="mt-4 text-xl tracking-tight">{t("unpaidTitle")}</h2>
-      <p className="mt-2 max-w-md text-sm text-muted-foreground">{t("unpaidBody")}</p>
+      <StatusPill label={failed ? t("statusFailed") : t("statusUnpaid")} tone="warn" />
+      <h2 className="mt-4 text-xl tracking-tight">{failed ? t("failedTitle") : t("unpaidTitle")}</h2>
+      <p className="mt-2 max-w-md text-sm text-muted-foreground">
+        {failed ? t("failedBody") : t("unpaidBody")}
+      </p>
       <Link
         href={{ pathname: "/checkout", query: { product, plan } }}
         className={cn(buttonVariants(), "mt-6 rounded-[10px]")}
       >
-        {t("unpaidCta")}
+        {failed ? t("failedCta") : t("unpaidCta")}
       </Link>
     </div>
   );

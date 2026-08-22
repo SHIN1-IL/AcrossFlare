@@ -29,6 +29,12 @@ export function GlobalDashboard() {
     return <IssuingSkeleton />;
   }
 
+  if (account.global.status === "unpaid" || account.global.status === "failed") {
+    return (
+      <ProductEmpty product="global" status={account.global.status} planId={account.global.planId} />
+    );
+  }
+
   const global = account.global;
   const statusLabel = global.failover ? t("statusFailover") : t("statusActive");
 

@@ -49,12 +49,18 @@ function latestByProduct(subscriptions: SubscriptionRow[], product: Product) {
   return subscriptions.find((item) => item.product === product) ?? null;
 }
 
-function toUiStatus(status: SubscriptionStatus): GlobalAccount["status"] | null {
+export function toUiStatus(status: SubscriptionStatus): GlobalAccount["status"] | null {
   if (status === SubscriptionStatus.ACTIVE) {
     return "active";
   }
   if (status === SubscriptionStatus.PROVISIONING) {
     return "provisioning";
+  }
+  if (status === SubscriptionStatus.FAILED) {
+    return "failed";
+  }
+  if (status === SubscriptionStatus.UNPAID) {
+    return "unpaid";
   }
   return null;
 }

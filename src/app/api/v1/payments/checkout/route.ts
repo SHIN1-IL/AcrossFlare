@@ -3,6 +3,7 @@ import { getAuthUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { isSimulateEnabled } from "@/lib/payments/config";
 import { defaultPaymentMethod, parseAppLocale, parsePaymentMethod, quotePayment } from "@/lib/payments/quote";
+import { CheckoutStartError, startProviderCheckout } from "@/lib/payments/start";
 import { isProductId } from "@/lib/plans";
 import { toPrismaProduct } from "@/lib/product";
 
@@ -43,12 +44,32 @@ export async function POST(request: Request) {
     },
   });
 
-  return NextResponse.json({
+  const base = {
     paymentId: payment.id,
     provider: payment.provider,
     method: payment.method === "CARD" ? "card" : "alipay",
     amount: payment.amount,
     currency: payment.currency,
     mode: isSimulateEnabled() ? "simulate" : "live",
-  });
+  };
+
+  if (isSimulateEnabled()) {
+    return NextResponse.json(base);
+  }
+
+  try {
+    const live = await startProviderCheckout({
+      payment,
+      plan,
+      email: user.email,
+      product,
+    });
+    return NextResponse.json({ ...base, ...live });
+  } catch (error) {
+    if (error instanceof CheckoutStartError) {
+      return NextResponse.json({ ...base, error: error.code }, { status: 502 });
+    }
+
+    throw error;
+  }
 }

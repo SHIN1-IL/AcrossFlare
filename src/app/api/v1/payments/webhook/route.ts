@@ -39,6 +39,10 @@ async function handleWebhook(request: Request) {
     });
   } catch (error) {
     if (error instanceof WebhookVerifyError) {
+      if (error.code === "ignored_event") {
+        return NextResponse.json({ received: true, ignored: true }, { status: 200 });
+      }
+
       return NextResponse.json({ error: error.code }, { status: error.status });
     }
 

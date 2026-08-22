@@ -150,13 +150,18 @@ function verifyStripe(headers: Headers, rawBody: string): VerifiedWebhook {
 
   const currency = optionalString(object.currency)?.toUpperCase();
   const minor = numberField(object, ["amount_total", "amount"]);
+  const status = stripeEventStatus(String(body.type ?? ""), object);
+
+  if (!status) {
+    throw new WebhookVerifyError("ignored_event", 200);
+  }
 
   return {
     eventId: `stripe:${String(body.id ?? `t${timestampSec}`)}`,
     provider: PaymentProvider.STRIPE,
     paymentId,
     externalId: stringField(object, ["id", "payment_intent"]) || String(body.id ?? paymentId),
-    status: String(body.type ?? "").includes("failed") ? PaymentStatus.FAILED : PaymentStatus.SUCCEEDED,
+    status,
     amount: minor == null || !currency ? undefined : fromStripeMinorUnits(minor, currency),
     currency,
   };
@@ -222,13 +227,18 @@ function verifyPaymentwall(params: URLSearchParams): VerifiedWebhook {
   }
 
   const type = params.get("type") ?? "0";
+  const status = paymentwallPingbackStatus(type);
+
+  if (!status) {
+    throw new WebhookVerifyError("ignored_event", 200);
+  }
 
   return {
     eventId: `paymentwall:${params.get("ref") ?? paymentId}:${type}`,
     provider: PaymentProvider.PAYMENTWALL,
     paymentId,
     externalId: params.get("ref") ?? paymentId,
-    status: type === "2" ? PaymentStatus.FAILED : PaymentStatus.SUCCEEDED,
+    status,
   };
 }
 
@@ -290,4 +300,59 @@ function asProvider(value: unknown): PaymentProvider | null {
 function isFailureType(type: string) {
   const lower = type.toLowerCase();
   return lower.includes("fail") || lower.includes("cancel") || lower.includes("virtual_account_issued");
+}
+
+const STRIPE_SUCCEEDED_TYPES = new Set([
+  "checkout.session.completed",
+  "checkout.session.async_payment_succeeded",
+  "payment_intent.succeeded",
+  "invoice.paid",
+  "invoice.payment_succeeded",
+  "charge.succeeded",
+]);
+
+const STRIPE_FAILED_TYPES = new Set([
+  "checkout.session.async_payment_failed",
+  "checkout.session.expired",
+  "payment_intent.payment_failed",
+  "payment_intent.canceled",
+  "invoice.payment_failed",
+  "charge.failed",
+  "charge.expired",
+]);
+
+function stripeEventStatus(
+  type: string,
+  object: Record<string, unknown>
+): Extract<PaymentStatus, "SUCCEEDED" | "FAILED"> | null {
+  if (STRIPE_FAILED_TYPES.has(type)) {
+    return PaymentStatus.FAILED;
+  }
+
+  if (type === "checkout.session.completed") {
+    const paymentStatus = optionalString(object.payment_status);
+    if (paymentStatus === "paid" || paymentStatus === "no_payment_required" || !paymentStatus) {
+      return PaymentStatus.SUCCEEDED;
+    }
+
+    return null;
+  }
+
+  if (STRIPE_SUCCEEDED_TYPES.has(type)) {
+    return PaymentStatus.SUCCEEDED;
+  }
+
+  return null;
+}
+
+function paymentwallPingbackStatus(type: string): Extract<PaymentStatus, "SUCCEEDED" | "FAILED"> | null {
+  if (type === "0") {
+    return PaymentStatus.SUCCEEDED;
+  }
+
+  if (type === "1" || type === "2") {
+    return PaymentStatus.FAILED;
+  }
+
+  return null;
 }

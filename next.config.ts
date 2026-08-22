@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/*": ["./messages/**/*", "./prisma/**/*"],
   },
-  serverExternalPackages: ["@prisma/client", "prisma"],
+  serverExternalPackages: ["@prisma/client", "prisma", "undici"],
 };
 
 export default withNextIntl(nextConfig);

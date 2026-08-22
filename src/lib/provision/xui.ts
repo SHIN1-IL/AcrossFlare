@@ -1,4 +1,5 @@
 import type { Node } from "@prisma/client";
+import { Agent } from "undici";
 import { xuiApiToken, xuiTlsInsecure } from "@/lib/provision/config";
 
 export class XuiError extends Error {
@@ -70,18 +71,27 @@ function csrfFromHtml(html: string) {
   return html.match(/name="csrf-token"\s+content="([^"]+)"/)?.[1] ?? "";
 }
 
+let insecureAgent: Agent | undefined;
+
+export function xuiTlsDispatcher() {
+  if (!xuiTlsInsecure()) {
+    return undefined;
+  }
+
+  insecureAgent ??= new Agent({ connect: { rejectUnauthorized: false } });
+  return insecureAgent;
+}
+
 async function panelFetch(url: string, init: RequestInit) {
   const headers = new Headers(init.headers);
-
-  if (xuiTlsInsecure()) {
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-  }
+  const dispatcher = xuiTlsDispatcher();
 
   const response = await fetch(url, {
     ...init,
     headers,
     redirect: init.redirect ?? "manual",
-  });
+    ...(dispatcher ? { dispatcher } : {}),
+  } as RequestInit);
 
   return response;
 }
@@ -147,8 +157,8 @@ async function panelRequest(session: XuiSession, path: string, init: RequestInit
   return body;
 }
 
-function inboundIdFrom(node: Node, obj: unknown) {
-  if (node.inboundId) {
+function inboundIdFrom(node: Node, obj: unknown, protocol = "vless") {
+  if (node.inboundId && protocol === "vless") {
     return node.inboundId;
   }
 
@@ -158,13 +168,13 @@ function inboundIdFrom(node: Node, obj: unknown) {
       return false;
     }
     const row = item as { enable?: boolean; protocol?: string };
-    return row.enable !== false && String(row.protocol ?? "").toLowerCase().includes("vless");
+    return row.enable !== false && String(row.protocol ?? "").toLowerCase().includes(protocol);
   }) as { id?: number } | undefined;
 
-  const fallback = list[0] as { id?: number } | undefined;
+  const fallback = protocol === "vless" ? (list[0] as { id?: number } | undefined) : undefined;
   const id = inbound?.id ?? fallback?.id;
   if (!id) {
-    throw new XuiError(`inbound_missing:${node.id}`);
+    throw new XuiError(`${protocol}_inbound_missing:${node.id}`);
   }
 
   return id;
@@ -218,6 +228,50 @@ async function tryPanelRequests(
   }
 
   throw lastError instanceof Error ? lastError : new XuiError("xui_request_failed");
+}
+
+export async function addWireGuardPeer(
+  node: Node,
+  input: { email: string; publicKey: string; allowedIp: string }
+) {
+  const session = await login(node);
+  const listed = await panelRequest(session, "/panel/api/inbounds/list");
+  const inboundId = inboundIdFrom(node, listed?.obj, "wireguard");
+  const jsonHeaders = { "Content-Type": "application/json" };
+  const client = {
+    id: input.publicKey,
+    email: input.email,
+    enable: true,
+    publicKey: input.publicKey,
+    allowedIPs: [input.allowedIp],
+  };
+
+  await tryPanelRequests(session, [
+    {
+      path: "/panel/api/inbounds/addClient",
+      init: {
+        method: "POST",
+        headers: jsonHeaders,
+        body: JSON.stringify({
+          id: inboundId,
+          settings: JSON.stringify({ clients: [client] }),
+        }),
+      },
+    },
+    {
+      path: "/panel/api/clients/add",
+      init: {
+        method: "POST",
+        headers: jsonHeaders,
+        body: JSON.stringify({
+          client,
+          inboundIds: [inboundId],
+        }),
+      },
+    },
+  ]);
+
+  return inboundId;
 }
 
 export async function addXuiClient(node: Node, input: XuiClientInput) {

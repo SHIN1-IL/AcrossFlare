@@ -7,11 +7,18 @@ export default async function CheckoutPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ product?: string; plan?: string }>;
+  searchParams: Promise<{ product?: string; plan?: string; paymentId?: string; canceled?: string }>;
 }) {
   const locale = await resolveLocale(params);
-  const { product, plan } = await searchParams;
+  const { product, plan, paymentId, canceled } = await searchParams;
   setRequestLocale(locale);
 
-  return <CheckoutView product={product} planId={plan} />;
+  return (
+    <CheckoutView
+      product={product}
+      planId={plan}
+      paymentId={paymentId}
+      canceled={canceled === "1" || canceled === "true"}
+    />
+  );
 }

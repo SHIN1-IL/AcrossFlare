@@ -22,7 +22,7 @@ import {
   yamlUrlFor,
 } from "@/lib/provision/build";
 import { createNextcloudAppPassword, createNextcloudUser } from "@/lib/provision/nextcloud";
-import { addXuiClient, updateXuiClientExpiry } from "@/lib/provision/xui";
+import { addXuiClient, addWireGuardPeer, updateXuiClientExpiry } from "@/lib/provision/xui";
 
 type LoadedSubscription = Subscription & {
   plan: Plan;
@@ -261,6 +261,19 @@ async function issueMarketing(subscription: LoadedSubscription, nodes: Node[]) {
     expiresAt: subscription.expiresAt,
     trafficGb: subscription.plan.trafficGb,
   });
+
+  if (!isProvisionSimulate()) {
+    const node = nodes[0];
+    if (!node) {
+      throw new ProvisionError("node_missing");
+    }
+
+    await addWireGuardPeer(node, {
+      email: xuiEmail,
+      publicKey: secrets.wgClientPublicKey,
+      allowedIp: secrets.wgAddress,
+    });
+  }
 
   return {
     uuid,

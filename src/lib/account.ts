@@ -7,7 +7,7 @@ export type ScenarioId =
   | "exhausted-user"
   | "unpaid-user";
 
-export type SubscriptionStatus = "active" | "unpaid" | "provisioning";
+export type SubscriptionStatus = "active" | "unpaid" | "provisioning" | "failed";
 export type PaymentMethod = "card" | "alipay";
 
 export const SCENARIO_ACCOUNTS: { id: ScenarioId; email: string }[] = [

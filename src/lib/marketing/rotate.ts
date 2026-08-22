@@ -10,7 +10,7 @@ import {
   regionFrom,
 } from "@/lib/marketing/secrets";
 import { isProvisionSimulate } from "@/lib/provision/config";
-import { addXuiClient } from "@/lib/provision/xui";
+import { addXuiClient, addWireGuardPeer } from "@/lib/provision/xui";
 
 type MarketingSubscription = Subscription & {
   plan: Plan;
@@ -147,6 +147,11 @@ async function applyMarketingRotate(subscription: MarketingSubscription) {
         email: credentials.xuiEmail,
         expiresAt: subscription.expiresAt,
         trafficGb: subscription.plan.trafficGb,
+      });
+      await addWireGuardPeer(nextNode, {
+        email: credentials.xuiEmail,
+        publicKey: secrets.wgClientPublicKey,
+        allowedIp: secrets.wgAddress,
       });
     }
   } catch (error) {

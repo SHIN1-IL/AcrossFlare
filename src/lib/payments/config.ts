@@ -26,6 +26,29 @@ export function paymentwallSecret() {
   return process.env.PAYMENTWALL_SECRET || "";
 }
 
+export function paymentwallProjectKey() {
+  return process.env.PAYMENTWALL_PROJECT_KEY || "";
+}
+
+export function stripeSecretKey() {
+  return process.env.STRIPE_SECRET_KEY || "";
+}
+
+export function portoneStoreId() {
+  return process.env.PORTONE_STORE_ID || "";
+}
+
+export function portoneChannelKey() {
+  return process.env.PORTONE_CHANNEL_KEY || "";
+}
+
+export function publicAppUrl() {
+  return (process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(
+    /\/$/,
+    ""
+  );
+}
+
 export function alipayProvider(): PaymentProvider {
   return process.env.PAYMENT_ALIPAY_PROVIDER === "paymentwall"
     ? PaymentProvider.PAYMENTWALL

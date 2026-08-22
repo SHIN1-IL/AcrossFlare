@@ -45,7 +45,7 @@ export function AppHome() {
           href="/app/global"
           checkoutHref={{ pathname: "/checkout", query: { product: "global", plan: "global-standard" } }}
           active={Boolean(account.global && account.global.status === "active")}
-          unpaid={!account.global}
+          unpaid={!account.global || account.global.status === "unpaid"}
           openLabel={t("open")}
           addLabel={t("addGlobal")}
           statusLabel={
@@ -53,12 +53,14 @@ export function AppHome() {
               ? t("statusFailover")
               : account.global?.status === "provisioning"
                 ? t("statusProvisioning")
-                : account.global
-                  ? t("statusActive")
-                  : t("statusUnpaid")
+                : account.global?.status === "failed"
+                  ? t("statusFailed")
+                  : account.global?.status === "active"
+                    ? t("statusActive")
+                    : t("statusUnpaid")
           }
           tone={
-            account.global?.failover
+            account.global?.failover || account.global?.status === "failed"
               ? "warn"
               : account.global?.status === "active"
                 ? "ok"
@@ -71,17 +73,25 @@ export function AppHome() {
           href="/app/marketing"
           checkoutHref={{ pathname: "/checkout", query: { product: "marketing", plan: "marketing-standard" } }}
           active={Boolean(account.marketing && account.marketing.status === "active")}
-          unpaid={!account.marketing}
+          unpaid={!account.marketing || account.marketing.status === "unpaid"}
           openLabel={t("open")}
           addLabel={t("addMarketing")}
           statusLabel={
             account.marketing?.status === "provisioning"
               ? t("statusProvisioning")
-              : account.marketing
-                ? t("statusActive")
-                : t("statusUnpaid")
+              : account.marketing?.status === "failed"
+                ? t("statusFailed")
+                : account.marketing?.status === "active"
+                  ? t("statusActive")
+                  : t("statusUnpaid")
           }
-          tone={account.marketing?.status === "active" ? "ok" : "neutral"}
+          tone={
+            account.marketing?.status === "failed"
+              ? "warn"
+              : account.marketing?.status === "active"
+                ? "ok"
+                : "neutral"
+          }
           muted
         />
       </div>

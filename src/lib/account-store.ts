@@ -78,10 +78,10 @@ export function getAccount(email: string): AccountSnapshot {
 
   return {
     ...seed,
-    global: remoteAccount.global ?? seed.global,
-    marketing: remoteAccount.marketing ?? seed.marketing,
-    method: remoteAccount.receipts.length ? remoteAccount.method : seed.method,
-    receipts: remoteAccount.receipts.length ? remoteAccount.receipts : seed.receipts,
+    global: remoteAccount.global,
+    marketing: remoteAccount.marketing,
+    method: remoteAccount.method,
+    receipts: remoteAccount.receipts,
   };
 }
 
