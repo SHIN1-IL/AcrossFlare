@@ -132,7 +132,7 @@ model Subscription {
   provisionStep   String             @default("queued")
   provisionError  String             @default("")
   trafficUsedGb   Float              @default(0)
-  nextcloudUsedGb Float              @default(0)
+  backupUsedGb    Float              @default(0)
   failover        Boolean            @default(false)
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
@@ -155,9 +155,10 @@ model Credential {
   deepLink             String?
   yamlToken            String? @unique
   yamlBody             String?
-  nextcloudUrl         String?
-  nextcloudUser        String?
-  nextcloudAppPassword String?
+  vaultUrl           String?
+  vaultUser          String?
+  syncthingUrl       String?
+  syncthingFolderId  String?
   xuiEmail             String?
 
   exitIp            String?

@@ -35,7 +35,8 @@ export function ProvisionPanel({ product }: { product: ProductId }) {
   const labels = useMemo(
     () => ({
       xui: t("stepXui"),
-      nextcloud: t("stepNextcloud"),
+      backup: t("stepBackup"),
+      nextcloud: t("stepBackup"),
       ready: t("stepReady"),
     }),
     [t]
@@ -134,8 +135,9 @@ export function ProvisionPanel({ product }: { product: ProductId }) {
                   <div className="space-y-3">
                     <CopyField label={tApp("deepLink")} value={issued.credentials.deepLink} />
                     <CopyField label={tApp("yamlUrl")} value={issued.credentials.yamlUrl} />
-                    <CopyField label={tApp("nextcloudUrl")} value={issued.credentials.nextcloudUrl} />
-                    <CopyField label={tApp("appPassword")} value={issued.credentials.nextcloudAppPassword} masked />
+                    <CopyField label={tApp("vaultUrl")} value={issued.credentials.vaultUrl} />
+                    <CopyField label={tApp("syncthingUrl")} value={issued.credentials.syncthingUrl} />
+                    <CopyField label={tApp("syncthingFolder")} value={issued.credentials.syncthingFolderId} />
                   </div>
                 </div>
               ) : (

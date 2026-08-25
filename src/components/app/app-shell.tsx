@@ -1,6 +1,6 @@
 "use client";
 
-import { CreditCard, Globe, LayoutGrid, LogOut, Menu, Settings2, Waypoints, X } from "lucide-react";
+import { CreditCard, Globe, HardDrive, LayoutGrid, LogOut, Menu, Settings2, Waypoints, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 
 const NAV = [
   { href: "/app", key: "overview", icon: LayoutGrid },
+  { href: "/dashboard", key: "backup", icon: HardDrive },
   { href: "/app/global", key: "global", icon: Globe },
   { href: "/app/marketing", key: "marketing", icon: Waypoints },
   { href: "/app/billing", key: "billing", icon: CreditCard },
@@ -55,7 +56,13 @@ function NavLinks({
   );
 }
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({
+  children,
+  merchant,
+}: {
+  children: React.ReactNode;
+  merchant?: React.ReactNode;
+}) {
   const t = useTranslations("app");
   const router = useRouter();
   const pathname = usePathname();
@@ -138,6 +145,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         ) : null}
         <main className="flex-1 px-4 py-8 md:px-8">{children}</main>
+        {merchant ? (
+          <footer className="border-t border-border px-4 py-6 md:px-8">{merchant}</footer>
+        ) : null}
       </div>
     </div>
   );

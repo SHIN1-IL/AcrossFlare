@@ -1,13 +1,15 @@
 {
   "meta": {
     "title": "AcrossFlare",
-    "description": "グローバル迂回とマーケティングIPを、1秒で発行。"
+    "description": "セキュアクラウドおよびネットワーク最適化サービス"
   },
   "nav": {
     "product": "プロダクト",
     "pricing": "料金",
     "docs": "ドキュメント",
+    "service": "サービス",
     "login": "ログイン",
+    "signup": "新規登録",
     "getStarted": "始める",
     "language": "言語",
     "console": "コンソール"
@@ -15,21 +17,32 @@
   "footer": {
     "terms": "利用規約",
     "privacy": "プライバシー",
-    "copyright": "© {year} AcrossFlare"
+    "refund": "撤回・返金",
+    "copyright": "© {year} AcrossFlare",
+    "merchantTitle": "事業者情報",
+    "serviceName": "サービス名",
+    "legalName": "商号",
+    "ceo": "代表者",
+    "address": "所在地",
+    "phone": "電話",
+    "email": "メール",
+    "businessNo": "事業者登録番号",
+    "vasNo": "付加通信事業届出番号",
+    "mailOrderNo": "通信販売業届出番号"
   },
   "legal": {
     "termsTitle": "利用規約",
     "privacyTitle": "プライバシーポリシー",
-    "updated": "最終更新：2026年8月22日",
+    "updated": "最終更新：2026年8月24日",
     "disclaimer": "本ページは AcrossFlare の現行の提供方法を説明するものであり、法的助言ではありません。適用法令により追加の義務が生じる場合があります。",
     "termsSections": [
       {
         "title": "1. サービス",
-        "body": "AcrossFlare は有料の2商品を提供します。グローバル（VLESS 接続と Nextcloud バックアップ枠）とマーケティング IP（HTTP/SOCKS5 および WireGuard エンドポイント）。アカウント、プラン、認証情報は、決済または管理者による手動発行の後、acrossflare.com から発行されます。"
+        "body": "AcrossFlare は有料の2商品を提供します。グローバル（VLESS 接続と Vaultwarden / Syncthing バックアップ）とマーケティング IP（HTTP/SOCKS5 および WireGuard エンドポイント）。アカウント、プラン、認証情報は、決済または管理者による手動発行の後、acrossflare.com から発行されます。"
       },
       {
         "title": "2. アカウント",
-        "body": "正確なメールアドレスを登録し、パスワードを秘密にしてください。プロキシ URL、WireGuard 鍵、Nextcloud アプリパスワードを含む、アカウント上の利用について責任を負います。"
+        "body": "正確なメールアドレスを登録し、パスワードを秘密にしてください。プロキシ URL、WireGuard 鍵、Vaultwarden / Syncthing のアクセス情報を含む、アカウント上の利用について責任を負います。"
       },
       {
         "title": "3. 利用上の制限",
@@ -37,37 +50,42 @@
       },
       {
         "title": "4. 支払いとプラン",
-        "body": "価格は言語設定に応じた通貨で表示されます。カードと Alipay は PortOne、Stripe、Paymentwall が処理します。決済成功後にプロビジョニングが始まります。トラフィック、バックアップ容量、ノード組み合わせは購入プランに従います。プランに別段の定めがなければ、未使用トラフィックは繰り越しません。"
+        "body": "価格は言語設定に応じた通貨で表示されます。カードと Alipay は PortOne、Stripe、Paymentwall が処理します。決済成功後にプロビジョニングが始まります。トラフィック、バックアップ容量、ノード組み合わせは購入プランに従います。プランに別段の定めがなければ、未使用トラフィックは繰り越しません。撤回と返金は第5条に従います。"
       },
       {
-        "title": "5. 可用性",
+        "id": "refund",
+        "title": "5. 契約の撤回および返金",
+        "body": "決済成功と同時に認証情報の発行が始まるデジタルサービスです。サブスクリプションが有効になり接続情報・バックアップが提供された後は、適用される電子商取引法令によりクーリングオフ（撤回）が制限される場合があり、その旨を決済前にお知らせします。\n\n次の場合、決済から7日以内に acrosstool@gmail.com へご連絡いただければ全額返金します。(1) 決済は完了したが認証情報が発行されなかった、または発行に失敗した (2) 重複決済または明らかな誤課金。\n\nすでに発行され利用可能な期間の途中解約について、残日数の日割り返金は原則行いません。強行法規が異なる場合は法令が優先します。返金は元の支払い方法で処理し、決済事業者の都合で数日かかることがあります。"
+      },
+      {
+        "title": "6. 可用性",
         "body": "ノード、パネル、ストレージは移設、フェイルオーバー、停止があり得ます。プランに含まれる予備ノードを含め接続維持に努めますが、途切れない迂回や特定の出口 IP を保証しません。"
       },
       {
-        "title": "6. 終了",
+        "title": "7. 終了",
         "body": "利用者はいつでも利用を止められます。未払い、濫用、法令上の必要がある場合、サブスクリプションを終了できます。終了後、プロキシクライアントとバックアップアクセスは猶予なく取り消されることがあります。"
       },
       {
-        "title": "7. 責任",
+        "title": "8. 責任",
         "body": "サービスは現状有姿・提供可能な範囲で提供します。法令が許す限り、AcrossFlare は逸失利益、データ損失、間接損害について責任を負わず、請求に対する総責任は直近3か月に当該サブスクリプションへ支払った額を上限とします。"
       },
       {
-        "title": "8. 変更",
-        "body": "本規約は変更されることがあります。掲載後も利用を続ける場合、変更後の規約に同意したものとみなします。問い合わせ: support@acrossflare.com"
+        "title": "9. 変更",
+        "body": "本規約は変更されることがあります。掲載後も利用を続ける場合、変更後の規約に同意したものとみなします。問い合わせ: acrosstool@gmail.com"
       }
     ],
     "privacySections": [
       {
         "title": "1. 収集するデータ",
-        "body": "登録メールとパスワードハッシュ、セッション Cookie、プランと支払い記録、発行済み認証情報（クライアント UUID、プロキシ秘密情報、Nextcloud ユーザー名など）、運用に必要なログを保管します。"
+        "body": "登録メールとパスワードハッシュ、セッション Cookie、プランと支払い記録、発行済み認証情報（クライアント UUID、プロキシ秘密情報、バックアップユーザー名など）、運用に必要なログを保管します。"
       },
       {
         "title": "2. ネットワークとセキュリティデータ",
-        "body": "acrossflare.com への通信は Cloudflare を経由します。Cloudflare が報告する接続 IP（CF-Connecting-IP）を取得する場合があり、Nextcloud を製品 VPN 帯域に制限するときも同様です。クォータと濫用対策のため、3x-ui/Xray と Nextcloud は独自のアクセス・利用記録を保持します。"
+        "body": "acrossflare.com への通信は Cloudflare を経由します。Cloudflare が報告する接続 IP（CF-Connecting-IP）を取得する場合があります。クォータと濫用対策のため、3x-ui/Xray、Vaultwarden、Syncthing は独自のアクセス・利用記録を保持します。"
       },
       {
         "title": "3. 処理委託",
-        "body": "支払いは PortOne、Stripe、および/または Paymentwall が処理します。ホスティング、DNS、WAF、TLS には Cloudflare と VPS 事業者が使われることがあります。バックアップファイルは当社 Nextcloud に置きます。個人情報は販売しません。"
+        "body": "支払いは PortOne、Stripe、および/または Paymentwall が処理します。ホスティング、DNS、WAF、TLS には Cloudflare と VPS 事業者が使われることがあります。暗号とセキュアメモは Vaultwarden、ファイルは Syncthing で同期します。個人情報は販売しません。"
       },
       {
         "title": "4. 保管",
@@ -75,23 +93,19 @@
       },
       {
         "title": "5. 利用者の選択",
-        "body": "コンソールでアカウントメールを確認・更新できます。法令またはセキュリティ上の保管が不要なら、support@acrossflare.com へアカウント削除を依頼できます。その宛先にカード番号を送らないでください。"
+        "body": "コンソールでアカウントメールを確認・更新できます。法令またはセキュリティ上の保管が不要なら、acrosstool@gmail.com へアカウント削除を依頼できます。その宛先にカード番号を送らないでください。"
       }
     ]
   },
   "landing": {
-    "headline": "グローバル迂回とマーケティングIPを、1秒で発行。",
-    "subhead": "Karing QR、Nextcloudバックアップ、回転型プロキシ。商品は分離、コンソールはひとつ。",
+    "headline": "Secure Cloud & Network Optimization",
     "ctaGlobal": "Start Global",
     "ctaMarketing": "Get Marketing IP",
-    "trustCloudflare": "Cloudflare エッジ",
-    "trustProvisioning": "自動プロビジョニング",
-    "trustLanguages": "ko / zh / ja / en",
     "productsEyebrow": "2つの商品",
     "productsTitle": "レーンを選ぶ。混ぜない。",
     "globalBadge": "ターゲット A",
     "globalTitle": "グローバル迂回 + バックアップ",
-    "globalDesc": "スキャン一回で Karing VLESS。アカウントと同時に Nextcloud 1GB を発行。",
+    "globalDesc": "スキャン一回で Karing VLESS。アカウントと同時に Vaultwarden と Syncthing バックアップを開きます。",
     "globalPoints": [
       "Karing 用 QR とディープリンク",
       "YAML 購読、text/yaml",
@@ -120,6 +134,7 @@
     "featured": "人気",
     "alipay": "Alipay"
   },
+  "planSlides": {},
   "auth": {
     "loginTitle": "ログイン",
     "loginSubtitle": "AcrossFlareアカウントでログインしてください。",
@@ -173,7 +188,7 @@
     "failedCta": "チェックアウトを再試行",
     "statusFailed": "失敗",
     "globalTitle": "グローバル迂回",
-    "globalDesc": "Karing VLESS と Nextcloud バックアップ。",
+    "globalDesc": "Karing VLESS と Vaultwarden / Syncthing バックアップ。",
     "marketingTitle": "マーケティングIP",
     "marketingDesc": "HTTP/SOCKS5 エンドポイントと WireGuard。",
     "usageTraffic": "Bandwagon トラフィック",
@@ -185,9 +200,21 @@
     "deepLink": "ディープリンク",
     "yamlUrl": "YAML URL",
     "yamlDownload": ".yaml をダウンロード",
-    "nextcloud": "Nextcloud",
-    "nextcloudUrl": "URL",
-    "appPassword": "アプリパスワード",
+    "backup": "バックアップ",
+    "backupTitle": "セキュリティバックアップ",
+    "backupDesc": "Vaultwarden でパスワードとセキュアメモを、Syncthing で暗号化ファイル同期を使います。ホーム画面にバックアップアプリを追加できます。",
+    "backupExpires": "{date} まで利用可能",
+    "vaultTitle": "Vaultwarden",
+    "vaultDesc": "暗号化パスワード、カード、セキュアメモ。",
+    "vaultUrl": "Vault URL",
+    "vaultUser": "Vault ユーザー",
+    "openVault": "保管庫を開く",
+    "syncthingTitle": "Syncthing",
+    "syncthingDesc": "中央 DB なしで、サーバーファイルシステムへ P2P 暗号化保存します。",
+    "syncthingUrl": "Sync URL",
+    "syncthingFolder": "フォルダ ID",
+    "openSync": "同期を開く",
+    "openBackupPwa": "バックアップ PWA を開く",
     "backupUsage": "バックアップ使用量",
     "exitIp": "出口 IP",
     "region": "リージョン",
@@ -232,7 +259,7 @@
     "alipay": "Alipay",
     "stepPayment": "支払い確認",
     "stepXui": "3x-ui アカウント",
-    "stepNextcloud": "Nextcloud ストレージ",
+    "stepBackup": "バックアップ領域",
     "stepReady": "準備完了",
     "invalidPlan": "料金ページからプランを選んでください。",
     "backPricing": "料金へ戻る"
@@ -251,7 +278,7 @@
     "navNodes": "ノード",
     "homeTitle": "コントロールプレーン",
     "homeSubtitle": "商品は完全に分離されます。タブを一つ開く。",
-    "homeGlobalDesc": "Karing、Nextcloud、Bandwagon / Racknerd。",
+    "homeGlobalDesc": "Karing、Vaultwarden、Syncthing、Bandwagon / Racknerd。",
     "homeMarketingDesc": "プロキシ URL、WireGuard、Rotate 履歴。",
     "statCustomers": "顧客",
     "statPlans": "プラン",
@@ -311,7 +338,7 @@
     "expiry": "期限",
     "issue": "発行",
     "stepXui": "3x-ui アカウント作成",
-    "stepNextcloud": "Nextcloud ストレージ作成",
+    "stepBackup": "バックアップ領域を作成",
     "stepReady": "完了",
     "provisionDone": "発行しました。一度でコピーしてください。",
     "provisionFailed": "失敗したステップで停止しました。",
@@ -351,5 +378,13 @@
     "notFound": "見つかりません。",
     "close": "閉じる",
     "required": "必須項目を入力してください。"
+  },
+  "pwa": {
+    "eyebrow": "PWA",
+    "title": "バックアップアプリをホーム画面に追加",
+    "body": "ブラウザ枠なしで Vaultwarden と Syncthing を開くには、AcrossFlare バックアップアプリをインストールしてください。",
+    "iosBody": "共有をタップし、「ホーム画面に追加」を選ぶとバックアップアプリがインストールされます。",
+    "install": "バックアップアプリを追加",
+    "later": "後で"
   }
 }

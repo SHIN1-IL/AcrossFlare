@@ -447,7 +447,7 @@ async function destroyXuiClients(
 }
 
 async function recreateClients(
-  subscription: Subscription & { credentials: { yamlToken: string | null; nextcloudUrl: string | null; nextcloudUser: string | null; nextcloudAppPassword: string | null } | null },
+  subscription: Subscription & { credentials: { yamlToken: string | null; vaultUrl: string | null; vaultUser: string | null; syncthingUrl: string | null; syncthingFolderId: string | null } | null },
   plan: Plan,
   nodes: Node[]
 ) {
@@ -480,9 +480,10 @@ async function recreateClients(
         uuid
       ),
       deepLink: karingDeepLink(yamlUrl),
-      nextcloudUrl: subscription.credentials?.nextcloudUrl,
-      nextcloudUser: subscription.credentials?.nextcloudUser,
-      nextcloudAppPassword: subscription.credentials?.nextcloudAppPassword,
+      vaultUrl: subscription.credentials?.vaultUrl,
+      vaultUser: subscription.credentials?.vaultUser,
+      syncthingUrl: subscription.credentials?.syncthingUrl,
+      syncthingFolderId: subscription.credentials?.syncthingFolderId,
     };
   }
 

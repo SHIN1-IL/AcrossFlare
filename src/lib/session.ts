@@ -22,7 +22,20 @@ export function subscribeSession(listener: Listener) {
 
 export { normalizeEmail };
 
+function isSameSession(a: Session | null, b: Session | null) {
+  if (a === b) {
+    return true;
+  }
+  if (!a || !b) {
+    return false;
+  }
+  return a.email === b.email && a.role === b.role;
+}
+
 export function hydrateSession(session: Session | null) {
+  if (isSameSession(current, session)) {
+    return;
+  }
   current = session;
   emit();
 }

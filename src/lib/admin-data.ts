@@ -123,8 +123,9 @@ function toCredentials(row: CustomerRow): CustomerCredentials | null {
       deepLink: creds.deepLink ?? "",
       yamlUrl: creds.yamlToken ? yamlUrlFor(creds.yamlToken, appUrl()) : "",
       yamlBody: creds.yamlBody ?? "",
-      nextcloudUrl: creds.nextcloudUrl ?? "",
-      nextcloudAppPassword: creds.nextcloudAppPassword ?? "",
+      vaultUrl: creds.vaultUrl ?? "",
+      syncthingUrl: creds.syncthingUrl ?? "",
+      syncthingFolderId: creds.syncthingFolderId ?? "",
       nodes: row.nodes.map((node) => node.ddns),
     };
   }

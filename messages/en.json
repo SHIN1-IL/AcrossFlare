@@ -1,13 +1,15 @@
 {
   "meta": {
     "title": "AcrossFlare",
-    "description": "Global bypass and marketing IPs, issued in one second."
+    "description": "Secure cloud and network optimization services"
   },
   "nav": {
     "product": "Product",
     "pricing": "Pricing",
     "docs": "Docs",
+    "service": "Service",
     "login": "Login",
+    "signup": "Sign up",
     "getStarted": "Get Started",
     "language": "Language",
     "console": "Console"
@@ -15,21 +17,32 @@
   "footer": {
     "terms": "Terms",
     "privacy": "Privacy",
-    "copyright": "© {year} AcrossFlare"
+    "refund": "Withdrawals & refunds",
+    "copyright": "© {year} AcrossFlare",
+    "merchantTitle": "Business information",
+    "serviceName": "Service name",
+    "legalName": "Legal name",
+    "ceo": "CEO",
+    "address": "Address",
+    "phone": "Phone",
+    "email": "Email",
+    "businessNo": "Business registration no.",
+    "vasNo": "Value-added telecom license no.",
+    "mailOrderNo": "Mail-order report no."
   },
   "legal": {
     "termsTitle": "Terms of Service",
     "privacyTitle": "Privacy Policy",
-    "updated": "Last updated August 22, 2026",
+    "updated": "Last updated August 24, 2026",
     "disclaimer": "These pages describe how AcrossFlare currently operates. They are not legal advice. Local law may impose extra duties on you or on us.",
     "termsSections": [
       {
         "title": "1. The service",
-        "body": "AcrossFlare provides two paid products: Global (VLESS access plus a Nextcloud backup quota) and Marketing IP (HTTP/SOCKS5 and WireGuard endpoints). Accounts, plans, and credentials are issued through acrossflare.com after payment or manual admin provisioning."
+        "body": "AcrossFlare provides two paid products: Global (VLESS access plus Vaultwarden and Syncthing backup) and Marketing IP (HTTP/SOCKS5 and WireGuard endpoints). Accounts, plans, and credentials are issued through acrossflare.com after payment or manual admin provisioning."
       },
       {
         "title": "2. Accounts",
-        "body": "You must provide an accurate email and keep your password secret. You are responsible for activity on your account, including shared credentials such as proxy URLs, WireGuard keys, and Nextcloud app passwords."
+        "body": "You must provide an accurate email and keep your password secret. You are responsible for activity on your account, including shared credentials such as proxy URLs, WireGuard keys, and Vaultwarden or Syncthing access."
       },
       {
         "title": "3. Acceptable use",
@@ -37,37 +50,42 @@
       },
       {
         "title": "4. Payments and plans",
-        "body": "Prices are shown in the currency that follows your language. Card and Alipay charges are processed by PortOne, Stripe, or Paymentwall. A successful payment starts provisioning. Traffic, backup quota, and node bindings follow the plan you buy. Unused traffic does not roll over unless a plan says otherwise."
+        "body": "Prices are shown in the currency that follows your language. Card and Alipay charges are processed by PortOne, Stripe, or Paymentwall. A successful payment starts provisioning. Traffic, backup quota, and node bindings follow the plan you buy. Unused traffic does not roll over unless a plan says otherwise. Withdrawals and refunds follow section 5."
       },
       {
-        "title": "5. Availability",
+        "id": "refund",
+        "title": "5. Withdrawals and refunds",
+        "body": "This is a digital service. Provisioning starts as soon as payment succeeds. After a subscription is active and credentials or backup access have been issued, the right to withdraw from the contract may be limited under applicable e-commerce rules. We disclose that before you pay.\n\nEmail acrosstool@gmail.com within 7 days of payment for a full refund if (1) payment succeeded but credentials were not issued or provisioning failed, or (2) the charge was duplicated or clearly erroneous.\n\nWe do not pro-rate unused days after credentials have been issued, unless a mandatory law says otherwise. Refunds go back to the original payment method and may take several days through the payment provider."
+      },
+      {
+        "title": "6. Availability",
         "body": "Nodes, panels, and storage may move, fail over, or go offline. We try to keep access working, including spare nodes where a plan includes them, but we do not warrant uninterrupted circumvention or a particular exit IP."
       },
       {
-        "title": "6. Termination",
+        "title": "7. Termination",
         "body": "You may stop using the service at any time. We may end a subscription that is unpaid, abusive, or required by law. When a subscription ends, proxy clients and backup access may be revoked without a separate notice period."
       },
       {
-        "title": "7. Liability",
+        "title": "8. Liability",
         "body": "The service is provided as available. To the extent allowed by law, AcrossFlare is not liable for lost profits, lost data, or indirect damages, and total liability for a claim is limited to the fees you paid for the affected subscription in the prior three months."
       },
       {
-        "title": "8. Changes",
-        "body": "We may update these terms. Continued use after a posted change means you accept the new terms. Questions: support@acrossflare.com."
+        "title": "9. Changes",
+        "body": "We may update these terms. Continued use after a posted change means you accept the new terms. Questions: acrosstool@gmail.com."
       }
     ],
     "privacySections": [
       {
         "title": "1. Data we collect",
-        "body": "We store the email and password hash you register with, session cookies, plan and payment records, provisioned credentials (such as client UUIDs, proxy secrets, and Nextcloud usernames), and operational logs needed to run the service."
+        "body": "We store the email and password hash you register with, session cookies, plan and payment records, provisioned credentials (such as client UUIDs, proxy secrets, and backup usernames), and operational logs needed to run the service."
       },
       {
         "title": "2. Network and security data",
-        "body": "Traffic to acrossflare.com goes through Cloudflare. We may see the connecting IP Cloudflare reports (CF-Connecting-IP), including when Nextcloud is limited to the product VPN range. Node software (3x-ui / Xray) and Nextcloud keep their own access and usage records so quotas and abuse controls work."
+        "body": "Traffic to acrossflare.com goes through Cloudflare. We may see the connecting IP Cloudflare reports (CF-Connecting-IP). Node software (3x-ui / Xray), Vaultwarden, and Syncthing keep their own access and usage records so quotas and abuse controls work."
       },
       {
         "title": "3. Processors",
-        "body": "Payments are handled by PortOne, Stripe, and/or Paymentwall. Hosting, DNS, WAF, and TLS may use Cloudflare and our VPS providers. Backup files live on our Nextcloud instance. We do not sell your personal information."
+        "body": "Payments are handled by PortOne, Stripe, and/or Paymentwall. Hosting, DNS, WAF, and TLS may use Cloudflare and our VPS providers. Encrypted passwords and notes live in Vaultwarden. Files sync through Syncthing. We do not sell your personal information."
       },
       {
         "title": "4. Retention",
@@ -75,23 +93,19 @@
       },
       {
         "title": "5. Your choices",
-        "body": "You can access or update account email through the console, and you can ask us to delete an account at support@acrossflare.com unless we must keep records for law or security. Do not send payment card numbers to that inbox."
+        "body": "You can access or update account email through the console, and you can ask us to delete an account at acrosstool@gmail.com unless we must keep records for law or security. Do not send payment card numbers to that inbox."
       }
     ]
   },
   "landing": {
-    "headline": "Global bypass and marketing IPs, issued in one second.",
-    "subhead": "Karing QR, Nextcloud backup, and rotatable proxy endpoints. Products stay isolated. The console does not.",
+    "headline": "Secure Cloud & Network Optimization",
     "ctaGlobal": "Start Global",
     "ctaMarketing": "Get Marketing IP",
-    "trustCloudflare": "Cloudflare edge",
-    "trustProvisioning": "Auto provisioning",
-    "trustLanguages": "ko / zh / ja / en",
     "productsEyebrow": "Two products",
     "productsTitle": "Pick a lane. Never mix them.",
     "globalBadge": "Target A",
     "globalTitle": "Global bypass + backup",
-    "globalDesc": "Karing-ready VLESS in one scan. Nextcloud 1GB provisioned with the account.",
+    "globalDesc": "Karing-ready VLESS in one scan. Vaultwarden and Syncthing backup open with the account.",
     "globalPoints": [
       "QR and deep link for Karing",
       "YAML subscription, text/yaml",
@@ -120,6 +134,7 @@
     "featured": "Popular",
     "alipay": "Alipay"
   },
+  "planSlides": {},
   "auth": {
     "loginTitle": "Sign in",
     "loginSubtitle": "Sign in with your AcrossFlare account.",
@@ -173,7 +188,7 @@
     "failedCta": "Retry checkout",
     "statusFailed": "Failed",
     "globalTitle": "Global bypass",
-    "globalDesc": "Karing VLESS and Nextcloud backup.",
+    "globalDesc": "Karing VLESS plus Vaultwarden and Syncthing backup.",
     "marketingTitle": "Marketing IP",
     "marketingDesc": "HTTP/SOCKS5 endpoints and WireGuard.",
     "usageTraffic": "Bandwagon traffic",
@@ -185,9 +200,21 @@
     "deepLink": "Deep link",
     "yamlUrl": "YAML URL",
     "yamlDownload": "Download .yaml",
-    "nextcloud": "Nextcloud",
-    "nextcloudUrl": "URL",
-    "appPassword": "App password",
+    "backup": "Backup",
+    "backupTitle": "Security backup",
+    "backupDesc": "Open Vaultwarden for passwords and secure notes, or Syncthing for encrypted file sync. Add this PWA to your home screen.",
+    "backupExpires": "Plan access until {date}",
+    "vaultTitle": "Vaultwarden",
+    "vaultDesc": "Encrypted passwords, cards, and secure notes.",
+    "vaultUrl": "Vault URL",
+    "vaultUser": "Vault user",
+    "openVault": "Open vault",
+    "syncthingTitle": "Syncthing",
+    "syncthingDesc": "P2P encrypted files on the server filesystem. No central document database.",
+    "syncthingUrl": "Sync URL",
+    "syncthingFolder": "Folder ID",
+    "openSync": "Open sync",
+    "openBackupPwa": "Open backup PWA",
     "backupUsage": "Backup usage",
     "exitIp": "Exit IP",
     "region": "Region",
@@ -232,7 +259,7 @@
     "alipay": "Alipay",
     "stepPayment": "Payment confirmed",
     "stepXui": "3x-ui account",
-    "stepNextcloud": "Nextcloud storage",
+    "stepBackup": "Backup space",
     "stepReady": "Ready",
     "invalidPlan": "Select a plan from pricing.",
     "backPricing": "Back to pricing"
@@ -251,7 +278,7 @@
     "navNodes": "Nodes",
     "homeTitle": "Control plane",
     "homeSubtitle": "Products stay isolated. Open one tab.",
-    "homeGlobalDesc": "Karing, Nextcloud, Bandwagon / Racknerd.",
+    "homeGlobalDesc": "Karing, Vaultwarden, Syncthing, Bandwagon / Racknerd.",
     "homeMarketingDesc": "Proxy URLs, WireGuard, rotate history.",
     "statCustomers": "Customers",
     "statPlans": "Plans",
@@ -311,7 +338,7 @@
     "expiry": "Expiry",
     "issue": "Issue",
     "stepXui": "Create 3x-ui account",
-    "stepNextcloud": "Create Nextcloud storage",
+    "stepBackup": "Create backup space",
     "stepReady": "Complete",
     "provisionDone": "Issued. Copy once.",
     "provisionFailed": "Stopped on a failed step.",
@@ -351,5 +378,13 @@
     "notFound": "Not found.",
     "close": "Close",
     "required": "Fill the required fields."
+  },
+  "pwa": {
+    "eyebrow": "PWA",
+    "title": "Add the backup app to your home screen",
+    "body": "Install AcrossFlare Backup to open Vaultwarden and Syncthing without a browser chrome.",
+    "iosBody": "Tap Share, then Add to Home Screen, to install the backup app.",
+    "install": "Add backup app",
+    "later": "Not now"
   }
 }

@@ -7,21 +7,26 @@ import {
   type Subscription,
 } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import { appUrl, isProvisionSimulate, nextcloudBaseUrl } from "@/lib/provision/config";
+import {
+  appUrl,
+  isProvisionSimulate,
+  syncthingBaseUrl,
+  vaultwardenBaseUrl,
+} from "@/lib/provision/config";
 import { exitHostFor, issueMarketingSecrets, nextWgAddress, regionFrom } from "@/lib/marketing/secrets";
 import {
   buildVlessYaml,
   defaultExitIp,
   karingDeepLink,
   newClientUuid,
-  newSecret,
   newYamlToken,
-  nextcloudUserId,
-  simulatedAppPassword,
+  syncthingFolderId,
+  vaultUserId,
   xuiClientEmail,
   yamlUrlFor,
 } from "@/lib/provision/build";
-import { createNextcloudAppPassword, createNextcloudUser } from "@/lib/provision/nextcloud";
+import { ensureSyncthingFolder } from "@/lib/provision/syncthing";
+import { inviteVaultwardenUser } from "@/lib/provision/vaultwarden";
 import { addXuiClient, addWireGuardPeer, updateXuiClientExpiry } from "@/lib/provision/xui";
 
 type LoadedSubscription = Subscription & {
@@ -191,9 +196,8 @@ async function issueGlobal(subscription: LoadedSubscription, nodes: Node[]) {
   const hosts = nodes.map((node) => node.ddns);
   const yamlBody = buildVlessYaml(hosts, uuid);
   const yamlUrl = yamlUrlFor(yamlToken, appUrl());
-  const quotaGb = subscription.plan.backupGb ?? 1;
-  const nextcloudUser = nextcloudUserId(subscription.id);
-  const loginPassword = newSecret(16);
+  const vaultUser = vaultUserId(subscription.id);
+  const folderId = syncthingFolderId(subscription.id);
 
   await addClients(nodes, {
     uuid,
@@ -204,22 +208,16 @@ async function issueGlobal(subscription: LoadedSubscription, nodes: Node[]) {
 
   await prisma.subscription.update({
     where: { id: subscription.id },
-    data: { provisionStep: "nextcloud" },
+    data: { provisionStep: "backup" },
   });
 
-  let nextcloudAppPassword = simulatedAppPassword(subscription.id);
   if (isProvisionSimulate()) {
     await wait(400);
   } else {
-    await createNextcloudUser({
-      userId: nextcloudUser,
-      password: loginPassword,
-      email: subscription.user.email,
-      quotaGb,
-    });
-    nextcloudAppPassword = await createNextcloudAppPassword({
-      userId: nextcloudUser,
-      password: loginPassword,
+    await inviteVaultwardenUser(subscription.user.email);
+    await ensureSyncthingFolder({
+      folderId,
+      label: subscription.user.email,
     });
   }
 
@@ -229,9 +227,10 @@ async function issueGlobal(subscription: LoadedSubscription, nodes: Node[]) {
     deepLink: karingDeepLink(yamlUrl),
     yamlToken,
     yamlBody,
-    nextcloudUrl: nextcloudBaseUrl(),
-    nextcloudUser,
-    nextcloudAppPassword,
+    vaultUrl: vaultwardenBaseUrl(),
+    vaultUser,
+    syncthingUrl: syncthingBaseUrl(),
+    syncthingFolderId: folderId,
     exitIp: null,
     region: null,
     httpUser: null,
@@ -281,9 +280,10 @@ async function issueMarketing(subscription: LoadedSubscription, nodes: Node[]) {
     deepLink: null,
     yamlToken: null,
     yamlBody: null,
-    nextcloudUrl: null,
-    nextcloudUser: null,
-    nextcloudAppPassword: null,
+    vaultUrl: null,
+    vaultUser: null,
+    syncthingUrl: null,
+    syncthingFolderId: null,
     exitIp: secrets.exitIp,
     region,
     httpUser: secrets.httpUser,

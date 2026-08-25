@@ -7,7 +7,8 @@ import {
   karingDeepLink,
   newClientUuid,
   newYamlToken,
-  simulatedAppPassword,
+  syncthingFolderId,
+  vaultUserId,
   xuiClientEmail,
   yamlUrlFor,
 } from "../src/lib/provision/build";
@@ -289,9 +290,10 @@ function globalSeedCredentials(subscriptionId: string, hosts: string[]) {
     deepLink: karingDeepLink(yamlUrl),
     yamlToken,
     yamlBody: buildVlessYaml(hosts, uuid),
-    nextcloudUrl: "https://files.acrossflare.com",
-    nextcloudUser: `af_${subscriptionId.slice(-12)}`,
-    nextcloudAppPassword: simulatedAppPassword(subscriptionId),
+    vaultUrl: "https://vault.acrossflare.com",
+    vaultUser: vaultUserId(subscriptionId),
+    syncthingUrl: "https://sync.acrossflare.com",
+    syncthingFolderId: syncthingFolderId(subscriptionId),
   };
 }
 

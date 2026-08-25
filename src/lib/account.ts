@@ -48,10 +48,12 @@ export type GlobalAccount = {
   deepLink: string;
   yamlUrl: string;
   yamlBody: string;
-  nextcloudUrl: string;
-  nextcloudUsedGb: number;
-  nextcloudLimitGb: number;
-  nextcloudAppPassword: string;
+  vaultUrl: string;
+  vaultUser: string;
+  syncthingUrl: string;
+  syncthingFolderId: string;
+  backupUsedGb: number;
+  backupLimitGb: number;
 };
 
 export type MarketingAccount = {
@@ -193,7 +195,7 @@ function buildGlobal(email: string, planId: string, scenario: ScenarioId): Globa
     (code) => `node-${code.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.acrossflare.com`
   );
   const failover = scenario === "exhausted-user";
-  const yamlUrl = `https://sub.acrossflare.com/v1/yaml/${token}`;
+  const yamlUrl = `https://acrossflare.com/api/v1/subscription/${token}`;
 
   return {
     status: "active",
@@ -208,10 +210,12 @@ function buildGlobal(email: string, planId: string, scenario: ScenarioId): Globa
     deepLink: `karing://install-config?url=${encodeURIComponent(yamlUrl)}`,
     yamlUrl,
     yamlBody: buildYaml(email, nodes, uuid),
-    nextcloudUrl: "https://files.acrossflare.com",
-    nextcloudUsedGb: failover ? 8.4 : 6.1,
-    nextcloudLimitGb: plan?.backupGb ?? 1,
-    nextcloudAppPassword: `nc_${tokenFrom(`${email}:nc`, 4)}-${tokenFrom(`${email}:nc2`, 4)}-${tokenFrom(`${email}:nc3`, 4)}`,
+    vaultUrl: "https://vault.acrossflare.com",
+    vaultUser: `af_${tokenFrom(`${email}:vault`, 8)}`,
+    syncthingUrl: "https://sync.acrossflare.com",
+    syncthingFolderId: `af-${tokenFrom(`${email}:sync`, 8)}`,
+    backupUsedGb: failover ? 8.4 : 6.1,
+    backupLimitGb: plan?.backupGb ?? 1,
   };
 }
 

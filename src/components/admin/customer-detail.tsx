@@ -102,8 +102,9 @@ export function CustomerDetail({ product, id }: { product: ProductId; id: string
               <div className="space-y-3">
                 <CopyField label={tApp("deepLink")} value={customer.credentials.deepLink} />
                 <CopyField label={tApp("yamlUrl")} value={customer.credentials.yamlUrl} />
-                <CopyField label={tApp("nextcloudUrl")} value={customer.credentials.nextcloudUrl} />
-                <CopyField label={tApp("appPassword")} value={customer.credentials.nextcloudAppPassword} masked />
+                <CopyField label={tApp("vaultUrl")} value={customer.credentials.vaultUrl} />
+                <CopyField label={tApp("syncthingUrl")} value={customer.credentials.syncthingUrl} />
+                <CopyField label={tApp("syncthingFolder")} value={customer.credentials.syncthingFolderId} />
               </div>
             </div>
           ) : (

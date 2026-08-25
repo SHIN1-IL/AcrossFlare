@@ -33,8 +33,9 @@ export type GlobalCredentials = {
   deepLink: string;
   yamlUrl: string;
   yamlBody: string;
-  nextcloudUrl: string;
-  nextcloudAppPassword: string;
+  vaultUrl: string;
+  syncthingUrl: string;
+  syncthingFolderId: string;
   nodes: string[];
 };
 
@@ -136,7 +137,7 @@ export function maskHost(host: string) {
 }
 
 export function provisionSteps(product: ProductId): JobStep[] {
-  const ids = product === "global" ? ["xui", "nextcloud", "ready"] : ["xui", "ready"];
+  const ids = product === "global" ? ["xui", "backup", "ready"] : ["xui", "ready"];
   return ids.map((id) => ({ id, status: "pending" as const }));
 }
 
@@ -158,7 +159,12 @@ export function stepsFromProvision(
     return steps.map((step) => ({ ...step, status: "done" as const }));
   }
 
-  const current = provisionStep === "queued" || provisionStep === "" ? "xui" : provisionStep;
+  const current =
+    provisionStep === "queued" || provisionStep === ""
+      ? "xui"
+      : provisionStep === "nextcloud"
+        ? "backup"
+        : provisionStep;
   const index = Math.max(
     0,
     steps.findIndex((step) => step.id === current)

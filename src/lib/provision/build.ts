@@ -1,9 +1,10 @@
 import { randomBytes } from "node:crypto";
+import { withBackupNotice } from "@/lib/provision/subscription";
 
 const EXIT_IPS = ["203.0.113.10", "203.0.113.44", "198.51.100.22", "198.51.100.87", "192.0.2.55"];
 
 export function yamlUrlFor(token: string, origin: string) {
-  return `${origin.replace(/\/$/, "")}/api/v1/yaml/${token}`;
+  return `${origin.replace(/\/$/, "")}/api/v1/subscription/${token}`;
 }
 
 export function karingDeepLink(yamlUrl: string) {
@@ -29,7 +30,7 @@ export function buildVlessYaml(nodes: string[], uuid: string) {
     })
     .join("\n");
 
-  return `# AcrossFlare subscription\n# Content-Type: text/yaml\nproxies:\n${proxies}\n`;
+  return withBackupNotice(`# AcrossFlare subscription\n# Content-Type: text/yaml\nproxies:\n${proxies}\n`);
 }
 
 export function newYamlToken() {
@@ -44,19 +45,16 @@ export function xuiClientEmail(subscriptionId: string) {
   return `af_${subscriptionId.replace(/[^a-zA-Z0-9]/g, "").slice(-12)}`;
 }
 
-export function nextcloudUserId(subscriptionId: string) {
+export function vaultUserId(subscriptionId: string) {
   return `af_${subscriptionId.replace(/[^a-zA-Z0-9]/g, "").slice(-16)}`;
+}
+
+export function syncthingFolderId(subscriptionId: string) {
+  return `af-${subscriptionId.replace(/[^a-zA-Z0-9]/g, "").slice(-12).toLowerCase()}`;
 }
 
 export function newSecret(bytes = 12) {
   return randomBytes(bytes).toString("base64url");
-}
-
-export function simulatedAppPassword(seed: string) {
-  const a = tokenFrom(`${seed}:nc`, 4);
-  const b = tokenFrom(`${seed}:nc2`, 4);
-  const c = tokenFrom(`${seed}:nc3`, 4);
-  return `nc_${a}-${b}-${c}`;
 }
 
 export function defaultExitIp(seed: string) {

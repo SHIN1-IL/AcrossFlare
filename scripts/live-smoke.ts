@@ -87,9 +87,10 @@ async function report(label: string, subscriptionId: string) {
     nodes: row?.nodes.map((node) => node.name),
     uuidSet: Boolean(creds?.uuid),
     yamlSet: Boolean(creds?.yamlBody),
-    nextcloudUser: creds?.nextcloudUser ?? null,
-    nextcloudUrl: creds?.nextcloudUrl ?? null,
-    simulatedPassword: creds?.nextcloudAppPassword?.startsWith("nc_") ?? false,
+    vaultUser: creds?.vaultUser ?? null,
+    vaultUrl: creds?.vaultUrl ?? null,
+    syncthingUrl: creds?.syncthingUrl ?? null,
+    syncthingFolderId: creds?.syncthingFolderId ?? null,
     httpPort: creds?.httpPort ?? null,
     socksPort: creds?.socksPort ?? null,
   });

@@ -91,10 +91,12 @@ function toGlobalAccount(subscription: SubscriptionRow | null): GlobalAccount | 
     deepLink: creds?.deepLink ?? "",
     yamlUrl,
     yamlBody: creds?.yamlBody ?? "",
-    nextcloudUrl: creds?.nextcloudUrl ?? "",
-    nextcloudUsedGb: subscription.nextcloudUsedGb,
-    nextcloudLimitGb: subscription.plan.backupGb ?? 1,
-    nextcloudAppPassword: creds?.nextcloudAppPassword ?? "",
+    vaultUrl: creds?.vaultUrl ?? "",
+    vaultUser: creds?.vaultUser ?? "",
+    syncthingUrl: creds?.syncthingUrl ?? "",
+    syncthingFolderId: creds?.syncthingFolderId ?? "",
+    backupUsedGb: subscription.backupUsedGb,
+    backupLimitGb: subscription.plan.backupGb ?? 1,
   };
 }
 

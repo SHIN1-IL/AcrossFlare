@@ -1,0 +1,35 @@
+{
+	auto_https off
+	admin off
+}
+
+acrossflare.com, www.acrossflare.com {
+	tls /etc/caddy/certs/origin.pem /etc/caddy/certs/origin.key
+	encode gzip zstd
+
+	handle /api/v1/subscription* {
+		reverse_proxy api:8000
+	}
+
+	handle {
+		reverse_proxy web:3000
+	}
+}
+
+vault.acrossflare.com {
+	tls /etc/caddy/certs/origin.pem /etc/caddy/certs/origin.key
+	encode gzip zstd
+	reverse_proxy vaultwarden:80
+}
+
+sync.acrossflare.com {
+	tls /etc/caddy/certs/origin.pem /etc/caddy/certs/origin.key
+	encode gzip zstd
+	reverse_proxy syncthing:8384 {
+		header_up Host {host}
+		header_up X-Forwarded-Host {host}
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+	}
+}

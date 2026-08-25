@@ -9,6 +9,7 @@ import { StatusPill } from "@/components/app/status-pill";
 import { UsageMeter } from "@/components/app/usage-meter";
 import { Button } from "@/components/ui/button";
 import { useAccount } from "@/hooks/use-account";
+import { Link } from "@/i18n/navigation";
 import { downloadText } from "@/lib/download";
 import { formatDate } from "@/lib/format-date";
 
@@ -92,15 +93,22 @@ export function GlobalDashboard() {
       </section>
 
       <section className="rounded-2xl border border-border bg-card p-5">
-        <p className="text-sm">{t("nextcloud")}</p>
+        <p className="text-sm">{t("backup")}</p>
         <div className="mt-4 space-y-4">
           <UsageMeter
             label={t("backupUsage")}
-            used={global.nextcloudUsedGb}
-            limit={global.nextcloudLimitGb}
+            used={global.backupUsedGb}
+            limit={global.backupLimitGb}
           />
-          <CopyField label={t("nextcloudUrl")} value={global.nextcloudUrl} />
-          <CopyField label={t("appPassword")} value={global.nextcloudAppPassword} masked />
+          <CopyField label={t("vaultUrl")} value={global.vaultUrl} />
+          <CopyField label={t("syncthingUrl")} value={global.syncthingUrl} />
+          <CopyField label={t("syncthingFolder")} value={global.syncthingFolderId} />
+          <Link
+            href="/dashboard"
+            className="inline-flex text-sm text-primary transition-colors hover:text-primary/80"
+          >
+            {t("openBackupPwa")}
+          </Link>
         </div>
       </section>
     </div>

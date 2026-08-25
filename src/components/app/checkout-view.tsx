@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 const STEPS = [
   { id: "payment", key: "stepPayment" },
   { id: "xui", key: "stepXui" },
-  { id: "nextcloud", key: "stepNextcloud" },
+  { id: "backup", key: "stepBackup" },
   { id: "ready", key: "stepReady" },
 ] as const;
 
@@ -29,11 +29,13 @@ export function CheckoutView({
   planId,
   paymentId,
   canceled = false,
+  merchant,
 }: {
   product?: string;
   planId?: string;
   paymentId?: string;
   canceled?: boolean;
+  merchant?: React.ReactNode;
 }) {
   const t = useTranslations("checkout");
   const tApp = useTranslations("app");
@@ -54,7 +56,7 @@ export function CheckoutView({
   const steps = useMemo(
     () =>
       validProduct === "marketing"
-        ? STEPS.filter((item) => item.id !== "nextcloud")
+        ? STEPS.filter((item) => item.id !== "backup")
         : [...STEPS],
     [validProduct]
   );
@@ -73,8 +75,8 @@ export function CheckoutView({
         const target =
           provisionStep === "ready"
             ? "ready"
-            : provisionStep === "nextcloud"
-              ? "nextcloud"
+            : provisionStep === "backup" || provisionStep === "nextcloud"
+              ? "backup"
               : "xui";
         const index = steps.findIndex((item) => item.id === target);
         setStep(index >= 0 ? index : 1);
@@ -190,7 +192,7 @@ export function CheckoutView({
 
   if (!validProduct || !plan) {
     return (
-      <CheckoutFrame>
+      <CheckoutFrame merchant={merchant}>
         <h1 className="text-3xl tracking-tight">{t("title")}</h1>
         <p className="mt-3 text-sm text-muted-foreground">{t("invalidPlan")}</p>
         <Link href="/pricing" className={cn(buttonVariants({ variant: "outline" }), "mt-6 rounded-[10px]")}>
@@ -203,7 +205,7 @@ export function CheckoutView({
   const secondary = formatSecondaryPrice(locale, plan.prices);
 
   return (
-    <CheckoutFrame>
+    <CheckoutFrame merchant={merchant}>
       <p className="text-xs font-medium tracking-[0.18em] text-primary uppercase">
         AcrossFlare
       </p>
@@ -420,7 +422,15 @@ function loadPortOneSdk(): Promise<PortOneSdk> {
   });
 }
 
-function CheckoutFrame({ children }: { children: React.ReactNode }) {
+function CheckoutFrame({
+  children,
+  merchant,
+}: {
+  children: React.ReactNode;
+  merchant?: React.ReactNode;
+}) {
+  const tFooter = useTranslations("footer");
+
   return (
     <div className="flex min-h-dvh flex-col bg-background">
       <header className="flex items-center justify-between border-b border-border px-4 py-3">
@@ -428,6 +438,23 @@ function CheckoutFrame({ children }: { children: React.ReactNode }) {
         <LocaleSwitcher />
       </header>
       <div className="mx-auto w-full max-w-lg px-4 py-16">{children}</div>
+      <div className="mt-auto border-t border-border">
+        <nav className="flex flex-wrap justify-center gap-4 px-4 py-6 text-xs text-muted-foreground">
+          <Link href="/terms" className="transition-colors hover:text-foreground">
+            {tFooter("terms")}
+          </Link>
+          <Link href="/privacy" className="transition-colors hover:text-foreground">
+            {tFooter("privacy")}
+          </Link>
+          <Link
+            href={{ pathname: "/terms", hash: "refund" }}
+            className="transition-colors hover:text-foreground"
+          >
+            {tFooter("refund")}
+          </Link>
+        </nav>
+        {merchant ? <div className="mx-auto max-w-6xl px-4 pb-8">{merchant}</div> : null}
+      </div>
     </div>
   );
 }

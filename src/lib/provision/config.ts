@@ -7,7 +7,7 @@ export function isProvisionSimulate() {
     return true;
   }
 
-  return !nextcloudAdminPassword();
+  return !xuiApiToken();
 }
 
 export function appUrl() {
@@ -17,21 +17,32 @@ export function appUrl() {
   );
 }
 
-export function nextcloudBaseUrl() {
-  return (process.env.NEXTCLOUD_URL || "https://files.acrossflare.com").replace(/\/$/, "");
+export function backupDashboardUrl() {
+  return (process.env.BACKUP_DASHBOARD_URL || "https://acrossflare.com/dashboard").replace(/\/$/, "");
 }
 
-/** Docker/OCS origin. Falls back to the public URL outside compose. */
-export function nextcloudApiBaseUrl() {
-  return (process.env.NEXTCLOUD_INTERNAL_URL || nextcloudBaseUrl()).replace(/\/$/, "");
+export function vaultwardenBaseUrl() {
+  return (process.env.VAULTWARDEN_URL || "https://vault.acrossflare.com").replace(/\/$/, "");
 }
 
-export function nextcloudAdminUser() {
-  return process.env.NEXTCLOUD_ADMIN_USER || "admin";
+export function vaultwardenApiBaseUrl() {
+  return (process.env.VAULTWARDEN_INTERNAL_URL || vaultwardenBaseUrl()).replace(/\/$/, "");
 }
 
-export function nextcloudAdminPassword() {
-  return process.env.NEXTCLOUD_ADMIN_PASSWORD || "";
+export function vaultwardenAdminToken() {
+  return process.env.VAULTWARDEN_ADMIN_TOKEN || "";
+}
+
+export function syncthingBaseUrl() {
+  return (process.env.SYNCTHING_URL || "https://sync.acrossflare.com").replace(/\/$/, "");
+}
+
+export function syncthingApiBaseUrl() {
+  return (process.env.SYNCTHING_INTERNAL_URL || syncthingBaseUrl()).replace(/\/$/, "");
+}
+
+export function syncthingApiKey() {
+  return process.env.SYNCTHING_API_KEY || "";
 }
 
 export function xuiApiToken() {

@@ -1,9 +1,11 @@
 import { getTranslations } from "next-intl/server";
+import { MerchantDisclosure } from "@/components/marketing/merchant-disclosure";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 
 type LegalDoc = "terms" | "privacy";
 
 type LegalSection = {
+  id?: string;
   title: string;
   body: string;
 };
@@ -25,13 +27,16 @@ export async function LegalPage({ doc }: { doc: LegalDoc }) {
         <p className="mt-4 text-sm leading-6 text-muted-foreground">{t("disclaimer")}</p>
         <div className="mt-10 space-y-8">
           {sections.map((section) => (
-            <section key={section.title}>
+            <section key={section.id ?? section.title} id={section.id} className="scroll-mt-24">
               <h2 className="text-lg tracking-tight">{section.title}</h2>
               <p className="mt-2 text-sm leading-7 text-muted-foreground whitespace-pre-line">
                 {section.body}
               </p>
             </section>
           ))}
+        </div>
+        <div className="mt-12 border-t border-border pt-8">
+          <MerchantDisclosure />
         </div>
       </article>
     </MarketingShell>

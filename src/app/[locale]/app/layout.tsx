@@ -1,5 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { AppShell } from "@/components/app/app-shell";
+import { MerchantDisclosure } from "@/components/marketing/merchant-disclosure";
 import { getCurrentUser } from "@/lib/auth";
 import { resolveLocale } from "@/i18n/locale";
 import { redirect } from "@/i18n/navigation";
@@ -19,5 +20,5 @@ export default async function AppLayout({
     redirect({ href: { pathname: "/login", query: { next: "/app" } }, locale });
   }
 
-  return <AppShell>{children}</AppShell>;
+  return <AppShell merchant={<MerchantDisclosure />}>{children}</AppShell>;
 }

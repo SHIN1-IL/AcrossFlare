@@ -1,6 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { resolveLocale } from "@/i18n/locale";
 import { CheckoutView } from "@/components/app/checkout-view";
+import { MerchantDisclosure } from "@/components/marketing/merchant-disclosure";
 
 export default async function CheckoutPage({
   params,
@@ -19,6 +20,7 @@ export default async function CheckoutPage({
       planId={plan}
       paymentId={paymentId}
       canceled={canceled === "1" || canceled === "true"}
+      merchant={<MerchantDisclosure />}
     />
   );
 }

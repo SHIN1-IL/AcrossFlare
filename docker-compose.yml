@@ -1,23 +1,167 @@
-# Local Postgres for Prisma (`npm run db:up`). Port 5434 avoids a host Postgres on 5432.
-# Production origin (Nginx + Cloudflare + Nextcloud) is docker-compose.origin.yml.
-services:
-  postgres:
-    image: postgis/postgis:16-3.4
-    container_name: acrossflare-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: acrossflare
-      POSTGRES_PASSWORD: acrossflare
-      POSTGRES_DB: acrossflare
-    ports:
-      - "5434:5432"
-    volumes:
-      - acrossflare_pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U acrossflare -d acrossflare"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
+# Lightweight origin: Vaultwarden + Syncthing + Caddy + FastAPI + Next.js PWA.
+# Local Prisma only: npm run db:up  (starts postgres on localhost:5434)
+# Full stack:        npm run origin:up
+name: acrossflare
+
+networks:
+  origin:
+    driver: bridge
 
 volumes:
   acrossflare_pgdata:
+  vaultwarden_data:
+  syncthing_data:
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: acrossflare-postgres
+    restart: unless-stopped
+    command:
+      - postgres
+      - -c
+      - shared_buffers=16MB
+      - -c
+      - max_connections=40
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-acrossflare}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-acrossflare}
+      POSTGRES_DB: ${POSTGRES_DB:-acrossflare}
+    ports:
+      - "127.0.0.1:5434:5432"
+    volumes:
+      - acrossflare_pgdata:/var/lib/postgresql/data
+    mem_limit: 64m
+    networks: [origin]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-acrossflare} -d ${POSTGRES_DB:-acrossflare}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    logging: *default-logging
+
+  api:
+    build:
+      context: ./services/api
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-acrossflare}:${POSTGRES_PASSWORD:-acrossflare}@postgres:5432/${POSTGRES_DB:-acrossflare}
+      BACKUP_DASHBOARD_URL: ${BACKUP_DASHBOARD_URL:-https://acrossflare.com/dashboard}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    mem_limit: 48m
+    networks: [origin]
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 10s
+    logging: *default-logging
+    profiles: ["origin"]
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-acrossflare}:${POSTGRES_PASSWORD:-acrossflare}@postgres:5432/${POSTGRES_DB:-acrossflare}
+      APP_URL: ${APP_URL:-https://acrossflare.com}
+      BACKUP_DASHBOARD_URL: ${BACKUP_DASHBOARD_URL:-https://acrossflare.com/dashboard}
+      VAULTWARDEN_URL: ${VAULTWARDEN_URL:-https://vault.acrossflare.com}
+      VAULTWARDEN_INTERNAL_URL: http://vaultwarden:80
+      SYNCTHING_URL: ${SYNCTHING_URL:-https://sync.acrossflare.com}
+      SYNCTHING_INTERNAL_URL: http://syncthing:8384
+    depends_on:
+      postgres:
+        condition: service_healthy
+    mem_limit: 128m
+    networks: [origin]
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/api/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    logging: *default-logging
+    profiles: ["origin"]
+
+  vaultwarden:
+    image: vaultwarden/server:1.33.2-alpine
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${VAULTWARDEN_URL:-https://vault.acrossflare.com}
+      SIGNUPS_ALLOWED: ${VAULTWARDEN_SIGNUPS_ALLOWED:-false}
+      INVITATIONS_ALLOWED: "true"
+      ADMIN_TOKEN: ${VAULTWARDEN_ADMIN_TOKEN:-}
+      ROCKET_PORT: 80
+      WEBSOCKET_ENABLED: "true"
+    volumes:
+      - vaultwarden_data:/data
+    mem_limit: 48m
+    networks: [origin]
+    logging: *default-logging
+    profiles: ["origin"]
+
+  syncthing:
+    image: syncthing/syncthing:1.29.7
+    restart: unless-stopped
+    hostname: syncthing
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      STGUIADDRESS: 0.0.0.0:8384
+    volumes:
+      - syncthing_data:/var/syncthing
+    mem_limit: 80m
+    networks: [origin]
+    logging: *default-logging
+    profiles: ["origin"]
+
+  caddy:
+    image: caddy:2.9-alpine
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+      vaultwarden:
+        condition: service_started
+      syncthing:
+        condition: service_started
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./infra/certs:/etc/caddy/certs:ro
+    mem_limit: 32m
+    networks: [origin]
+    logging: *default-logging
+    profiles: ["origin"]

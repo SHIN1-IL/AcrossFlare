@@ -1,13 +1,15 @@
 {
   "meta": {
     "title": "AcrossFlare",
-    "description": "全球加速与营销 IP，一秒开通。"
+    "description": "安全云及网络优化服务"
   },
   "nav": {
     "product": "产品",
     "pricing": "定价",
     "docs": "文档",
+    "service": "服务",
     "login": "登录",
+    "signup": "注册",
     "getStarted": "开始使用",
     "language": "语言",
     "console": "控制台"
@@ -15,21 +17,32 @@
   "footer": {
     "terms": "条款",
     "privacy": "隐私",
-    "copyright": "© {year} AcrossFlare"
+    "refund": "撤回与退款",
+    "copyright": "© {year} AcrossFlare",
+    "merchantTitle": "经营者信息",
+    "serviceName": "服务名称",
+    "legalName": "商号",
+    "ceo": "代表人",
+    "address": "经营场所地址",
+    "phone": "电话",
+    "email": "邮箱",
+    "businessNo": "营业执照号",
+    "vasNo": "增值电信业务许可证号",
+    "mailOrderNo": "通信销售备案号"
   },
   "legal": {
     "termsTitle": "服务条款",
     "privacyTitle": "隐私政策",
-    "updated": "最近更新：2026年8月22日",
+    "updated": "最近更新：2026年8月24日",
     "disclaimer": "本页说明 AcrossFlare 目前如何提供服务，不构成法律意见。您或我们仍可能承担当地法律的额外义务。",
     "termsSections": [
       {
         "title": "1. 服务内容",
-        "body": "AcrossFlare 提供两款付费产品：全球（VLESS 接入及 Nextcloud 备份配额）与营销 IP（HTTP/SOCKS5 和 WireGuard 节点）。账户、套餐与凭证在付款或管理员手动开通后，通过 acrossflare.com 发放。"
+        "body": "AcrossFlare 提供两款付费产品：全球（VLESS 接入及 Vaultwarden、Syncthing 备份）与营销 IP（HTTP/SOCKS5 和 WireGuard 节点）。账户、套餐与凭证在付款或管理员手动开通后，通过 acrossflare.com 发放。"
       },
       {
         "title": "2. 账户",
-        "body": "您须提供准确邮箱并妥善保管密码。账户上的活动由您负责，包括代理 URL、WireGuard 密钥和 Nextcloud 应用密码等共享凭证。"
+        "body": "您须提供准确邮箱并妥善保管密码。账户上的活动由您负责，包括代理 URL、WireGuard 密钥以及 Vaultwarden / Syncthing 访问信息等共享凭证。"
       },
       {
         "title": "3. 可接受使用",
@@ -37,37 +50,42 @@
       },
       {
         "title": "4. 付款与套餐",
-        "body": "价格按语言对应的货币显示。银行卡与支付宝由 PortOne、Stripe 或 Paymentwall 处理。付款成功即开始开通。流量、备份配额和节点组合以所购套餐为准。除非套餐另有说明，未用流量不结转。"
+        "body": "价格按语言对应的货币显示。银行卡与支付宝由 PortOne、Stripe 或 Paymentwall 处理。付款成功即开始开通。流量、备份配额和节点组合以所购套餐为准。除非套餐另有说明，未用流量不结转。撤回与退款见第5条。"
       },
       {
-        "title": "5. 可用性",
+        "id": "refund",
+        "title": "5. 撤回与退款",
+        "body": "本服务为数字服务，付款成功后即开始开通凭证。订阅变为有效并已提供连接信息或备份后，依据适用的电子商务规定，合同撤回权可能受到限制；我们在付款前予以告知。\n\n付款后 7 日内发送邮件至 acrosstool@gmail.com，符合下列情形的将全额退款：(1) 已付款但凭证未签发或开通失败；(2) 重复扣款或明显错误扣款。\n\n凭证已签发后的中途退订，原则上不对剩余天数按日折算退款；强制性法律另有规定的，以该法律为准。退款退回原支付方式，并可能因支付机构处理需要数日。"
+      },
+      {
+        "title": "6. 可用性",
         "body": "节点、控制面板和存储可能迁移、故障切换或中断。我们会尽量维持访问（含套餐中的备用节点），但不保证不间断绕过或固定出口 IP。"
       },
       {
-        "title": "6. 终止",
+        "title": "7. 终止",
         "body": "您可随时停止使用。若欠费、滥用或法律要求，我们可以终止订阅。订阅结束后，代理客户端与备份访问可能被立即收回。"
       },
       {
-        "title": "7. 责任限制",
+        "title": "8. 责任限制",
         "body": "服务按“现状、可用”提供。在法律允许范围内，AcrossFlare 不对利润损失、数据丢失或间接损害承担责任；就单项主张的总责任以您在此前三个月为相关订阅支付的费用为上限。"
       },
       {
-        "title": "8. 变更",
-        "body": "我们可能更新本条款。公布变更后继续使用，即视为接受新条款。联系：support@acrossflare.com"
+        "title": "9. 变更",
+        "body": "我们可能更新本条款。公布变更后继续使用，即视为接受新条款。联系：acrosstool@gmail.com"
       }
     ],
     "privacySections": [
       {
         "title": "1. 我们收集的数据",
-        "body": "我们保存注册邮箱与密码哈希、会话 Cookie、套餐与支付记录、已开通凭证（如客户端 UUID、代理密钥、Nextcloud 用户名），以及运营所需日志。"
+        "body": "我们保存注册邮箱与密码哈希、会话 Cookie、套餐与支付记录、已开通凭证（如客户端 UUID、代理密钥、备份用户名），以及运营所需日志。"
       },
       {
         "title": "2. 网络与安全数据",
-        "body": "访问 acrossflare.com 的流量经过 Cloudflare。我们可能看到 Cloudflare 报告的连接 IP（CF-Connecting-IP），包括 Nextcloud 仅允许产品 VPN 网段时。3x-ui/Xray 与 Nextcloud 会保留各自的访问与用量记录，以便配额与防滥用。"
+        "body": "访问 acrossflare.com 的流量经过 Cloudflare。我们可能看到 Cloudflare 报告的连接 IP（CF-Connecting-IP）。3x-ui/Xray、Vaultwarden 与 Syncthing 会保留各自的访问与用量记录，以便配额与防滥用。"
       },
       {
         "title": "3. 处理者",
-        "body": "支付由 PortOne、Stripe 和/或 Paymentwall 处理。托管、DNS、WAF 与 TLS 可能使用 Cloudflare 及我们的 VPS 供应商。备份文件存放在我们的 Nextcloud。我们不出售个人信息。"
+        "body": "支付由 PortOne、Stripe 和/或 Paymentwall 处理。托管、DNS、WAF 与 TLS 可能使用 Cloudflare 及我们的 VPS 供应商。加密密码与安全备忘录存放在 Vaultwarden，文件通过 Syncthing 同步。我们不出售个人信息。"
       },
       {
         "title": "4. 保存期限",
@@ -75,23 +93,19 @@
       },
       {
         "title": "5. 您的选择",
-        "body": "可在控制台查看或更新账户邮箱。若无法律或安全保留必要，可发信 support@acrossflare.com 请求删除账户。请勿向该邮箱发送银行卡号。"
+        "body": "可在控制台查看或更新账户邮箱。若无法律或安全保留必要，可发信 acrosstool@gmail.com 请求删除账户。请勿向该邮箱发送银行卡号。"
       }
     ]
   },
   "landing": {
-    "headline": "全球加速与营销 IP，一秒开通。",
-    "subhead": "Karing 二维码、Nextcloud 备份、可轮换代理。产品隔离，控制台统一。",
+    "headline": "Secure Cloud & Network Optimization",
     "ctaGlobal": "Start Global",
     "ctaMarketing": "Get Marketing IP",
-    "trustCloudflare": "Cloudflare 边缘",
-    "trustProvisioning": "自动开通",
-    "trustLanguages": "ko / zh / ja / en",
     "productsEyebrow": "两款产品",
     "productsTitle": "选一条线。不要混用。",
     "globalBadge": "目标 A",
     "globalTitle": "全球加速 + 备份",
-    "globalDesc": "扫码即可接入 Karing VLESS。开通账号时同时发放 Nextcloud 1GB。",
+    "globalDesc": "扫码即可接入 Karing VLESS。开通账号时同时打开 Vaultwarden 与 Syncthing 备份。",
     "globalPoints": [
       "Karing 二维码与深链",
       "YAML 订阅，text/yaml",
@@ -120,6 +134,7 @@
     "featured": "热门",
     "alipay": "支付宝"
   },
+  "planSlides": {},
   "auth": {
     "loginTitle": "登录",
     "loginSubtitle": "使用 AcrossFlare 账号登录。",
@@ -173,7 +188,7 @@
     "failedCta": "重新结账",
     "statusFailed": "失败",
     "globalTitle": "全球加速",
-    "globalDesc": "Karing VLESS 与 Nextcloud 备份。",
+    "globalDesc": "Karing VLESS 与 Vaultwarden、Syncthing 备份。",
     "marketingTitle": "营销 IP",
     "marketingDesc": "HTTP/SOCKS5 端点与 WireGuard。",
     "usageTraffic": "Bandwagon 流量",
@@ -185,9 +200,21 @@
     "deepLink": "深链",
     "yamlUrl": "YAML 地址",
     "yamlDownload": "下载 .yaml",
-    "nextcloud": "Nextcloud",
-    "nextcloudUrl": "URL",
-    "appPassword": "应用密码",
+    "backup": "备份",
+    "backupTitle": "安全备份空间",
+    "backupDesc": "在 Vaultwarden 管理密码与安全备忘录，在 Syncthing 同步加密文件。可将备份应用添加到主屏幕。",
+    "backupExpires": "可用至 {date}",
+    "vaultTitle": "Vaultwarden",
+    "vaultDesc": "加密密码、卡片与安全备忘录。",
+    "vaultUrl": "Vault URL",
+    "vaultUser": "Vault 用户",
+    "openVault": "打开保险库",
+    "syncthingTitle": "Syncthing",
+    "syncthingDesc": "P2P 加密文件直接落在服务器文件系统，无中央文档数据库。",
+    "syncthingUrl": "Sync URL",
+    "syncthingFolder": "文件夹 ID",
+    "openSync": "打开同步",
+    "openBackupPwa": "打开备份 PWA",
     "backupUsage": "备份用量",
     "exitIp": "出口 IP",
     "region": "区域",
@@ -232,7 +259,7 @@
     "alipay": "支付宝",
     "stepPayment": "支付确认",
     "stepXui": "3x-ui 账号",
-    "stepNextcloud": "Nextcloud 存储",
+    "stepBackup": "备份空间",
     "stepReady": "就绪",
     "invalidPlan": "请先从定价页选择套餐。",
     "backPricing": "返回定价"
@@ -251,7 +278,7 @@
     "navNodes": "节点",
     "homeTitle": "控制面",
     "homeSubtitle": "产品完全隔离。打开一个标签。",
-    "homeGlobalDesc": "Karing、Nextcloud、Bandwagon / Racknerd。",
+    "homeGlobalDesc": "Karing、Vaultwarden、Syncthing、Bandwagon / Racknerd。",
     "homeMarketingDesc": "代理 URL、WireGuard、轮换记录。",
     "statCustomers": "客户",
     "statPlans": "套餐",
@@ -311,7 +338,7 @@
     "expiry": "到期日",
     "issue": "签发",
     "stepXui": "创建 3x-ui 账号",
-    "stepNextcloud": "创建 Nextcloud 存储",
+    "stepBackup": "创建备份空间",
     "stepReady": "完成",
     "provisionDone": "已签发。请一次复制。",
     "provisionFailed": "已停在失败步骤。",
@@ -351,5 +378,13 @@
     "notFound": "未找到。",
     "close": "关闭",
     "required": "请填写必填项。"
+  },
+  "pwa": {
+    "eyebrow": "PWA",
+    "title": "将备份应用添加到主屏幕",
+    "body": "安装 AcrossFlare 备份应用，即可在无浏览器边框的情况下打开 Vaultwarden 与 Syncthing。",
+    "iosBody": "点按分享，然后选择“添加到主屏幕”即可安装备份应用。",
+    "install": "添加备份应用",
+    "later": "稍后再说"
   }
 }

@@ -3,6 +3,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { Geist, Geist_Mono } from "next/font/google";
 import { SessionProvider } from "@/components/auth/session-provider";
+import { PwaProvider } from "@/components/pwa/pwa-provider";
 import { getCurrentUser } from "@/lib/auth";
 import { resolveLocale } from "@/i18n/locale";
 import { routing } from "@/i18n/routing";
@@ -33,8 +34,24 @@ export async function generateMetadata({
   return {
     title: t("title"),
     description: t("description"),
+    manifest: "/manifest.json",
+    applicationName: "AcrossFlare Backup",
+    appleWebApp: {
+      capable: true,
+      title: "AcrossFlare Backup",
+      statusBarStyle: "black-translucent",
+    },
+    icons: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
   };
 }
+
+export const viewport = {
+  themeColor: "#090A0F",
+};
 
 export default async function LocaleLayout({
   children,
@@ -55,7 +72,10 @@ export default async function LocaleLayout({
     >
       <body className="min-h-full bg-background text-foreground">
         <NextIntlClientProvider messages={messages}>
-          <SessionProvider initialSession={session}>{children}</SessionProvider>
+          <SessionProvider initialSession={session}>
+            <PwaProvider />
+            {children}
+          </SessionProvider>
         </NextIntlClientProvider>
       </body>
     </html>

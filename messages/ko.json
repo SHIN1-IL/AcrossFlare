@@ -1,13 +1,15 @@
 {
   "meta": {
     "title": "AcrossFlare",
-    "description": "글로벌 우회와 마케팅 IP를 1초에 발급합니다."
+    "description": "보안 클라우드 및 네트워크 최적화 서비스"
   },
   "nav": {
     "product": "제품",
     "pricing": "요금",
     "docs": "문서",
+    "service": "서비스",
     "login": "로그인",
+    "signup": "회원가입",
     "getStarted": "시작하기",
     "language": "언어",
     "console": "콘솔"
@@ -15,21 +17,32 @@
   "footer": {
     "terms": "이용약관",
     "privacy": "개인정보",
-    "copyright": "© {year} AcrossFlare"
+    "refund": "청약철회·환불",
+    "copyright": "© {year} AcrossFlare",
+    "merchantTitle": "사업자 정보",
+    "serviceName": "서비스명",
+    "legalName": "상호",
+    "ceo": "대표자",
+    "address": "사업장 주소",
+    "phone": "전화번호",
+    "email": "이메일",
+    "businessNo": "사업자등록번호",
+    "vasNo": "부가통신사업 신고번호",
+    "mailOrderNo": "통신판매업 신고번호"
   },
   "legal": {
     "termsTitle": "이용약관",
     "privacyTitle": "개인정보 처리방침",
-    "updated": "최종 업데이트 2026년 8월 22일",
+    "updated": "최종 업데이트 2026년 8월 24일",
     "disclaimer": "이 문서는 AcrossFlare가 현재 서비스를 제공하는 방식을 설명합니다. 법률 자문이 아니며, 적용 법령에 따라 추가 의무가 있을 수 있습니다.",
     "termsSections": [
       {
         "title": "1. 서비스",
-        "body": "AcrossFlare는 두 가지 유료 상품을 제공합니다. 글로벌(VLESS 접속과 Nextcloud 백업 용량)과 마케팅 IP(HTTP/SOCKS5 및 WireGuard 엔드포인트). 계정·요금제·자격 증명은 결제 또는 관리자 수동 발급 후 acrossflare.com에서 발급됩니다."
+        "body": "AcrossFlare는 두 가지 유료 상품을 제공합니다. 글로벌(VLESS 접속과 Vaultwarden·Syncthing 백업)과 마케팅 IP(HTTP/SOCKS5 및 WireGuard 엔드포인트). 계정·요금제·자격 증명은 결제 또는 관리자 수동 발급 후 acrossflare.com에서 발급됩니다."
       },
       {
         "title": "2. 계정",
-        "body": "정확한 이메일을 제공하고 비밀번호를 비밀로 유지해야 합니다. 프록시 URL, WireGuard 키, Nextcloud 앱 비밀번호를 포함해 계정에서 일어나는 이용에 대한 책임은 이용자에게 있습니다."
+        "body": "정확한 이메일을 제공하고 비밀번호를 비밀로 유지해야 합니다. 프록시 URL, WireGuard 키, Vaultwarden·Syncthing 접근 정보를 포함해 계정에서 일어나는 이용에 대한 책임은 이용자에게 있습니다."
       },
       {
         "title": "3. 허용되는 이용",
@@ -37,37 +50,42 @@
       },
       {
         "title": "4. 결제와 요금제",
-        "body": "가격은 언어 설정에 따른 통화로 표시됩니다. 카드와 알리페이는 PortOne, Stripe, Paymentwall이 처리합니다. 결제 성공 시 프로비저닝이 시작됩니다. 트래픽, 백업 용량, 노드 조합은 구매한 요금제를 따릅니다. 요금제에 별도 규정이 없으면 남은 트래픽은 이월되지 않습니다."
+        "body": "가격은 언어 설정에 따른 통화로 표시됩니다. 카드와 알리페이는 PortOne, Stripe, Paymentwall이 처리합니다. 결제 성공 시 프로비저닝이 시작됩니다. 트래픽, 백업 용량, 노드 조합은 구매한 요금제를 따릅니다. 요금제에 별도 규정이 없으면 남은 트래픽은 이월되지 않습니다. 청약철회와 환불은 제5조를 따릅니다."
       },
       {
-        "title": "5. 가용성",
+        "id": "refund",
+        "title": "5. 청약철회 및 환불",
+        "body": "결제 성공과 동시에 자격 증명 발급이 시작되는 디지털 서비스입니다. 구독이 활성 상태가 되어 접속 정보·백업이 제공된 뒤에는 전자상거래법 제17조 제2항에 따라 청약철회가 제한될 수 있으며, 이 사실을 결제 전에 고지합니다.\n\n결제 후 7일 이내 acrosstool@gmail.com으로 요청하면 다음의 경우 전액 환불합니다. (1) 결제는 되었으나 자격 증명이 발급되지 않았거나 발급이 실패한 경우 (2) 중복 결제 또는 명백한 오류 결제.\n\n이미 발급되어 이용 가능한 기간의 중도 해지는 잔여 일수 일할 환불을 원칙으로 하지 않습니다. 강행 법규가 다르게 정하면 그 법이 우선합니다. 환불은 원래 결제 수단으로 처리하며 PG 일정에 따라 수일이 걸릴 수 있습니다."
+      },
+      {
+        "title": "6. 가용성",
         "body": "노드, 패널, 저장소는 이전·예비 전환·장애가 있을 수 있습니다. 요금제에 포함된 예비 노드를 포함해 접속 유지를 위해 노력하지만, 끊김 없는 우회나 특정 출구 IP를 보증하지는 않습니다."
       },
       {
-        "title": "6. 해지",
+        "title": "7. 해지",
         "body": "이용자는 언제든지 서비스 이용을 중단할 수 있습니다. 미납, 남용, 법령상 필요가 있으면 구독을 종료할 수 있습니다. 구독이 끝나면 별도의 유예 없이 프록시 클라이언트와 백업 접근이 회수될 수 있습니다."
       },
       {
-        "title": "7. 책임",
+        "title": "8. 책임",
         "body": "서비스는 있는 그대로, 제공 가능한 범위에서 제공됩니다. 법령이 허용하는 한 AcrossFlare는 일실이익, 데이터 손실, 간접 손해에 책임지지 않으며, 청구에 대한 총 책임은 직전 3개월간 해당 구독에 지급한 금액으로 제한됩니다."
       },
       {
-        "title": "8. 변경",
-        "body": "본 약관은 변경될 수 있습니다. 게시된 변경 이후에도 서비스를 계속 이용하면 변경된 약관에 동의한 것으로 봅니다. 문의: support@acrossflare.com"
+        "title": "9. 변경",
+        "body": "본 약관은 변경될 수 있습니다. 게시된 변경 이후에도 서비스를 계속 이용하면 변경된 약관에 동의한 것으로 봅니다. 문의: acrosstool@gmail.com"
       }
     ],
     "privacySections": [
       {
         "title": "1. 수집하는 정보",
-        "body": "가입 시 이메일과 비밀번호 해시, 세션 쿠키, 요금제·결제 기록, 발급된 자격 증명(클라이언트 UUID, 프록시 비밀값, Nextcloud 사용자명 등), 서비스 운영에 필요한 로그를 저장합니다."
+        "body": "가입 시 이메일과 비밀번호 해시, 세션 쿠키, 요금제·결제 기록, 발급된 자격 증명(클라이언트 UUID, 프록시 비밀값, 백업 사용자명 등), 서비스 운영에 필요한 로그를 저장합니다."
       },
       {
         "title": "2. 네트워크와 보안 정보",
-        "body": "acrossflare.com 트래픽은 Cloudflare를 거칩니다. Cloudflare가 전달하는 접속 IP(CF-Connecting-IP)를 볼 수 있으며, Nextcloud가 상품 VPN 대역으로 제한될 때도 마찬가지입니다. 쿼터와 남용 대응을 위해 3x-ui/Xray와 Nextcloud는 자체 접속·사용 기록을 유지합니다."
+        "body": "acrossflare.com 트래픽은 Cloudflare를 거칩니다. Cloudflare가 전달하는 접속 IP(CF-Connecting-IP)를 볼 수 있습니다. 쿼터와 남용 대응을 위해 3x-ui/Xray, Vaultwarden, Syncthing은 자체 접속·사용 기록을 유지합니다."
       },
       {
         "title": "3. 처리 위탁",
-        "body": "결제는 PortOne, Stripe, Paymentwall이 처리합니다. 호스팅, DNS, WAF, TLS에는 Cloudflare와 VPS 제공자가 사용될 수 있습니다. 백업 파일은 당사 Nextcloud에 저장됩니다. 개인정보를 판매하지 않습니다."
+        "body": "결제는 PortOne, Stripe, Paymentwall이 처리합니다. 호스팅, DNS, WAF, TLS에는 Cloudflare와 VPS 제공자가 사용될 수 있습니다. 암호와 보안 메모는 Vaultwarden에, 파일은 Syncthing으로 동기화됩니다. 개인정보를 판매하지 않습니다."
       },
       {
         "title": "4. 보관",
@@ -75,23 +93,19 @@
       },
       {
         "title": "5. 이용자 선택",
-        "body": "콘솔에서 계정 이메일을 확인하고 바꿀 수 있습니다. 법령이나 보안상 보관이 필요치 않다면 support@acrossflare.com으로 계정 삭제를 요청할 수 있습니다. 그 주소로 카드 번호를 보내지 마세요."
+        "body": "콘솔에서 계정 이메일을 확인하고 바꿀 수 있습니다. 법령이나 보안상 보관이 필요치 않다면 acrosstool@gmail.com으로 계정 삭제를 요청할 수 있습니다. 그 주소로 카드 번호를 보내지 마세요."
       }
     ]
   },
   "landing": {
-    "headline": "글로벌 우회와 마케팅 IP를 1초에 발급합니다.",
-    "subhead": "Karing QR, Nextcloud 백업, 회전형 프록시 엔드포인트. 상품은 분리되고, 콘솔은 하나입니다.",
+    "headline": "Secure Cloud & Network Optimization",
     "ctaGlobal": "Start Global",
     "ctaMarketing": "Get Marketing IP",
-    "trustCloudflare": "Cloudflare 엣지",
-    "trustProvisioning": "자동 프로비저닝",
-    "trustLanguages": "ko / zh / ja / en",
     "productsEyebrow": "두 가지 상품",
     "productsTitle": "레인을 고르세요. 섞지 않습니다.",
     "globalBadge": "타겟 A",
     "globalTitle": "글로벌 우회 + 백업",
-    "globalDesc": "스캔 한 번으로 Karing VLESS 연결. 계정과 함께 Nextcloud 1GB가 발급됩니다.",
+    "globalDesc": "스캔 한 번으로 Karing VLESS 연결. 계정과 함께 Vaultwarden·Syncthing 백업이 열립니다.",
     "globalPoints": [
       "Karing용 QR과 딥링크",
       "YAML 구독, text/yaml",
@@ -119,6 +133,22 @@
     "cta": "계속",
     "featured": "인기",
     "alipay": "Alipay"
+  },
+  "planSlides": {
+    "global-lite": {
+      "eyebrow": "보안 클라우드+네트워크 최적화",
+      "title": "Standard",
+      "description": "단기 여행이나 출장시 보안백업을 위한 적합한 속도를 제공",
+      "price": "₩99,00/월",
+      "cta": "서비스 신청하기"
+    },
+    "global-pro": {
+      "eyebrow": "보안 클라우드+네트워크 최적화",
+      "title": "Hybrid",
+      "description": "보안백업과 빠른 속도의 네트워크 최적화를 제공",
+      "price": "₩199,00/월",
+      "cta": "서비스 신청하기"
+    }
   },
   "auth": {
     "loginTitle": "로그인",
@@ -173,7 +203,7 @@
     "failedCta": "다시 결제하기",
     "statusFailed": "실패",
     "globalTitle": "글로벌 우회",
-    "globalDesc": "Karing VLESS와 Nextcloud 백업.",
+    "globalDesc": "Karing VLESS와 Vaultwarden·Syncthing 백업.",
     "marketingTitle": "마케팅 IP",
     "marketingDesc": "HTTP/SOCKS5 엔드포인트와 WireGuard.",
     "usageTraffic": "Bandwagon 트래픽",
@@ -185,9 +215,21 @@
     "deepLink": "딥링크",
     "yamlUrl": "YAML URL",
     "yamlDownload": ".yaml 다운로드",
-    "nextcloud": "Nextcloud",
-    "nextcloudUrl": "URL",
-    "appPassword": "앱 패스워드",
+    "backup": "백업",
+    "backupTitle": "보안 백업 공간",
+    "backupDesc": "Vaultwarden에서 암호와 보안 메모를, Syncthing에서 암호화 파일 동기화를 이용하세요. 홈 화면에 백업 앱을 추가할 수 있습니다.",
+    "backupExpires": "{date}까지 이용",
+    "vaultTitle": "Vaultwarden",
+    "vaultDesc": "암호화된 비밀번호, 카드, 보안 메모.",
+    "vaultUrl": "Vault URL",
+    "vaultUser": "Vault 사용자",
+    "openVault": "금고 열기",
+    "syncthingTitle": "Syncthing",
+    "syncthingDesc": "서버 파일 시스템에 P2P 암호화 저장. 중앙 문서 DB 없음.",
+    "syncthingUrl": "Sync URL",
+    "syncthingFolder": "폴더 ID",
+    "openSync": "동기화 열기",
+    "openBackupPwa": "백업 PWA 열기",
     "backupUsage": "백업 사용량",
     "exitIp": "출구 IP",
     "region": "리전",
@@ -232,7 +274,7 @@
     "alipay": "Alipay",
     "stepPayment": "결제 확인",
     "stepXui": "3x-ui 계정",
-    "stepNextcloud": "Nextcloud 저장소",
+    "stepBackup": "백업 공간",
     "stepReady": "준비 완료",
     "invalidPlan": "요금 페이지에서 플랜을 선택하세요.",
     "backPricing": "요금으로"
@@ -251,7 +293,7 @@
     "navNodes": "노드",
     "homeTitle": "제어면",
     "homeSubtitle": "상품은 완전히 분리됩니다. 탭을 하나 여세요.",
-    "homeGlobalDesc": "Karing, Nextcloud, Bandwagon / Racknerd.",
+    "homeGlobalDesc": "Karing, Vaultwarden, Syncthing, Bandwagon / Racknerd.",
     "homeMarketingDesc": "프록시 URL, WireGuard, Rotate 이력.",
     "statCustomers": "고객",
     "statPlans": "요금제",
@@ -311,7 +353,7 @@
     "expiry": "만료일",
     "issue": "발급",
     "stepXui": "3x-ui 계정 생성",
-    "stepNextcloud": "Nextcloud 저장소 생성",
+    "stepBackup": "백업 공간 생성",
     "stepReady": "완료",
     "provisionDone": "발급되었습니다. 한 번에 복사하세요.",
     "provisionFailed": "실패한 스텝에서 멈췄습니다.",
@@ -351,5 +393,13 @@
     "notFound": "찾을 수 없습니다.",
     "close": "닫기",
     "required": "필수 항목을 입력하세요."
+  },
+  "pwa": {
+    "eyebrow": "PWA",
+    "title": "홈 화면에 백업 앱 추가",
+    "body": "브라우저 없이 Vaultwarden과 Syncthing을 열려면 AcrossFlare 백업 앱을 설치하세요.",
+    "iosBody": "공유 버튼을 누른 뒤 '홈 화면에 추가'를 선택하면 백업 앱이 설치됩니다.",
+    "install": "백업 앱 추가",
+    "later": "나중에"
   }
 }

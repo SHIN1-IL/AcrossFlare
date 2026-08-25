@@ -12,34 +12,28 @@ import { cn } from "@/lib/utils";
 
 export function MarketingHeader() {
   const t = useTranslations("nav");
-  const tCommon = useTranslations("common");
   const [open, setOpen] = useState(false);
   const hydrated = useHydrated();
   const session = useSession();
   const signedIn = hydrated && Boolean(session);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/80 bg-background/80 backdrop-blur-md">
+    <header className="sticky top-0 z-40 bg-transparent">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        <Logo />
-
-        <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
-          <Link href="/#products" className="transition-colors hover:text-foreground">
-            {t("product")}
-          </Link>
-          <Link href="/pricing" className="transition-colors hover:text-foreground">
-            {t("pricing")}
-          </Link>
-          <span
-            title={tCommon("docsSoon")}
-            className="cursor-not-allowed text-muted-foreground/50"
+        <div className="flex items-center gap-4">
+          <Logo showWordmark={false} />
+          <Link
+            href="/#plans"
+            className="hidden text-sm text-muted-foreground transition-colors hover:text-foreground md:inline"
           >
-            {t("docs")}
-          </span>
-        </nav>
+            {t("service")}
+          </Link>
+          <div className="hidden md:block">
+            <LocaleSwitcher />
+          </div>
+        </div>
 
         <div className="hidden items-center gap-2 md:flex">
-          <LocaleSwitcher />
           {signedIn ? (
             <Link
               href="/app"
@@ -59,7 +53,7 @@ export function MarketingHeader() {
                 href="/signup"
                 className={cn(buttonVariants({ size: "sm" }), "rounded-[10px]")}
               >
-                {t("getStarted")}
+                {t("signup")}
               </Link>
             </>
           )}
@@ -77,13 +71,9 @@ export function MarketingHeader() {
 
       {open ? (
         <div className="space-y-3 border-t border-border px-4 py-3 md:hidden">
-          <Link href="/#products" onClick={() => setOpen(false)} className="block text-sm">
-            {t("product")}
+          <Link href="/#plans" onClick={() => setOpen(false)} className="block text-sm">
+            {t("service")}
           </Link>
-          <Link href="/pricing" onClick={() => setOpen(false)} className="block text-sm">
-            {t("pricing")}
-          </Link>
-          <p className="text-sm text-muted-foreground/50">{t("docs")}</p>
           <LocaleSwitcher />
           {signedIn ? (
             <Link
@@ -107,7 +97,7 @@ export function MarketingHeader() {
                 onClick={() => setOpen(false)}
                 className={cn(buttonVariants({ size: "sm" }), "flex-1 rounded-[10px]")}
               >
-                {t("getStarted")}
+                {t("signup")}
               </Link>
             </div>
           )}
