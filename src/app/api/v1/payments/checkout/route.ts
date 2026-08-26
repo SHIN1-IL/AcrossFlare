@@ -8,11 +8,16 @@ import { CheckoutStartError, startProviderCheckout } from "@/lib/payments/start"
 import { isPublicCheckoutProduct } from "@/lib/plans";
 import { lookupPromoCode } from "@/lib/promo";
 import { toPrismaProduct } from "@/lib/product";
+import { canStartPublicCheckout } from "@/lib/review-user";
 
 export async function POST(request: Request) {
   const user = await getAuthUser();
   if (!user) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
+  if (!canStartPublicCheckout(user.email)) {
+    return NextResponse.json({ error: "review_only" }, { status: 403 });
   }
 
   const body = (await request.json().catch(() => null)) as

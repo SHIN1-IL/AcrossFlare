@@ -7,8 +7,10 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PgReviewNotice } from "@/components/marketing/pg-review-notice";
 import { isAdminSession, type PublicSession } from "@/lib/auth-types";
 import { isPublicCheckoutProduct } from "@/lib/plans";
+import { REVIEW_USER_EMAIL } from "@/lib/review-user";
 import { hydrateSession, setPreviewEmail } from "@/lib/session";
 
 function isSafeNext(value: string | null): value is string {
@@ -48,8 +50,8 @@ export function AuthForm({
           return;
         }
 
-        if (mode === "signup" && (!ageConfirmed || !legalAgreed)) {
-          setError(t("errorConsent"));
+        if (mode === "signup") {
+          setError(t("errorReviewOnly"));
           return;
         }
 
@@ -78,7 +80,9 @@ export function AuthForm({
                     ? t("errorTaken")
                     : data.error === "weak_password"
                       ? t("errorWeak")
-                      : t("errorGeneric");
+                      : data.error === "review_only"
+                        ? t("errorReviewOnly")
+                        : t("errorGeneric");
             setError(message);
             return;
           }
@@ -120,6 +124,8 @@ export function AuthForm({
         </p>
       ) : null}
 
+      <PgReviewNotice />
+
       <div className="space-y-2">
         <Label htmlFor="email">{t("email")}</Label>
         <Input
@@ -127,7 +133,7 @@ export function AuthForm({
           name="email"
           type="text"
           autoComplete="username"
-          placeholder="global-user@acrossflare.com"
+          placeholder={REVIEW_USER_EMAIL}
           className="h-10 rounded-[10px]"
         />
       </div>
@@ -176,7 +182,11 @@ export function AuthForm({
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
-      <Button type="submit" disabled={pending} className="h-10 w-full rounded-[10px]">
+      <Button
+        type="submit"
+        disabled={pending || mode === "signup"}
+        className="h-10 w-full rounded-[10px]"
+      >
         {mode === "login" ? t("submitLogin") : t("submitSignup")}
       </Button>
 

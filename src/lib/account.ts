@@ -138,7 +138,7 @@ export function scenarioFromEmail(email: string): ScenarioId {
   if (local === "unpaid-user") {
     return "unpaid-user";
   }
-  if (local === "both-user" || local === "user" || local === "admin") {
+  if (local === "both-user" || local === "user") {
     return "both-user";
   }
 
@@ -354,5 +354,17 @@ export function resolveAccount(email: string, overlay: AccountOverlay = {}): Acc
     workspace,
     method: overlay.method ?? "card",
     receipts,
+  };
+}
+
+export function emptyAccount(email: string): AccountSnapshot {
+  return {
+    email,
+    scenario: scenarioFromEmail(email),
+    global: null,
+    marketing: null,
+    workspace: null,
+    method: "card",
+    receipts: [],
   };
 }

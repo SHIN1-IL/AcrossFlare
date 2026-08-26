@@ -9,6 +9,7 @@ import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { Logo } from "@/components/marketing/logo";
 import { ServiceNav } from "@/components/marketing/service-nav";
 import { useHydrated, useSession } from "@/hooks/use-account";
+import { signedInHomeHref } from "@/lib/auth-types";
 import { cn } from "@/lib/utils";
 
 export function MarketingHeader() {
@@ -17,6 +18,7 @@ export function MarketingHeader() {
   const hydrated = useHydrated();
   const session = useSession();
   const signedIn = hydrated && Boolean(session);
+  const consoleHref = signedInHomeHref(session);
 
   return (
     <header className="sticky top-0 z-40 bg-transparent">
@@ -34,7 +36,7 @@ export function MarketingHeader() {
         <div className="hidden items-center gap-2 md:flex">
           {signedIn ? (
             <Link
-              href="/app"
+              href={consoleHref}
               className={cn(buttonVariants({ size: "sm" }), "rounded-[10px]")}
             >
               {t("console")}
@@ -73,7 +75,7 @@ export function MarketingHeader() {
           <LocaleSwitcher />
           {signedIn ? (
             <Link
-              href="/app"
+              href={consoleHref}
               onClick={() => setOpen(false)}
               className={cn(buttonVariants({ size: "sm" }), "w-full rounded-[10px]")}
             >

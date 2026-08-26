@@ -22,6 +22,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "weak_password" }, { status: 400 });
   }
 
+  if (!isOwnerEmail(email)) {
+    return NextResponse.json({ error: "review_only" }, { status: 403 });
+  }
+
   try {
     const user = await prisma.user.create({
       data: {

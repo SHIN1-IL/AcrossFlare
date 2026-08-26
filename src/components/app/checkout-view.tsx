@@ -7,6 +7,7 @@ import { PaymentTabs } from "@/components/app/payment-tabs";
 import { LegalFooterLinks } from "@/components/marketing/legal-footer-links";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { Logo } from "@/components/marketing/logo";
+import { PgReviewNotice } from "@/components/marketing/pg-review-notice";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useAccount, useHydrated } from "@/hooks/use-account";
 import { Link, useRouter } from "@/i18n/navigation";
@@ -16,7 +17,21 @@ import { provisionProduct, refreshRemoteAccount } from "@/lib/account-store";
 import { PriceAmount, SecondaryPriceAmount } from "@/components/marketing/price-amount";
 import { useLivePlan } from "@/hooks/use-admin";
 import { isPublicCheckoutProduct } from "@/lib/plans";
+import type { PortOneCheckout } from "@/lib/payments/portone";
+import { canStartPublicCheckout } from "@/lib/review-user";
 import { cn } from "@/lib/utils";
+
+const CHECKOUT_FAILURES = [
+  "timeout",
+  "invalid_code",
+  "review_only",
+  "portone_not_configured",
+  "stripe_not_configured",
+  "stripe_checkout_failed",
+  "paymentwall_not_configured",
+] as const;
+
+type CheckoutFailure = (typeof CHECKOUT_FAILURES)[number] | "failed" | "agree";
 
 const STEPS = [
   { id: "payment", key: "stepPayment" },
@@ -64,9 +79,7 @@ export function CheckoutView({
     paymentId && !canceled ? "processing" : "form"
   );
   const [step, setStep] = useState(0);
-  const [error, setError] = useState<"failed" | "timeout" | "invalid_code" | "agree" | null>(
-    canceled ? "failed" : null
-  );
+  const [error, setError] = useState<CheckoutFailure | null>(canceled ? "failed" : null);
   const [payStatus, setPayStatus] = useState<"processing" | "openingWindow" | "redirecting">(
     "processing"
   );
@@ -103,7 +116,7 @@ export function CheckoutView({
 
       setStep(steps.length - 1);
       await sleep(500);
-      await refreshRemoteAccount();
+      await refreshRemoteAccount(session.email);
       if (session && validProduct && plan) {
         provisionProduct(session.email, validProduct, plan.id, method);
         router.push(validProduct === "workspace" ? "/app/workspace" : "/app/global");
@@ -119,6 +132,11 @@ export function CheckoutView({
 
     if (!agreed) {
       setError("agree");
+      return;
+    }
+
+    if (!canStartPublicCheckout(session?.email)) {
+      setError("review_only");
       return;
     }
 
@@ -151,8 +169,20 @@ export function CheckoutView({
         redirectUrl?: string;
         portone?: PortOneCheckout;
       };
+      if (checkout.error) {
+        throw new Error(
+          checkout.error === "invalid_code" ||
+            checkout.error === "review_only" ||
+            checkout.error === "portone_not_configured" ||
+            checkout.error === "stripe_not_configured" ||
+            checkout.error === "stripe_checkout_failed" ||
+            checkout.error === "paymentwall_not_configured"
+            ? checkout.error
+            : "failed"
+        );
+      }
       if (!created.ok || !checkout.paymentId) {
-        throw new Error(checkout.error === "invalid_code" ? "invalid_code" : "failed");
+        throw new Error("failed");
       }
 
       if (checkout.mode === "simulate") {
@@ -190,11 +220,7 @@ export function CheckoutView({
       throw new Error("failed");
     } catch (cause) {
       setPhase("form");
-      setError(
-        cause instanceof Error && (cause.message === "timeout" || cause.message === "invalid_code")
-          ? cause.message
-          : "failed"
-      );
+      setError(checkoutFailure(cause));
     }
   }
 
@@ -206,11 +232,7 @@ export function CheckoutView({
     resumeRef.current = true;
     void finishPaidCheckout(paymentId).catch((cause: unknown) => {
       setPhase("form");
-      setError(
-        cause instanceof Error && (cause.message === "timeout" || cause.message === "invalid_code")
-          ? cause.message
-          : "failed"
-      );
+      setError(checkoutFailure(cause));
     });
   }, [canceled, finishPaidCheckout, hydrated, paymentId, plan, session, validProduct]);
 
@@ -289,6 +311,7 @@ export function CheckoutView({
         {phase === "form" ? (
           <div className="mt-6 space-y-5">
             <PaymentTabs value={method} onChange={setMethod} />
+            {canStartPublicCheckout(session.email) ? null : <PgReviewNotice />}
             {error ? (
               <p className="text-sm text-destructive">
                 {error === "timeout"
@@ -297,7 +320,14 @@ export function CheckoutView({
                     ? t("invalidCode")
                     : error === "agree"
                       ? t("agreeRequired")
-                      : t("payFailed")}
+                      : error === "review_only"
+                        ? t("reviewOnly")
+                        : error === "portone_not_configured" ||
+                            error === "stripe_not_configured" ||
+                            error === "paymentwall_not_configured" ||
+                            error === "stripe_checkout_failed"
+                          ? t("payNotConfigured")
+                          : t("payFailed")}
               </p>
             ) : null}
             <p className="text-xs leading-5 text-muted-foreground">{t("refundNotice")}</p>
@@ -332,6 +362,7 @@ export function CheckoutView({
             <Button
               type="button"
               className="h-10 w-full rounded-[10px]"
+              disabled={!canStartPublicCheckout(session.email)}
               onClick={() => {
                 void startPayment();
               }}
@@ -382,6 +413,14 @@ export function CheckoutView({
       </div>
     </CheckoutFrame>
   );
+}
+
+function checkoutFailure(cause: unknown): Exclude<CheckoutFailure, "agree"> {
+  if (cause instanceof Error && CHECKOUT_FAILURES.includes(cause.message as (typeof CHECKOUT_FAILURES)[number])) {
+    return cause.message as (typeof CHECKOUT_FAILURES)[number];
+  }
+
+  return "failed";
 }
 
 type PaymentPoll = {
@@ -436,28 +475,8 @@ function sleep(ms: number) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
-type PortOneCheckout = {
-  storeId: string;
-  channelKey: string;
-  paymentId: string;
-  orderName: string;
-  totalAmount: number;
-  currency: string;
-  payMethod: "CARD" | "ALIPAY";
-  redirectUrl: string;
-};
-
 type PortOneSdk = {
-  requestPayment: (input: {
-    storeId: string;
-    channelKey: string;
-    paymentId: string;
-    orderName: string;
-    totalAmount: number;
-    currency: string;
-    payMethod: "CARD" | "ALIPAY";
-    redirectUrl: string;
-  }) => Promise<{ code?: string } | null>;
+  requestPayment: (input: PortOneCheckout) => Promise<{ code?: string } | null>;
 };
 
 declare global {

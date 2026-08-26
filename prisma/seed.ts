@@ -1,6 +1,7 @@
 import { PrismaClient, Product, Role, SubscriptionStatus, type Node } from "@prisma/client";
 import { exitHostFor, issueMarketingSecrets, nextWgAddress, regionFrom } from "../src/lib/marketing/secrets";
 import { hashPassword } from "../src/lib/password";
+import { REVIEW_USER_EMAIL, REVIEW_USER_PASSWORD } from "../src/lib/review-user";
 import { plans } from "../src/lib/plans";
 import { toPrismaProduct } from "../src/lib/product";
 import {
@@ -20,8 +21,8 @@ const DEMO_PASSWORD = "acrossflare";
 
 // Regular USER for PG review and merchant testing. No seeded subscription, so checkout still works.
 const REVIEW_USER = {
-  email: "shin@acrosstool.com",
-  password: "12345678",
+  email: REVIEW_USER_EMAIL,
+  password: REVIEW_USER_PASSWORD,
   role: Role.USER,
 };
 

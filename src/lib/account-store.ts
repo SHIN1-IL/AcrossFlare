@@ -1,4 +1,5 @@
 import {
+  emptyAccount,
   resolveAccount,
   type AccountOverlay,
   type AccountSnapshot,
@@ -15,6 +16,7 @@ let version = 0;
 let rotateInFlight = false;
 let rotateError: string | null = null;
 let remoteAccount: AccountSnapshot | null = null;
+let remoteReadyEmail: string | null = null;
 
 function emit() {
   version += 1;
@@ -70,37 +72,50 @@ function patchOverlay(email: string, patch: AccountOverlay) {
   writeAll(all);
 }
 
-export function getAccount(email: string): AccountSnapshot {
-  const seed = resolveAccount(email, getOverlay(email));
-  if (!remoteAccount || remoteAccount.email !== email) {
-    return seed;
-  }
-
-  return {
-    ...seed,
-    global: remoteAccount.global,
-    marketing: remoteAccount.marketing,
-    method: remoteAccount.method,
-    receipts: remoteAccount.receipts,
-  };
+export function isRemoteAccountReady(email: string) {
+  return remoteReadyEmail === email;
 }
 
-export async function refreshRemoteAccount() {
+export function getAccount(email: string, preview = false): AccountSnapshot | null {
+  if (preview) {
+    return resolveAccount(email, getOverlay(email));
+  }
+
+  if (remoteReadyEmail !== email) {
+    return null;
+  }
+
+  if (remoteAccount && remoteAccount.email === email) {
+    return remoteAccount;
+  }
+
+  return emptyAccount(email);
+}
+
+export async function refreshRemoteAccount(email?: string) {
   const response = await fetch("/api/v1/account", { credentials: "include" });
   if (!response.ok) {
-    remoteAccount = null;
+    if (email) {
+      remoteAccount = emptyAccount(email);
+      remoteReadyEmail = email;
+    } else {
+      remoteAccount = null;
+      remoteReadyEmail = null;
+    }
     emit();
     return null;
   }
 
   const data = (await response.json()) as { account?: AccountSnapshot | null };
-  remoteAccount = data.account ?? null;
+  remoteAccount = data.account ?? (email ? emptyAccount(email) : null);
+  remoteReadyEmail = remoteAccount?.email ?? email ?? null;
   emit();
   return remoteAccount;
 }
 
 export function clearRemoteAccount() {
   remoteAccount = null;
+  remoteReadyEmail = null;
   emit();
 }
 

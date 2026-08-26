@@ -9,6 +9,12 @@ import {
   stripeSecretKey,
 } from "@/lib/payments/config";
 import { md5Hex } from "@/lib/payments/crypto";
+import {
+  portoneCurrency,
+  portoneCustomerName,
+  portoneLocale,
+  type PortOneCheckout,
+} from "@/lib/payments/portone";
 import { toStripeMinorUnits } from "@/lib/payments/quote";
 
 export class CheckoutStartError extends Error {
@@ -18,16 +24,7 @@ export class CheckoutStartError extends Error {
   }
 }
 
-export type PortOneCheckout = {
-  storeId: string;
-  channelKey: string;
-  paymentId: string;
-  orderName: string;
-  totalAmount: number;
-  currency: string;
-  payMethod: "CARD" | "ALIPAY";
-  redirectUrl: string;
-};
+export type { PortOneCheckout };
 
 export type LiveCheckoutSession = {
   redirectUrl?: string;
@@ -162,7 +159,7 @@ function createPaymentwallCheckout(input: { payment: Payment; plan: Plan; email:
 }
 
 function createPortoneCheckout(
-  input: { payment: Payment; plan: Plan },
+  input: { payment: Payment; plan: Plan; email: string },
   redirectUrl: string
 ): PortOneCheckout {
   const storeId = portoneStoreId();
@@ -177,8 +174,13 @@ function createPortoneCheckout(
     paymentId: input.payment.id,
     orderName: input.plan.name,
     totalAmount: input.payment.amount,
-    currency: input.payment.currency,
+    currency: portoneCurrency(input.payment.currency),
     payMethod: input.payment.method === PaymentMethod.ALIPAY ? "ALIPAY" : "CARD",
     redirectUrl,
+    locale: portoneLocale(input.payment.locale),
+    customer: {
+      email: input.email,
+      fullName: portoneCustomerName(input.email),
+    },
   };
 }

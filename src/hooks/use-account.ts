@@ -5,11 +5,12 @@ import {
   getAccount,
   getAccountVersion,
   getRotateError,
+  isRemoteAccountReady,
   isRotateInFlight,
   refreshRemoteAccount,
   subscribeAccount,
 } from "@/lib/account-store";
-import { getSession, lookupEmail, subscribeSession } from "@/lib/session";
+import { getPreviewEmail, getSession, lookupEmail, subscribeSession } from "@/lib/session";
 
 export function useHydrated() {
   return useSyncExternalStore(
@@ -28,16 +29,18 @@ export function useAccount() {
   useSyncExternalStore(subscribeAccount, getAccountVersion, () => 0);
   const rotating = useSyncExternalStore(subscribeAccount, isRotateInFlight, () => false);
   const rotateError = useSyncExternalStore(subscribeAccount, getRotateError, () => null);
+  const previewEmail = useSyncExternalStore(subscribeSession, getPreviewEmail, () => null);
   const email = lookupEmail(session);
-  const account = email ? getAccount(email) : null;
+  const account = email ? getAccount(email, Boolean(previewEmail)) : null;
+  const accountReady = Boolean(previewEmail) || !session || isRemoteAccountReady(session.email);
 
   useEffect(() => {
     if (!session) {
       return;
     }
 
-    void refreshRemoteAccount();
+    void refreshRemoteAccount(session.email);
   }, [session]);
 
-  return { account, rotating, rotateError, session };
+  return { account, accountReady, rotating, rotateError, session };
 }

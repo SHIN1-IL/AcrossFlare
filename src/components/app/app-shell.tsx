@@ -79,7 +79,7 @@ export function AppShell({
   const router = useRouter();
   const pathname = usePathname();
   const hydrated = useHydrated();
-  const { session } = useAccount();
+  const { session, accountReady } = useAccount();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -91,7 +91,7 @@ export function AppShell({
     }
   }, [hydrated, pathname, router, session]);
 
-  if (!hydrated || !session) {
+  if (!hydrated || !session || !accountReady) {
     return (
       <div className="flex min-h-dvh items-center justify-center bg-background">
         <div className="h-8 w-8 animate-pulse rounded-full bg-primary/20" />

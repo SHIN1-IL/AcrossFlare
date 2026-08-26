@@ -17,6 +17,10 @@ export function isOwnerSession(session: PublicSession | null | undefined) {
   return isOwnerRole(session?.role);
 }
 
+export function signedInHomeHref(session: PublicSession | null | undefined) {
+  return isAdminSession(session) ? "/admin" : "/app";
+}
+
 export function toPublicSession(user: {
   email: string;
   role: UserRole;
