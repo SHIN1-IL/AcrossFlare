@@ -5,7 +5,8 @@ import { Link } from "@/i18n/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import { StatusPill } from "@/components/app/status-pill";
 import { cn } from "@/lib/utils";
-import type { ProductId } from "@/lib/plans";
+import { isPublicCheckoutProduct, type ProductId } from "@/lib/plans";
+import { publicServiceFromPlanId, publicServiceHref } from "@/lib/public-service";
 
 export function ProductEmpty({
   product,
@@ -17,8 +18,10 @@ export function ProductEmpty({
   planId?: string;
 }) {
   const t = useTranslations("app");
-  const plan = planId ?? (product === "global" ? "global-standard" : "marketing-standard");
   const failed = status === "failed";
+  const browse = publicServiceHref(product === "workspace" ? "workspace" : publicServiceFromPlanId(planId));
+  const retryPlan =
+    planId ?? (product === "workspace" ? "workspace-a" : product === "marketing" ? "marketing-standard" : "global-lite");
 
   return (
     <div className="rounded-2xl border border-border bg-card p-8">
@@ -28,7 +31,11 @@ export function ProductEmpty({
         {failed ? t("failedBody") : t("unpaidBody")}
       </p>
       <Link
-        href={{ pathname: "/checkout", query: { product, plan } }}
+        href={
+          failed && isPublicCheckoutProduct(product)
+            ? { pathname: "/checkout", query: { product, plan: retryPlan } }
+            : browse
+        }
         className={cn(buttonVariants(), "mt-6 rounded-[10px]")}
       >
         {failed ? t("failedCta") : t("unpaidCta")}

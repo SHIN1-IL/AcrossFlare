@@ -2,6 +2,7 @@ import { PrismaClient, Product, Role, SubscriptionStatus, type Node } from "@pri
 import { exitHostFor, issueMarketingSecrets, nextWgAddress } from "../src/lib/marketing/secrets";
 import { hashPassword } from "../src/lib/password";
 import { plans } from "../src/lib/plans";
+import { toPrismaProduct } from "../src/lib/product";
 import {
   buildVlessYaml,
   karingDeepLink,
@@ -17,6 +18,7 @@ const prisma = new PrismaClient();
 
 const DEMO_PASSWORD = "acrossflare";
 
+// Seed admin is a legacy full-access ADMIN. The live owner is ADMIN_OWNER_EMAIL (promoted on login).
 const DEMO_USERS: { email: string; role: Role }[] = [
   { email: "admin@acrossflare.com", role: Role.ADMIN },
   { email: "global-user@acrossflare.com", role: Role.USER },
@@ -89,10 +91,6 @@ const SEED_NODES = [
   },
 ];
 
-function productEnum(product: "global" | "marketing") {
-  return product === "global" ? Product.GLOBAL : Product.MARKETING;
-}
-
 async function main() {
   const passwordHash = await hashPassword(DEMO_PASSWORD);
 
@@ -100,7 +98,7 @@ async function main() {
     await prisma.plan.upsert({
       where: { id: plan.id },
       update: {
-        product: productEnum(plan.product),
+        product: toPrismaProduct(plan.product),
         name: plan.name,
         priceKrw: plan.prices.krw,
         priceUsd: plan.prices.usd,
@@ -114,7 +112,7 @@ async function main() {
       },
       create: {
         id: plan.id,
-        product: productEnum(plan.product),
+        product: toPrismaProduct(plan.product),
         name: plan.name,
         priceKrw: plan.prices.krw,
         priceUsd: plan.prices.usd,
@@ -248,7 +246,7 @@ async function seedDemoSubscriptions() {
           orderBy: { createdAt: "asc" },
         })
       : [];
-    const prefix = row.product === Product.GLOBAL ? "g" : "m";
+  const prefix = row.product === Product.GLOBAL ? "g" : row.product === Product.MARKETING ? "m" : "w";
     const subscriptionId = `seed_${prefix}_${user.id.slice(-10)}`;
     const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 

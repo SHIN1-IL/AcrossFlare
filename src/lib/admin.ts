@@ -106,10 +106,24 @@ export type MigrateJob = {
   running: boolean;
 };
 
+export type AdminPromoCode = {
+  id: string;
+  code: string;
+  planId: string;
+  planName: string;
+  product: ProductId;
+  note: string;
+  status: "unused" | "redeemed";
+  reserved: boolean;
+  createdAt: string;
+  redeemedAt: string | null;
+};
+
 export type AdminState = {
   plans: AdminPlan[];
   nodes: AdminNode[];
   customers: AdminCustomer[];
+  promoCodes: AdminPromoCode[];
   provision: ProvisionSession | null;
   migrate: MigrateJob | null;
 };
@@ -137,7 +151,7 @@ export function maskHost(host: string) {
 }
 
 export function provisionSteps(product: ProductId): JobStep[] {
-  const ids = product === "global" ? ["xui", "backup", "ready"] : ["xui", "ready"];
+  const ids = product === "marketing" ? ["xui", "ready"] : ["xui", "backup", "ready"];
   return ids.map((id) => ({ id, status: "pending" as const }));
 }
 

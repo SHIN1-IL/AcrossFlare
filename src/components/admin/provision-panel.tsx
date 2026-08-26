@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useAdmin } from "@/hooks/use-admin";
 import { Link } from "@/i18n/navigation";
+import { adminTabMessageKey } from "@/lib/admin-nav";
 import { normalizeEmail } from "@/lib/session";
 import { clearProvision, getCustomer, listPlans, runProvision } from "@/lib/admin-store";
 import type { ProductId } from "@/lib/plans";
@@ -74,7 +75,7 @@ export function ProvisionPanel({ product }: { product: ProductId }) {
         >
           <div className="space-y-2">
             <Label>{t("product")}</Label>
-            <input className={fieldClass} value={product === "global" ? t("tabGlobal") : t("tabMarketing")} disabled />
+            <input className={fieldClass} value={t(adminTabMessageKey(product))} disabled />
           </div>
           <div className="space-y-2">
             <Label>{t("email")}</Label>

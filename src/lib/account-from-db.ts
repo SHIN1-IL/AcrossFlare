@@ -40,6 +40,7 @@ export async function loadAccountSnapshot(email: string, userId: string): Promis
     scenario: scenarioFromEmail(email),
     global: toGlobalAccount(latestByProduct(subscriptions, Product.GLOBAL)),
     marketing: toMarketingAccount(latestByProduct(subscriptions, Product.MARKETING)),
+    workspace: toGlobalAccount(latestByProduct(subscriptions, Product.WORKSPACE)),
     method: latestMethod === PrismaPaymentMethod.ALIPAY ? "alipay" : "card",
     receipts: payments.map(toReceipt),
   };

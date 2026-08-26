@@ -5,37 +5,45 @@ import { useState } from "react";
 import { PlanCard } from "@/components/marketing/plan-card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLivePlans } from "@/hooks/use-admin";
-import type { ProductId } from "@/lib/plans";
+import {
+  MARKETING_SERVICES,
+  getMarketingService,
+  type MarketingServiceId,
+} from "@/lib/marketing-services";
+import { getPlanById, publicPlanFrom, type Plan } from "@/lib/plans";
 
 export function PricingView({
-  initialProduct,
+  initialService,
   showAlipay,
 }: {
-  initialProduct: ProductId;
+  initialService: MarketingServiceId;
   showAlipay: boolean;
 }) {
   const t = useTranslations("pricing");
-  const [product, setProduct] = useState<ProductId>(initialProduct);
-  const plans = useLivePlans(product);
+  const [service, setService] = useState<MarketingServiceId>(initialService);
+  const current = getMarketingService(service);
+  const livePlans = useLivePlans(current.product);
+  const plans = current.planIds
+    .map((id) => publicPlanFrom(getPlanById(id), livePlans.find((plan) => plan.id === id)))
+    .filter((plan): plan is Plan => Boolean(plan));
 
   return (
     <div className="space-y-8">
       <Tabs
-        value={product}
+        value={service}
         onValueChange={(value) => {
-          if (value === "global" || value === "marketing") {
-            setProduct(value);
+          if (value === "standard" || value === "hybrid" || value === "workspace") {
+            setService(value);
           }
         }}
         className="items-center"
       >
         <TabsList className="rounded-[10px] bg-surface-2">
-          <TabsTrigger value="global" className="rounded-md px-4">
-            {t("global")}
-          </TabsTrigger>
-          <TabsTrigger value="marketing" className="rounded-md px-4">
-            {t("marketing")}
-          </TabsTrigger>
+          {MARKETING_SERVICES.map((item) => (
+            <TabsTrigger key={item.id} value={item.id} className="rounded-md px-4">
+              {t(item.id)}
+            </TabsTrigger>
+          ))}
         </TabsList>
       </Tabs>
 

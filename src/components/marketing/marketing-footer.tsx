@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
 import { MerchantDisclosure } from "@/components/marketing/merchant-disclosure";
+import { LegalFooterLinks } from "@/components/marketing/legal-footer-links";
 import { Logo } from "@/components/marketing/logo";
 
 export async function MarketingFooter() {
@@ -14,20 +14,7 @@ export async function MarketingFooter() {
             <Logo />
             <span className="text-sm text-muted-foreground">{t("copyright", { year: new Date().getFullYear() })}</span>
           </div>
-          <nav className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-            <Link href="/terms" className="transition-colors hover:text-foreground">
-              {t("terms")}
-            </Link>
-            <Link href="/privacy" className="transition-colors hover:text-foreground">
-              {t("privacy")}
-            </Link>
-            <Link
-              href={{ pathname: "/terms", hash: "refund" }}
-              className="transition-colors hover:text-foreground"
-            >
-              {t("refund")}
-            </Link>
-          </nav>
+          <LegalFooterLinks className="text-sm" />
         </div>
         <MerchantDisclosure />
       </div>

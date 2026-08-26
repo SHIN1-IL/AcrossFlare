@@ -80,6 +80,7 @@ export type AccountSnapshot = {
   scenario: ScenarioId;
   global: GlobalAccount | null;
   marketing: MarketingAccount | null;
+  workspace: GlobalAccount | null;
   method: PaymentMethod;
   receipts: Receipt[];
 };
@@ -161,6 +162,9 @@ function seedProducts(scenario: ScenarioId): ProductId[] {
 function seedPlanId(product: ProductId, scenario: ScenarioId) {
   if (product === "global") {
     return scenario === "exhausted-user" ? "global-pro" : "global-standard";
+  }
+  if (product === "workspace") {
+    return "workspace-a";
   }
   return "marketing-standard";
 }
@@ -294,6 +298,7 @@ export function resolveAccount(email: string, overlay: AccountOverlay = {}): Acc
 
   const globalPlanId = overlay.extraPlanIds?.global ?? seedPlanId("global", scenario);
   const marketingPlanId = overlay.extraPlanIds?.marketing ?? seedPlanId("marketing", scenario);
+  const workspacePlanId = overlay.extraPlanIds?.workspace ?? seedPlanId("workspace", scenario);
 
   let global: GlobalAccount | null = products.has("global")
     ? buildGlobal(email, globalPlanId, scenario)
@@ -301,12 +306,18 @@ export function resolveAccount(email: string, overlay: AccountOverlay = {}): Acc
   let marketing: MarketingAccount | null = products.has("marketing")
     ? buildMarketing(email, marketingPlanId, overlay.marketing)
     : null;
+  let workspace: GlobalAccount | null = products.has("workspace")
+    ? buildGlobal(email, workspacePlanId, scenario)
+    : null;
 
   if (global && provisioning.has("global")) {
     global = { ...global, status: "provisioning" };
   }
   if (marketing && provisioning.has("marketing")) {
     marketing = { ...marketing, status: "provisioning" };
+  }
+  if (workspace && provisioning.has("workspace")) {
+    workspace = { ...workspace, status: "provisioning" };
   }
 
   const receipts: Receipt[] = [];
@@ -326,12 +337,21 @@ export function resolveAccount(email: string, overlay: AccountOverlay = {}): Acc
       planId: marketing.planId,
     });
   }
+  if (workspace && workspace.status === "active") {
+    receipts.push({
+      id: `rcpt_${tokenFrom(`${email}:w`, 6)}`,
+      date: "2026-07-22T00:00:00.000Z",
+      product: "workspace",
+      planId: workspace.planId,
+    });
+  }
 
   return {
     email,
     scenario,
     global,
     marketing,
+    workspace,
     method: overlay.method ?? "card",
     receipts,
   };

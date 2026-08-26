@@ -1,4 +1,6 @@
-export type ProductId = "global" | "marketing";
+export const PRODUCT_IDS = ["global", "marketing", "workspace"] as const;
+
+export type ProductId = (typeof PRODUCT_IDS)[number];
 
 export type PlanPrices = {
   krw: number;
@@ -23,8 +25,26 @@ export const plans: Plan[] = [
     id: "global-lite",
     product: "global",
     name: "Lite",
-    prices: { krw: 19900, usd: 15, cny: 99, jpy: 2300 },
-    trafficGb: 80,
+    prices: { krw: 9900, usd: 8, cny: 49, jpy: 1100 },
+    trafficGb: 100,
+    backupGb: 1,
+    nodes: ["SG"],
+  },
+  {
+    id: "global-week",
+    product: "global",
+    name: "Week",
+    prices: { krw: 5900, usd: 5, cny: 29, jpy: 680 },
+    trafficGb: 20,
+    backupGb: 1,
+    nodes: ["SG"],
+  },
+  {
+    id: "global-year",
+    product: "global",
+    name: "Year",
+    prices: { krw: 99000, usd: 80, cny: 490, jpy: 11000 },
+    trafficGb: 1200,
     backupGb: 1,
     nodes: ["SG"],
   },
@@ -44,6 +64,33 @@ export const plans: Plan[] = [
     name: "Pro",
     prices: { krw: 69900, usd: 49, cny: 349, jpy: 7600 },
     trafficGb: null,
+    backupGb: 1,
+    nodes: ["SG", "JP", "US"],
+  },
+  {
+    id: "hybrid-week",
+    product: "global",
+    name: "Hybrid Week",
+    prices: { krw: 9900, usd: 8, cny: 49, jpy: 1100 },
+    trafficGb: 20,
+    backupGb: 1,
+    nodes: ["SG", "JP", "US"],
+  },
+  {
+    id: "hybrid-lite",
+    product: "global",
+    name: "Hybrid",
+    prices: { krw: 19900, usd: 15, cny: 99, jpy: 2300 },
+    trafficGb: 100,
+    backupGb: 1,
+    nodes: ["SG", "JP", "US"],
+  },
+  {
+    id: "hybrid-year",
+    product: "global",
+    name: "Hybrid Year",
+    prices: { krw: 199000, usd: 150, cny: 990, jpy: 23000 },
+    trafficGb: 1200,
     backupGb: 1,
     nodes: ["SG", "JP", "US"],
   },
@@ -75,6 +122,33 @@ export const plans: Plan[] = [
     backupGb: null,
     nodes: ["US-East", "US-West", "EU"],
   },
+  {
+    id: "workspace-a",
+    product: "workspace",
+    name: "A",
+    prices: { krw: 1990000, usd: 1500, cny: 9900, jpy: 230000 },
+    trafficGb: 1200,
+    backupGb: 1,
+    nodes: ["SG", "JP", "US"],
+  },
+  {
+    id: "workspace-b",
+    product: "workspace",
+    name: "B",
+    prices: { krw: 1990000, usd: 1500, cny: 9900, jpy: 230000 },
+    trafficGb: 2400,
+    backupGb: 1,
+    nodes: ["SG", "JP", "US"],
+  },
+  {
+    id: "workspace-c",
+    product: "workspace",
+    name: "C",
+    prices: { krw: 1990000, usd: 1500, cny: 9900, jpy: 230000 },
+    trafficGb: 12000,
+    backupGb: 1,
+    nodes: ["SG", "JP", "US"],
+  },
 ];
 
 export function getPlansByProduct(product: ProductId) {
@@ -89,6 +163,79 @@ export function getPlanById(id: string | null | undefined) {
   return plans.find((plan) => plan.id === id) ?? null;
 }
 
+export function publicPlanFrom(catalog: Plan | null | undefined, live: Plan | undefined): Plan | undefined {
+  const pricedLive = live && planHasPrice(live) ? live : undefined;
+  const plan = pricedLive ?? catalog ?? live;
+  if (!plan) {
+    return undefined;
+  }
+  if (!catalog) {
+    return plan;
+  }
+
+  return { ...plan, trafficGb: catalog.trafficGb };
+}
+
 export function isProductId(value: string | null | undefined): value is ProductId {
-  return value === "global" || value === "marketing";
+  return PRODUCT_IDS.includes(value as ProductId);
+}
+
+export type PublicCheckoutProduct = "global" | "workspace";
+
+export function isPublicCheckoutProduct(
+  value: string | null | undefined
+): value is PublicCheckoutProduct {
+  return value === "global" || value === "workspace";
+}
+
+export function planHasPrice(plan: Plan) {
+  return plan.prices.krw > 0 || plan.prices.usd > 0 || plan.prices.cny > 0 || plan.prices.jpy > 0;
+}
+
+export function isWeeklyPlan(planId: string) {
+  return planTerm(planId) === "week";
+}
+
+export function isNonMonthlyPlan(planId: string) {
+  return planTerm(planId) !== "month";
+}
+
+export type PlanTerm = "week" | "month" | "year";
+
+export function planTerm(planId: string): PlanTerm {
+  if (planId.endsWith("-week")) return "week";
+  if (planId.endsWith("-year") || planId.startsWith("workspace-")) {
+    return "year";
+  }
+  return "month";
+}
+
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+const MONTH_MS = 30 * 24 * 60 * 60 * 1000;
+const YEAR_MS = 12 * MONTH_MS;
+
+export function planPeriodMs(planId: string) {
+  const term = planTerm(planId);
+  if (term === "week") return WEEK_MS;
+  if (term === "year") return YEAR_MS;
+  return MONTH_MS;
+}
+
+export type PlanTrafficQuota = {
+  cadence: "month" | "total";
+  gb: number;
+};
+
+export function planTrafficQuota(plan: Pick<Plan, "id" | "trafficGb">): PlanTrafficQuota | null {
+  if (plan.trafficGb == null) {
+    return null;
+  }
+
+  if (planTerm(plan.id) === "year") {
+    const monthly = plan.trafficGb / 12;
+    const gb = Number.isInteger(monthly) ? monthly : Number(monthly.toFixed(1));
+    return { cadence: "month", gb };
+  }
+
+  return { cadence: "total", gb: plan.trafficGb };
 }

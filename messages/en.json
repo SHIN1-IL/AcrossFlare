@@ -12,13 +12,19 @@
     "signup": "Sign up",
     "getStarted": "Get Started",
     "language": "Language",
+    "locales": {
+      "ko": "한국어",
+      "zh": "简体中文",
+      "ja": "日本語",
+      "en": "English"
+    },
     "console": "Console"
   },
   "footer": {
     "terms": "Terms",
-    "privacy": "Privacy",
+    "privacy": "Privacy Policy",
     "refund": "Withdrawals & refunds",
-    "copyright": "© {year} AcrossFlare",
+    "copyright": "© {year} 어크로스툴",
     "merchantTitle": "Business information",
     "serviceName": "Service name",
     "legalName": "Legal name",
@@ -27,114 +33,221 @@
     "phone": "Phone",
     "email": "Email",
     "businessNo": "Business registration no.",
-    "vasNo": "Value-added telecom license no.",
-    "mailOrderNo": "Mail-order report no."
+    "vasNo": "Value-added telecom report no.",
+    "mailOrderNo": "Mail-order report no.",
+    "hostingProvider": "Hosting provider",
+    "escrow": "Purchase-protection (escrow) is not offered because this is digital content."
+  },
+  "productNotice": {
+    "title": "Product information",
+    "supplier": "Supplier",
+    "terms": "Terms and duration",
+    "delivery": "How it is provided",
+    "requirements": "Minimum requirements",
+    "withdraw": "Withdrawal and cancellation",
+    "support": "Customer support",
+    "supplierValue": "{legalName} (service name {serviceName})",
+    "standardTerms": "Encrypted network access and 1GB secure cloud backup on the LA route, for lawful travel, work, and online meetings. Traffic and term follow the plan you choose (1 week, 1 month, or 12 months).",
+    "hybridTerms": "Encrypted network access and 1GB secure cloud backup on Tokyo+LA routes, for lawful travel, work, and online meetings. Traffic and term follow the plan you choose (1 week, 1 month, or 12 months).",
+    "workspaceTerms": "Team or custom encrypted network access and secure cloud backup. Plans A, B, and C share the same 12-month price; they differ only in seats and monthly traffic. Plans require a promotional code.",
+    "deliveryValue": "No physical shipment. After payment, access and backup details are issued immediately to the signed-in account.",
+    "workspaceDeliveryValue": "No physical shipment. After the promotional code is confirmed, access and backup details are issued to the signed-in account.",
+    "requirementsValue": "A PC or phone with internet access. No dedicated app is required. Use the account and backup in a browser.",
+    "withdrawValue": "After access or backup details are issued, the right to withdraw may be limited under Korean e-commerce law article 17(2)(5). Full refund within 7 days if issuance failed or the charge was duplicated. We do not pro-rate unused time after issuance.",
+    "withdrawLink": "Withdrawals & refunds",
+    "vat": "Prices include VAT."
   },
   "legal": {
     "termsTitle": "Terms of Service",
     "privacyTitle": "Privacy Policy",
-    "updated": "Last updated August 24, 2026",
-    "disclaimer": "These pages describe how AcrossFlare currently operates. They are not legal advice. Local law may impose extra duties on you or on us.",
+    "updated": "Last updated August 26, 2026",
+    "disclaimer": "These terms and this privacy policy apply to AcrossFlare, operated by 어크로스툴 (CEO: 신일) at acrossflare.com.",
     "termsSections": [
       {
-        "title": "1. The service",
-        "body": "AcrossFlare provides two paid products: Global (VLESS access plus Vaultwarden and Syncthing backup) and Marketing IP (HTTP/SOCKS5 and WireGuard endpoints). Accounts, plans, and credentials are issued through acrossflare.com after payment or manual admin provisioning."
+        "title": "1. Parties",
+        "body": "These terms govern the secure-cloud and network-optimization digital service AcrossFlare, provided by 어크로스툴 (“the company”). You accept them when you sign up or pay."
       },
       {
-        "title": "2. Accounts",
-        "body": "You must provide an accurate email and keep your password secret. You are responsible for activity on your account, including shared credentials such as proxy URLs, WireGuard keys, and Vaultwarden or Syncthing access."
+        "title": "2. The service",
+        "body": "Paid products listed on the site are Standard, Hybrid, and Workspace & Custom. Each includes encrypted network access and encrypted cloud backup. Routes (such as LA or Tokyo+LA), traffic, backup size, term, and seat counts follow the product page and checkout screen.\n\nAfter payment succeeds or the company provisions an account manually, access and backup details are issued to the signed-in account. Workspace plans require a promotional code. The catalog on the homepage may change."
       },
       {
-        "title": "3. Acceptable use",
-        "body": "You may use the service only for lawful purposes. You must not use AcrossFlare to attack networks, commit fraud, distribute malware, exploit minors, evade lawful process, or violate export or sanctions rules. We may suspend or delete an account that we reasonably believe is abusing nodes, storage, or other customers."
+        "title": "3. Accounts",
+        "body": "You must be 14 or older. Provide an accurate email and keep your password secret. You are responsible for issued access and backup credentials. After sign-in you can view your email in Settings. To change the email or delete the account, email acrosstool@gmail.com."
       },
       {
-        "title": "4. Payments and plans",
-        "body": "Prices are shown in the currency that follows your language. Card and Alipay charges are processed by PortOne, Stripe, or Paymentwall. A successful payment starts provisioning. Traffic, backup quota, and node bindings follow the plan you buy. Unused traffic does not roll over unless a plan says otherwise. Withdrawals and refunds follow section 5."
+        "title": "4. Acceptable use",
+        "body": "Use the service only for lawful purposes such as travel, work trips, and online meetings. You must not use it to attack networks, commit fraud, distribute malware, exploit minors, evade legal duties, or violate export or sanctions rules. The company may restrict or end service for abuse, non-payment, or legal need."
+      },
+      {
+        "title": "5. Payments and plans",
+        "body": "Prices include VAT and are shown in the currency that follows your language. Card and Alipay charges are processed by PortOne, Stripe, or Paymentwall. For Standard and Hybrid, digital delivery (access and backup details) starts immediately when payment succeeds. For Workspace, you pay after a promotional code is confirmed, and the company issues details to the account. Traffic, backup quota, and term follow the plan; unused traffic does not roll over unless stated. Withdrawals and refunds follow section 6."
       },
       {
         "id": "refund",
-        "title": "5. Withdrawals and refunds",
-        "body": "This is a digital service. Provisioning starts as soon as payment succeeds. After a subscription is active and credentials or backup access have been issued, the right to withdraw from the contract may be limited under applicable e-commerce rules. We disclose that before you pay.\n\nEmail acrosstool@gmail.com within 7 days of payment for a full refund if (1) payment succeeded but credentials were not issued or provisioning failed, or (2) the charge was duplicated or clearly erroneous.\n\nWe do not pro-rate unused days after credentials have been issued, unless a mandatory law says otherwise. Refunds go back to the original payment method and may take several days through the payment provider."
+        "title": "6. Withdrawals and refunds",
+        "body": "This is digital content whose supply starts when payment succeeds. After access or backup details are issued, the right to withdraw may be limited under Korean e-commerce law (Article 17(2)(5)). We disclose that on the payment screen and require your agreement.\n\nEmail acrosstool@gmail.com within 7 days of payment for a full refund if (1) payment succeeded but access or backup details were not issued or provisioning failed, or (2) the charge was duplicated or clearly erroneous.\n\nWe do not pro-rate unused time after details have been issued, unless a mandatory law says otherwise.\n\nRefunds go back to the original payment method. By statute a refund should begin within three business days of the withdrawal request; the payment provider may take several more days to post it. Purchase-protection (escrow) is not offered for this digital content."
       },
       {
-        "title": "6. Availability",
-        "body": "Nodes, panels, and storage may move, fail over, or go offline. We try to keep access working, including spare nodes where a plan includes them, but we do not warrant uninterrupted circumvention or a particular exit IP."
+        "title": "7. Availability",
+        "body": "Network routes, access systems, and backup storage may move, fail over, be maintained, or go offline. We work to keep the service available but do not warrant uninterrupted access or a particular exit IP."
       },
       {
-        "title": "7. Termination",
-        "body": "You may stop using the service at any time. We may end a subscription that is unpaid, abusive, or required by law. When a subscription ends, proxy clients and backup access may be revoked without a separate notice period."
+        "title": "8. Termination",
+        "body": "You may stop using the service at any time. The company may end a contract for non-payment, breach, or legal need. Access and backup may be revoked without a separate notice period."
       },
       {
-        "title": "8. Liability",
-        "body": "The service is provided as available. To the extent allowed by law, AcrossFlare is not liable for lost profits, lost data, or indirect damages, and total liability for a claim is limited to the fees you paid for the affected subscription in the prior three months."
+        "title": "9. Liability",
+        "body": "The service is provided as available. To the extent allowed by law, the company is not liable for lost profits, lost data, or indirect damages, and total liability for a claim is limited to the fees paid for the affected subscription in the prior three months."
       },
       {
-        "title": "9. Changes",
-        "body": "We may update these terms. Continued use after a posted change means you accept the new terms. Questions: acrosstool@gmail.com."
+        "title": "10. Governing law",
+        "body": "These terms follow the laws of the Republic of Korea. Disputes follow Korean e-commerce and consumer rules; you may also use Korea Consumer Agency procedures. Contact: acrosstool@gmail.com, phone 070-8065-1258."
+      },
+      {
+        "title": "11. Changes",
+        "body": "We may update these terms on this page. Changes that are unfavorable to you will be announced before they apply. Continued use after a posted change means you accept the new terms."
       }
     ],
     "privacySections": [
       {
-        "title": "1. Data we collect",
-        "body": "We store the email and password hash you register with, session cookies, plan and payment records, provisioned credentials (such as client UUIDs, proxy secrets, and backup usernames), and operational logs needed to run the service."
+        "title": "1. Purpose and data we collect",
+        "body": "We process personal data to register accounts, provide the paid service, handle payment and refunds, answer support, and protect against abuse. We store email, password hashes, session cookies, plan and payment records, issued access and backup details, and operational logs. We do not store card numbers; payment processors do."
       },
       {
-        "title": "2. Network and security data",
-        "body": "Traffic to acrossflare.com goes through Cloudflare. We may see the connecting IP Cloudflare reports (CF-Connecting-IP). Node software (3x-ui / Xray), Vaultwarden, and Syncthing keep their own access and usage records so quotas and abuse controls work."
+        "title": "2. Retention",
+        "body": "Account data is kept until you leave or the contract ends. Transaction records are kept for the periods required by Korean e-commerce and tax rules (generally five years for contracts, payments, and supply records, and three years for complaint records). Session cookies expire. Issued secrets are removed or rotated when a plan changes or ends; backup copies may remain for a limited time."
       },
       {
         "title": "3. Processors",
-        "body": "Payments are handled by PortOne, Stripe, and/or Paymentwall. Hosting, DNS, WAF, and TLS may use Cloudflare and our VPS providers. Encrypted passwords and notes live in Vaultwarden. Files sync through Syncthing. We do not sell your personal information."
+        "body": "Payments are processed by PortOne, Stripe, and Paymentwall. Hosting, DNS, WAF, and TLS may use Cloudflare and VPS providers. Encrypted backup features use our password, note, and file-sync systems. We do not sell personal information."
       },
       {
-        "title": "4. Retention",
-        "body": "Account and billing records are kept while the account is open and as long as tax or dispute rules require. Session cookies expire. Provisioned secrets are removed or rotated when a plan changes, migrates, or ends, except copies that remain in backups for a limited time."
+        "title": "4. Overseas transfers",
+        "body": "Data may be transferred abroad to run the service: Cloudflare (United States and other regions, DNS and security), Stripe and Paymentwall (United States and other regions, payments), and overseas VPS providers (including the United States, Japan, and Singapore, servers). Items may include email, payment identifiers, and technical access data. Retention follows section 2. Signing up or paying with this policy in view is how we inform you of those transfers."
       },
       {
-        "title": "5. Your choices",
-        "body": "You can access or update account email through the console, and you can ask us to delete an account at acrosstool@gmail.com unless we must keep records for law or security. Do not send payment card numbers to that inbox."
+        "title": "5. Sharing with third parties",
+        "body": "We do not provide personal data to third parties except where the law requires it."
+      },
+      {
+        "title": "6. Deletion and security",
+        "body": "When the retention period ends we destroy personal data so it cannot be restored. We use access control, TLS, password hashing, and permission limits."
+      },
+      {
+        "title": "7. Your rights",
+        "body": "After sign-in you can view your account email in Settings. To change the email, access or correct data, pause processing, or delete the account, email acrosstool@gmail.com unless we must keep records for law or security. Do not send payment card numbers to that inbox."
+      },
+      {
+        "title": "8. Children under 14",
+        "body": "We do not collect personal data from children under 14. They may not create an account."
+      },
+      {
+        "title": "9. Cookies",
+        "body": "We use session cookies to keep you signed in and to protect the account. Blocking cookies may disable sign-in."
+      },
+      {
+        "title": "10. Privacy officer",
+        "body": "Privacy officer: 신일. Email acrosstool@gmail.com, phone 070-8065-1258."
+      },
+      {
+        "title": "11. Remedies",
+        "body": "You may contact the Personal Information Infringement Report Center (privacy.kisa.or.kr / 118), the Personal Information Dispute Mediation Committee (www.kopico.go.kr / 1833-6972), the Supreme Prosecutors’ Office cyber investigation unit (www.spo.go.kr / 1301), or the National Police Agency cyber investigation unit (ecrm.police.go.kr / 182)."
+      },
+      {
+        "title": "12. Changes",
+        "body": "We post updates on this page and announce material changes before they apply."
       }
     ]
   },
-  "landing": {
-    "headline": "Secure Cloud & Network Optimization",
-    "ctaGlobal": "Start Global",
-    "ctaMarketing": "Get Marketing IP",
-    "productsEyebrow": "Two products",
-    "productsTitle": "Pick a lane. Never mix them.",
-    "globalBadge": "Target A",
-    "globalTitle": "Global bypass + backup",
-    "globalDesc": "Karing-ready VLESS in one scan. Vaultwarden and Syncthing backup open with the account.",
-    "globalPoints": [
-      "QR and deep link for Karing",
-      "YAML subscription, text/yaml",
-      "Bandwagon 150GB, Racknerd failover"
-    ],
-    "marketingBadge": "Target B",
-    "marketingTitle": "Marketing IP",
-    "marketingDesc": "No extra app. Copy an HTTP or SOCKS5 URL, or a WireGuard config.",
-    "marketingPoints": [
-      "http://id:pw@ip:port endpoints",
-      "WireGuard snippet on demand",
-      "One-click IP rotate with lock"
-    ]
-  },
   "pricing": {
-    "title": "Simple monthly plans",
-    "subtitle": "Toggle a product. Prices follow your language.",
-    "global": "Global Bypass",
-    "marketing": "Marketing IP",
+    "title": "Pricing",
+    "subtitle": "Standard, Hybrid, and Workspace & Custom.",
+    "standard": "Standard",
+    "hybrid": "Hybrid",
+    "workspace": "Workspace",
+    "global": "Standard",
+    "marketing": "Workspace",
     "perMonth": "/ mo",
+    "perWeek": "/ week",
+    "periodWeek": "/ 1 week",
+    "period1Week": "/ 1 week",
+    "periodMonth": "/ 1 month",
+    "periodYear": "/ 12 months",
     "traffic": "Traffic",
     "backup": "Backup",
     "nodes": "Nodes",
     "unlimited": "Unlimited",
+    "quotaMonth": "Monthly",
+    "quotaTotal": "Total",
     "cta": "Continue",
+    "viewService": "View service",
+    "inquire": "Email us with your requirements",
     "featured": "Popular",
     "alipay": "Alipay"
   },
   "planSlides": {},
+  "workspace": {
+    "eyebrow": "Secure Cloud & Network Optimization",
+    "title": "Workspace & Custom",
+    "description": "Custom orders for friends and teams",
+    "hint": "Plans A, B, and C by headcount",
+    "learnMore": "Learn more",
+    "cta": "Get started"
+  },
+  "services": {
+    "trialPlan": "Short-term trial",
+    "standard": {
+      "eyebrow": "Secure Cloud & Network Optimization",
+      "title": "Standard",
+      "description": "Right-sized speed for short trips and travel backups",
+      "cta": "Get started",
+      "features": [
+        "AcrossFlare base technology",
+        "1 GB secure cloud backup for important files",
+        "Online meetings on Zoom, Webex, Teams, and more",
+        "Network optimization over a dedicated international line (LA)",
+        "Advanced encryption for a secure network"
+      ]
+    },
+    "hybrid": {
+      "eyebrow": "Secure Cloud & Network Optimization",
+      "title": "Hybrid",
+      "description": "Secure backup plus faster network optimization",
+      "cta": "Get started",
+      "features": [
+        "AcrossFlare advanced technology",
+        "1 GB secure cloud backup for important files",
+        "Uninterrupted online meetings on Zoom, Webex, Teams, and more",
+        "Faster network over Tokyo + LA lines",
+        "Advanced encryption for a secure network"
+      ]
+    },
+    "workspace": {
+      "eyebrow": "Secure Cloud & Network Optimization",
+      "title": "Workspace & Custom",
+      "description": "Custom orders for friends and teams",
+      "cta": "Enter promotional code",
+      "hint": "Plans A, B, and C by headcount",
+      "priceNote": "Plans A, B, and C share the same 12-month price. They differ only in seats and monthly traffic.",
+      "codePlaceholder": "Promotional code",
+      "codeSubmit": "Continue",
+      "codeInvalid": "This code is not valid.",
+      "inquire": "Email us with your requirements",
+      "headings": {
+        "workspace-a": "Plan A: Workspace (20 people)",
+        "workspace-b": "Plan B: Workspace (10 people)",
+        "workspace-c": "Plan C: Custom"
+      },
+      "features": [
+        "AcrossFlare advanced technology",
+        "1 GB secure cloud backup for important files",
+        "Uninterrupted online meetings on Zoom, Webex, Teams, and more",
+        "Faster network over Tokyo + LA lines",
+        "Advanced encryption for a secure network"
+      ]
+    }
+  },
   "auth": {
     "loginTitle": "Sign in",
     "loginSubtitle": "Sign in with your AcrossFlare account.",
@@ -152,12 +265,18 @@
     "errorTaken": "An account with this email already exists.",
     "errorWeak": "Password must be at least 8 characters.",
     "errorGeneric": "Something went wrong. Try again.",
-    "productHint": "Selected product: {product}"
+    "productHint": "Selected product: {product}",
+    "ageConfirm": "I am 14 or older.",
+    "agreeLegal": "I agree to the Terms of Service and Privacy Policy.",
+    "errorConsent": "Confirm that you are 14 or older and agree to the legal terms."
   },
   "app": {
     "overview": "Overview",
-    "global": "Global",
+    "standard": "Standard",
+    "hybrid": "Hybrid",
+    "global": "Standard",
     "marketing": "Marketing IP",
+    "workspace": "Workspace & Custom",
     "billing": "Billing",
     "settings": "Settings",
     "logout": "Sign out",
@@ -169,10 +288,11 @@
     "homeTitle": "Console",
     "homeSubtitle": "Products stay isolated. Open one lane.",
     "emptyTitle": "No active product",
-    "emptyBody": "Complete checkout to provision Global or Marketing IP.",
+    "emptyBody": "Choose a Standard, Hybrid, or Workspace & Custom plan to get access and backup.",
     "goCheckout": "View plans",
     "open": "Open",
-    "addGlobal": "Add Global",
+    "addGlobal": "View Standard",
+    "addWorkspace": "View Workspace",
     "addMarketing": "Add Marketing IP",
     "plan": "Plan",
     "expires": "Expires",
@@ -181,14 +301,19 @@
     "statusActive": "Active",
     "statusFailover": "Failover",
     "unpaidTitle": "Payment required",
-    "unpaidBody": "Checkout to issue this product. Nodes use DDNS, never a raw IP.",
-    "unpaidCta": "Checkout",
+    "unpaidBody": "Choose a plan on the product page to issue this service.",
+    "unpaidCta": "View plans",
     "failedTitle": "Issuance failed",
     "failedBody": "Payment succeeded, but provisioning stopped. Retry checkout to issue this product.",
     "failedCta": "Retry checkout",
     "statusFailed": "Failed",
-    "globalTitle": "Global bypass",
-    "globalDesc": "Karing VLESS plus Vaultwarden and Syncthing backup.",
+    "globalTitle": "Standard",
+    "globalDesc": "Encrypted network access and secure cloud backup.",
+    "hybridTitle": "Hybrid",
+    "hybridDesc": "Encrypted network access and secure cloud backup on Tokyo+LA routes.",
+    "workspaceTitle": "Workspace & Custom",
+    "workspaceDesc": "Team or custom encrypted network access and secure cloud backup.",
+    "pendingCredentials": "Access and backup details appear here after issuance.",
     "marketingTitle": "Marketing IP",
     "marketingDesc": "HTTP/SOCKS5 endpoints and WireGuard.",
     "usageTraffic": "Bandwagon traffic",
@@ -258,11 +383,21 @@
     "card": "Card",
     "alipay": "Alipay",
     "stepPayment": "Payment confirmed",
-    "stepXui": "3x-ui account",
+    "stepXui": "Access details",
     "stepBackup": "Backup space",
     "stepReady": "Ready",
     "invalidPlan": "Select a plan from pricing.",
-    "backPricing": "Back to pricing"
+    "backPricing": "Back to pricing",
+    "invalidCode": "A valid promotional code is required.",
+    "backWorkspace": "Back to Workspace",
+    "taxIncluded": "VAT included",
+    "refundNotice": "This is digital content. Access and backup details are issued as soon as payment succeeds. After they are issued, the right to withdraw may be limited under e-commerce law.",
+    "agreeLabel": "I agree to the Terms, Privacy Policy, and the withdrawal limitation notice.",
+    "agreeRequired": "Agree to the terms and withdrawal limitation before paying.",
+    "productStandard": "Standard",
+    "productHybrid": "Hybrid",
+    "productWorkspace": "Workspace & Custom",
+    "productMarketing": "Marketing IP"
   },
   "common": {
     "docsSoon": "Docs coming soon"
@@ -270,15 +405,35 @@
   "admin": {
     "title": "Admin",
     "mode": "Admin mode",
-    "tabGlobal": "Global bypass",
+    "sessionRoleOwner": "Admin (owner)",
+    "sessionRoleStaff": "Staff",
+    "tabGlobal": "Standard · Hybrid",
+    "tabWorkspace": "Workspace",
     "tabMarketing": "Marketing IP",
     "navPlans": "Plans",
     "navCustomers": "Customers",
     "navProvision": "Provision",
     "navNodes": "Nodes",
+    "navCodes": "Promo codes",
+    "navStaff": "Staff",
+    "staffTitle": "Staff access",
+    "staffSubtitle": "Staff sign up as regular members first. Promote them here and turn on each menu. Only the owner can manage staff.",
+    "staffEmpty": "No accounts to promote. Staff must sign up as members first.",
+    "staffPromote": "Make staff",
+    "staffDemote": "Make member",
+    "staffRoleUser": "Member",
+    "staffRoleStaff": "Staff",
+    "staffPermissions": "Permissions",
+    "staffOwnerHint": "Owner {email} — full access",
+    "permCustomers": "Customers",
+    "permPlans": "Plans",
+    "permCodes": "Promo codes",
+    "permProvision": "Manual issue",
+    "permNodes": "Nodes",
     "homeTitle": "Control plane",
     "homeSubtitle": "Products stay isolated. Open one tab.",
-    "homeGlobalDesc": "Karing, Vaultwarden, Syncthing, Bandwagon / Racknerd.",
+    "homeGlobalDesc": "Standard and Hybrid. Encrypted access and secure cloud backup.",
+    "homeWorkspaceDesc": "Plans A/B/C, promo codes, and manual issuance.",
     "homeMarketingDesc": "Proxy URLs, WireGuard, rotate history.",
     "statCustomers": "Customers",
     "statPlans": "Plans",
@@ -377,7 +532,18 @@
     "back": "Back",
     "notFound": "Not found.",
     "close": "Close",
-    "required": "Fill the required fields."
+    "required": "Fill the required fields.",
+    "codesTitle": "Promo codes",
+    "codesSubtitle": "Create Workspace plan codes and send them to customers.",
+    "newCode": "New code",
+    "codeValue": "Code",
+    "codeHint": "Leave empty to generate one.",
+    "statusUnused": "Unused",
+    "statusReserved": "In checkout",
+    "statusRedeemed": "Redeemed",
+    "emptyCodes": "No codes yet.",
+    "codeTaken": "That code already exists.",
+    "codeInUse": "A used code cannot be deleted."
   },
   "pwa": {
     "eyebrow": "PWA",

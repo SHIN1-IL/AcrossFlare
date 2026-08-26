@@ -12,13 +12,19 @@
     "signup": "新規登録",
     "getStarted": "始める",
     "language": "言語",
+    "locales": {
+      "ko": "한국어",
+      "zh": "简体中文",
+      "ja": "日本語",
+      "en": "English"
+    },
     "console": "コンソール"
   },
   "footer": {
     "terms": "利用規約",
-    "privacy": "プライバシー",
+    "privacy": "プライバシーポリシー",
     "refund": "撤回・返金",
-    "copyright": "© {year} AcrossFlare",
+    "copyright": "© {year} 어크로스툴",
     "merchantTitle": "事業者情報",
     "serviceName": "サービス名",
     "legalName": "商号",
@@ -28,113 +34,220 @@
     "email": "メール",
     "businessNo": "事業者登録番号",
     "vasNo": "付加通信事業届出番号",
-    "mailOrderNo": "通信販売業届出番号"
+    "mailOrderNo": "通信販売業届出番号",
+    "hostingProvider": "ホスティング提供者",
+    "escrow": "デジタルコンテンツのため、購入者保護サービス（エスクロー）は提供しません。"
+  },
+  "productNotice": {
+    "title": "商品情報",
+    "supplier": "供給者",
+    "terms": "利用条件・利用期間",
+    "delivery": "提供方法",
+    "requirements": "動作環境",
+    "withdraw": "撤回・解約",
+    "support": "お客様相談",
+    "supplierValue": "{legalName}（サービス名 {serviceName}）",
+    "standardTerms": "暗号化ネットワーク接続とセキュアクラウドバックアップ 1GB。LA回線。出張・旅行・オンライン会議など適法な利用。トラフィックと期間は選択プラン（1週・1か月・12か月）に従います。",
+    "hybridTerms": "暗号化ネットワーク接続とセキュアクラウドバックアップ 1GB。東京+LA回線。出張・旅行・オンライン会議など適法な利用。トラフィックと期間は選択プラン（1週・1か月・12か月）に従います。",
+    "workspaceTerms": "チームまたはカスタムの暗号化ネットワーク接続とセキュアクラウドバックアップ。A・B・C プランはいずれも12か月同一価格で、人数と月次トラフィックのみ異なります。申し込みはプロモーションコードで行います。",
+    "deliveryValue": "現物配送はありません。決済完了後、ログイン中のアカウントへ接続情報とバックアップ利用情報を直ちに発行します。",
+    "workspaceDeliveryValue": "現物配送はありません。プロモーションコード確認後、ログイン中のアカウントへ接続情報とバックアップ利用情報を発行します。",
+    "requirementsValue": "インターネット接続のある PC またはモバイル。専用アプリのインストール義務はありません。ブラウザでアカウントとバックアップを利用します。",
+    "withdrawValue": "接続・バックアップ情報の発行後は、韓国電子商取引法17条2項5号により撤回が制限される場合があります。未発行・重複決済は7日以内に全額返金します。発行後の途中解約は日割りしないのが原則です。",
+    "withdrawLink": "撤回・返金",
+    "vat": "表示価格は税込みです。"
   },
   "legal": {
     "termsTitle": "利用規約",
     "privacyTitle": "プライバシーポリシー",
-    "updated": "最終更新：2026年8月24日",
-    "disclaimer": "本ページは AcrossFlare の現行の提供方法を説明するものであり、法的助言ではありません。適用法令により追加の義務が生じる場合があります。",
+    "updated": "最終更新：2026年8月26日",
+    "disclaimer": "本規約およびプライバシーポリシーは、商号 어크로스툴（代表 신일）が acrossflare.com で運営する AcrossFlare に適用されます。",
     "termsSections": [
       {
-        "title": "1. サービス",
-        "body": "AcrossFlare は有料の2商品を提供します。グローバル（VLESS 接続と Vaultwarden / Syncthing バックアップ）とマーケティング IP（HTTP/SOCKS5 および WireGuard エンドポイント）。アカウント、プラン、認証情報は、決済または管理者による手動発行の後、acrossflare.com から発行されます。"
+        "title": "1. 目的と当事者",
+        "body": "本規約は、어크로스툴（以下「当社」）が提供するセキュアクラウドおよびネットワーク最適化のデジタルサービス（サービス名 AcrossFlare）の利用条件を定めます。利用者は会員登録または決済時に本規約に同意したうえで利用します。"
       },
       {
-        "title": "2. アカウント",
-        "body": "正確なメールアドレスを登録し、パスワードを秘密にしてください。プロキシ URL、WireGuard 鍵、Vaultwarden / Syncthing のアクセス情報を含む、アカウント上の利用について責任を負います。"
+        "title": "2. サービス",
+        "body": "ホームページに掲載する有料商品は Standard、Hybrid、Workspace & Custom です。各商品は暗号化されたネットワーク接続とセキュアクラウドバックアップを含み、回線（LA または東京+LA など）、トラフィック、バックアップ容量、利用期間、人数構成は商品ページと決済画面の表示に従います。\n\n決済完了または当社の手動発行後、ログインしたアカウントへ接続情報とバックアップ利用情報が提供されます。Workspace プランはプロモーションコードで申し込みます。商品構成はホームページの告知により変わることがあります。"
       },
       {
-        "title": "3. 利用上の制限",
-        "body": "本サービスは適法な目的に限り利用できます。ネットワーク攻撃、詐欺、マルウェア配布、未成年者の搾取、適法な手続の回避、輸出・制裁規制への違反に AcrossFlare を用いてはなりません。ノード、ストレージ、他顧客の濫用があると合理的に判断した場合、アカウントを停止または削除できます。"
+        "title": "3. アカウント",
+        "body": "満14歳以上のみ登録できます。正確なメールアドレスを登録し、パスワードを秘密にしてください。発行された接続・バックアップ情報の管理責任は利用者にあります。ログイン後、設定でアカウントメールを確認できます。メール変更やアカウント削除は acrosstool@gmail.com へ依頼してください。"
       },
       {
-        "title": "4. 支払いとプラン",
-        "body": "価格は言語設定に応じた通貨で表示されます。カードと Alipay は PortOne、Stripe、Paymentwall が処理します。決済成功後にプロビジョニングが始まります。トラフィック、バックアップ容量、ノード組み合わせは購入プランに従います。プランに別段の定めがなければ、未使用トラフィックは繰り越しません。撤回と返金は第5条に従います。"
+        "title": "4. 利用上の制限",
+        "body": "出張・旅行・オンライン会議など適法な目的に限り利用できます。ネットワーク攻撃、詐欺、マルウェア配布、未成年者の搾取、法令上の義務の回避、輸出・制裁規制違反に用いてはなりません。濫用、未払い、法令上の必要がある場合、当社は利用を制限し、または契約を終了できます。"
+      },
+      {
+        "title": "5. 支払いとプラン",
+        "body": "表示価格は付加価値税込みであり、言語設定に応じた通貨で示します。カードと Alipay は PortOne、Stripe、Paymentwall が処理します。Standard と Hybrid は決済成功後、デジタルコンテンツの提供（接続・バックアップ情報の発行）が直ちに始まります。Workspace はプロモーションコード確認後に決済し、当社がアカウントへ発行します。トラフィック、バックアップ容量、利用期間は購入プランに従い、別段の表示がなければ未使用トラフィックは繰り越しません。撤回と返金は第6条に従います。"
       },
       {
         "id": "refund",
-        "title": "5. 契約の撤回および返金",
-        "body": "決済成功と同時に認証情報の発行が始まるデジタルサービスです。サブスクリプションが有効になり接続情報・バックアップが提供された後は、適用される電子商取引法令によりクーリングオフ（撤回）が制限される場合があり、その旨を決済前にお知らせします。\n\n次の場合、決済から7日以内に acrosstool@gmail.com へご連絡いただければ全額返金します。(1) 決済は完了したが認証情報が発行されなかった、または発行に失敗した (2) 重複決済または明らかな誤課金。\n\nすでに発行され利用可能な期間の途中解約について、残日数の日割り返金は原則行いません。強行法規が異なる場合は法令が優先します。返金は元の支払い方法で処理し、決済事業者の都合で数日かかることがあります。"
+        "title": "6. 契約の撤回および返金",
+        "body": "本サービスは決済と同時に提供が開始されるデジタルコンテンツです。接続情報またはバックアップ利用情報が発行された後は、韓国電子商取引法17条2項5号によりクーリングオフ（撤回）が制限される場合があります。当社は決済画面でその旨を告知し、同意を取得します。\n\n次の場合、決済から7日以内に acrosstool@gmail.com へ連絡いただければ全額返金します。(1) 決済は完了したが接続・バックアップ情報が発行されなかった、または発行に失敗した (2) 重複決済または明らかな誤課金。\n\nすでに発行され利用可能な状態での途中解約について、残期間の日割り返金は原則行いません。強行法規が異なる場合は法令が優先します。\n\n返金は元の支払い方法で処理します。法令上、撤回の意思表示から3営業日以内に返金手続を開始し、決済事業者の都合で入金まで数日かかることがあります。デジタルコンテンツのため購入者保護サービス（エスクロー）は提供しません。"
       },
       {
-        "title": "6. 可用性",
-        "body": "ノード、パネル、ストレージは移設、フェイルオーバー、停止があり得ます。プランに含まれる予備ノードを含め接続維持に努めますが、途切れない迂回や特定の出口 IP を保証しません。"
+        "title": "7. 提供と可用性",
+        "body": "ネットワーク回線、接続情報、バックアップ保存は移設、予備切替、点検、障害があり得ます。当社は維持に努めますが、途切れない接続や特定の出口 IP を保証しません。"
       },
       {
-        "title": "7. 終了",
-        "body": "利用者はいつでも利用を止められます。未払い、濫用、法令上の必要がある場合、サブスクリプションを終了できます。終了後、プロキシクライアントとバックアップアクセスは猶予なく取り消されることがあります。"
+        "title": "8. 終了",
+        "body": "利用者はいつでも利用を止められます。未払い、規約違反、法令上の必要がある場合、当社は契約を終了できます。終了後、猶予なく接続とバックアップ利用が停止されることがあります。"
       },
       {
-        "title": "8. 責任",
-        "body": "サービスは現状有姿・提供可能な範囲で提供します。法令が許す限り、AcrossFlare は逸失利益、データ損失、間接損害について責任を負わず、請求に対する総責任は直近3か月に当該サブスクリプションへ支払った額を上限とします。"
+        "title": "9. 責任",
+        "body": "サービスは提供可能な範囲で提供します。法令が許す限り、当社は逸失利益、データ損失、間接損害について責任を負わず、請求に対する総責任は当該サブスクリプションへ直近3か月に支払った額を上限とします。"
       },
       {
-        "title": "9. 変更",
-        "body": "本規約は変更されることがあります。掲載後も利用を続ける場合、変更後の規約に同意したものとみなします。問い合わせ: acrosstool@gmail.com"
+        "title": "10. 準拠法と問い合わせ",
+        "body": "本規約は大韓民国の法令に従います。紛争は電子商取引関連法令に従い、韓国消費資源などの救済手続を利用できます。問い合わせ: acrosstool@gmail.com、電話 070-8065-1258。"
+      },
+      {
+        "title": "11. 変更",
+        "body": "当社は本規約を変更でき、変更内容はこのページに掲載します。利用者に不利な変更は適用前に告知します。掲載後も利用を続ける場合、変更後の規約に同意したものとみなします。"
       }
     ],
     "privacySections": [
       {
-        "title": "1. 収集するデータ",
-        "body": "登録メールとパスワードハッシュ、セッション Cookie、プランと支払い記録、発行済み認証情報（クライアント UUID、プロキシ秘密情報、バックアップユーザー名など）、運用に必要なログを保管します。"
+        "title": "1. 利用目的と収集項目",
+        "body": "当社は会員登録、本人確認、有料サービスの提供、決済・返金、問い合わせ対応、セキュリティ・濫用対策のために個人情報を処理します。収集項目はメール、パスワードハッシュ、セッション Cookie、プラン・決済記録、発行済みの接続・バックアップ情報、運用に必要なログです。カード番号は当社が直接保存せず、決済代行者が処理します。"
       },
       {
-        "title": "2. ネットワークとセキュリティデータ",
-        "body": "acrossflare.com への通信は Cloudflare を経由します。Cloudflare が報告する接続 IP（CF-Connecting-IP）を取得する場合があります。クォータと濫用対策のため、3x-ui/Xray、Vaultwarden、Syncthing は独自のアクセス・利用記録を保持します。"
+        "title": "2. 保管期間",
+        "body": "アカウント情報は退会または契約終了まで、決済・取引記録は電子商取引法等に定める期間（契約・撤回記録5年、代金決済・供給記録5年、苦情・紛争記録3年など）保管します。セッション Cookie は期限切れになります。発行済み秘密情報はプラン変更・終了時に削除または更新し、バックアップ上の複製は限られた期間だけ残ることがあります。"
       },
       {
-        "title": "3. 処理委託",
-        "body": "支払いは PortOne、Stripe、および/または Paymentwall が処理します。ホスティング、DNS、WAF、TLS には Cloudflare と VPS 事業者が使われることがあります。暗号とセキュアメモは Vaultwarden、ファイルは Syncthing で同期します。個人情報は販売しません。"
+        "title": "3. 処理の委託",
+        "body": "決済は PortOne、Stripe、Paymentwall に委託します。ホスティング、DNS、WAF、TLS は Cloudflare および VPS 事業者に委託することがあります。セキュアクラウドバックアップのため、暗号・メモ・ファイル同期システムを使用します。個人情報は販売しません。"
       },
       {
-        "title": "4. 保管",
-        "body": "アカウントと請求記録は、アカウント存続中および税務・紛争に必要な期間保管します。セッション Cookie は期限切れになります。プラン変更、移行、終了時、発行済み秘密情報は削除またはローテーションし、バックアップ上の複製は限られた期間だけ残ることがあります。"
+        "title": "4. 国外移転",
+        "body": "サービス提供のため個人情報が国外へ移転されることがあります。Cloudflare（米国等、DNS・セキュリティ）、Stripe・Paymentwall（米国等、決済）、海外 VPS 事業者（米国・日本・シンガポール等、サーバー運用）。移転項目はメール、決済識別情報、接続に必要な技術情報です。保管期間は第2条に従います。会員登録または決済時に本ポリシーへ同意することで、国外移転を認識したものとみなします。"
       },
       {
-        "title": "5. 利用者の選択",
-        "body": "コンソールでアカウントメールを確認・更新できます。法令またはセキュリティ上の保管が不要なら、acrosstool@gmail.com へアカウント削除を依頼できます。その宛先にカード番号を送らないでください。"
+        "title": "5. 第三者提供",
+        "body": "法令に基づく場合を除き、個人情報を第三者に提供しません。"
+      },
+      {
+        "title": "6. 廃棄と安全管理",
+        "body": "保管期間終了後、復元できない方法で個人情報を廃棄します。当社はアクセス制限、TLS、パスワードハッシュ、権限管理など合理的な安全管理措置を講じます。"
+      },
+      {
+        "title": "7. 利用者の権利",
+        "body": "ログイン後、設定でアカウントメールを確認できます。メール変更、開示・訂正、処理停止、アカウント削除は、法令またはセキュリティ上の保管が不要な範囲で acrosstool@gmail.com へ依頼できます。その宛先にカード番号を送らないでください。"
+      },
+      {
+        "title": "8. 満14歳未満",
+        "body": "当社は満14歳未満の児童の個人情報を収集しません。満14歳未満は登録できません。"
+      },
+      {
+        "title": "9. Cookie",
+        "body": "ログイン維持とセキュリティのためセッション Cookie を使用します。Cookie を拒否するとログインなど一部機能が使えません。"
+      },
+      {
+        "title": "10. 個人情報保護責任者",
+        "body": "個人情報保護責任者: 신일。メール acrosstool@gmail.com、電話 070-8065-1258。"
+      },
+      {
+        "title": "11. 権利侵害の救済",
+        "body": "個人情報侵害申告センター (privacy.kisa.or.kr / 118)、個人情報紛争調整委員会 (www.kopico.go.kr / 1833-6972)、大検察庁サイバー捜査 (www.spo.go.kr / 1301)、警察庁サイバー捜査 (ecrm.police.go.kr / 182)。"
+      },
+      {
+        "title": "12. 変更",
+        "body": "本ポリシーを変更する場合はこのページに掲載し、重要な変更は適用前に告知します。"
       }
     ]
   },
-  "landing": {
-    "headline": "Secure Cloud & Network Optimization",
-    "ctaGlobal": "Start Global",
-    "ctaMarketing": "Get Marketing IP",
-    "productsEyebrow": "2つの商品",
-    "productsTitle": "レーンを選ぶ。混ぜない。",
-    "globalBadge": "ターゲット A",
-    "globalTitle": "グローバル迂回 + バックアップ",
-    "globalDesc": "スキャン一回で Karing VLESS。アカウントと同時に Vaultwarden と Syncthing バックアップを開きます。",
-    "globalPoints": [
-      "Karing 用 QR とディープリンク",
-      "YAML 購読、text/yaml",
-      "Bandwagon 150GB、Racknerd フェイルオーバー"
-    ],
-    "marketingBadge": "ターゲット B",
-    "marketingTitle": "マーケティングIP",
-    "marketingDesc": "追加アプリは不要。HTTP/SOCKS5 URL か WireGuard 設定をコピー。",
-    "marketingPoints": [
-      "http://id:pw@ip:port エンドポイント",
-      "必要なとき WireGuard スニペット",
-      "ロック付きワンクリック IP Rotate"
-    ]
-  },
   "pricing": {
-    "title": "シンプルな月額プラン",
-    "subtitle": "商品を切り替える。価格は言語に従う。",
-    "global": "Global Bypass",
-    "marketing": "Marketing IP",
+    "title": "料金",
+    "subtitle": "Standard、Hybrid、Workspace & Custom。",
+    "standard": "Standard",
+    "hybrid": "Hybrid",
+    "workspace": "Workspace",
+    "global": "Standard",
+    "marketing": "Workspace",
     "perMonth": "/ 月",
+    "perWeek": "/ 一週間",
+    "periodWeek": "/ 1週間",
+    "period1Week": "/ 1週間",
+    "periodMonth": "/ 1ヶ月",
+    "periodYear": "/ 12ヶ月",
     "traffic": "トラフィック",
     "backup": "バックアップ",
     "nodes": "ノード",
     "unlimited": "無制限",
+    "quotaMonth": "毎月",
+    "quotaTotal": "総",
     "cta": "続ける",
+    "viewService": "商品ページ",
+    "inquire": "ご要望をメールでお問い合わせ",
     "featured": "人気",
     "alipay": "Alipay"
   },
   "planSlides": {},
+  "workspace": {
+    "eyebrow": "セキュアクラウドおよびネットワーク最適化",
+    "title": "Workspace & Custom",
+    "description": "友人やチーム向けのオーダーメイドサービス",
+    "hint": "人数に応じた A・B・C プラン",
+    "learnMore": "詳しく見る",
+    "cta": "申し込む"
+  },
+  "services": {
+    "trialPlan": "短期体験プラン",
+    "standard": {
+      "eyebrow": "セキュアクラウドおよびネットワーク最適化",
+      "title": "Standard",
+      "description": "短期旅行や出張時のセキュアバックアップに適した速度",
+      "cta": "申し込む",
+      "features": [
+        "AcrossFlareのベース技術を適用",
+        "セキュリティクラウドバックアップ 1GB（重要ファイルのバックアップが可能）",
+        "Zoom、Webex、Teamsなどオンライン会議に対応",
+        "国際専用回線（LAライン）でネットワーク最適化",
+        "高度な暗号化で安全なネットワーク環境"
+      ]
+    },
+    "hybrid": {
+      "eyebrow": "セキュアクラウドおよびネットワーク最適化",
+      "title": "Hybrid",
+      "description": "セキュアバックアップと高速なネットワーク最適化",
+      "cta": "申し込む",
+      "features": [
+        "AcrossFlareの高度な技術を適用",
+        "セキュリティクラウドバックアップ 1GB（重要ファイルのバックアップが可能）",
+        "Zoom、Webex、Teamsなど途切れないオンライン会議",
+        "東京+LAラインで高速ネットワーク",
+        "高度な暗号化で安全なネットワーク環境"
+      ]
+    },
+    "workspace": {
+      "eyebrow": "セキュアクラウドおよびネットワーク最適化",
+      "title": "Workspace & Custom",
+      "description": "友人やチーム向けのオーダーメイドサービス",
+      "cta": "プロモーションコードを入力",
+      "hint": "人数に応じた A・B・C プラン",
+      "priceNote": "A・B・C はいずれも12か月同一価格です。人数と月次トラフィックのみ異なります。",
+      "codePlaceholder": "プロモーションコード",
+      "codeSubmit": "確認",
+      "codeInvalid": "コードが無効です。",
+      "inquire": "ご要望はメールでお問い合わせください",
+      "headings": {
+        "workspace-a": "Aプラン: Workspace（20名）",
+        "workspace-b": "Bプラン: Workspace（10名）",
+        "workspace-c": "Cプラン: Custom"
+      },
+      "features": [
+        "AcrossFlareの高度な技術を適用",
+        "セキュリティクラウドバックアップ 1GB（重要ファイルのバックアップが可能）",
+        "Zoom、Webex、Teamsなど途切れないオンライン会議",
+        "東京+LAラインで高速ネットワーク",
+        "高度な暗号化で安全なネットワーク環境"
+      ]
+    }
+  },
   "auth": {
     "loginTitle": "ログイン",
     "loginSubtitle": "AcrossFlareアカウントでログインしてください。",
@@ -152,12 +265,18 @@
     "errorTaken": "このメールはすでに登録されています。",
     "errorWeak": "パスワードは8文字以上にしてください。",
     "errorGeneric": "問題が発生しました。もう一度お試しください。",
-    "productHint": "選択中の商品: {product}"
+    "productHint": "選択中の商品: {product}",
+    "ageConfirm": "満14歳以上です。",
+    "agreeLegal": "利用規約とプライバシーポリシーに同意します。",
+    "errorConsent": "満14歳以上の確認と規約への同意が必要です。"
   },
   "app": {
     "overview": "概要",
-    "global": "グローバル",
-    "marketing": "マーケティングIP",
+    "standard": "Standard",
+    "hybrid": "Hybrid",
+    "global": "Standard",
+    "marketing": "Marketing IP",
+    "workspace": "Workspace & Custom",
     "billing": "請求",
     "settings": "設定",
     "logout": "ログアウト",
@@ -169,10 +288,11 @@
     "homeTitle": "コンソール",
     "homeSubtitle": "商品は分離される。レーンを一つ開く。",
     "emptyTitle": "有効な商品がありません",
-    "emptyBody": "チェックアウトすると Global または Marketing IP が発行されます。",
+    "emptyBody": "Standard、Hybrid、Workspace & Custom の商品ページでプランを選ぶと、接続とバックアップが発行されます。",
     "goCheckout": "料金を見る",
     "open": "開く",
-    "addGlobal": "Global を追加",
+    "addGlobal": "Standard を見る",
+    "addWorkspace": "Workspace を見る",
     "addMarketing": "Marketing IP を追加",
     "plan": "プラン",
     "expires": "期限",
@@ -181,15 +301,20 @@
     "statusActive": "有効",
     "statusFailover": "フェイルオーバー",
     "unpaidTitle": "支払いが必要です",
-    "unpaidBody": "チェックアウトでこの商品を発行します。ノードは DDNS のみです。",
-    "unpaidCta": "チェックアウト",
+    "unpaidBody": "商品ページでプランを選ぶと、このサービスが発行されます。",
+    "unpaidCta": "料金を見る",
     "failedTitle": "発行に失敗しました",
     "failedBody": "支払いは完了しましたが、プロビジョニングが停止しました。チェックアウトを再試行してください。",
     "failedCta": "チェックアウトを再試行",
     "statusFailed": "失敗",
-    "globalTitle": "グローバル迂回",
-    "globalDesc": "Karing VLESS と Vaultwarden / Syncthing バックアップ。",
-    "marketingTitle": "マーケティングIP",
+    "globalTitle": "Standard",
+    "globalDesc": "暗号化ネットワーク接続とセキュアクラウドバックアップ。",
+    "hybridTitle": "Hybrid",
+    "hybridDesc": "東京+LA回線の暗号化ネットワーク接続とセキュアクラウドバックアップ。",
+    "workspaceTitle": "Workspace & Custom",
+    "workspaceDesc": "チームまたはカスタムの暗号化ネットワーク接続とセキュアクラウドバックアップ。",
+    "pendingCredentials": "接続・バックアップ情報は発行後にここに表示されます。",
+    "marketingTitle": "Marketing IP",
     "marketingDesc": "HTTP/SOCKS5 エンドポイントと WireGuard。",
     "usageTraffic": "Bandwagon トラフィック",
     "usageUnlimited": "Racknerd 無制限",
@@ -258,11 +383,21 @@
     "card": "カード",
     "alipay": "Alipay",
     "stepPayment": "支払い確認",
-    "stepXui": "3x-ui アカウント",
+    "stepXui": "接続情報の発行",
     "stepBackup": "バックアップ領域",
     "stepReady": "準備完了",
     "invalidPlan": "料金ページからプランを選んでください。",
-    "backPricing": "料金へ戻る"
+    "backPricing": "料金へ戻る",
+    "invalidCode": "有効なプロモーションコードが必要です。",
+    "backWorkspace": "Workspaceへ戻る",
+    "taxIncluded": "消費税込み",
+    "refundNotice": "決済と同時に接続・バックアップ情報の発行が始まるデジタルコンテンツです。発行後は電子商取引法令により撤回が制限される場合があります。",
+    "agreeLabel": "利用規約、プライバシーポリシーおよび撤回制限の案内に同意します。",
+    "agreeRequired": "支払い前に規約と撤回制限への同意が必要です。",
+    "productStandard": "Standard",
+    "productHybrid": "Hybrid",
+    "productWorkspace": "Workspace & Custom",
+    "productMarketing": "Marketing IP"
   },
   "common": {
     "docsSoon": "ドキュメントは近日公開"
@@ -270,15 +405,35 @@
   "admin": {
     "title": "管理",
     "mode": "管理者モード",
-    "tabGlobal": "グローバル迂回",
-    "tabMarketing": "マーケティングIP",
+    "sessionRoleOwner": "管理者（代表）",
+    "sessionRoleStaff": "スタッフ",
+    "tabGlobal": "Standard · Hybrid",
+    "tabWorkspace": "Workspace",
+    "tabMarketing": "Marketing IP",
     "navPlans": "プラン",
     "navCustomers": "顧客",
     "navProvision": "手動発行",
     "navNodes": "ノード",
+    "navCodes": "プロモーションコード",
+    "navStaff": "スタッフ",
+    "staffTitle": "スタッフ権限",
+    "staffSubtitle": "スタッフは先に一般会員として登録します。ここで昇格し、メニューごとに権限を付けます。スタッフ管理はオーナーのみです。",
+    "staffEmpty": "昇格できるアカウントがありません。先に会員登録してください。",
+    "staffPromote": "スタッフにする",
+    "staffDemote": "一般会員に戻す",
+    "staffRoleUser": "会員",
+    "staffRoleStaff": "スタッフ",
+    "staffPermissions": "権限",
+    "staffOwnerHint": "オーナー {email} — 全権限",
+    "permCustomers": "顧客",
+    "permPlans": "プラン",
+    "permCodes": "プロモーションコード",
+    "permProvision": "手動発行",
+    "permNodes": "ノード",
     "homeTitle": "コントロールプレーン",
     "homeSubtitle": "商品は完全に分離されます。タブを一つ開く。",
-    "homeGlobalDesc": "Karing、Vaultwarden、Syncthing、Bandwagon / Racknerd。",
+    "homeGlobalDesc": "Standard と Hybrid。暗号化アクセスとセキュアクラウドバックアップ。",
+    "homeWorkspaceDesc": "A/B/C プラン、プロモーションコード、手動発行。",
     "homeMarketingDesc": "プロキシ URL、WireGuard、Rotate 履歴。",
     "statCustomers": "顧客",
     "statPlans": "プラン",
@@ -377,7 +532,18 @@
     "back": "戻る",
     "notFound": "見つかりません。",
     "close": "閉じる",
-    "required": "必須項目を入力してください。"
+    "required": "必須項目を入力してください。",
+    "codesTitle": "プロモーションコード",
+    "codesSubtitle": "Workspaceプランのコードを作成し、顧客に渡します。",
+    "newCode": "新規コード",
+    "codeValue": "コード",
+    "codeHint": "空欄なら自動生成します。",
+    "statusUnused": "未使用",
+    "statusReserved": "決済中",
+    "statusRedeemed": "使用済み",
+    "emptyCodes": "コードはありません。",
+    "codeTaken": "すでに存在するコードです。",
+    "codeInUse": "使用済みコードは削除できません。"
   },
   "pwa": {
     "eyebrow": "PWA",

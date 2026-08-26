@@ -10,8 +10,9 @@ import { Label } from "@/components/ui/label";
 import { useAdmin } from "@/hooks/use-admin";
 import type { AppLocale } from "@/i18n/routing";
 import { deletePlan, listPlans, upsertPlan } from "@/lib/admin-store";
-import { formatPrimaryPrice } from "@/lib/format-price";
+import { PriceAmount } from "@/components/marketing/price-amount";
 import type { AdminPlan } from "@/lib/admin";
+import { productHasBackup } from "@/lib/admin-nav";
 import type { ProductId } from "@/lib/plans";
 
 type Draft = {
@@ -87,7 +88,7 @@ export function PlanManager({ product }: { product: ProductId }) {
               <th className="px-4 py-3 font-medium">{t("name")}</th>
               <th className="px-4 py-3 font-medium">{tPricing("perMonth")}</th>
               <th className="px-4 py-3 font-medium">{t("traffic")}</th>
-              {product === "global" ? <th className="px-4 py-3 font-medium">{t("backup")}</th> : null}
+              {productHasBackup(product) ? <th className="px-4 py-3 font-medium">{t("backup")}</th> : null}
               <th className="px-4 py-3 font-medium">{t("nodes")}</th>
               <th className="px-4 py-3 font-medium">{t("visible")}</th>
               <th className="px-4 py-3 font-medium" />
@@ -98,7 +99,7 @@ export function PlanManager({ product }: { product: ProductId }) {
               <tr key={plan.id} className="border-b border-border last:border-0">
                 <td className="px-4 py-3">{plan.name}</td>
                 <td className="px-4 py-3 font-mono text-xs">
-                  {formatPrimaryPrice(locale, plan.prices)}
+                  <PriceAmount locale={locale} prices={plan.prices} />
                   <span className="mt-1 block text-muted-foreground">
                     ${plan.prices.usd} · ¥{plan.prices.cny}
                   </span>
@@ -106,7 +107,7 @@ export function PlanManager({ product }: { product: ProductId }) {
                 <td className="px-4 py-3 font-mono text-xs">
                   {plan.trafficGb == null ? t("unlimited") : `${plan.trafficGb} GB`}
                 </td>
-                {product === "global" ? (
+                {productHasBackup(product) ? (
                   <td className="px-4 py-3 font-mono text-xs">
                     {plan.backupGb == null ? "—" : `${plan.backupGb} GB`}
                   </td>
@@ -159,7 +160,11 @@ export function PlanManager({ product }: { product: ProductId }) {
                     jpy: Number(draft.jpy) || 0,
                   },
                   trafficGb: draft.traffic === "" ? null : Number(draft.traffic) || 0,
-                  backupGb: product === "global" ? (draft.backup === "" ? null : Number(draft.backup) || 0) : null,
+                  backupGb: productHasBackup(product)
+                    ? draft.backup === ""
+                      ? null
+                      : Number(draft.backup) || 0
+                    : null,
                   nodes: draft.nodes
                     .split(",")
                     .map((item) => item.trim())
@@ -226,7 +231,7 @@ export function PlanManager({ product }: { product: ProductId }) {
                 onChange={(event) => setDraft({ ...draft, traffic: event.target.value })}
               />
             </Field>
-            {product === "global" ? (
+            {productHasBackup(product) ? (
               <Field label={t("backup")}>
                 <input
                   className={fieldClass}

@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { AdminActionError, rotateAdminCustomer } from "@/lib/admin-actions";
-import { requireAdmin } from "@/lib/admin-auth";
+import { requirePermission } from "@/lib/admin-auth";
 import { RotateError } from "@/lib/marketing/rotate";
 
 export async function POST(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = await requireAdmin();
+  const auth = await requirePermission("customers");
   if ("response" in auth) {
     return auth.response;
   }

@@ -3,9 +3,10 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AuthForm } from "@/components/marketing/auth-form";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { getCurrentUser } from "@/lib/auth";
+import { isAdminSession } from "@/lib/auth-types";
 import { resolveLocale } from "@/i18n/locale";
 import { redirect } from "@/i18n/navigation";
-import { isProductId } from "@/lib/plans";
+import { isPublicCheckoutProduct } from "@/lib/plans";
 
 export default async function SignupPage({
   params,
@@ -20,12 +21,12 @@ export default async function SignupPage({
 
   const user = await getCurrentUser();
   if (user) {
-    redirect({ href: user.role === "ADMIN" ? "/admin" : "/app", locale });
+    redirect({ href: isAdminSession(user) ? "/admin" : "/app", locale });
   }
 
   const t = await getTranslations("auth");
 
-  const productHint = isProductId(product)
+  const productHint = isPublicCheckoutProduct(product)
     ? [product, plan].filter(Boolean).join(" / ")
     : undefined;
 

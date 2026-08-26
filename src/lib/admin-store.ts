@@ -3,6 +3,7 @@ import {
   type AdminCustomer,
   type AdminNode,
   type AdminPlan,
+  type AdminPromoCode,
   type AdminState,
   type JobStep,
   type NodeRole,
@@ -13,6 +14,7 @@ const empty: AdminState = {
   plans: [],
   nodes: [],
   customers: [],
+  promoCodes: [],
   provision: null,
   migrate: null,
 };
@@ -86,11 +88,12 @@ export async function refreshAdmin() {
       return;
     }
 
-    const data = await readJson<Pick<AdminState, "plans" | "nodes" | "customers">>(response);
+    const data = await readJson<Pick<AdminState, "plans" | "nodes" | "customers" | "promoCodes">>(response);
     patch({
       plans: data.plans ?? [],
       nodes: data.nodes ?? [],
       customers: mergeCustomers(data.customers ?? []),
+      promoCodes: data.promoCodes ?? [],
     });
   })().finally(() => {
     refreshPromise = null;
@@ -150,6 +153,37 @@ export function getCustomer(product: ProductId, id: string) {
 
 export function countNodeUsers(nodeId: string) {
   return memory.customers.filter((customer) => customer.nodeIds.includes(nodeId)).length;
+}
+
+export function listPromoCodes() {
+  return memory.promoCodes.slice().sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+export async function createPromoCode(input: { planId: string; code?: string; note?: string }) {
+  const response = await fetch("/api/v1/admin/promo", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  const data = await readJson<{ code?: AdminPromoCode; error?: string }>(response);
+  if (!response.ok || !data.code) {
+    return { ok: false as const, error: data.error ?? "failed" };
+  }
+  await refreshAdmin();
+  return { ok: true as const, code: data.code };
+}
+
+export async function deletePromoCode(id: string) {
+  const response = await fetch(`/api/v1/admin/promo/${id}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  if (!response.ok) {
+    return false;
+  }
+  await refreshAdmin();
+  return true;
 }
 
 export async function upsertPlan(input: Omit<AdminPlan, "id"> & { id?: string }) {

@@ -4,6 +4,7 @@ import { Check, LoaderCircle } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PaymentTabs } from "@/components/app/payment-tabs";
+import { LegalFooterLinks } from "@/components/marketing/legal-footer-links";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { Logo } from "@/components/marketing/logo";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -12,52 +13,60 @@ import { Link, useRouter } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import { type PaymentMethod } from "@/lib/account";
 import { provisionProduct, refreshRemoteAccount } from "@/lib/account-store";
-import { formatPrimaryPrice, formatSecondaryPrice } from "@/lib/format-price";
+import { PriceAmount, SecondaryPriceAmount } from "@/components/marketing/price-amount";
 import { useLivePlan } from "@/hooks/use-admin";
-import { isProductId } from "@/lib/plans";
+import { isPublicCheckoutProduct } from "@/lib/plans";
 import { cn } from "@/lib/utils";
 
-const STEPS = [
-  { id: "payment", key: "stepPayment" },
-  { id: "xui", key: "stepXui" },
-  { id: "backup", key: "stepBackup" },
-  { id: "ready", key: "stepReady" },
-] as const;
+function checkoutProductLabel(
+  product: string,
+  planId: string,
+  t: (key: "productWorkspace" | "productHybrid" | "productStandard") => string
+) {
+  if (product === "workspace") return t("productWorkspace");
+  if (planId.startsWith("hybrid")) return t("productHybrid");
+  return t("productStandard");
+}
 
 export function CheckoutView({
   product,
   planId,
   paymentId,
+  promoCode,
   canceled = false,
   merchant,
 }: {
   product?: string;
   planId?: string;
   paymentId?: string;
+  promoCode?: string;
   canceled?: boolean;
   merchant?: React.ReactNode;
 }) {
   const t = useTranslations("checkout");
-  const tApp = useTranslations("app");
+  const tFooter = useTranslations("footer");
   const locale = useLocale() as AppLocale;
   const router = useRouter();
   const hydrated = useHydrated();
   const { session } = useAccount();
   const plan = useLivePlan(planId);
-  const validProduct = isProductId(product) && plan?.product === product ? product : null;
+  const validProduct = isPublicCheckoutProduct(product) && plan?.product === product ? product : null;
   const [method, setMethod] = useState<PaymentMethod>(locale === "zh" ? "alipay" : "card");
+  const [agreed, setAgreed] = useState(false);
   const [phase, setPhase] = useState<"form" | "processing" | "provisioning">(
     paymentId && !canceled ? "processing" : "form"
   );
   const [step, setStep] = useState(0);
-  const [error, setError] = useState<"failed" | "timeout" | null>(canceled ? "failed" : null);
+  const [error, setError] = useState<"failed" | "timeout" | "invalid_code" | "agree" | null>(
+    canceled ? "failed" : null
+  );
   const resumeRef = useRef(false);
 
   const steps = useMemo(
     () =>
-      validProduct === "marketing"
-        ? STEPS.filter((item) => item.id !== "backup")
-        : [...STEPS],
+      validProduct === "global"
+        ? [...STEPS]
+        : STEPS.filter((item) => item.id !== "backup"),
     [validProduct]
   );
 
@@ -87,7 +96,7 @@ export function CheckoutView({
       await refreshRemoteAccount();
       if (session && validProduct && plan) {
         provisionProduct(session.email, validProduct, plan.id, method);
-        router.push(validProduct === "global" ? "/app/global" : "/app/marketing");
+        router.push(validProduct === "workspace" ? "/app/workspace" : "/app/global");
       }
     },
     [method, plan, router, session, steps, validProduct]
@@ -95,6 +104,16 @@ export function CheckoutView({
 
   async function startPayment() {
     if (!validProduct || !plan) {
+      return;
+    }
+
+    if (!agreed) {
+      setError("agree");
+      return;
+    }
+
+    if (validProduct === "workspace" && !promoCode) {
+      setError("invalid_code");
       return;
     }
 
@@ -111,6 +130,7 @@ export function CheckoutView({
           planId: plan.id,
           method,
           locale,
+          promoCode,
         }),
       });
       const checkout = (await created.json()) as {
@@ -121,7 +141,7 @@ export function CheckoutView({
         portone?: PortOneCheckout;
       };
       if (!created.ok || !checkout.paymentId) {
-        throw new Error("failed");
+        throw new Error(checkout.error === "invalid_code" ? "invalid_code" : "failed");
       }
 
       if (checkout.mode === "simulate") {
@@ -155,7 +175,11 @@ export function CheckoutView({
       throw new Error("failed");
     } catch (cause) {
       setPhase("form");
-      setError(cause instanceof Error && cause.message === "timeout" ? "timeout" : "failed");
+      setError(
+        cause instanceof Error && (cause.message === "timeout" || cause.message === "invalid_code")
+          ? cause.message
+          : "failed"
+      );
     }
   }
 
@@ -167,20 +191,27 @@ export function CheckoutView({
     resumeRef.current = true;
     void finishPaidCheckout(paymentId).catch((cause: unknown) => {
       setPhase("form");
-      setError(cause instanceof Error && cause.message === "timeout" ? "timeout" : "failed");
+      setError(
+        cause instanceof Error && (cause.message === "timeout" || cause.message === "invalid_code")
+          ? cause.message
+          : "failed"
+      );
     });
   }, [canceled, finishPaidCheckout, hydrated, paymentId, plan, session, validProduct]);
 
   useEffect(() => {
     if (hydrated && !session) {
+      const query = new URLSearchParams();
+      if (product) query.set("product", product);
+      if (planId) query.set("plan", planId);
+      if (promoCode) query.set("code", promoCode);
+      if (paymentId) query.set("paymentId", paymentId);
       router.replace({
         pathname: "/login",
-        query: {
-          next: `/checkout?product=${product ?? ""}&plan=${planId ?? ""}${paymentId ? `&paymentId=${paymentId}` : ""}`,
-        },
+        query: { next: `/checkout?${query.toString()}` },
       });
     }
-  }, [hydrated, paymentId, planId, product, router, session]);
+  }, [hydrated, paymentId, planId, product, promoCode, router, session]);
 
   if (!hydrated || !session) {
     return (
@@ -202,7 +233,17 @@ export function CheckoutView({
     );
   }
 
-  const secondary = formatSecondaryPrice(locale, plan.prices);
+  if (validProduct === "workspace" && !promoCode && !paymentId) {
+    return (
+      <CheckoutFrame merchant={merchant}>
+        <h1 className="text-3xl tracking-tight">{t("title")}</h1>
+        <p className="mt-3 text-sm text-muted-foreground">{t("invalidCode")}</p>
+        <Link href="/workspace" className={cn(buttonVariants({ variant: "outline" }), "mt-6 rounded-[10px]")}>
+          {t("backWorkspace")}
+        </Link>
+      </CheckoutFrame>
+    );
+  }
 
   return (
     <CheckoutFrame merchant={merchant}>
@@ -216,14 +257,17 @@ export function CheckoutView({
         <div className="flex items-end justify-between gap-3">
           <div>
             <p className="text-sm text-muted-foreground">
-              {validProduct === "global" ? tApp("global") : tApp("marketing")} · {plan.name}
+              {checkoutProductLabel(validProduct, plan.id, t)} · {plan.name}
             </p>
             <p className="mt-2 font-mono text-3xl tracking-tight">
-              {formatPrimaryPrice(locale, plan.prices)}
+              <PriceAmount locale={locale} prices={plan.prices} />
             </p>
-            {secondary ? (
-              <p className="mt-1 font-mono text-xs text-muted-foreground">{secondary}</p>
-            ) : null}
+            <p className="mt-1 text-xs text-muted-foreground">{t("taxIncluded")}</p>
+            <SecondaryPriceAmount
+              locale={locale}
+              prices={plan.prices}
+              className="mt-1 font-mono text-xs text-muted-foreground"
+            />
           </div>
         </div>
 
@@ -232,9 +276,44 @@ export function CheckoutView({
             <PaymentTabs value={method} onChange={setMethod} />
             {error ? (
               <p className="text-sm text-destructive">
-                {error === "timeout" ? t("payTimeout") : t("payFailed")}
+                {error === "timeout"
+                  ? t("payTimeout")
+                  : error === "invalid_code"
+                    ? t("invalidCode")
+                    : error === "agree"
+                      ? t("agreeRequired")
+                      : t("payFailed")}
               </p>
             ) : null}
+            <p className="text-xs leading-5 text-muted-foreground">{t("refundNotice")}</p>
+            <label className="flex items-start gap-2 text-xs leading-5 text-muted-foreground">
+              <input
+                type="checkbox"
+                className="mt-0.5 size-3.5 shrink-0 accent-primary"
+                checked={agreed}
+                onChange={(event) => {
+                  setAgreed(event.target.checked);
+                  if (event.target.checked && error === "agree") {
+                    setError(null);
+                  }
+                }}
+              />
+              <span>{t("agreeLabel")}</span>
+            </label>
+            <p className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+              <Link href="/terms" className="transition-colors hover:text-foreground">
+                {tFooter("terms")}
+              </Link>
+              <Link href="/privacy" className="transition-colors hover:text-foreground">
+                {tFooter("privacy")}
+              </Link>
+              <Link
+                href={{ pathname: "/terms", hash: "refund" }}
+                className="transition-colors hover:text-foreground"
+              >
+                {tFooter("refund")}
+              </Link>
+            </p>
             <Button
               type="button"
               className="h-10 w-full rounded-[10px]"
@@ -429,8 +508,6 @@ function CheckoutFrame({
   children: React.ReactNode;
   merchant?: React.ReactNode;
 }) {
-  const tFooter = useTranslations("footer");
-
   return (
     <div className="flex min-h-dvh flex-col bg-background">
       <header className="flex items-center justify-between border-b border-border px-4 py-3">
@@ -439,20 +516,7 @@ function CheckoutFrame({
       </header>
       <div className="mx-auto w-full max-w-lg px-4 py-16">{children}</div>
       <div className="mt-auto border-t border-border">
-        <nav className="flex flex-wrap justify-center gap-4 px-4 py-6 text-xs text-muted-foreground">
-          <Link href="/terms" className="transition-colors hover:text-foreground">
-            {tFooter("terms")}
-          </Link>
-          <Link href="/privacy" className="transition-colors hover:text-foreground">
-            {tFooter("privacy")}
-          </Link>
-          <Link
-            href={{ pathname: "/terms", hash: "refund" }}
-            className="transition-colors hover:text-foreground"
-          >
-            {tFooter("refund")}
-          </Link>
-        </nav>
+        <LegalFooterLinks className="justify-center px-4 py-6 text-xs" />
         {merchant ? <div className="mx-auto max-w-6xl px-4 pb-8">{merchant}</div> : null}
       </div>
     </div>

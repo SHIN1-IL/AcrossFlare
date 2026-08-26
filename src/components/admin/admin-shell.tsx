@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutGrid, LogOut, Menu, Server, Users, Wallet, X } from "lucide-react";
+import { LayoutGrid, LogOut, Menu, Server, Shield, Ticket, Users, Wallet, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { AdminTabSwitch } from "@/components/admin/admin-tab-switch";
@@ -9,39 +9,66 @@ import { Logo } from "@/components/marketing/logo";
 import { buttonVariants } from "@/components/ui/button";
 import { useHydrated, useSession } from "@/hooks/use-account";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
-import { isAdminSession } from "@/lib/auth-types";
+import { isAdminSession, isOwnerSession } from "@/lib/auth-types";
+import { adminNavItems } from "@/lib/admin-nav";
+import type { AdminPermission } from "@/lib/admin-permissions";
 import { isProductId, type ProductId } from "@/lib/plans";
 import { clearSession } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
-const NAV = [
-  { suffix: "customers", key: "navCustomers", icon: Users },
-  { suffix: "plans", key: "navPlans", icon: Wallet },
-  { suffix: "provision", key: "navProvision", icon: LayoutGrid },
-  { suffix: "nodes", key: "navNodes", icon: Server },
-] as const;
+const NAV_ICONS = {
+  customers: Users,
+  plans: Wallet,
+  codes: Ticket,
+  provision: LayoutGrid,
+  nodes: Server,
+} as const;
 
 function productFromPath(pathname: string): ProductId {
   const part = pathname.split("/").find((item) => isProductId(item));
   return part ?? "global";
 }
 
+function SessionRole({ owner, className }: { owner: boolean; className?: string }) {
+  const t = useTranslations("admin");
+  return (
+    <p className={cn("font-mono text-[11px] tracking-[0.16em] text-primary uppercase", className)}>
+      {owner ? t("sessionRoleOwner") : t("sessionRoleStaff")}
+    </p>
+  );
+}
+
+function SessionIdentity({ email, owner }: { email: string; owner: boolean }) {
+  return (
+    <div className="space-y-1">
+      <SessionRole owner={owner} className="px-0 tracking-[0.12em]" />
+      <p className="truncate font-mono text-[11px] text-muted-foreground">{email}</p>
+    </div>
+  );
+}
+
 function NavLinks({
   product,
+  permissions,
+  owner,
   onNavigate,
 }: {
   product: ProductId;
+  permissions: AdminPermission[];
+  owner: boolean;
   onNavigate?: () => void;
 }) {
   const t = useTranslations("admin");
   const pathname = usePathname();
+  const staffHref = "/admin/staff";
+  const staffActive = pathname === staffHref || pathname.startsWith(`${staffHref}/`);
 
   return (
     <nav className="space-y-1">
-      {NAV.map((item) => {
+      {adminNavItems(product, permissions).map((item) => {
         const href = `/admin/${product}/${item.suffix}`;
         const active = pathname === href || pathname.startsWith(`${href}/`);
-        const Icon = item.icon;
+        const Icon = NAV_ICONS[item.suffix];
 
         return (
           <Link
@@ -60,12 +87,26 @@ function NavLinks({
           </Link>
         );
       })}
+      {owner ? (
+        <Link
+          href={staffHref}
+          onClick={onNavigate}
+          className={cn(
+            "flex items-center gap-2 rounded-[10px] px-3 py-2 text-sm transition-colors",
+            staffActive
+              ? "bg-primary/10 text-primary"
+              : "text-muted-foreground hover:bg-surface-2 hover:text-foreground"
+          )}
+        >
+          <Shield className="size-4" />
+          {t("navStaff")}
+        </Link>
+      ) : null}
     </nav>
   );
 }
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
-  const t = useTranslations("admin");
   const tApp = useTranslations("app");
   const router = useRouter();
   const pathname = usePathname();
@@ -73,6 +114,8 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const session = useSession();
   const [open, setOpen] = useState(false);
   const product = productFromPath(pathname);
+  const permissions = session?.permissions ?? [];
+  const owner = isOwnerSession(session);
 
   useEffect(() => {
     if (!hydrated) {
@@ -105,13 +148,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       <aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-surface px-3 py-4 md:flex">
         <div className="space-y-4 px-1 pb-4">
           <Logo />
-          <p className="px-2 font-mono text-[11px] tracking-[0.16em] text-primary uppercase">{t("mode")}</p>
+          <SessionRole owner={owner} className="px-2" />
           <AdminTabSwitch />
         </div>
-        <NavLinks product={product} />
+        <NavLinks product={product} permissions={permissions} owner={owner} />
         <div className="mt-auto space-y-3 px-1 pt-6">
           <LocaleSwitcher />
-          <p className="truncate font-mono text-[11px] text-muted-foreground">{session.email}</p>
+          <SessionIdentity email={session.email} owner={owner} />
           <button
             type="button"
             onClick={() => {
@@ -130,7 +173,10 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-border px-4 py-3 md:hidden">
-          <Logo />
+          <div className="min-w-0">
+            <Logo />
+            <SessionRole owner={owner} className="mt-1" />
+          </div>
           <button
             type="button"
             className={cn(buttonVariants({ variant: "outline", size: "icon-sm" }), "rounded-[10px]")}
@@ -143,8 +189,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         {open ? (
           <div className="space-y-4 border-b border-border px-4 py-3 md:hidden">
             <AdminTabSwitch />
-            <NavLinks product={product} onNavigate={() => setOpen(false)} />
+            <NavLinks product={product} permissions={permissions} owner={owner} onNavigate={() => setOpen(false)} />
             <LocaleSwitcher />
+            <SessionIdentity email={session.email} owner={owner} />
           </div>
         ) : null}
         <main className="flex-1 px-4 py-8 md:px-8">{children}</main>

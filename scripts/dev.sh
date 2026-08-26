@@ -7,4 +7,5 @@ elif ulimit -n 10240 >/dev/null 2>&1; then
   :
 fi
 
-exec next dev --hostname 0.0.0.0 --port 3000 "$@"
+# Bind IPv6 (::). Node dual-stacks this on macOS so localhost (::1) and 127.0.0.1 both work.
+exec next dev --hostname :: --port 3000 "$@"

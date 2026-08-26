@@ -5,6 +5,7 @@ import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { StatusPill } from "@/components/app/status-pill";
 import { buttonVariants } from "@/components/ui/button";
 import { useAdmin } from "@/hooks/use-admin";
+import { useSession } from "@/hooks/use-account";
 import { Link } from "@/i18n/navigation";
 import { listCustomers, listNodes } from "@/lib/admin-store";
 import type { CustomerStatus } from "@/lib/admin";
@@ -25,9 +26,11 @@ function toneFor(status: CustomerStatus) {
 export function CustomerTable({ product }: { product: ProductId }) {
   const t = useTranslations("admin");
   const locale = useLocale();
+  const session = useSession();
   useAdmin();
   const customers = listCustomers(product);
   const nodes = listNodes(product);
+  const canProvision = Boolean(session?.permissions?.includes("provision"));
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -35,9 +38,11 @@ export function CustomerTable({ product }: { product: ProductId }) {
         title={t("customersTitle")}
         subtitle={t("customersSubtitle")}
         action={
-          <Link href={`/admin/${product}/provision`} className={cn(buttonVariants(), "rounded-[10px]")}>
-            {t("issue")}
-          </Link>
+          canProvision ? (
+            <Link href={`/admin/${product}/provision`} className={cn(buttonVariants(), "rounded-[10px]")}>
+              {t("issue")}
+            </Link>
+          ) : undefined
         }
       />
 

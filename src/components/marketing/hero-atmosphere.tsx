@@ -55,8 +55,15 @@ type Meteor = {
   length: number;
 };
 
+let meteorSeq = 0;
+
 function randomBetween(min: number, max: number) {
   return min + Math.random() * (max - min);
+}
+
+function nextMeteorId() {
+  meteorSeq += 1;
+  return meteorSeq;
 }
 
 export function HeroAtmosphere() {
@@ -68,7 +75,6 @@ export function HeroAtmosphere() {
     }
 
     let timeoutId = 0;
-    let nextId = 1;
     let active = true;
 
     const spawn = () => {
@@ -77,13 +83,12 @@ export function HeroAtmosphere() {
       }
 
       const meteor: Meteor = {
-        id: nextId,
+        id: nextMeteorId(),
         left: randomBetween(8, 92),
         top: randomBetween(-4, 28),
         angle: randomBetween(-52, -38),
         length: randomBetween(70, 140),
       };
-      nextId += 1;
       setMeteors((current) => [...current.slice(-4), meteor]);
     };
 
@@ -113,6 +118,7 @@ export function HeroAtmosphere() {
       active = false;
       window.clearTimeout(timeoutId);
       document.removeEventListener("visibilitychange", onVisibility);
+      setMeteors([]);
     };
   }, []);
 

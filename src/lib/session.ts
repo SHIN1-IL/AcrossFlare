@@ -22,6 +22,10 @@ export function subscribeSession(listener: Listener) {
 
 export { normalizeEmail };
 
+function samePermissions(a: Session["permissions"] = [], b: Session["permissions"] = []) {
+  return a.length === b.length && a.every((item, index) => item === b[index]);
+}
+
 function isSameSession(a: Session | null, b: Session | null) {
   if (a === b) {
     return true;
@@ -29,7 +33,7 @@ function isSameSession(a: Session | null, b: Session | null) {
   if (!a || !b) {
     return false;
   }
-  return a.email === b.email && a.role === b.role;
+  return a.email === b.email && a.role === b.role && samePermissions(a.permissions, b.permissions);
 }
 
 export function hydrateSession(session: Session | null) {

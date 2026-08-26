@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isAdminRole } from "@/lib/admin-permissions";
 import { getAuthUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
@@ -13,7 +14,7 @@ export async function GET(
 
   const { id } = await params;
   const payment = await prisma.payment.findFirst({
-    where: user.role === "ADMIN" ? { id } : { id, userId: user.id },
+    where: isAdminRole(user.role) ? { id } : { id, userId: user.id },
     include: {
       subscription: {
         select: {

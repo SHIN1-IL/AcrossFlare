@@ -2,12 +2,22 @@ import { createHash, randomBytes } from "node:crypto";
 import { cache } from "react";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/db";
-import type { PublicSession, UserRole } from "@/lib/auth-types";
+import { isOwnerEmail, permissionsFor } from "@/lib/admin-permissions";
+import { toPublicSession, type PublicSession, type UserRole } from "@/lib/auth-types";
+import type { AdminPermission } from "@/lib/admin-permissions";
 
 export type AuthUser = {
   id: string;
   email: string;
   role: UserRole;
+  permissions: AdminPermission[];
+};
+
+type UserAuthRow = {
+  id: string;
+  email: string;
+  role: UserRole;
+  staffPermissions: string[];
 };
 
 export const SESSION_COOKIE = "af_session";
@@ -61,6 +71,27 @@ export async function destroySession(token?: string | null) {
   await clearSessionCookie();
 }
 
+export async function materializeAuthUser(row: UserAuthRow): Promise<AuthUser> {
+  let { id, email, role, staffPermissions } = row;
+
+  if (isOwnerEmail(email) && role !== "OWNER") {
+    const updated = await prisma.user.update({
+      where: { id },
+      data: { role: "OWNER", staffPermissions: [] },
+      select: { role: true, staffPermissions: true },
+    });
+    role = updated.role;
+    staffPermissions = updated.staffPermissions;
+  }
+
+  return {
+    id,
+    email,
+    role,
+    permissions: permissionsFor(role, staffPermissions),
+  };
+}
+
 export const getAuthUser = cache(async (): Promise<AuthUser | null> => {
   const cookieStore = await cookies();
   const token = cookieStore.get(SESSION_COOKIE)?.value;
@@ -72,7 +103,7 @@ export const getAuthUser = cache(async (): Promise<AuthUser | null> => {
     where: { tokenHash: hashToken(token) },
     include: {
       user: {
-        select: { id: true, email: true, role: true },
+        select: { id: true, email: true, role: true, staffPermissions: true },
       },
     },
   });
@@ -84,7 +115,7 @@ export const getAuthUser = cache(async (): Promise<AuthUser | null> => {
     return null;
   }
 
-  return session.user;
+  return materializeAuthUser(session.user);
 });
 
 export const getCurrentUser = cache(async (): Promise<PublicSession | null> => {
@@ -93,8 +124,5 @@ export const getCurrentUser = cache(async (): Promise<PublicSession | null> => {
     return null;
   }
 
-  return {
-    email: user.email,
-    role: user.role,
-  };
+  return toPublicSession(user);
 });

@@ -12,8 +12,9 @@ import { useAccount } from "@/hooks/use-account";
 import { Link } from "@/i18n/navigation";
 import { downloadText } from "@/lib/download";
 import { formatDate } from "@/lib/format-date";
+import { publicServiceFromPlanId } from "@/lib/public-service";
 
-export function GlobalDashboard() {
+export function GlobalDashboard({ product = "global" }: { product?: "global" | "workspace" }) {
   const t = useTranslations("app");
   const locale = useLocale();
   const { account } = useAccount();
@@ -22,95 +23,111 @@ export function GlobalDashboard() {
     return null;
   }
 
-  if (!account.global) {
-    return <ProductEmpty product="global" />;
+  const lane = product === "workspace" ? account.workspace : account.global;
+
+  if (!lane) {
+    return <ProductEmpty product={product} />;
   }
 
-  if (account.global.status === "provisioning") {
+  if (lane.status === "provisioning") {
     return <IssuingSkeleton />;
   }
 
-  if (account.global.status === "unpaid" || account.global.status === "failed") {
-    return (
-      <ProductEmpty product="global" status={account.global.status} planId={account.global.planId} />
-    );
+  if (lane.status === "unpaid" || lane.status === "failed") {
+    return <ProductEmpty product={product} status={lane.status} planId={lane.planId} />;
   }
 
-  const global = account.global;
-  const statusLabel = global.failover ? t("statusFailover") : t("statusActive");
+  const hybrid = product === "global" && publicServiceFromPlanId(lane.planId) === "hybrid";
+  const statusLabel = lane.failover ? t("statusFailover") : t("statusActive");
+  const title =
+    product === "workspace" ? t("workspaceTitle") : hybrid ? t("hybridTitle") : t("globalTitle");
+  const description =
+    product === "workspace" ? t("workspaceDesc") : hybrid ? t("hybridDesc") : t("globalDesc");
+  const hasAccess = Boolean(lane.deepLink || lane.yamlUrl);
+  const hasBackup = Boolean(lane.vaultUrl || lane.syncthingUrl);
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-3xl tracking-tight">{t("globalTitle")}</h1>
-          <p className="mt-2 text-sm text-muted-foreground">{t("globalDesc")}</p>
+          <h1 className="text-3xl tracking-tight">{title}</h1>
+          <p className="mt-2 text-sm text-muted-foreground">{description}</p>
         </div>
-        <StatusPill label={statusLabel} tone={global.failover ? "warn" : "ok"} />
+        <StatusPill label={statusLabel} tone={lane.failover ? "warn" : "ok"} />
       </div>
 
-      {global.failover ? (
+      {lane.failover ? (
         <div className="rounded-[10px] border border-amber-400/25 bg-amber-400/10 px-4 py-3 text-sm text-amber-200">
           {t("failoverBanner")}
         </div>
       ) : null}
 
       <section className="grid gap-4 sm:grid-cols-3">
-        <MetaCard label={t("plan")} value={global.planName} />
-        <MetaCard label={t("expires")} value={formatDate(locale, global.expiresAt)} />
-        <MetaCard label={t("nodes")} value={global.nodes.join(" · ")} mono />
+        <MetaCard label={t("plan")} value={lane.planName} />
+        <MetaCard label={t("expires")} value={formatDate(locale, lane.expiresAt)} />
+        <MetaCard label={t("nodes")} value={lane.nodes.join(" · ") || "—"} mono />
       </section>
 
-      <section className="rounded-2xl border border-border bg-card p-5">
-        <UsageMeter
-          label={global.failover ? t("usageUnlimited") : t("usageTraffic")}
-          used={global.trafficUsedGb}
-          limit={global.trafficLimitGb}
-          unlimited={global.failover}
-        />
-      </section>
+      {hasAccess ? (
+        <>
+          <section className="rounded-2xl border border-border bg-card p-5">
+            <UsageMeter
+              label={lane.failover ? t("usageUnlimited") : t("usageTraffic")}
+              used={lane.trafficUsedGb}
+              limit={lane.trafficLimitGb}
+              unlimited={lane.failover}
+            />
+          </section>
 
-      <section className="grid gap-4 lg:grid-cols-[auto_1fr]">
-        <div className="rounded-2xl border border-border bg-card p-5">
-          <p className="text-sm">{t("karing")}</p>
-          <div className="mt-4">
-            <QrPanel value={global.deepLink} label={t("karingQr")} />
+          <section className="grid gap-4 lg:grid-cols-[auto_1fr]">
+            <div className="rounded-2xl border border-border bg-card p-5">
+              <p className="text-sm">{t("karing")}</p>
+              <div className="mt-4">
+                <QrPanel value={lane.deepLink} label={t("karingQr")} />
+              </div>
+            </div>
+            <div className="space-y-4 rounded-2xl border border-border bg-card p-5">
+              <CopyField label={t("deepLink")} value={lane.deepLink} />
+              <CopyField label={t("yamlUrl")} value={lane.yamlUrl} />
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-[10px]"
+                onClick={() => downloadText("acrossflare.yaml", lane.yamlBody, "text/yaml")}
+              >
+                <Download />
+                {t("yamlDownload")}
+              </Button>
+            </div>
+          </section>
+        </>
+      ) : (
+        <section className="rounded-2xl border border-border bg-card p-5">
+          <p className="text-sm text-muted-foreground">{t("pendingCredentials")}</p>
+        </section>
+      )}
+
+      {hasBackup ? (
+        <section className="rounded-2xl border border-border bg-card p-5">
+          <p className="text-sm">{t("backup")}</p>
+          <div className="mt-4 space-y-4">
+            <UsageMeter
+              label={t("backupUsage")}
+              used={lane.backupUsedGb}
+              limit={lane.backupLimitGb}
+            />
+            <CopyField label={t("vaultUrl")} value={lane.vaultUrl} />
+            <CopyField label={t("syncthingUrl")} value={lane.syncthingUrl} />
+            <CopyField label={t("syncthingFolder")} value={lane.syncthingFolderId} />
+            <Link
+              href="/dashboard"
+              className="inline-flex text-sm text-primary transition-colors hover:text-primary/80"
+            >
+              {t("openBackupPwa")}
+            </Link>
           </div>
-        </div>
-        <div className="space-y-4 rounded-2xl border border-border bg-card p-5">
-          <CopyField label={t("deepLink")} value={global.deepLink} />
-          <CopyField label={t("yamlUrl")} value={global.yamlUrl} />
-          <Button
-            type="button"
-            variant="outline"
-            className="rounded-[10px]"
-            onClick={() => downloadText("acrossflare.yaml", global.yamlBody, "text/yaml")}
-          >
-            <Download />
-            {t("yamlDownload")}
-          </Button>
-        </div>
-      </section>
-
-      <section className="rounded-2xl border border-border bg-card p-5">
-        <p className="text-sm">{t("backup")}</p>
-        <div className="mt-4 space-y-4">
-          <UsageMeter
-            label={t("backupUsage")}
-            used={global.backupUsedGb}
-            limit={global.backupLimitGb}
-          />
-          <CopyField label={t("vaultUrl")} value={global.vaultUrl} />
-          <CopyField label={t("syncthingUrl")} value={global.syncthingUrl} />
-          <CopyField label={t("syncthingFolder")} value={global.syncthingFolderId} />
-          <Link
-            href="/dashboard"
-            className="inline-flex text-sm text-primary transition-colors hover:text-primary/80"
-          >
-            {t("openBackupPwa")}
-          </Link>
-        </div>
-      </section>
+        </section>
+      ) : null}
     </div>
   );
 }

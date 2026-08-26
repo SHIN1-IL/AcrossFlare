@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
+import { PromoCodeStatus } from "@prisma/client";
 import { getAuthUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { isSimulateEnabled } from "@/lib/payments/config";
 import { defaultPaymentMethod, parseAppLocale, parsePaymentMethod, quotePayment } from "@/lib/payments/quote";
 import { CheckoutStartError, startProviderCheckout } from "@/lib/payments/start";
-import { isProductId } from "@/lib/plans";
+import { isPublicCheckoutProduct } from "@/lib/plans";
+import { lookupPromoCode } from "@/lib/promo";
 import { toPrismaProduct } from "@/lib/product";
 
 export async function POST(request: Request) {
@@ -14,11 +16,11 @@ export async function POST(request: Request) {
   }
 
   const body = (await request.json().catch(() => null)) as
-    | { product?: string; planId?: string; method?: string; locale?: string }
+    | { product?: string; planId?: string; method?: string; locale?: string; promoCode?: string }
     | null;
 
   const locale = parseAppLocale(body?.locale);
-  const product = isProductId(body?.product) ? body.product : null;
+  const product = isPublicCheckoutProduct(body?.product) ? body.product : null;
   const method = parsePaymentMethod(body?.method) ?? (locale ? defaultPaymentMethod(locale) : null);
 
   if (!locale || !product || !method || !body?.planId) {
@@ -28,6 +30,15 @@ export async function POST(request: Request) {
   const plan = await prisma.plan.findUnique({ where: { id: body.planId } });
   if (!plan || !plan.visible || plan.product !== toPrismaProduct(product)) {
     return NextResponse.json({ error: "invalid_plan" }, { status: 400 });
+  }
+
+  let promoId: string | null = null;
+  if (product === "workspace") {
+    const promo = await lookupPromoCode(body.promoCode ?? "");
+    if (!promo.ok || promo.planId !== plan.id) {
+      return NextResponse.json({ error: "invalid_code" }, { status: 400 });
+    }
+    promoId = promo.id;
   }
 
   const quote = quotePayment(locale, method, plan);
@@ -43,6 +54,17 @@ export async function POST(request: Request) {
       currency: quote.currency,
     },
   });
+
+  if (promoId) {
+    const reserved = await prisma.promoCode.updateMany({
+      where: { id: promoId, status: PromoCodeStatus.UNUSED, paymentId: null },
+      data: { paymentId: payment.id },
+    });
+    if (reserved.count !== 1) {
+      await prisma.payment.delete({ where: { id: payment.id } });
+      return NextResponse.json({ error: "invalid_code" }, { status: 400 });
+    }
+  }
 
   const base = {
     paymentId: payment.id,
@@ -66,6 +88,12 @@ export async function POST(request: Request) {
     });
     return NextResponse.json({ ...base, ...live });
   } catch (error) {
+    if (promoId) {
+      await prisma.promoCode.updateMany({
+        where: { paymentId: payment.id, status: PromoCodeStatus.UNUSED },
+        data: { paymentId: null },
+      });
+    }
     if (error instanceof CheckoutStartError) {
       return NextResponse.json({ ...base, error: error.code }, { status: 502 });
     }

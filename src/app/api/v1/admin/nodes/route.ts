@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { addAdminNode, AdminActionError } from "@/lib/admin-actions";
-import { requireAdmin } from "@/lib/admin-auth";
+import { requirePermission } from "@/lib/admin-auth";
 import { parseNodeRole, toAdminNode } from "@/lib/admin-data";
 import { isProductId } from "@/lib/plans";
 
 export async function POST(request: Request) {
-  const auth = await requireAdmin();
+  const auth = await requirePermission("nodes");
   if ("response" in auth) {
     return auth.response;
   }

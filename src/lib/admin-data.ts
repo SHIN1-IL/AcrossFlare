@@ -2,10 +2,12 @@ import {
   NodeHealth,
   NodeRole,
   Product,
+  PromoCodeStatus,
   SubscriptionStatus,
   type Credential,
   type Node,
   type Plan,
+  type PromoCode,
   type RotateEvent as DbRotateEvent,
   type Subscription,
 } from "@prisma/client";
@@ -13,6 +15,7 @@ import type {
   AdminCustomer,
   AdminNode,
   AdminPlan,
+  AdminPromoCode,
   CustomerCredentials,
   CustomerStatus,
   NodeHealth as UiNodeHealth,
@@ -21,7 +24,7 @@ import type {
 import { maskHost, maskSecret } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import type { Plan as UiPlan, ProductId } from "@/lib/plans";
-import { toProductId } from "@/lib/product";
+import { toPrismaProduct, toProductId } from "@/lib/product";
 import { appUrl } from "@/lib/provision/config";
 import { yamlUrlFor } from "@/lib/provision/build";
 
@@ -184,12 +187,33 @@ export function customerInclude() {
   };
 }
 
+export function toAdminPromoCode(
+  row: PromoCode & { plan: { name: string; product: Product } }
+): AdminPromoCode {
+  return {
+    id: row.id,
+    code: row.code,
+    planId: row.planId,
+    planName: row.plan.name,
+    product: toProductId(row.plan.product),
+    note: row.note,
+    status: row.status === PromoCodeStatus.REDEEMED ? "redeemed" : "unused",
+    reserved: Boolean(row.paymentId) && row.status === PromoCodeStatus.UNUSED,
+    createdAt: row.createdAt.toISOString(),
+    redeemedAt: row.redeemedAt?.toISOString() ?? null,
+  };
+}
+
 export async function listAdminState() {
-  const [plans, nodes, subscriptions] = await Promise.all([
+  const [plans, nodes, subscriptions, promoCodes] = await Promise.all([
     prisma.plan.findMany({ orderBy: { name: "asc" } }),
     prisma.node.findMany({ orderBy: { createdAt: "asc" } }),
     prisma.subscription.findMany({
       include: customerInclude(),
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.promoCode.findMany({
+      include: { plan: { select: { name: true, product: true } } },
       orderBy: { createdAt: "desc" },
     }),
   ]);
@@ -198,6 +222,7 @@ export async function listAdminState() {
     plans: plans.map(toAdminPlan),
     nodes: nodes.map(toAdminNode),
     customers: subscriptions.map(toAdminCustomer),
+    promoCodes: promoCodes.map(toAdminPromoCode),
   };
 }
 
@@ -217,6 +242,9 @@ export function parseProduct(value: string | null | undefined): Product | null {
   if (value === "marketing" || value === Product.MARKETING) {
     return Product.MARKETING;
   }
+  if (value === "workspace" || value === Product.WORKSPACE) {
+    return Product.WORKSPACE;
+  }
   return null;
 }
 
@@ -234,7 +262,7 @@ export async function listPublicPlans(product?: ProductId) {
   const plans = await prisma.plan.findMany({
     where: {
       visible: true,
-      ...(product ? { product: product === "global" ? Product.GLOBAL : Product.MARKETING } : {}),
+      ...(product ? { product: toPrismaProduct(product) } : {}),
     },
     orderBy: { name: "asc" },
   });

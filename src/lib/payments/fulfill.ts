@@ -2,12 +2,12 @@ import {
   PaymentProvider,
   PaymentStatus,
   Prisma,
+  PromoCodeStatus,
   SubscriptionStatus,
   type Payment,
 } from "@prisma/client";
 import { prisma } from "@/lib/db";
-
-const MONTH_MS = 1000 * 60 * 60 * 24 * 30;
+import { planPeriodMs } from "@/lib/plans";
 
 export class PaymentFulfillError extends Error {
   constructor(
@@ -75,6 +75,10 @@ async function applyFulfillment(tx: Prisma.TransactionClient, input: FulfillInpu
   }
 
   if (input.status === PaymentStatus.FAILED) {
+    await tx.promoCode.updateMany({
+      where: { paymentId: payment.id, status: PromoCodeStatus.UNUSED },
+      data: { paymentId: null },
+    });
     return tx.payment.update({
       where: { id: payment.id },
       data: {
@@ -85,6 +89,11 @@ async function applyFulfillment(tx: Prisma.TransactionClient, input: FulfillInpu
   }
 
   const subscription = await upsertPaidSubscription(tx, payment);
+
+  await tx.promoCode.updateMany({
+    where: { paymentId: payment.id },
+    data: { status: PromoCodeStatus.REDEEMED, redeemedAt: new Date() },
+  });
 
   return tx.payment.update({
     where: { id: payment.id },
@@ -107,7 +116,7 @@ async function upsertPaidSubscription(tx: Prisma.TransactionClient, payment: Pay
     existing?.status === SubscriptionStatus.ACTIVE && existing.expiresAt.getTime() > now.getTime()
       ? existing.expiresAt
       : now;
-  const expiresAt = new Date(base.getTime() + MONTH_MS);
+  const expiresAt = new Date(base.getTime() + planPeriodMs(payment.planId));
 
   if (!existing) {
     return tx.subscription.create({

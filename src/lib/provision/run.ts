@@ -100,7 +100,7 @@ export async function provisionSubscription(subscriptionId: string) {
   }
 
   try {
-    const nodes = await assignNodes(subscription);
+    const nodes = subscription.product === Product.WORKSPACE ? [] : await assignNodes(subscription);
     const issued = await issueCredentials(subscription, nodes);
 
     await prisma.subscription.update({
@@ -186,7 +186,39 @@ async function issueCredentials(subscription: LoadedSubscription, nodes: Node[])
     return issueGlobal(subscription, nodes);
   }
 
-  return issueMarketing(subscription, nodes);
+  if (subscription.product === Product.MARKETING) {
+    return issueMarketing(subscription, nodes);
+  }
+
+  return issueWorkspace();
+}
+
+async function issueWorkspace() {
+  if (isProvisionSimulate()) {
+    await wait(200);
+  }
+
+  return {
+    uuid: null,
+    xuiEmail: null,
+    deepLink: null,
+    yamlToken: null,
+    yamlBody: null,
+    vaultUrl: null,
+    vaultUser: null,
+    syncthingUrl: null,
+    syncthingFolderId: null,
+    exitIp: null,
+    region: null,
+    httpUser: null,
+    httpPass: null,
+    httpPort: null,
+    socksPort: null,
+    wgPrivateKey: null,
+    wgPublicKey: null,
+    wgAddress: null,
+    wgEndpointPort: null,
+  };
 }
 
 async function issueGlobal(subscription: LoadedSubscription, nodes: Node[]) {

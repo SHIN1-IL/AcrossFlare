@@ -1,5 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { NodeManager } from "@/components/admin/node-manager";
+import { requireAdminPage } from "@/lib/admin-auth";
 import { resolveAdminProduct } from "@/lib/admin-product";
 
 export default async function AdminNodesPage({
@@ -9,5 +10,6 @@ export default async function AdminNodesPage({
 }) {
   const { locale, product } = await resolveAdminProduct(params);
   setRequestLocale(locale);
+  await requireAdminPage(locale, "nodes");
   return <NodeManager product={product} />;
 }

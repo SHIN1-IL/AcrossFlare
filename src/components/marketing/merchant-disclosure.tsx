@@ -40,6 +40,7 @@ export async function MerchantDisclosure() {
           </div>
         ))}
       </dl>
+      <p className="mt-4 text-xs leading-5 text-muted-foreground">{t("escrow")}</p>
     </div>
   );
 }

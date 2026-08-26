@@ -2,7 +2,7 @@ import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 import { resolveLocale } from "@/i18n/locale";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { PricingView } from "@/components/marketing/pricing-view";
-import { isProductId } from "@/lib/plans";
+import { pricingServiceFromQuery } from "@/lib/marketing-services";
 
 export default async function PricingPage({
   params,
@@ -17,7 +17,7 @@ export default async function PricingPage({
 
   const t = await getTranslations("pricing");
   const currentLocale = await getLocale();
-  const initialProduct = isProductId(product) ? product : "global";
+  const initialService = pricingServiceFromQuery(product);
 
   return (
     <MarketingShell>
@@ -26,7 +26,7 @@ export default async function PricingPage({
         <p className="mt-3 max-w-xl text-muted-foreground">{t("subtitle")}</p>
         <div className="mt-10">
           <PricingView
-            initialProduct={initialProduct}
+            initialService={initialService}
             showAlipay={currentLocale === "zh"}
           />
         </div>

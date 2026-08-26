@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { isAdminSession, type PublicSession } from "@/lib/auth-types";
+import { isPublicCheckoutProduct } from "@/lib/plans";
 import { hydrateSession, setPreviewEmail } from "@/lib/session";
 
 function isSafeNext(value: string | null): value is string {
@@ -22,10 +23,16 @@ export function AuthForm({
   productHint?: string;
 }) {
   const t = useTranslations("auth");
+  const tFooter = useTranslations("footer");
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
+  const [legalAgreed, setLegalAgreed] = useState(false);
+  const localDemo =
+    typeof window !== "undefined" &&
+    (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
 
   return (
     <form
@@ -38,6 +45,11 @@ export function AuthForm({
 
         if (!email || !password) {
           setError(t("errorRequired"));
+          return;
+        }
+
+        if (mode === "signup" && (!ageConfirmed || !legalAgreed)) {
+          setError(t("errorConsent"));
           return;
         }
 
@@ -89,7 +101,7 @@ export function AuthForm({
             return;
           }
 
-          if (product && plan) {
+          if (isPublicCheckoutProduct(product) && plan) {
             router.push({ pathname: "/checkout", query: { product, plan } });
             return;
           }
@@ -130,13 +142,47 @@ export function AuthForm({
         />
       </div>
 
+      {mode === "signup" ? (
+        <div className="space-y-3 text-xs leading-5 text-muted-foreground">
+          <label className="flex items-start gap-2">
+            <input
+              type="checkbox"
+              className="mt-0.5 size-3.5 shrink-0 accent-primary"
+              checked={ageConfirmed}
+              onChange={(event) => setAgeConfirmed(event.target.checked)}
+            />
+            <span>{t("ageConfirm")}</span>
+          </label>
+          <label className="flex items-start gap-2">
+            <input
+              type="checkbox"
+              className="mt-0.5 size-3.5 shrink-0 accent-primary"
+              checked={legalAgreed}
+              onChange={(event) => setLegalAgreed(event.target.checked)}
+            />
+            <span>
+              {t("agreeLegal")}{" "}
+              <Link href="/terms" className="underline-offset-2 hover:text-foreground hover:underline">
+                {tFooter("terms")}
+              </Link>
+              {" · "}
+              <Link href="/privacy" className="underline-offset-2 hover:text-foreground hover:underline">
+                {tFooter("privacy")}
+              </Link>
+            </span>
+          </label>
+        </div>
+      ) : null}
+
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
       <Button type="submit" disabled={pending} className="h-10 w-full rounded-[10px]">
         {mode === "login" ? t("submitLogin") : t("submitSignup")}
       </Button>
 
-      <p className="font-mono text-xs text-muted-foreground">{t("demoHint")}</p>
+      {localDemo ? (
+        <p className="font-mono text-xs text-muted-foreground">{t("demoHint")}</p>
+      ) : null}
 
       <Link
         href={mode === "login" ? "/signup" : "/login"}

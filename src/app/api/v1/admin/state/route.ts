@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin-auth";
+import { filterAdminState } from "@/lib/admin-permissions";
 import { listAdminState } from "@/lib/admin-data";
 
 export async function GET() {
@@ -8,5 +9,5 @@ export async function GET() {
     return auth.response;
   }
 
-  return NextResponse.json(await listAdminState());
+  return NextResponse.json(filterAdminState(await listAdminState(), auth.user.permissions));
 }

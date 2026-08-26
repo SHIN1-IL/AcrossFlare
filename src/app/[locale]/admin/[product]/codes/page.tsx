@@ -1,0 +1,15 @@
+import { setRequestLocale } from "next-intl/server";
+import { PromoCodeManager } from "@/components/admin/promo-code-manager";
+import { requireAdminPage } from "@/lib/admin-auth";
+import { resolveAdminProduct } from "@/lib/admin-product";
+
+export default async function AdminCodesPage({
+  params,
+}: {
+  params: Promise<{ locale: string; product: string }>;
+}) {
+  const { locale } = await resolveAdminProduct(params);
+  setRequestLocale(locale);
+  await requireAdminPage(locale, "codes");
+  return <PromoCodeManager />;
+}

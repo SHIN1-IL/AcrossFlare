@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { AdminActionError, changeCustomerPlan } from "@/lib/admin-actions";
-import { requireAdmin } from "@/lib/admin-auth";
+import { requirePermission } from "@/lib/admin-auth";
 
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = await requireAdmin();
+  const auth = await requirePermission("customers");
   if ("response" in auth) {
     return auth.response;
   }

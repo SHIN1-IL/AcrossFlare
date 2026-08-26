@@ -1,23 +1,56 @@
 import type { AppLocale } from "@/i18n/routing";
-import type { PlanPrices } from "@/lib/plans";
+import { plans, type PlanPrices } from "@/lib/plans";
 
-export function formatPrimaryPrice(locale: AppLocale, prices: PlanPrices) {
+export function splitPrimaryPrice(locale: AppLocale, prices: PlanPrices) {
   switch (locale) {
     case "ko":
-      return `₩${prices.krw.toLocaleString("ko-KR")}`;
+      return { symbol: "₩", amount: prices.krw.toLocaleString("ko-KR") };
     case "zh":
-      return `¥${prices.cny.toLocaleString("zh-CN")}`;
+      return { symbol: "¥", amount: prices.cny.toLocaleString("zh-CN") };
     case "ja":
-      return `¥${prices.jpy.toLocaleString("ja-JP")}`;
+      return { symbol: "¥", amount: prices.jpy.toLocaleString("ja-JP") };
     default:
-      return `$${prices.usd.toLocaleString("en-US")}`;
+      return { symbol: "$", amount: prices.usd.toLocaleString("en-US") };
   }
 }
 
-export function formatSecondaryPrice(locale: AppLocale, prices: PlanPrices) {
+export function formatPrimaryPrice(locale: AppLocale, prices: PlanPrices) {
+  const { symbol, amount } = splitPrimaryPrice(locale, prices);
+  return `${symbol}${amount}`;
+}
+
+export function splitSecondaryPrice(locale: AppLocale, prices: PlanPrices) {
   if (locale !== "zh") {
     return null;
   }
 
-  return `$${prices.usd.toLocaleString("en-US")}`;
+  return { symbol: "$", amount: prices.usd.toLocaleString("en-US") };
+}
+
+export function formatSecondaryPrice(locale: AppLocale, prices: PlanPrices) {
+  const parts = splitSecondaryPrice(locale, prices);
+  return parts ? `${parts.symbol}${parts.amount}` : null;
+}
+
+export function primaryAmountSlots(locale: AppLocale, prices: PlanPrices) {
+  const { amount } = splitPrimaryPrice(locale, prices);
+  return amountCharSlots(amount, locale);
+}
+
+export function secondaryAmountSlots(prices: PlanPrices) {
+  const parts = splitSecondaryPrice("zh", prices);
+  if (!parts) {
+    return null;
+  }
+
+  return amountCharSlots(parts.amount, "en");
+}
+
+export function amountCharSlots(amount: string, locale: AppLocale) {
+  const width = Math.max(
+    1,
+    amount.length,
+    ...plans.map((plan) => splitPrimaryPrice(locale, plan.prices).amount.length)
+  );
+  return Array.from(amount.padStart(width, " "));
 }

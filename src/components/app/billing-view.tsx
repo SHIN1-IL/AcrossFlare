@@ -4,8 +4,9 @@ import { useLocale, useTranslations } from "next-intl";
 import { StatusPill } from "@/components/app/status-pill";
 import { useAccount } from "@/hooks/use-account";
 import { formatDate } from "@/lib/format-date";
-import { formatPrimaryPrice } from "@/lib/format-price";
+import { PriceAmount } from "@/components/marketing/price-amount";
 import { getPlanById } from "@/lib/plans";
+import { publicServiceFromPlanId } from "@/lib/public-service";
 import type { AppLocale } from "@/i18n/routing";
 
 export function BillingView() {
@@ -17,7 +18,8 @@ export function BillingView() {
     return null;
   }
 
-  const nextCharge = account.global?.expiresAt ?? account.marketing?.expiresAt;
+  const nextCharge =
+    account.global?.expiresAt ?? account.workspace?.expiresAt ?? account.marketing?.expiresAt;
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -64,12 +66,12 @@ export function BillingView() {
                       </td>
                       <td className="py-3">
                         <StatusPill
-                          label={receipt.product === "global" ? t("global") : t("marketing")}
+                          label={t(publicServiceFromPlanId(receipt.planId))}
                           tone="neutral"
                         />
                       </td>
                       <td className="py-3 font-mono text-xs">
-                        {plan ? formatPrimaryPrice(locale, plan.prices) : "—"}
+                        {plan ? <PriceAmount locale={locale} prices={plan.prices} /> : "—"}
                       </td>
                     </tr>
                   );

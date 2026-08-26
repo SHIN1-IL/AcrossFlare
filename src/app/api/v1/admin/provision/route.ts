@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { AdminActionError, provisionManually } from "@/lib/admin-actions";
-import { requireAdmin } from "@/lib/admin-auth";
+import { requirePermission } from "@/lib/admin-auth";
 import { isProductId } from "@/lib/plans";
 
 export async function POST(request: Request) {
-  const auth = await requireAdmin();
+  const auth = await requirePermission("provision");
   if ("response" in auth) {
     return auth.response;
   }

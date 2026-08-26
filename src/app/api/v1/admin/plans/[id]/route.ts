@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { AdminActionError, removeAdminPlan, saveAdminPlan } from "@/lib/admin-actions";
-import { requireAdmin } from "@/lib/admin-auth";
+import { requirePermission } from "@/lib/admin-auth";
 import { isProductId } from "@/lib/plans";
 
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = await requireAdmin();
+  const auth = await requirePermission("plans");
   if ("response" in auth) {
     return auth.response;
   }
@@ -62,7 +62,7 @@ export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = await requireAdmin();
+  const auth = await requirePermission("plans");
   if ("response" in auth) {
     return auth.response;
   }

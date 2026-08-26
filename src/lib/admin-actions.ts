@@ -1,12 +1,14 @@
 import {
   Product,
+  PromoCodeStatus,
   SubscriptionStatus,
   type Node,
   type Plan,
   type Subscription,
 } from "@prisma/client";
-import { planChangeSteps, slugPlanId, type AdminCustomer, type AdminPlan, type JobStep } from "@/lib/admin";
-import { getAdminCustomer, toAdminPlan } from "@/lib/admin-data";
+import { planChangeSteps, slugPlanId, type AdminCustomer, type AdminPlan, type AdminPromoCode, type JobStep } from "@/lib/admin";
+import { getAdminCustomer, toAdminPlan, toAdminPromoCode } from "@/lib/admin-data";
+import { productHasBackup } from "@/lib/admin-nav";
 import { prisma } from "@/lib/db";
 import { normalizeEmail } from "@/lib/email";
 import { rotateMarketingSubscription } from "@/lib/marketing/rotate";
@@ -14,6 +16,7 @@ import { exitHostFor, regionFrom } from "@/lib/marketing/secrets";
 import { hashPassword } from "@/lib/password";
 import type { ProductId } from "@/lib/plans";
 import { toPrismaProduct } from "@/lib/product";
+import { generatePromoCode, normalizePromoCode } from "@/lib/promo";
 import {
   buildVlessYaml,
   karingDeepLink,
@@ -63,7 +66,7 @@ export async function saveAdminPlan(input: PlanInput): Promise<AdminPlan> {
     priceCny: Math.max(0, Math.round(input.prices.cny)),
     priceJpy: Math.max(0, Math.round(input.prices.jpy)),
     trafficGb: input.trafficGb,
-    backupGb: input.product === "global" ? input.backupGb : null,
+    backupGb: productHasBackup(input.product) ? input.backupGb : null,
     nodeCodes: input.nodes,
     visible: input.visible,
     featured: input.featured,
@@ -87,6 +90,50 @@ export async function saveAdminPlan(input: PlanInput): Promise<AdminPlan> {
 
   const plan = await prisma.plan.create({ data: { id, ...data } });
   return toAdminPlan(plan);
+}
+
+export async function createAdminPromoCode(input: {
+  planId: string;
+  code?: string;
+  note?: string;
+}): Promise<AdminPromoCode> {
+  const plan = await prisma.plan.findUnique({ where: { id: input.planId } });
+  if (!plan || plan.product !== Product.WORKSPACE) {
+    throw new AdminActionError("invalid_plan");
+  }
+
+  const code = normalizePromoCode(input.code || generatePromoCode());
+  if (code.length < 4) {
+    throw new AdminActionError("required");
+  }
+
+  const existing = await prisma.promoCode.findUnique({ where: { code } });
+  if (existing) {
+    throw new AdminActionError("code_taken", 409);
+  }
+
+  const row = await prisma.promoCode.create({
+    data: {
+      code,
+      planId: plan.id,
+      note: input.note?.trim() ?? "",
+    },
+    include: { plan: { select: { name: true, product: true } } },
+  });
+
+  return toAdminPromoCode(row);
+}
+
+export async function removeAdminPromoCode(id: string) {
+  const row = await prisma.promoCode.findUnique({ where: { id } });
+  if (!row) {
+    throw new AdminActionError("not_found", 404);
+  }
+  if (row.status === PromoCodeStatus.REDEEMED || row.paymentId) {
+    throw new AdminActionError("code_in_use", 409);
+  }
+
+  await prisma.promoCode.delete({ where: { id } });
 }
 
 export async function removeAdminPlan(id: string) {

@@ -3,9 +3,11 @@
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { StageBackdrop } from "@/components/marketing/plan-stage-bg";
+import { PriceAmount, SecondaryPriceAmount } from "@/components/marketing/price-amount";
 import { buttonVariants } from "@/components/ui/button";
 import { useLivePlans } from "@/hooks/use-admin";
-import { formatPrimaryPrice, formatSecondaryPrice } from "@/lib/format-price";
+import { HOME_SLIDE_PRICES, homeSlideFor } from "@/lib/marketing-services";
+import { publicServiceFromPlanId } from "@/lib/public-service";
 import type { Plan } from "@/lib/plans";
 import { cn } from "@/lib/utils";
 import type { AppLocale } from "@/i18n/routing";
@@ -27,6 +29,7 @@ export function PlanStages({ showAlipay }: { showAlipay: boolean }) {
           isFirst={index === 0}
         />
       ))}
+      <WorkspaceStage index={slides.length} />
     </div>
   );
 }
@@ -44,19 +47,22 @@ function PlanStage({
 }) {
   const t = useTranslations("pricing");
   const tSlides = useTranslations("planSlides");
+  const tWorkspace = useTranslations("workspace");
   const locale = useLocale() as AppLocale;
-  const secondary = formatSecondaryPrice(locale, plan.prices);
+  const slide = homeSlideFor(plan.id);
+  const prices = HOME_SLIDE_PRICES[plan.id] ?? plan.prices;
   const slideKey = `${plan.id}.title`;
   const custom = tSlides.has(slideKey)
     ? {
         eyebrow: tSlides(`${plan.id}.eyebrow`),
         title: tSlides(`${plan.id}.title`),
         description: tSlides(`${plan.id}.description`),
-        price: tSlides(`${plan.id}.price`),
         cta: tSlides(`${plan.id}.cta`),
       }
     : null;
-  const productLabel = custom?.eyebrow ?? (plan.product === "global" ? t("global") : t("marketing"));
+  const service = publicServiceFromPlanId(plan.id);
+  const productLabel =
+    custom?.eyebrow ?? t(service === "marketing" ? "standard" : service);
   const traffic = plan.trafficGb === null ? t("unlimited") : `${plan.trafficGb} GB`;
 
   return (
@@ -79,27 +85,48 @@ function PlanStage({
             }`}
         </p>
         <p className="mt-6 font-mono text-3xl tracking-tight md:text-4xl">
-          {custom?.price ?? (
-            <>
-              {formatPrimaryPrice(locale, plan.prices)}
-              <span className="ml-2 text-sm text-muted-foreground">{t("perMonth")}</span>
-            </>
-          )}
+          <PriceAmount locale={locale} prices={prices} />
+          <span className="ml-2 text-sm text-muted-foreground">{t("perMonth")}</span>
         </p>
-        {!custom && secondary ? (
-          <p className="mt-1 font-mono text-xs text-muted-foreground">{secondary}</p>
-        ) : null}
+        <SecondaryPriceAmount
+          locale={locale}
+          prices={prices}
+          className="mt-1 font-mono text-xs text-muted-foreground"
+        />
         {showAlipay ? (
           <p className="mt-2 text-xs text-primary">{t("alipay")}</p>
         ) : null}
         <Link
-          href={{
-            pathname: "/checkout",
-            query: { product: plan.product, plan: plan.id },
-          }}
+          href={slide.href}
           className={cn(buttonVariants({ size: "lg" }), "mt-8 rounded-[10px] px-8")}
         >
-          {custom?.cta ?? t("cta")}
+          {tWorkspace("learnMore")}
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+function WorkspaceStage({ index }: { index: number }) {
+  const t = useTranslations("workspace");
+
+  return (
+    <section className="relative h-dvh overflow-hidden">
+      <StageBackdrop variant={index} />
+      <div className="relative z-10 mx-auto flex h-full w-full max-w-3xl flex-col items-center justify-end px-6 pb-[22vh] text-center">
+        <p className="text-xs font-medium tracking-[0.22em] text-primary uppercase">
+          {t("eyebrow")}
+        </p>
+        <h2 className="mt-3 text-4xl font-semibold tracking-tight md:text-6xl">
+          {t("title")}
+        </h2>
+        <p className="mt-4 text-sm text-muted-foreground md:text-base">{t("description")}</p>
+        <p className="mt-2 text-sm text-muted-foreground md:text-base">{t("hint")}</p>
+        <Link
+          href="/workspace"
+          className={cn(buttonVariants({ size: "lg" }), "mt-8 rounded-[10px] px-8")}
+        >
+          {t("learnMore")}
         </Link>
       </div>
     </section>

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { createSession, setSessionCookie } from "@/lib/auth";
+import { createSession, materializeAuthUser, setSessionCookie } from "@/lib/auth";
+import { toPublicSession } from "@/lib/auth-types";
 import { prisma } from "@/lib/db";
 import { normalizeEmail } from "@/lib/email";
 import { verifyPassword } from "@/lib/password";
@@ -24,8 +25,9 @@ export async function POST(request: Request) {
 
   const token = await createSession(user.id);
   await setSessionCookie(token);
+  const session = await materializeAuthUser(user);
 
   return NextResponse.json({
-    user: { email: user.email, role: user.role },
+    user: toPublicSession(session),
   });
 }

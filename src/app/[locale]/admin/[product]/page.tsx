@@ -1,6 +1,9 @@
 import { setRequestLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
+import { requireAdminPage } from "@/lib/admin-auth";
+import { firstAdminPath } from "@/lib/admin-nav";
 import { resolveAdminProduct } from "@/lib/admin-product";
+import { isOwnerRole } from "@/lib/admin-permissions";
 
 export default async function AdminProductIndexPage({
   params,
@@ -9,5 +12,9 @@ export default async function AdminProductIndexPage({
 }) {
   const { locale, product } = await resolveAdminProduct(params);
   setRequestLocale(locale);
-  redirect({ href: `/admin/${product}/customers`, locale });
+  const user = await requireAdminPage(locale);
+  redirect({
+    href: firstAdminPath(product, user.permissions, isOwnerRole(user.role)),
+    locale,
+  });
 }

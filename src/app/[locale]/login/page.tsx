@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AuthForm } from "@/components/marketing/auth-form";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { getCurrentUser } from "@/lib/auth";
+import { isAdminSession } from "@/lib/auth-types";
 import { resolveLocale } from "@/i18n/locale";
 import { redirect } from "@/i18n/navigation";
 
@@ -16,7 +17,7 @@ export default async function LoginPage({
 
   const user = await getCurrentUser();
   if (user) {
-    redirect({ href: user.role === "ADMIN" ? "/admin" : "/app", locale });
+    redirect({ href: isAdminSession(user) ? "/admin" : "/app", locale });
   }
 
   const t = await getTranslations("auth");

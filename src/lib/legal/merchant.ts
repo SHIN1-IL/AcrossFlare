@@ -3,6 +3,9 @@ function readEnv(name: string, fallback = "") {
   return value.length > 0 ? value : fallback;
 }
 
+export const MAIL_ORDER_PENDING = "구매안전확인증 발급 후 신고 예정";
+export const DEFAULT_HOSTING_PROVIDER = "Cloudflare";
+
 export type MerchantInfo = {
   serviceName: string;
   legalName: string;
@@ -13,6 +16,7 @@ export type MerchantInfo = {
   businessNumber: string;
   vasNumber: string;
   mailOrderNumber: string;
+  hostingProvider: string;
 };
 
 export function getMerchant(): MerchantInfo {
@@ -25,7 +29,8 @@ export function getMerchant(): MerchantInfo {
     email: readEnv("LEGAL_EMAIL", "acrosstool@gmail.com"),
     businessNumber: readEnv("LEGAL_BUSINESS_NO", "163-13-03007"),
     vasNumber: readEnv("LEGAL_VAS_NO", "제 2-04-26-0006 호"),
-    mailOrderNumber: readEnv("LEGAL_MAIL_ORDER_NO"),
+    mailOrderNumber: readEnv("LEGAL_MAIL_ORDER_NO", MAIL_ORDER_PENDING),
+    hostingProvider: readEnv("LEGAL_HOSTING_PROVIDER", DEFAULT_HOSTING_PROVIDER),
   };
 }
 
@@ -38,7 +43,8 @@ export type MerchantRowId =
   | "email"
   | "businessNo"
   | "vasNo"
-  | "mailOrderNo";
+  | "mailOrderNo"
+  | "hostingProvider";
 
 export function merchantRows(merchant: MerchantInfo): Array<{ id: MerchantRowId; value: string }> {
   return (
@@ -52,6 +58,7 @@ export function merchantRows(merchant: MerchantInfo): Array<{ id: MerchantRowId;
       { id: "businessNo", value: merchant.businessNumber },
       { id: "vasNo", value: merchant.vasNumber },
       { id: "mailOrderNo", value: merchant.mailOrderNumber },
+      { id: "hostingProvider", value: merchant.hostingProvider },
     ] satisfies Array<{ id: MerchantRowId; value: string }>
   ).filter((row) => row.value.length > 0);
 }

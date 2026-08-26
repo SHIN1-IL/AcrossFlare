@@ -10,11 +10,14 @@ datasource db {
 enum Role {
   USER
   ADMIN
+  OWNER
+  STAFF
 }
 
 enum Product {
   GLOBAL
   MARKETING
+  WORKSPACE
 }
 
 enum SubscriptionStatus {
@@ -41,6 +44,11 @@ enum PaymentProvider {
   PAYMENTWALL
 }
 
+enum PromoCodeStatus {
+  UNUSED
+  REDEEMED
+}
+
 enum NodeRole {
   BANDWAGON
   RACKNERD
@@ -53,12 +61,13 @@ enum NodeHealth {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String
-  role         Role     @default(USER)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                String   @id @default(cuid())
+  email             String   @unique
+  passwordHash      String
+  role              Role     @default(USER)
+  staffPermissions  String[] @default([])
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   sessions      Session[]
   subscriptions Subscription[]
@@ -95,6 +104,7 @@ model Plan {
 
   subscriptions Subscription[]
   payments      Payment[]
+  promoCodes    PromoCode[]
 
   @@index([product])
 }
@@ -209,8 +219,26 @@ model Payment {
   updatedAt      DateTime         @updatedAt
 
   webhookEvents WebhookEvent[]
+  promoCode     PromoCode?
 
   @@index([userId])
+  @@index([status])
+}
+
+model PromoCode {
+  id         String          @id @default(cuid())
+  code       String          @unique
+  planId     String
+  plan       Plan            @relation(fields: [planId], references: [id])
+  note       String          @default("")
+  status     PromoCodeStatus @default(UNUSED)
+  paymentId  String?         @unique
+  payment    Payment?        @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  redeemedAt DateTime?
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  @@index([planId])
   @@index([status])
 }
 

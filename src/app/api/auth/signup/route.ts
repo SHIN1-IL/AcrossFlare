@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
-import { createSession, setSessionCookie } from "@/lib/auth";
+import { createSession, materializeAuthUser, setSessionCookie } from "@/lib/auth";
+import { toPublicSession } from "@/lib/auth-types";
+import { isOwnerEmail } from "@/lib/admin-permissions";
 import { prisma } from "@/lib/db";
 import { normalizeEmail } from "@/lib/email";
 import { hashPassword, isStrongPassword } from "@/lib/password";
@@ -25,15 +27,16 @@ export async function POST(request: Request) {
       data: {
         email,
         passwordHash: await hashPassword(password),
-        role: "USER",
+        role: isOwnerEmail(email) ? "OWNER" : "USER",
       },
     });
 
     const token = await createSession(user.id);
     await setSessionCookie(token);
+    const session = await materializeAuthUser(user);
 
     return NextResponse.json({
-      user: { email: user.email, role: user.role },
+      user: toPublicSession(session),
     });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {

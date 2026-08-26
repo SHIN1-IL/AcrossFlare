@@ -12,13 +12,19 @@
     "signup": "회원가입",
     "getStarted": "시작하기",
     "language": "언어",
+    "locales": {
+      "ko": "한국어",
+      "zh": "简体中文",
+      "ja": "日本語",
+      "en": "English"
+    },
     "console": "콘솔"
   },
   "footer": {
     "terms": "이용약관",
-    "privacy": "개인정보",
+    "privacy": "개인정보 처리방침",
     "refund": "청약철회·환불",
-    "copyright": "© {year} AcrossFlare",
+    "copyright": "© {year} 어크로스툴",
     "merchantTitle": "사업자 정보",
     "serviceName": "서비스명",
     "legalName": "상호",
@@ -28,109 +34,155 @@
     "email": "이메일",
     "businessNo": "사업자등록번호",
     "vasNo": "부가통신사업 신고번호",
-    "mailOrderNo": "통신판매업 신고번호"
+    "mailOrderNo": "통신판매업 신고번호",
+    "hostingProvider": "호스팅 제공자",
+    "escrow": "디지털 콘텐츠 특성상 구매안전서비스(에스크로)가 제공되지 않습니다."
+  },
+  "productNotice": {
+    "title": "상품 정보",
+    "supplier": "공급자",
+    "terms": "이용조건·이용기간",
+    "delivery": "제공 방식",
+    "requirements": "최소 사양·필수 소프트웨어",
+    "withdraw": "청약철회·해지",
+    "support": "소비자상담",
+    "supplierValue": "{legalName} (서비스명 {serviceName})",
+    "standardTerms": "암호화 네트워크 접속과 보안 클라우드 백업 1GB. LA 회선. 출장·여행·온라인 회의 등 합법적 이용. 트래픽과 이용 기간은 선택한 요금제(1주·1개월·12개월)를 따릅니다.",
+    "hybridTerms": "암호화 네트워크 접속과 보안 클라우드 백업 1GB. 도쿄+LA 회선. 출장·여행·온라인 회의 등 합법적 이용. 트래픽과 이용 기간은 선택한 요금제(1주·1개월·12개월)를 따릅니다.",
+    "workspaceTerms": "팀 또는 맞춤형 암호화 네트워크 접속과 보안 클라우드 백업. A·B·C 플랜은 모두 12개월 1,990,000원이며, 인원과 월 트래픽만 다릅니다. 신청은 프로모션 코드로 합니다.",
+    "deliveryValue": "실물 배송 없음. 결제 완료 후 로그인 계정으로 접속 정보와 백업 이용 정보를 즉시 제공합니다.",
+    "workspaceDeliveryValue": "실물 배송 없음. 프로모션 코드 확인 후 로그인 계정으로 접속 정보와 백업 이용 정보를 제공합니다.",
+    "requirementsValue": "인터넷이 되는 PC 또는 모바일. 전용 앱 설치 의무 없음. 브라우저로 계정과 백업을 이용합니다.",
+    "withdrawValue": "접속·백업 정보가 발급된 뒤에는 전자상거래법 제17조 제2항 제5호에 따라 청약철회가 제한될 수 있습니다. 미발급·중복결제는 7일 내 전액 환불합니다. 발급 후 중도 해지는 일할 환불을 원칙으로 하지 않습니다.",
+    "withdrawLink": "청약철회·환불",
+    "vat": "표시 가격은 부가세 포함입니다."
   },
   "legal": {
     "termsTitle": "이용약관",
     "privacyTitle": "개인정보 처리방침",
-    "updated": "최종 업데이트 2026년 8월 24일",
-    "disclaimer": "이 문서는 AcrossFlare가 현재 서비스를 제공하는 방식을 설명합니다. 법률 자문이 아니며, 적용 법령에 따라 추가 의무가 있을 수 있습니다.",
+    "updated": "최종 업데이트 2026년 8월 26일",
+    "disclaimer": "본 약관과 개인정보 처리방침은 상호 어크로스툴(대표 신일)이 acrossflare.com에서 운영하는 AcrossFlare 서비스에 적용됩니다.",
     "termsSections": [
       {
-        "title": "1. 서비스",
-        "body": "AcrossFlare는 두 가지 유료 상품을 제공합니다. 글로벌(VLESS 접속과 Vaultwarden·Syncthing 백업)과 마케팅 IP(HTTP/SOCKS5 및 WireGuard 엔드포인트). 계정·요금제·자격 증명은 결제 또는 관리자 수동 발급 후 acrossflare.com에서 발급됩니다."
+        "title": "1. 목적과 당사자",
+        "body": "본 약관은 어크로스툴(이하 '회사')이 제공하는 보안 클라우드 및 네트워크 최적화 디지털 서비스(서비스명 AcrossFlare)의 이용 조건을 정합니다. 이용자는 회원가입 또는 결제 시 본 약관에 동의한 뒤 서비스를 이용합니다."
       },
       {
-        "title": "2. 계정",
-        "body": "정확한 이메일을 제공하고 비밀번호를 비밀로 유지해야 합니다. 프록시 URL, WireGuard 키, Vaultwarden·Syncthing 접근 정보를 포함해 계정에서 일어나는 이용에 대한 책임은 이용자에게 있습니다."
+        "title": "2. 서비스",
+        "body": "홈페이지에 게시된 유료 상품은 Standard, Hybrid, Workspace & Custom입니다. 각 상품은 암호화된 네트워크 접속과 보안 클라우드 백업을 포함하며, 회선(LA 또는 도쿄+LA 등), 트래픽, 백업 용량, 이용 기간, 인원 구성은 해당 상품 페이지와 결제 화면에 표시된 내용을 따릅니다.\n\n결제가 완료되거나 회사가 수동 발급하면, 로그인한 계정으로 접속 정보와 백업 이용 정보가 제공됩니다. Workspace 플랜은 프로모션 코드로 신청합니다. 상품 구성은 홈페이지 공지에 따라 달라질 수 있습니다."
       },
       {
-        "title": "3. 허용되는 이용",
-        "body": "서비스는 합법적인 목적에만 사용할 수 있습니다. 네트워크 공격, 사기, 악성코드 유포, 아동 착취, 적법한 절차 회피, 수출·제재 위반에 AcrossFlare를 사용해서는 안 됩니다. 노드·저장소·다른 고객을 남용한다고 합리적으로 판단되면 계정을 정지하거나 삭제할 수 있습니다."
+        "title": "3. 계정",
+        "body": "만 14세 이상만 가입할 수 있습니다. 정확한 이메일을 제공하고 비밀번호를 비밀로 유지해야 합니다. 계정에서 발급된 접속 정보·백업 이용 정보의 관리 책임은 이용자에게 있습니다. 로그인 후 설정에서 계정 이메일을 확인할 수 있으며, 이메일 변경이나 계정 삭제는 acrosstool@gmail.com으로 요청합니다."
       },
       {
-        "title": "4. 결제와 요금제",
-        "body": "가격은 언어 설정에 따른 통화로 표시됩니다. 카드와 알리페이는 PortOne, Stripe, Paymentwall이 처리합니다. 결제 성공 시 프로비저닝이 시작됩니다. 트래픽, 백업 용량, 노드 조합은 구매한 요금제를 따릅니다. 요금제에 별도 규정이 없으면 남은 트래픽은 이월되지 않습니다. 청약철회와 환불은 제5조를 따릅니다."
+        "title": "4. 허용되는 이용",
+        "body": "서비스는 출장·여행·온라인 회의 등 합법적인 목적에만 사용할 수 있습니다. 네트워크 공격, 사기, 악성코드 유포, 아동 착취, 법령상 의무 회피, 수출·제재 위반에 사용해서는 안 됩니다. 회사는 남용·미납·법령상 필요가 있으면 이용을 제한하거나 계약을 해지할 수 있습니다."
+      },
+      {
+        "title": "5. 결제와 요금제",
+        "body": "표시 가격은 부가가치세가 포함된 금액이며, 언어 설정에 따른 통화로 보여 줍니다. 카드와 알리페이는 PortOne, Stripe, Paymentwall이 처리합니다. Standard와 Hybrid는 결제 성공 시 디지털 콘텐츠 제공(접속·백업 정보 발급)이 바로 시작됩니다. Workspace는 프로모션 코드 확인 후 결제하며, 회사가 계정에 발급합니다. 트래픽·백업 용량·이용 기간은 구매한 요금제를 따르며, 별도 표시가 없으면 남은 트래픽은 이월되지 않습니다. 청약철회와 환불은 제6조를 따릅니다."
       },
       {
         "id": "refund",
-        "title": "5. 청약철회 및 환불",
-        "body": "결제 성공과 동시에 자격 증명 발급이 시작되는 디지털 서비스입니다. 구독이 활성 상태가 되어 접속 정보·백업이 제공된 뒤에는 전자상거래법 제17조 제2항에 따라 청약철회가 제한될 수 있으며, 이 사실을 결제 전에 고지합니다.\n\n결제 후 7일 이내 acrosstool@gmail.com으로 요청하면 다음의 경우 전액 환불합니다. (1) 결제는 되었으나 자격 증명이 발급되지 않았거나 발급이 실패한 경우 (2) 중복 결제 또는 명백한 오류 결제.\n\n이미 발급되어 이용 가능한 기간의 중도 해지는 잔여 일수 일할 환불을 원칙으로 하지 않습니다. 강행 법규가 다르게 정하면 그 법이 우선합니다. 환불은 원래 결제 수단으로 처리하며 PG 일정에 따라 수일이 걸릴 수 있습니다."
+        "title": "6. 청약철회 및 환불",
+        "body": "본 서비스는 결제와 동시에 제공이 개시되는 디지털 콘텐츠입니다. 접속 정보 또는 백업 이용 정보가 발급된 뒤에는 「전자상거래 등에서의 소비자보호에 관한 법률」 제17조 제2항 제5호에 따라 청약철회가 제한될 수 있습니다. 회사는 결제 화면에서 이 사실을 고지하고 동의를 받습니다.\n\n다음의 경우 결제 후 7일 이내 acrosstool@gmail.com으로 요청하면 전액 환불합니다. (1) 결제는 되었으나 접속·백업 정보가 발급되지 않았거나 발급이 실패한 경우 (2) 중복 결제 또는 명백한 오류 결제.\n\n이미 발급되어 이용 가능한 상태의 중도 해지는 잔여 기간 일할 환불을 원칙으로 하지 않습니다. 강행 법규가 다르게 정하면 그 법이 우선합니다.\n\n환불은 원래 결제 수단으로 처리합니다. 법령상 환급 기한은 청약철회 의사 표시일부터 3영업일 이내이며, 결제대행 일정에 따라 입금까지 수일이 더 걸릴 수 있습니다. 디지털 콘텐츠 특성상 구매안전서비스(에스크로)는 제공되지 않습니다."
       },
       {
-        "title": "6. 가용성",
-        "body": "노드, 패널, 저장소는 이전·예비 전환·장애가 있을 수 있습니다. 요금제에 포함된 예비 노드를 포함해 접속 유지를 위해 노력하지만, 끊김 없는 우회나 특정 출구 IP를 보증하지는 않습니다."
+        "title": "7. 제공과 가용성",
+        "body": "네트워크 회선, 접속 정보, 백업 저장소는 이전·예비 전환·점검·장애가 있을 수 있습니다. 회사는 서비스 유지를 위해 노력하지만, 끊김 없는 접속이나 특정 출구 IP를 보증하지는 않습니다."
       },
       {
-        "title": "7. 해지",
-        "body": "이용자는 언제든지 서비스 이용을 중단할 수 있습니다. 미납, 남용, 법령상 필요가 있으면 구독을 종료할 수 있습니다. 구독이 끝나면 별도의 유예 없이 프록시 클라이언트와 백업 접근이 회수될 수 있습니다."
+        "title": "8. 해지",
+        "body": "이용자는 언제든지 이용을 중단할 수 있습니다. 미납, 약관 위반, 법령상 필요가 있으면 회사는 계약을 종료할 수 있습니다. 종료 후에는 별도의 유예 없이 접속과 백업 이용이 중단될 수 있습니다."
       },
       {
-        "title": "8. 책임",
-        "body": "서비스는 있는 그대로, 제공 가능한 범위에서 제공됩니다. 법령이 허용하는 한 AcrossFlare는 일실이익, 데이터 손실, 간접 손해에 책임지지 않으며, 청구에 대한 총 책임은 직전 3개월간 해당 구독에 지급한 금액으로 제한됩니다."
+        "title": "9. 책임",
+        "body": "서비스는 제공 가능한 범위에서 제공됩니다. 법령이 허용하는 한 회사는 일실이익, 데이터 손실, 간접 손해에 책임지지 않으며, 청구에 대한 총 책임은 문제된 구독에 대해 직전 3개월간 지급한 금액으로 제한됩니다."
       },
       {
-        "title": "9. 변경",
-        "body": "본 약관은 변경될 수 있습니다. 게시된 변경 이후에도 서비스를 계속 이용하면 변경된 약관에 동의한 것으로 봅니다. 문의: acrosstool@gmail.com"
+        "title": "10. 준거법과 문의",
+        "body": "본 약관은 대한민국 법령을 따릅니다. 분쟁은 「전자상거래 등에서의 소비자보호에 관한 법률」 및 관련 법령에 따라 처리하며, 소비자는 한국소비자원 등 구제 절차를 이용할 수 있습니다. 문의: acrosstool@gmail.com, 전화 070-8065-1258."
+      },
+      {
+        "title": "11. 변경",
+        "body": "회사는 약관을 변경할 수 있으며, 변경 내용은 이 페이지에 게시합니다. 이용자에게 불리한 변경은 적용 전에 고지합니다. 게시 이후에도 서비스를 계속 이용하면 변경된 약관에 동의한 것으로 봅니다."
       }
     ],
     "privacySections": [
       {
-        "title": "1. 수집하는 정보",
-        "body": "가입 시 이메일과 비밀번호 해시, 세션 쿠키, 요금제·결제 기록, 발급된 자격 증명(클라이언트 UUID, 프록시 비밀값, 백업 사용자명 등), 서비스 운영에 필요한 로그를 저장합니다."
+        "title": "1. 처리 목적과 수집 항목",
+        "body": "회사는 회원 가입, 본인 확인, 유료 서비스 제공, 결제·환불, 고객 문의, 보안·남용 대응을 위해 개인정보를 처리합니다. 수집 항목은 이메일, 비밀번호 해시, 세션 쿠키, 요금제·결제 기록, 발급된 접속·백업 이용 정보, 서비스 운영에 필요한 접속·이용 로그입니다. 카드 번호는 회사가 직접 저장하지 않으며 결제대행사가 처리합니다."
       },
       {
-        "title": "2. 네트워크와 보안 정보",
-        "body": "acrossflare.com 트래픽은 Cloudflare를 거칩니다. Cloudflare가 전달하는 접속 IP(CF-Connecting-IP)를 볼 수 있습니다. 쿼터와 남용 대응을 위해 3x-ui/Xray, Vaultwarden, Syncthing은 자체 접속·사용 기록을 유지합니다."
+        "title": "2. 보유 기간",
+        "body": "계정 정보는 회원 탈퇴 또는 계약 종료 시까지, 결제·거래 기록은 전자상거래법 등 관련 법령에 따른 보관 기간(계약·청약철회 기록 5년, 대금결제·재화 공급 기록 5년, 소비자 불만·분쟁 처리 기록 3년 등) 동안 보관합니다. 세션 쿠키는 만료됩니다. 발급 비밀값은 요금제 변경·종료 시 삭제하거나 교체하며, 백업 사본은 제한된 기간만 남을 수 있습니다."
       },
       {
         "title": "3. 처리 위탁",
-        "body": "결제는 PortOne, Stripe, Paymentwall이 처리합니다. 호스팅, DNS, WAF, TLS에는 Cloudflare와 VPS 제공자가 사용될 수 있습니다. 암호와 보안 메모는 Vaultwarden에, 파일은 Syncthing으로 동기화됩니다. 개인정보를 판매하지 않습니다."
+        "body": "결제는 PortOne, Stripe, Paymentwall에 위탁합니다. 웹사이트 호스팅·DNS·WAF·TLS는 Cloudflare 및 서버 운영에 사용하는 VPS 제공자에 위탁할 수 있습니다. 보안 클라우드 백업 기능 제공을 위해 암호·메모·파일 동기화 시스템이 사용됩니다. 회사는 개인정보를 판매하지 않습니다."
       },
       {
-        "title": "4. 보관",
-        "body": "계정과 결제 기록은 계정 유지 기간과 세무·분쟁에 필요한 기간 동안 보관합니다. 세션 쿠키는 만료됩니다. 요금제 변경, 이관, 종료 시 발급 비밀값은 삭제하거나 회전하며, 백업 사본은 제한된 기간만 남을 수 있습니다."
+        "title": "4. 국외 이전",
+        "body": "서비스 제공을 위해 개인정보가 국외로 이전될 수 있습니다. Cloudflare(미국 등, DNS·보안·접속 지원), Stripe·Paymentwall(미국 등, 결제 처리), 해외 VPS 제공자(미국·일본·싱가포르 등, 서버 운영). 이전 항목은 이메일, 결제 식별 정보, 접속·이용에 필요한 기술 정보입니다. 보유 기간은 제2조와 같습니다. 회원가입 또는 결제 시 본 처리방침에 동의하는 것으로 국외 이전을 인지한 것으로 봅니다."
       },
       {
-        "title": "5. 이용자 선택",
-        "body": "콘솔에서 계정 이메일을 확인하고 바꿀 수 있습니다. 법령이나 보안상 보관이 필요치 않다면 acrosstool@gmail.com으로 계정 삭제를 요청할 수 있습니다. 그 주소로 카드 번호를 보내지 마세요."
+        "title": "5. 제3자 제공",
+        "body": "법령에 따른 요청이 있는 경우를 제외하고 개인정보를 제3자에게 제공하지 않습니다."
+      },
+      {
+        "title": "6. 파기와 안전조치",
+        "body": "보유 기간이 끝나면 개인정보를 복구할 수 없는 방법으로 파기합니다. 전자 파일은 안전한 삭제, 출력물은 분쇄 또는 소각합니다. 회사는 접근 제한, 암호화 전송(TLS), 비밀번호 해시 보관, 권한 관리 등 합리적인 안전조치를 합니다."
+      },
+      {
+        "title": "7. 이용자 권리",
+        "body": "로그인 후 설정에서 계정 이메일을 확인할 수 있습니다. 이메일 변경, 열람·정정, 처리 정지, 계정 삭제는 법령이나 보안상 보관이 필요치 않은 범위에서 acrosstool@gmail.com으로 요청할 수 있습니다. 그 주소로 카드 번호를 보내지 마세요."
+      },
+      {
+        "title": "8. 만 14세 미만",
+        "body": "회사는 만 14세 미만 아동의 개인정보를 수집하지 않습니다. 만 14세 미만은 가입할 수 없습니다."
+      },
+      {
+        "title": "9. 쿠키",
+        "body": "로그인 유지와 보안을 위해 세션 쿠키를 사용합니다. 브라우저에서 쿠키를 차단하면 로그인 등 일부 기능을 쓸 수 없습니다."
+      },
+      {
+        "title": "10. 개인정보 보호책임자",
+        "body": "개인정보 보호책임자: 신일. 이메일 acrosstool@gmail.com, 전화 070-8065-1258."
+      },
+      {
+        "title": "11. 권익침해 구제",
+        "body": "개인정보 침해 신고·상담: 개인정보침해신고센터 (privacy.kisa.or.kr / 118), 개인정보분쟁조정위원회 (www.kopico.go.kr / 1833-6972), 대검찰청 사이버수사과 (www.spo.go.kr / 1301), 경찰청 사이버수사 (ecrm.police.go.kr / 182)."
+      },
+      {
+        "title": "12. 변경",
+        "body": "처리방침을 변경하면 이 페이지에 게시하고, 중요한 변경은 적용 전에 고지합니다."
       }
     ]
   },
-  "landing": {
-    "headline": "Secure Cloud & Network Optimization",
-    "ctaGlobal": "Start Global",
-    "ctaMarketing": "Get Marketing IP",
-    "productsEyebrow": "두 가지 상품",
-    "productsTitle": "레인을 고르세요. 섞지 않습니다.",
-    "globalBadge": "타겟 A",
-    "globalTitle": "글로벌 우회 + 백업",
-    "globalDesc": "스캔 한 번으로 Karing VLESS 연결. 계정과 함께 Vaultwarden·Syncthing 백업이 열립니다.",
-    "globalPoints": [
-      "Karing용 QR과 딥링크",
-      "YAML 구독, text/yaml",
-      "Bandwagon 150GB, Racknerd 예비 전환"
-    ],
-    "marketingBadge": "타겟 B",
-    "marketingTitle": "마케팅 IP",
-    "marketingDesc": "별도 앱 없이 HTTP/SOCKS5 URL 또는 WireGuard 설정을 복사합니다.",
-    "marketingPoints": [
-      "http://id:pw@ip:port 엔드포인트",
-      "필요한 순간 WireGuard 스니펫",
-      "잠금 기반 1클릭 IP Rotate"
-    ]
-  },
   "pricing": {
-    "title": "단순한 월간 요금",
-    "subtitle": "상품을 전환하세요. 가격은 언어를 따릅니다.",
-    "global": "Global Bypass",
-    "marketing": "Marketing IP",
+    "title": "요금",
+    "subtitle": "Standard, Hybrid, Workspace & Custom.",
+    "standard": "Standard",
+    "hybrid": "Hybrid",
+    "workspace": "Workspace",
+    "global": "Standard",
+    "marketing": "Workspace",
     "perMonth": "/ 월",
+    "perWeek": "/ 일주일",
+    "periodWeek": "/ 일주일",
+    "period1Week": "/ 1주일",
+    "periodMonth": "/ 1개월",
+    "periodYear": "/ 12개월",
     "traffic": "트래픽",
     "backup": "백업",
     "nodes": "노드",
     "unlimited": "무제한",
+    "quotaMonth": "매월",
+    "quotaTotal": "총",
     "cta": "계속",
+    "viewService": "상품 보기",
+    "inquire": "요청사항을 이메일로 문의",
     "featured": "인기",
     "alipay": "Alipay"
   },
@@ -139,15 +191,76 @@
       "eyebrow": "보안 클라우드+네트워크 최적화",
       "title": "Standard",
       "description": "단기 여행이나 출장시 보안백업을 위한 적합한 속도를 제공",
-      "price": "₩99,00/월",
-      "cta": "서비스 신청하기"
+      "price": "₩9,900/월",
+      "cta": "더 알아보기"
     },
     "global-pro": {
       "eyebrow": "보안 클라우드+네트워크 최적화",
       "title": "Hybrid",
       "description": "보안백업과 빠른 속도의 네트워크 최적화를 제공",
-      "price": "₩199,00/월",
-      "cta": "서비스 신청하기"
+      "price": "₩19,900/월",
+      "cta": "더 알아보기"
+    }
+  },
+  "workspace": {
+    "eyebrow": "보안 클라우드+네트워크 최적화",
+    "title": "Workspace & Custom",
+    "description": "친구나 팀원을 위한 맞춤형 주문 서비스",
+    "hint": "인원수에 따른 A, B, C 플랜",
+    "learnMore": "더 알아보기",
+    "cta": "서비스 신청하기"
+  },
+  "services": {
+    "trialPlan": "단기체험플랜",
+    "standard": {
+      "eyebrow": "보안 클라우드+네트워크 최적화",
+      "title": "Standard",
+      "description": "단기 여행이나 출장시 보안백업을 위한 적합한 속도를 제공",
+      "cta": "서비스 신청하기",
+      "features": [
+        "AcrossFlare의 베이스 기술 적용",
+        "보안 클라우드 백업 1GB 제공(중요한 파일 백업가능)",
+        "Zoom, Webex, Teams 등등 온라인 회의 가능",
+        "국제 전용 회선(LA라인)으로 네트워크 최적화",
+        "고급 암호화 기술로 안전한 네트워크 환경 조성"
+      ]
+    },
+    "hybrid": {
+      "eyebrow": "보안 클라우드+네트워크 최적화",
+      "title": "Hybrid",
+      "description": "보안백업과 빠른 속도의 네트워크 최적화를 제공",
+      "cta": "서비스 신청하기",
+      "features": [
+        "AcrossFlare의 고급 기술 적용",
+        "보안 클라우드 백업 1GB 제공(중요한 파일 백업가능)",
+        "Zoom, Webex, Teams 등등 끊김없는 온라인 회의",
+        "도쿄+LA라인으로 빠른 네트워크",
+        "고급 암호화 기술로 안전한 네트워크 환경 조성"
+      ]
+    },
+    "workspace": {
+      "eyebrow": "보안 클라우드+네트워크 최적화",
+      "title": "Workspace & Custom",
+      "description": "친구나 팀원을 위한 맞춤형 주문 서비스",
+      "cta": "Promotional Code 입력하기",
+      "hint": "인원수에 따른 A, B, C 플랜",
+      "priceNote": "A·B·C 모두 12개월 ₩1,990,000입니다. 플랜에 따라 인원과 월 트래픽만 다릅니다.",
+      "codePlaceholder": "프로모션 코드",
+      "codeSubmit": "확인",
+      "codeInvalid": "유효하지 않은 코드입니다.",
+      "inquire": "요청사항을 이메일로 문의",
+      "headings": {
+        "workspace-a": "A플랜: Workspace(20명)",
+        "workspace-b": "B플랜: Workspace(10명)",
+        "workspace-c": "C플랜: Custom"
+      },
+      "features": [
+        "AcrossFlare의 고급 기술 적용",
+        "보안 클라우드 백업 1GB 제공(중요한 파일 백업가능)",
+        "Zoom, Webex, Teams 등등 끊김없는 온라인 회의",
+        "도쿄+LA라인으로 빠른 네트워크",
+        "고급 암호화 기술로 안전한 네트워크 환경 조성"
+      ]
     }
   },
   "auth": {
@@ -167,12 +280,18 @@
     "errorTaken": "이미 가입된 이메일입니다.",
     "errorWeak": "비밀번호는 8자 이상이어야 합니다.",
     "errorGeneric": "문제가 발생했습니다. 다시 시도하세요.",
-    "productHint": "선택한 상품: {product}"
+    "productHint": "선택한 상품: {product}",
+    "ageConfirm": "만 14세 이상입니다.",
+    "agreeLegal": "이용약관과 개인정보 처리방침에 동의합니다.",
+    "errorConsent": "만 14세 이상 확인과 약관 동의가 필요합니다."
   },
   "app": {
     "overview": "개요",
-    "global": "글로벌",
-    "marketing": "마케팅 IP",
+    "standard": "Standard",
+    "hybrid": "Hybrid",
+    "global": "Standard",
+    "marketing": "Marketing IP",
+    "workspace": "Workspace & Custom",
     "billing": "결제",
     "settings": "설정",
     "logout": "로그아웃",
@@ -184,10 +303,11 @@
     "homeTitle": "콘솔",
     "homeSubtitle": "상품은 분리됩니다. 레인을 하나 여세요.",
     "emptyTitle": "활성 상품 없음",
-    "emptyBody": "결제를 완료하면 Global 또는 Marketing IP가 발급됩니다.",
+    "emptyBody": "Standard, Hybrid, Workspace & Custom 상품 페이지에서 요금제를 고르면 접속과 백업이 발급됩니다.",
     "goCheckout": "요금 보기",
     "open": "열기",
-    "addGlobal": "Global 추가",
+    "addGlobal": "Standard 보기",
+    "addWorkspace": "Workspace 보기",
     "addMarketing": "Marketing IP 추가",
     "plan": "요금제",
     "expires": "만료",
@@ -196,15 +316,20 @@
     "statusActive": "활성",
     "statusFailover": "예비 전환",
     "unpaidTitle": "결제가 필요합니다",
-    "unpaidBody": "체크아웃하면 이 상품이 발급됩니다. 노드는 DDNS만 사용합니다.",
-    "unpaidCta": "결제하기",
+    "unpaidBody": "상품 페이지에서 요금제를 고르면 이 서비스가 발급됩니다.",
+    "unpaidCta": "요금 보기",
     "failedTitle": "발급에 실패했습니다",
     "failedBody": "결제는 완료됐지만 프로비저닝이 멈췄습니다. 다시 결제하면 이 상품을 발급합니다.",
     "failedCta": "다시 결제하기",
     "statusFailed": "실패",
-    "globalTitle": "글로벌 우회",
-    "globalDesc": "Karing VLESS와 Vaultwarden·Syncthing 백업.",
-    "marketingTitle": "마케팅 IP",
+    "globalTitle": "Standard",
+    "globalDesc": "암호화 네트워크 접속과 보안 클라우드 백업.",
+    "hybridTitle": "Hybrid",
+    "hybridDesc": "도쿄+LA 회선의 암호화 네트워크 접속과 보안 클라우드 백업.",
+    "workspaceTitle": "Workspace & Custom",
+    "workspaceDesc": "팀 또는 맞춤형 암호화 네트워크 접속과 보안 클라우드 백업.",
+    "pendingCredentials": "접속·백업 정보는 발급되면 여기에 표시됩니다.",
+    "marketingTitle": "Marketing IP",
     "marketingDesc": "HTTP/SOCKS5 엔드포인트와 WireGuard.",
     "usageTraffic": "Bandwagon 트래픽",
     "usageUnlimited": "Racknerd 무제한",
@@ -273,11 +398,21 @@
     "card": "카드",
     "alipay": "Alipay",
     "stepPayment": "결제 확인",
-    "stepXui": "3x-ui 계정",
+    "stepXui": "접속 정보 발급",
     "stepBackup": "백업 공간",
     "stepReady": "준비 완료",
     "invalidPlan": "요금 페이지에서 플랜을 선택하세요.",
-    "backPricing": "요금으로"
+    "backPricing": "요금으로",
+    "invalidCode": "유효한 프로모션 코드가 필요합니다.",
+    "backWorkspace": "Workspace로",
+    "taxIncluded": "부가세 포함",
+    "refundNotice": "결제와 동시에 접속·백업 정보 발급이 시작되는 디지털 콘텐츠입니다. 발급 후에는 전자상거래법에 따라 청약철회가 제한될 수 있습니다.",
+    "agreeLabel": "이용약관, 개인정보 처리방침 및 청약철회 제한 안내에 동의합니다.",
+    "agreeRequired": "결제 전에 약관과 청약철회 제한에 동의해 주세요.",
+    "productStandard": "Standard",
+    "productHybrid": "Hybrid",
+    "productWorkspace": "Workspace & Custom",
+    "productMarketing": "Marketing IP"
   },
   "common": {
     "docsSoon": "문서는 곧 제공"
@@ -285,15 +420,35 @@
   "admin": {
     "title": "어드민",
     "mode": "관리자모드",
-    "tabGlobal": "글로벌 우회",
-    "tabMarketing": "마케팅 IP",
+    "sessionRoleOwner": "관리자(대표)",
+    "sessionRoleStaff": "직원",
+    "tabGlobal": "Standard · Hybrid",
+    "tabWorkspace": "Workspace",
+    "tabMarketing": "Marketing IP",
     "navPlans": "요금제",
     "navCustomers": "고객",
     "navProvision": "수동 등록",
     "navNodes": "노드",
+    "navCodes": "프로모션 코드",
+    "navStaff": "직원",
+    "staffTitle": "직원 권한",
+    "staffSubtitle": "직원이 먼저 일반 회원으로 가입한 뒤, 여기서 직원으로 올리고 메뉴별 권한을 켭니다. 직원 관리는 대표만 할 수 있습니다.",
+    "staffEmpty": "직원이 될 수 있는 계정이 없습니다. 직원이 먼저 회원가입해야 합니다.",
+    "staffPromote": "직원으로 지정",
+    "staffDemote": "일반 회원으로",
+    "staffRoleUser": "회원",
+    "staffRoleStaff": "직원",
+    "staffPermissions": "권한",
+    "staffOwnerHint": "대표 {email} — 모든 권한",
+    "permCustomers": "고객",
+    "permPlans": "요금제",
+    "permCodes": "프로모션 코드",
+    "permProvision": "수동 등록",
+    "permNodes": "노드",
     "homeTitle": "제어면",
     "homeSubtitle": "상품은 완전히 분리됩니다. 탭을 하나 여세요.",
-    "homeGlobalDesc": "Karing, Vaultwarden, Syncthing, Bandwagon / Racknerd.",
+    "homeGlobalDesc": "Standard와 Hybrid. 암호화 네트워크 접속과 보안 클라우드 백업.",
+    "homeWorkspaceDesc": "A/B/C 플랜, 프로모션 코드, 수동 발급.",
     "homeMarketingDesc": "프록시 URL, WireGuard, Rotate 이력.",
     "statCustomers": "고객",
     "statPlans": "요금제",
@@ -392,7 +547,18 @@
     "back": "뒤로",
     "notFound": "찾을 수 없습니다.",
     "close": "닫기",
-    "required": "필수 항목을 입력하세요."
+    "required": "필수 항목을 입력하세요.",
+    "codesTitle": "프로모션 코드",
+    "codesSubtitle": "Workspace 플랜 코드를 만들고 고객에게 전달합니다.",
+    "newCode": "새 코드",
+    "codeValue": "코드",
+    "codeHint": "비우면 자동 생성됩니다.",
+    "statusUnused": "미사용",
+    "statusReserved": "결제 중",
+    "statusRedeemed": "사용됨",
+    "emptyCodes": "코드가 없습니다.",
+    "codeTaken": "이미 있는 코드입니다.",
+    "codeInUse": "이미 쓰인 코드는 삭제할 수 없습니다."
   },
   "pwa": {
     "eyebrow": "PWA",

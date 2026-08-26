@@ -1,21 +1,23 @@
 "use client";
 
-import { CreditCard, Globe, HardDrive, LayoutGrid, LogOut, Menu, Settings2, Waypoints, X } from "lucide-react";
+import { CreditCard, Globe, HardDrive, Layers, LayoutGrid, LogOut, Menu, Settings2, Waypoints, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { LegalFooterLinks } from "@/components/marketing/legal-footer-links";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { Logo } from "@/components/marketing/logo";
 import { buttonVariants } from "@/components/ui/button";
 import { useAccount, useHydrated } from "@/hooks/use-account";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import { publicServiceFromPlanId } from "@/lib/public-service";
 import { clearSession } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
-const NAV = [
+const BASE_NAV = [
   { href: "/app", key: "overview", icon: LayoutGrid },
   { href: "/dashboard", key: "backup", icon: HardDrive },
-  { href: "/app/global", key: "global", icon: Globe },
-  { href: "/app/marketing", key: "marketing", icon: Waypoints },
+  { href: "/app/global", key: "network", icon: Globe },
+  { href: "/app/workspace", key: "workspace", icon: Layers },
   { href: "/app/billing", key: "billing", icon: CreditCard },
   { href: "/app/settings", key: "settings", icon: Settings2 },
 ] as const;
@@ -27,13 +29,23 @@ function NavLinks({
 }) {
   const t = useTranslations("app");
   const pathname = usePathname();
+  const { account } = useAccount();
+  const networkKey = publicServiceFromPlanId(account?.global?.planId) === "hybrid" ? "hybrid" : "standard";
+  const items = [
+    ...BASE_NAV.slice(0, 4),
+    ...(account?.marketing
+      ? ([{ href: "/app/marketing", key: "marketing", icon: Waypoints }] as const)
+      : []),
+    ...BASE_NAV.slice(4),
+  ];
 
   return (
     <nav className="space-y-1">
-      {NAV.map((item) => {
+      {items.map((item) => {
         const active =
           item.href === "/app" ? pathname === "/app" : pathname.startsWith(item.href);
         const Icon = item.icon;
+        const label = item.key === "network" ? t(networkKey) : t(item.key);
 
         return (
           <Link
@@ -48,7 +60,7 @@ function NavLinks({
             )}
           >
             <Icon className="size-4" />
-            {t(item.key)}
+            {label}
           </Link>
         );
       })}
@@ -146,7 +158,10 @@ export function AppShell({
         ) : null}
         <main className="flex-1 px-4 py-8 md:px-8">{children}</main>
         {merchant ? (
-          <footer className="border-t border-border px-4 py-6 md:px-8">{merchant}</footer>
+          <footer className="border-t border-border px-4 py-6 md:px-8">
+            <LegalFooterLinks className="text-xs" />
+            <div className="mt-6">{merchant}</div>
+          </footer>
         ) : null}
       </div>
     </div>

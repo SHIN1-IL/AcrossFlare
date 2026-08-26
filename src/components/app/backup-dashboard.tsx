@@ -19,21 +19,31 @@ export function BackupDashboard() {
     return null;
   }
 
-  if (!account.global) {
+  const lane = account.global ?? account.workspace;
+  const product = account.global ? "global" : "workspace";
+
+  if (!lane) {
     return <ProductEmpty product="global" />;
   }
 
-  if (account.global.status === "provisioning") {
+  if (lane.status === "provisioning") {
     return <IssuingSkeleton />;
   }
 
-  if (account.global.status === "unpaid" || account.global.status === "failed") {
+  if (lane.status === "unpaid" || lane.status === "failed") {
+    return <ProductEmpty product={product} status={lane.status} planId={lane.planId} />;
+  }
+
+  if (!lane.vaultUrl && !lane.syncthingUrl) {
     return (
-      <ProductEmpty product="global" status={account.global.status} planId={account.global.planId} />
+      <div className="mx-auto max-w-4xl">
+        <h1 className="text-3xl tracking-tight">{t("backupTitle")}</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{t("pendingCredentials")}</p>
+      </div>
     );
   }
 
-  const global = account.global;
+  const global = lane;
   const statusLabel = global.failover ? t("statusFailover") : t("statusActive");
 
   return (

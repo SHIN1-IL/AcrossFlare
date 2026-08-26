@@ -7,6 +7,7 @@ import { Link } from "@/i18n/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { Logo } from "@/components/marketing/logo";
+import { ServiceNav } from "@/components/marketing/service-nav";
 import { useHydrated, useSession } from "@/hooks/use-account";
 import { cn } from "@/lib/utils";
 
@@ -22,12 +23,9 @@ export function MarketingHeader() {
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
         <div className="flex items-center gap-4">
           <Logo showWordmark={false} />
-          <Link
-            href="/#plans"
-            className="hidden text-sm text-muted-foreground transition-colors hover:text-foreground md:inline"
-          >
-            {t("service")}
-          </Link>
+          <div className="hidden md:block">
+            <ServiceNav />
+          </div>
           <div className="hidden md:block">
             <LocaleSwitcher />
           </div>
@@ -71,9 +69,7 @@ export function MarketingHeader() {
 
       {open ? (
         <div className="space-y-3 border-t border-border px-4 py-3 md:hidden">
-          <Link href="/#plans" onClick={() => setOpen(false)} className="block text-sm">
-            {t("service")}
-          </Link>
+          <ServiceNav onNavigate={() => setOpen(false)} />
           <LocaleSwitcher />
           {signedIn ? (
             <Link
