@@ -8,7 +8,7 @@ export default async function AdminNodesPage({
 }: {
   params: Promise<{ locale: string; product: string }>;
 }) {
-  const { locale, product } = await resolveAdminProduct(params);
+  const { locale, product } = await resolveAdminProduct(params, "nodes");
   setRequestLocale(locale);
   await requireAdminPage(locale, "nodes");
   return <NodeManager product={product} />;

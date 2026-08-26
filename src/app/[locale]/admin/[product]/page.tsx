@@ -10,11 +10,11 @@ export default async function AdminProductIndexPage({
 }: {
   params: Promise<{ locale: string; product: string }>;
 }) {
-  const { locale, product } = await resolveAdminProduct(params);
+  const { locale, service } = await resolveAdminProduct(params);
   setRequestLocale(locale);
   const user = await requireAdminPage(locale);
   redirect({
-    href: firstAdminPath(product, user.permissions, isOwnerRole(user.role)),
+    href: firstAdminPath(service, user.permissions, isOwnerRole(user.role)),
     locale,
   });
 }

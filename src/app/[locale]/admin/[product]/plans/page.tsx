@@ -8,8 +8,8 @@ export default async function AdminPlansPage({
 }: {
   params: Promise<{ locale: string; product: string }>;
 }) {
-  const { locale, product } = await resolveAdminProduct(params);
+  const { locale, service } = await resolveAdminProduct(params, "plans");
   setRequestLocale(locale);
   await requireAdminPage(locale, "plans");
-  return <PlanManager product={product} />;
+  return <PlanManager service={service} />;
 }

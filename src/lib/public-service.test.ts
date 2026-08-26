@@ -5,7 +5,7 @@ describe("public-service", () => {
   it("maps catalog plan ids to homepage service names", () => {
     expect(publicServiceFromPlanId("global-lite")).toBe("standard");
     expect(publicServiceFromPlanId("global-week")).toBe("standard");
-    expect(publicServiceFromPlanId("hybrid-lite")).toBe("hybrid");
+    expect(publicServiceFromPlanId("global-pro")).toBe("hybrid");
     expect(publicServiceFromPlanId("workspace-a")).toBe("workspace");
     expect(publicServiceFromPlanId("marketing-standard")).toBe("marketing");
     expect(publicServiceFromPlanId(undefined)).toBe("standard");

@@ -17,9 +17,9 @@ describe("provision/build", () => {
   });
 
   it("emits VLESS yaml for DDNS hosts with the backup dashboard notice", () => {
-    const yaml = buildVlessYaml(["node-sg.acrossflare.com"], "uuid-1");
+    const yaml = buildVlessYaml(["node-tokyo.acrossflare.com"], "uuid-1");
     expect(yaml).toContain("type: vless");
-    expect(yaml).toContain("server: node-sg.acrossflare.com");
+    expect(yaml).toContain("server: node-tokyo.acrossflare.com");
     expect(yaml).toContain("uuid: uuid-1");
     expect(yaml).toContain("path: /vless");
     expect(yaml).toContain(BACKUP_ANNOUNCE);

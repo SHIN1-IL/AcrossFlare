@@ -8,15 +8,16 @@ import { StatusPill } from "@/components/app/status-pill";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useAdmin } from "@/hooks/use-admin";
-import { createPromoCode, deletePromoCode, listPlans, listPromoCodes } from "@/lib/admin-store";
+import { AdminPlanLabel, AdminPlanOption } from "@/components/admin/admin-plan-label";
+import { listPlansForService, createPromoCode, deletePromoCode, listPromoCodes } from "@/lib/admin-store";
 import { getPlansByProduct } from "@/lib/plans";
 
 export function PromoCodeManager() {
   const t = useTranslations("admin");
   useAdmin();
-  const plans = listPlans("workspace");
+  const { catalog: liveCatalog } = listPlansForService("workspace");
   const catalog = getPlansByProduct("workspace");
-  const planOptions = plans.length ? plans : catalog;
+  const planOptions = liveCatalog.length ? liveCatalog : catalog;
   const codes = listPromoCodes();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
@@ -87,7 +88,9 @@ export function PromoCodeManager() {
               codes.map((row) => (
                 <tr key={row.id} className="border-b border-border last:border-0">
                   <td className="px-4 py-3 font-mono text-xs tracking-wide">{row.code}</td>
-                  <td className="px-4 py-3">{planNames[row.planId] ?? row.planName}</td>
+                  <td className="px-4 py-3">
+                    <AdminPlanLabel planId={row.planId} fallback={planNames[row.planId] ?? row.planName} />
+                  </td>
                   <td className="px-4 py-3 text-muted-foreground">{row.note || "—"}</td>
                   <td className="px-4 py-3">
                     <StatusPill
@@ -155,9 +158,7 @@ export function PromoCodeManager() {
               onChange={(event) => setDraft({ ...draft, planId: event.target.value })}
             >
               {planOptions.map((plan) => (
-                <option key={plan.id} value={plan.id}>
-                  {plan.name}
-                </option>
+                <AdminPlanOption key={plan.id} planId={plan.id} fallback={plan.name} />
               ))}
             </select>
           </div>

@@ -2,15 +2,16 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
+import { AdminPlanLabel } from "@/components/admin/admin-plan-label";
 import { StatusPill } from "@/components/app/status-pill";
 import { buttonVariants } from "@/components/ui/button";
 import { useAdmin } from "@/hooks/use-admin";
 import { useSession } from "@/hooks/use-account";
 import { Link } from "@/i18n/navigation";
-import { listCustomers, listNodes } from "@/lib/admin-store";
+import { listCustomersForService, listNodesForService } from "@/lib/admin-store";
 import type { CustomerStatus } from "@/lib/admin";
+import type { AdminServiceId } from "@/lib/admin-service";
 import { formatDate } from "@/lib/format-date";
-import type { ProductId } from "@/lib/plans";
 import { cn } from "@/lib/utils";
 
 function toneFor(status: CustomerStatus) {
@@ -23,13 +24,13 @@ function toneFor(status: CustomerStatus) {
   return "neutral" as const;
 }
 
-export function CustomerTable({ product }: { product: ProductId }) {
+export function CustomerTable({ service }: { service: AdminServiceId }) {
   const t = useTranslations("admin");
   const locale = useLocale();
   const session = useSession();
   useAdmin();
-  const customers = listCustomers(product);
-  const nodes = listNodes(product);
+  const customers = listCustomersForService(service);
+  const nodes = listNodesForService(service);
   const canProvision = Boolean(session?.permissions?.includes("provision"));
 
   return (
@@ -39,7 +40,7 @@ export function CustomerTable({ product }: { product: ProductId }) {
         subtitle={t("customersSubtitle")}
         action={
           canProvision ? (
-            <Link href={`/admin/${product}/provision`} className={cn(buttonVariants(), "rounded-[10px]")}>
+            <Link href={`/admin/${service}/provision`} className={cn(buttonVariants(), "rounded-[10px]")}>
               {t("issue")}
             </Link>
           ) : undefined
@@ -73,7 +74,9 @@ export function CustomerTable({ product }: { product: ProductId }) {
                 return (
                   <tr key={customer.id} className="border-b border-border last:border-0">
                     <td className="px-4 py-3 font-mono text-xs">{customer.email}</td>
-                    <td className="px-4 py-3">{customer.planName}</td>
+                    <td className="px-4 py-3">
+                      <AdminPlanLabel planId={customer.planId} fallback={customer.planName} />
+                    </td>
                     <td className="px-4 py-3 font-mono text-xs">{formatDate(locale, customer.expiresAt)}</td>
                     <td className="px-4 py-3">
                       <StatusPill
@@ -95,7 +98,7 @@ export function CustomerTable({ product }: { product: ProductId }) {
                     <td className="max-w-[180px] truncate px-4 py-3 text-muted-foreground">{customer.memo || "—"}</td>
                     <td className="px-4 py-3 text-right">
                       <Link
-                        href={`/admin/${product}/customers/${customer.id}`}
+                        href={`/admin/${service}/customers/${customer.id}`}
                         className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "rounded-[10px]")}
                       >
                         {t("open")}

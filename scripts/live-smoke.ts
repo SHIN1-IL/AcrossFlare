@@ -13,7 +13,7 @@ async function pointSeedNodesAtLocalPanel() {
   });
 
   await prisma.node.updateMany({
-    where: { id: { in: ["g-sg-bw", "m-use-bw"] } },
+    where: { id: { in: ["g-la-b-bw", "m-use-bw"] } },
     data: {
       status: NodeHealth.ONLINE,
       host: PANEL_HOST,

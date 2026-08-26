@@ -6,10 +6,18 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { StageBackdrop } from "@/components/marketing/plan-stage-bg";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PriceAmount, SecondaryPriceAmount } from "@/components/marketing/price-amount";
+import { PriceWithPeriod, SecondaryPriceAmount } from "@/components/marketing/price-amount";
 import { useLivePlans } from "@/hooks/use-admin";
 import { getMarketingService, type MarketingServiceId } from "@/lib/marketing-services";
-import { getPlanById, planHasPrice, planTerm, planTrafficQuota, publicPlanFrom, type Plan } from "@/lib/plans";
+import {
+  getPlanById,
+  planHasPrice,
+  planPricePeriodKey,
+  planTerm,
+  planTrafficQuota,
+  publicPlanFrom,
+  type Plan,
+} from "@/lib/plans";
 import { cn } from "@/lib/utils";
 import type { AppLocale } from "@/i18n/routing";
 
@@ -92,19 +100,7 @@ export function ServiceDetail({
                 cta={t(`${service.id}.cta`)}
                 wrapCta={service.id === "workspace"}
                 needsCode={service.id === "workspace"}
-                period={
-                  priced
-                    ? tPricing(
-                        planTerm(plan.id) === "week"
-                          ? service.id === "hybrid"
-                            ? "period1Week"
-                            : "periodWeek"
-                          : planTerm(plan.id) === "year"
-                            ? "periodYear"
-                            : "periodMonth"
-                      )
-                    : null
-                }
+                period={priced ? tPricing(planPricePeriodKey(plan.id, service.id)) : null}
               />
               );
             })}
@@ -328,19 +324,13 @@ function PriceLine({
     >
       <p className="flex h-[1.25em] items-baseline justify-center whitespace-nowrap">
         {hidePrice ? null : (
-          <>
-            <PriceAmount
-              locale={locale}
-              prices={prices}
-              compact={compact}
-              className="shrink-0 whitespace-nowrap text-primary"
-            />
-            {period ? (
-              <span className="ml-1.5 shrink-0 text-xs text-muted-foreground sm:text-sm">
-                {period}
-              </span>
-            ) : null}
-          </>
+          <PriceWithPeriod
+            locale={locale}
+            prices={prices}
+            period={period}
+            compact={compact}
+            amountClassName="text-primary"
+          />
         )}
       </p>
       <p className="mt-1 h-[1em] text-center text-base font-medium leading-none text-blue-400 sm:text-lg">

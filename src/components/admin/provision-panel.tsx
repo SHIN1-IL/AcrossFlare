@@ -13,15 +13,17 @@ import { Label } from "@/components/ui/label";
 import { useAdmin } from "@/hooks/use-admin";
 import { Link } from "@/i18n/navigation";
 import { adminTabMessageKey } from "@/lib/admin-nav";
+import { productForAdminService, type AdminServiceId } from "@/lib/admin-service";
 import { normalizeEmail } from "@/lib/session";
-import { clearProvision, getCustomer, listPlans, runProvision } from "@/lib/admin-store";
-import type { ProductId } from "@/lib/plans";
+import { clearProvision, getCustomerById, listAllPlansForService, runProvision } from "@/lib/admin-store";
+import { AdminPlanOption } from "@/components/admin/admin-plan-label";
 
-export function ProvisionPanel({ product }: { product: ProductId }) {
+export function ProvisionPanel({ service }: { service: AdminServiceId }) {
   const t = useTranslations("admin");
   const tApp = useTranslations("app");
   const { provision, provisioning } = useAdmin();
-  const plans = listPlans(product);
+  const product = productForAdminService(service);
+  const plans = listAllPlansForService(service);
   const [email, setEmail] = useState("");
   const [planId, setPlanId] = useState("");
   const [expiresAt, setExpiresAt] = useState(defaultExpiry);
@@ -31,7 +33,7 @@ export function ProvisionPanel({ product }: { product: ProductId }) {
   const [error, setError] = useState("");
 
   const session = provision?.product === product ? provision : null;
-  const issued = session?.customerId ? getCustomer(product, session.customerId) : null;
+  const issued = session?.customerId ? getCustomerById(session.customerId) : null;
 
   const labels = useMemo(
     () => ({
@@ -75,7 +77,7 @@ export function ProvisionPanel({ product }: { product: ProductId }) {
         >
           <div className="space-y-2">
             <Label>{t("product")}</Label>
-            <input className={fieldClass} value={t(adminTabMessageKey(product))} disabled />
+            <input className={fieldClass} value={t(adminTabMessageKey(service))} disabled />
           </div>
           <div className="space-y-2">
             <Label>{t("email")}</Label>
@@ -91,9 +93,7 @@ export function ProvisionPanel({ product }: { product: ProductId }) {
               <Label>{t("plan")}</Label>
               <select className={fieldClass} value={selectedPlanId} onChange={(event) => setPlanId(event.target.value)}>
                 {plans.map((plan) => (
-                  <option key={plan.id} value={plan.id}>
-                    {plan.name}
-                  </option>
+                  <AdminPlanOption key={plan.id} planId={plan.id} fallback={plan.name} />
                 ))}
               </select>
             </div>
@@ -148,7 +148,7 @@ export function ProvisionPanel({ product }: { product: ProductId }) {
                   <WireGuardSnippet config={issued.credentials.wgConfig} filename="acrossflare.conf" />
                 </div>
               )}
-              <Link href={`/admin/${product}/customers/${issued.id}`} className="block text-sm text-primary">
+              <Link href={`/admin/${service}/customers/${issued.id}`} className="block text-sm text-primary">
                 {t("open")}
               </Link>
             </div>

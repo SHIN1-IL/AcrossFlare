@@ -14,6 +14,7 @@ import {
   vaultwardenBaseUrl,
 } from "@/lib/provision/config";
 import { exitHostFor, issueMarketingSecrets, nextWgAddress, regionFrom } from "@/lib/marketing/secrets";
+import { nodeNameMatchesCode } from "@/lib/provision/node-match";
 import {
   buildVlessYaml,
   defaultExitIp,
@@ -163,10 +164,7 @@ export async function selectNodesForPlan(product: Product, plan: Plan) {
   });
 
   const matched = plan.nodeCodes
-    .map((code) => {
-      const needle = code.toLowerCase().replace(/[^a-z0-9]+/g, "");
-      return pool.find((node) => node.name.toLowerCase().replace(/[^a-z0-9]+/g, "").includes(needle));
-    })
+    .map((code) => pool.find((node) => nodeNameMatchesCode(node.name, code)))
     .filter((node): node is Node => Boolean(node));
 
   const nodes = matched.length ? uniqueNodes(matched) : pool.slice(0, Math.min(2, pool.length));

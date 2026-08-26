@@ -8,8 +8,8 @@ export default async function AdminProvisionPage({
 }: {
   params: Promise<{ locale: string; product: string }>;
 }) {
-  const { locale, product } = await resolveAdminProduct(params);
+  const { locale, service } = await resolveAdminProduct(params, "provision");
   setRequestLocale(locale);
   await requireAdminPage(locale, "provision");
-  return <ProvisionPanel product={product} />;
+  return <ProvisionPanel service={service} />;
 }

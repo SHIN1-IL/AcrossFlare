@@ -8,9 +8,9 @@ export default async function AdminCustomerDetailPage({
 }: {
   params: Promise<{ locale: string; product: string; id: string }>;
 }) {
-  const { locale, product } = await resolveAdminProduct(params);
   const { id } = await params;
+  const { locale, service } = await resolveAdminProduct(params, `customers/${id}`);
   setRequestLocale(locale);
   await requireAdminPage(locale, "customers");
-  return <CustomerDetail product={product} id={id} />;
+  return <CustomerDetail service={service} id={id} />;
 }

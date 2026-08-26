@@ -4,7 +4,7 @@ export function publicServiceFromPlanId(planId: string | null | undefined): Publ
   if (!planId) {
     return "standard";
   }
-  if (planId.startsWith("hybrid")) {
+  if (planId === "global-pro" || planId.startsWith("hybrid")) {
     return "hybrid";
   }
   if (planId.startsWith("workspace")) {

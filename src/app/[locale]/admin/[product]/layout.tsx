@@ -2,7 +2,7 @@ import { setRequestLocale } from "next-intl/server";
 import { resolveAdminProduct } from "@/lib/admin-product";
 
 export function generateStaticParams() {
-  return [{ product: "global" }, { product: "workspace" }, { product: "marketing" }];
+  return [{ product: "standard" }, { product: "hybrid" }, { product: "workspace" }];
 }
 
 export default async function AdminProductLayout({

@@ -11,8 +11,8 @@ import { useHydrated, useSession } from "@/hooks/use-account";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { isAdminSession, isOwnerSession } from "@/lib/auth-types";
 import { adminNavItems } from "@/lib/admin-nav";
+import { canonicalAdminService, type AdminServiceId } from "@/lib/admin-service";
 import type { AdminPermission } from "@/lib/admin-permissions";
-import { isProductId, type ProductId } from "@/lib/plans";
 import { clearSession } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
@@ -24,9 +24,9 @@ const NAV_ICONS = {
   nodes: Server,
 } as const;
 
-function productFromPath(pathname: string): ProductId {
-  const part = pathname.split("/").find((item) => isProductId(item));
-  return part ?? "global";
+function serviceFromPath(pathname: string): AdminServiceId {
+  const part = pathname.split("/").find((item) => canonicalAdminService(item));
+  return canonicalAdminService(part) ?? "standard";
 }
 
 function SessionRole({ owner, className }: { owner: boolean; className?: string }) {
@@ -53,7 +53,7 @@ function NavLinks({
   owner,
   onNavigate,
 }: {
-  product: ProductId;
+  product: AdminServiceId;
   permissions: AdminPermission[];
   owner: boolean;
   onNavigate?: () => void;
@@ -113,7 +113,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const hydrated = useHydrated();
   const session = useSession();
   const [open, setOpen] = useState(false);
-  const product = productFromPath(pathname);
+  const product = serviceFromPath(pathname);
   const permissions = session?.permissions ?? [];
   const owner = isOwnerSession(session);
 

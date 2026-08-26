@@ -56,6 +56,7 @@ export function homeSlideFor(planId: string) {
   if (planId === "global-pro") {
     return {
       href: "/hybrid" as const,
+      service: "hybrid" as const,
       prices: HOME_SLIDE_PRICES[planId],
     };
   }
@@ -66,6 +67,7 @@ export function homeSlideFor(planId: string) {
 
   return {
     href: service?.href ?? "/standard",
+    service: service?.id ?? "standard",
     prices: HOME_SLIDE_PRICES[planId],
   };
 }

@@ -9,11 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useAdmin } from "@/hooks/use-admin";
 import type { AppLocale } from "@/i18n/routing";
-import { deletePlan, listPlans, upsertPlan } from "@/lib/admin-store";
+import { deletePlan, listPlansForService, upsertPlan } from "@/lib/admin-store";
 import { PriceAmount } from "@/components/marketing/price-amount";
+import { AdminPlanLabel } from "@/components/admin/admin-plan-label";
 import type { AdminPlan } from "@/lib/admin";
 import { productHasBackup } from "@/lib/admin-nav";
-import type { ProductId } from "@/lib/plans";
+import { productForAdminService, type AdminServiceId } from "@/lib/admin-service";
+import { planTerm, planTrafficQuota } from "@/lib/plans";
 
 type Draft = {
   id?: string;
@@ -28,21 +30,6 @@ type Draft = {
   visible: boolean;
   featured: boolean;
 };
-
-function emptyDraft(): Draft {
-  return {
-    name: "",
-    krw: "",
-    usd: "",
-    cny: "",
-    jpy: "",
-    traffic: "",
-    backup: "",
-    nodes: "",
-    visible: true,
-    featured: false,
-  };
-}
 
 function fromPlan(plan: AdminPlan): Draft {
   return {
@@ -60,75 +47,105 @@ function fromPlan(plan: AdminPlan): Draft {
   };
 }
 
-export function PlanManager({ product }: { product: ProductId }) {
+function periodLabel(planId: string, week: string, month: string, year: string) {
+  const term = planTerm(planId);
+  if (term === "week") return week;
+  if (term === "year") return year;
+  return month;
+}
+
+function trafficLabel(plan: AdminPlan, unlimited: string, month: string, total: string) {
+  const quota = planTrafficQuota(plan);
+  if (!quota) {
+    return unlimited;
+  }
+  const prefix = quota.cadence === "month" ? month : total;
+  return `${prefix} ${quota.gb}GB`;
+}
+
+export function PlanManager({ service }: { service: AdminServiceId }) {
   const t = useTranslations("admin");
   const tPricing = useTranslations("pricing");
   const locale = useLocale() as AppLocale;
   useAdmin();
-  const plans = listPlans(product);
+  const product = productForAdminService(service);
+  const { catalog } = listPlansForService(service);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [error, setError] = useState("");
+  const showBackup = productHasBackup(product);
+  const week = tPricing("periodWeek");
+  const month = tPricing("periodMonth");
+  const year = tPricing("periodYear");
+  const draftPeriod = draft?.id ? periodLabel(draft.id, week, month, year) : month;
+
+  function renderTable(plans: AdminPlan[], title: string) {
+    if (!plans.length) {
+      return null;
+    }
+
+    return (
+      <div className="space-y-2">
+        <p className="text-xs font-medium tracking-[0.16em] text-muted-foreground uppercase">{title}</p>
+        <div className="overflow-x-auto rounded-2xl border border-border">
+          <table className="w-full min-w-[720px] text-left text-sm">
+            <thead className="border-b border-border bg-surface text-xs text-muted-foreground">
+              <tr>
+                <th className="px-4 py-3 font-medium">{t("name")}</th>
+                <th className="px-4 py-3 font-medium">{t("priceKrw")}</th>
+                <th className="px-4 py-3 font-medium">{t("traffic")}</th>
+                {showBackup ? <th className="px-4 py-3 font-medium">{t("backup")}</th> : null}
+                <th className="px-4 py-3 font-medium">{t("nodes")}</th>
+                <th className="px-4 py-3 font-medium">{t("visible")}</th>
+                <th className="px-4 py-3 font-medium" />
+              </tr>
+            </thead>
+            <tbody>
+              {plans.map((plan) => (
+                <tr key={plan.id} className="border-b border-border last:border-0">
+                  <td className="px-4 py-3">
+                    <AdminPlanLabel planId={plan.id} fallback={plan.name} />
+                  </td>
+                  <td className="px-4 py-3 font-mono text-xs">
+                    <PriceAmount locale={locale} prices={plan.prices} />
+                    <span className="ml-1 text-muted-foreground">{periodLabel(plan.id, week, month, year)}</span>
+                    <span className="mt-1 block text-muted-foreground">
+                      ${plan.prices.usd} · ¥{plan.prices.cny}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 font-mono text-xs">
+                    {trafficLabel(plan, t("unlimited"), tPricing("quotaMonth"), tPricing("quotaTotal"))}
+                  </td>
+                  {showBackup ? (
+                    <td className="px-4 py-3 font-mono text-xs">
+                      {plan.backupGb == null ? "—" : `${plan.backupGb} GB`}
+                    </td>
+                  ) : null}
+                  <td className="px-4 py-3 font-mono text-xs">{plan.nodes.join(" · ")}</td>
+                  <td className="px-4 py-3">
+                    <StatusPill
+                      label={plan.visible ? t("visible") : t("hidden")}
+                      tone={plan.visible ? "ok" : "neutral"}
+                    />
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <Button type="button" variant="ghost" size="sm" onClick={() => setDraft(fromPlan(plan))}>
+                      {t("edit")}
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="mx-auto max-w-6xl">
-      <AdminPageHeader
-        title={t("plansTitle")}
-        subtitle={t("plansSubtitle")}
-        action={
-          <Button type="button" className="rounded-[10px]" onClick={() => setDraft(emptyDraft())}>
-            {t("newPlan")}
-          </Button>
-        }
-      />
+    <div className="mx-auto max-w-6xl space-y-8">
+      <AdminPageHeader title={t("plansTitle")} subtitle={t("plansSubtitle")} />
 
-      <div className="overflow-x-auto rounded-2xl border border-border">
-        <table className="w-full min-w-[720px] text-left text-sm">
-          <thead className="border-b border-border bg-surface text-xs text-muted-foreground">
-            <tr>
-              <th className="px-4 py-3 font-medium">{t("name")}</th>
-              <th className="px-4 py-3 font-medium">{tPricing("perMonth")}</th>
-              <th className="px-4 py-3 font-medium">{t("traffic")}</th>
-              {productHasBackup(product) ? <th className="px-4 py-3 font-medium">{t("backup")}</th> : null}
-              <th className="px-4 py-3 font-medium">{t("nodes")}</th>
-              <th className="px-4 py-3 font-medium">{t("visible")}</th>
-              <th className="px-4 py-3 font-medium" />
-            </tr>
-          </thead>
-          <tbody>
-            {plans.map((plan) => (
-              <tr key={plan.id} className="border-b border-border last:border-0">
-                <td className="px-4 py-3">{plan.name}</td>
-                <td className="px-4 py-3 font-mono text-xs">
-                  <PriceAmount locale={locale} prices={plan.prices} />
-                  <span className="mt-1 block text-muted-foreground">
-                    ${plan.prices.usd} · ¥{plan.prices.cny}
-                  </span>
-                </td>
-                <td className="px-4 py-3 font-mono text-xs">
-                  {plan.trafficGb == null ? t("unlimited") : `${plan.trafficGb} GB`}
-                </td>
-                {productHasBackup(product) ? (
-                  <td className="px-4 py-3 font-mono text-xs">
-                    {plan.backupGb == null ? "—" : `${plan.backupGb} GB`}
-                  </td>
-                ) : null}
-                <td className="px-4 py-3 font-mono text-xs">{plan.nodes.join(" · ")}</td>
-                <td className="px-4 py-3">
-                  <StatusPill
-                    label={plan.visible ? t("visible") : t("hidden")}
-                    tone={plan.visible ? "ok" : "neutral"}
-                  />
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <Button type="button" variant="ghost" size="sm" onClick={() => setDraft(fromPlan(plan))}>
-                    {t("edit")}
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {renderTable(catalog, t("catalogPlans"))}
 
       <AdminDrawer
         open={Boolean(draft)}
@@ -160,7 +177,7 @@ export function PlanManager({ product }: { product: ProductId }) {
                     jpy: Number(draft.jpy) || 0,
                   },
                   trafficGb: draft.traffic === "" ? null : Number(draft.traffic) || 0,
-                  backupGb: productHasBackup(product)
+                  backupGb: showBackup
                     ? draft.backup === ""
                       ? null
                       : Number(draft.backup) || 0
@@ -189,7 +206,7 @@ export function PlanManager({ product }: { product: ProductId }) {
               />
             </Field>
             <div className="grid grid-cols-2 gap-3">
-              <Field label={t("priceKrw")}>
+              <Field label={`${t("priceKrw")} ${draftPeriod}`}>
                 <input
                   className={fieldClass}
                   inputMode="numeric"
@@ -197,7 +214,7 @@ export function PlanManager({ product }: { product: ProductId }) {
                   onChange={(event) => setDraft({ ...draft, krw: event.target.value })}
                 />
               </Field>
-              <Field label={t("priceUsd")}>
+              <Field label={`${t("priceUsd")} ${draftPeriod}`}>
                 <input
                   className={fieldClass}
                   inputMode="numeric"
@@ -205,7 +222,7 @@ export function PlanManager({ product }: { product: ProductId }) {
                   onChange={(event) => setDraft({ ...draft, usd: event.target.value })}
                 />
               </Field>
-              <Field label={t("priceCny")}>
+              <Field label={`${t("priceCny")} ${draftPeriod}`}>
                 <input
                   className={fieldClass}
                   inputMode="numeric"
@@ -213,7 +230,7 @@ export function PlanManager({ product }: { product: ProductId }) {
                   onChange={(event) => setDraft({ ...draft, cny: event.target.value })}
                 />
               </Field>
-              <Field label={t("priceJpy")}>
+              <Field label={`${t("priceJpy")} ${draftPeriod}`}>
                 <input
                   className={fieldClass}
                   inputMode="numeric"
@@ -231,7 +248,7 @@ export function PlanManager({ product }: { product: ProductId }) {
                 onChange={(event) => setDraft({ ...draft, traffic: event.target.value })}
               />
             </Field>
-            {productHasBackup(product) ? (
+            {showBackup ? (
               <Field label={t("backup")}>
                 <input
                   className={fieldClass}

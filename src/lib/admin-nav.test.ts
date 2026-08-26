@@ -4,9 +4,9 @@ import { pricingServiceFromQuery } from "@/lib/marketing-services";
 
 describe("admin-nav", () => {
   it("labels the public admin tabs", () => {
-    expect(adminTabMessageKey("global")).toBe("tabGlobal");
+    expect(adminTabMessageKey("standard")).toBe("tabStandard");
+    expect(adminTabMessageKey("hybrid")).toBe("tabHybrid");
     expect(adminTabMessageKey("workspace")).toBe("tabWorkspace");
-    expect(adminTabMessageKey("marketing")).toBe("tabMarketing");
   });
 
   it("hides nav items the staff cannot open", () => {
@@ -14,14 +14,15 @@ describe("admin-nav", () => {
       "customers",
       "codes",
     ]);
-    expect(adminNavItems("global", ["codes", "provision"]).map((item) => item.suffix)).toEqual(["provision"]);
-    expect(firstAdminPath("global", ["nodes"])).toBe("/admin/global/nodes");
-    expect(firstAdminPath("global", [], true)).toBe("/admin/staff");
+    expect(adminNavItems("standard", ["codes", "provision"]).map((item) => item.suffix)).toEqual(["provision"]);
+    expect(firstAdminPath("hybrid", ["nodes"])).toBe("/admin/hybrid/nodes");
+    expect(firstAdminPath("standard", [], true)).toBe("/admin/staff");
   });
 
   it("allows backup quota on standard/hybrid and workspace", () => {
     expect(productHasBackup("global")).toBe(true);
     expect(productHasBackup("workspace")).toBe(true);
+    expect(productHasBackup("standard")).toBe(true);
     expect(productHasBackup("marketing")).toBe(false);
   });
 });

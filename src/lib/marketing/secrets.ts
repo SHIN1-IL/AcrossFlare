@@ -85,7 +85,7 @@ export function regionFrom(node: Node | null | undefined, fallback = "US-East") 
     return fallback;
   }
 
-  return node.name.replace(/\s+(Bandwagon|Racknerd)$/i, "").trim() || node.name;
+  return node.name.replace(/[\s-]+(Bandwagon|Racknerd)$/i, "").trim() || node.name;
 }
 
 export function pickNextNode(currentId: string | undefined, pool: Node[]) {

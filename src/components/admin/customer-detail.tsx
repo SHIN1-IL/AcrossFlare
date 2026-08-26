@@ -15,24 +15,25 @@ import { useAdmin } from "@/hooks/use-admin";
 import { Link } from "@/i18n/navigation";
 import {
   clearPlanChange,
-  getCustomer,
-  listNodes,
-  listPlans,
+  getCustomerById,
+  listAllPlansForService,
+  listNodesForService,
   recordRotate,
   runPlanChange,
 } from "@/lib/admin-store";
+import { AdminPlanLabel, AdminPlanOption } from "@/components/admin/admin-plan-label";
 import { formatDate, formatDateTime } from "@/lib/format-date";
-import type { ProductId } from "@/lib/plans";
+import type { AdminServiceId } from "@/lib/admin-service";
 import { cn } from "@/lib/utils";
 
-export function CustomerDetail({ product, id }: { product: ProductId; id: string }) {
+export function CustomerDetail({ service, id }: { service: AdminServiceId; id: string }) {
   const t = useTranslations("admin");
   const tApp = useTranslations("app");
   const locale = useLocale();
   const { changing } = useAdmin();
-  const customer = getCustomer(product, id);
-  const plans = listPlans(product);
-  const nodes = listNodes(product);
+  const customer = getCustomerById(id);
+  const plans = listAllPlansForService(service);
+  const nodes = listNodesForService(service);
   const [toPlanId, setToPlanId] = useState("");
   const [simulateFail, setSimulateFail] = useState(false);
 
@@ -40,7 +41,7 @@ export function CustomerDetail({ product, id }: { product: ProductId; id: string
     return (
       <div className="mx-auto max-w-3xl">
         <p className="text-sm text-muted-foreground">{t("notFound")}</p>
-        <Link href={`/admin/${product}/customers`} className={cn(buttonVariants({ variant: "outline" }), "mt-4 rounded-[10px]")}>
+        <Link href={`/admin/${service}/customers`} className={cn(buttonVariants({ variant: "outline" }), "mt-4 rounded-[10px]")}>
           {t("back")}
         </Link>
       </div>
@@ -59,14 +60,19 @@ export function CustomerDetail({ product, id }: { product: ProductId; id: string
         title={customer.email}
         subtitle={t("detailTitle")}
         action={
-          <Link href={`/admin/${product}/customers`} className={cn(buttonVariants({ variant: "outline" }), "rounded-[10px]")}>
+          <Link href={`/admin/${service}/customers`} className={cn(buttonVariants({ variant: "outline" }), "rounded-[10px]")}>
             {t("back")}
           </Link>
         }
       />
 
       <section className="grid gap-4 sm:grid-cols-3">
-        <Meta label={t("plan")} value={customer.planName} />
+        <div className="rounded-2xl border border-border bg-card p-4">
+          <p className="text-xs text-muted-foreground">{t("plan")}</p>
+          <div className="mt-2 text-sm">
+            <AdminPlanLabel planId={customer.planId} fallback={customer.planName} />
+          </div>
+        </div>
         <Meta label={t("expires")} value={formatDate(locale, customer.expiresAt)} />
         <div className="rounded-2xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">{t("status")}</p>
@@ -117,7 +123,7 @@ export function CustomerDetail({ product, id }: { product: ProductId; id: string
         </section>
       ) : null}
 
-      {product === "marketing" ? (
+      {customer.product === "marketing" ? (
         <section className="rounded-2xl border border-border bg-card p-5">
           <div className="flex items-center justify-between gap-3">
             <p className="text-sm">{t("rotateHistory")}</p>
@@ -159,9 +165,7 @@ export function CustomerDetail({ product, id }: { product: ProductId; id: string
                 onChange={(event) => setToPlanId(event.target.value)}
               >
                 {otherPlans.map((plan) => (
-                  <option key={plan.id} value={plan.id}>
-                    {plan.name}
-                  </option>
+                  <AdminPlanOption key={plan.id} planId={plan.id} fallback={plan.name} />
                 ))}
               </select>
             </div>
@@ -169,7 +173,7 @@ export function CustomerDetail({ product, id }: { product: ProductId; id: string
               type="button"
               className="rounded-[10px]"
               disabled={changing || !selectedPlan}
-              onClick={() => void runPlanChange({ product, customerId: customer.id, toPlanId: selectedPlan, simulateFail })}
+              onClick={() => void runPlanChange({ product: customer.product, customerId: customer.id, toPlanId: selectedPlan, simulateFail })}
             >
               {t("runChange")}
             </Button>

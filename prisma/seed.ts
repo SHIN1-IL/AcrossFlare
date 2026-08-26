@@ -1,5 +1,5 @@
 import { PrismaClient, Product, Role, SubscriptionStatus, type Node } from "@prisma/client";
-import { exitHostFor, issueMarketingSecrets, nextWgAddress } from "../src/lib/marketing/secrets";
+import { exitHostFor, issueMarketingSecrets, nextWgAddress, regionFrom } from "../src/lib/marketing/secrets";
 import { hashPassword } from "../src/lib/password";
 import { plans } from "../src/lib/plans";
 import { toPrismaProduct } from "../src/lib/product";
@@ -18,6 +18,13 @@ const prisma = new PrismaClient();
 
 const DEMO_PASSWORD = "acrossflare";
 
+// Regular USER for PG review and merchant testing. No seeded subscription, so checkout still works.
+const REVIEW_USER = {
+  email: "shin@acrosstool.com",
+  password: "12345678",
+  role: Role.USER,
+};
+
 // Seed admin is a legacy full-access ADMIN. The live owner is ADMIN_OWNER_EMAIL (promoted on login).
 const DEMO_USERS: { email: string; role: Role }[] = [
   { email: "admin@acrossflare.com", role: Role.ADMIN },
@@ -30,22 +37,10 @@ const DEMO_USERS: { email: string; role: Role }[] = [
 
 const SEED_NODES = [
   {
-    id: "g-sg-bw",
+    id: "g-tokyo-bw",
     product: Product.GLOBAL,
-    name: "SG Bandwagon",
-    ddns: "node-sg.acrossflare.com",
-    role: "BANDWAGON" as const,
-    status: "ONLINE" as const,
-    host: "10.0.0.10",
-    port: 2053,
-    username: "admin",
-    password: "seed-only",
-  },
-  {
-    id: "g-jp-bw",
-    product: Product.GLOBAL,
-    name: "JP Bandwagon",
-    ddns: "node-jp.acrossflare.com",
+    name: "Tokyo-Bandwagon",
+    ddns: "node-tokyo.acrossflare.com",
     role: "BANDWAGON" as const,
     status: "ONLINE" as const,
     host: "10.0.0.22",
@@ -54,13 +49,25 @@ const SEED_NODES = [
     password: "seed-only",
   },
   {
-    id: "g-us-rn",
+    id: "g-la-b-bw",
     product: Product.GLOBAL,
-    name: "US Racknerd",
-    ddns: "node-us.acrossflare.com",
-    role: "RACKNERD" as const,
+    name: "LA(B)-Bandwagon",
+    ddns: "node-la-b.acrossflare.com",
+    role: "BANDWAGON" as const,
     status: "ONLINE" as const,
     host: "10.0.0.55",
+    port: 2053,
+    username: "admin",
+    password: "seed-only",
+  },
+  {
+    id: "g-la-a-bw",
+    product: Product.GLOBAL,
+    name: "LA(A)-Bandwagon",
+    ddns: "node-la-a.acrossflare.com",
+    role: "BANDWAGON" as const,
+    status: "ONLINE" as const,
+    host: "10.0.0.66",
     port: 2053,
     username: "admin",
     password: "seed-only",
@@ -127,6 +134,19 @@ async function main() {
     });
   }
 
+  await prisma.node.deleteMany({
+    where: {
+      OR: [
+        { id: { in: ["g-sg-bw", "g-jp-bw", "g-us-rn"] } },
+        {
+          ddns: {
+            in: ["node-sg.acrossflare.com", "node-jp.acrossflare.com", "node-us.acrossflare.com"],
+          },
+        },
+      ],
+    },
+  });
+
   for (const node of SEED_NODES) {
     await prisma.node.upsert({
       where: { id: node.id },
@@ -160,6 +180,20 @@ async function main() {
     });
   }
 
+  const reviewPasswordHash = await hashPassword(REVIEW_USER.password);
+  await prisma.user.upsert({
+    where: { email: REVIEW_USER.email },
+    update: {
+      passwordHash: reviewPasswordHash,
+      role: REVIEW_USER.role,
+    },
+    create: {
+      email: REVIEW_USER.email,
+      passwordHash: reviewPasswordHash,
+      role: REVIEW_USER.role,
+    },
+  });
+
   await seedDemoSubscriptions();
 }
 
@@ -168,7 +202,7 @@ const DEMO_SUBSCRIPTIONS = [
     email: "global-user@acrossflare.com",
     product: Product.GLOBAL,
     planId: "global-standard",
-    nodeIds: ["g-sg-bw", "g-jp-bw"],
+    nodeIds: ["g-la-b-bw"],
     status: SubscriptionStatus.ACTIVE,
     memo: "Seed demo",
   },
@@ -176,7 +210,7 @@ const DEMO_SUBSCRIPTIONS = [
     email: "both-user@acrossflare.com",
     product: Product.GLOBAL,
     planId: "global-pro",
-    nodeIds: ["g-sg-bw", "g-jp-bw", "g-us-rn"],
+    nodeIds: ["g-tokyo-bw", "g-la-a-bw"],
     status: SubscriptionStatus.ACTIVE,
     memo: "Holds both products",
   },
@@ -184,7 +218,7 @@ const DEMO_SUBSCRIPTIONS = [
     email: "exhausted-user@acrossflare.com",
     product: Product.GLOBAL,
     planId: "global-pro",
-    nodeIds: ["g-us-rn"],
+    nodeIds: ["g-la-a-bw"],
     status: SubscriptionStatus.ACTIVE,
     memo: "Failed over to Racknerd",
     failover: true,
@@ -307,7 +341,7 @@ function marketingSeedCredentials(subscriptionId: string, nodes: Node[], used: s
     uuid: newClientUuid(),
     xuiEmail: xuiClientEmail(subscriptionId),
     exitIp: secrets.exitIp,
-    region: nodes[0]?.name.replace(/\s+(Bandwagon|Racknerd)$/i, "").trim() || "US-East",
+    region: regionFrom(nodes[0]),
     httpUser: secrets.httpUser,
     httpPass: secrets.httpPass,
     httpPort: secrets.httpPort,

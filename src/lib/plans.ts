@@ -24,11 +24,11 @@ export const plans: Plan[] = [
   {
     id: "global-lite",
     product: "global",
-    name: "Lite",
+    name: "Month",
     prices: { krw: 9900, usd: 8, cny: 49, jpy: 1100 },
     trafficGb: 100,
     backupGb: 1,
-    nodes: ["SG"],
+    nodes: ["LA(B)"],
   },
   {
     id: "global-week",
@@ -37,7 +37,7 @@ export const plans: Plan[] = [
     prices: { krw: 5900, usd: 5, cny: 29, jpy: 680 },
     trafficGb: 20,
     backupGb: 1,
-    nodes: ["SG"],
+    nodes: ["LA(B)"],
   },
   {
     id: "global-year",
@@ -46,7 +46,7 @@ export const plans: Plan[] = [
     prices: { krw: 99000, usd: 80, cny: 490, jpy: 11000 },
     trafficGb: 1200,
     backupGb: 1,
-    nodes: ["SG"],
+    nodes: ["LA(B)"],
   },
   {
     id: "global-standard",
@@ -55,7 +55,7 @@ export const plans: Plan[] = [
     prices: { krw: 39900, usd: 29, cny: 199, jpy: 4500 },
     trafficGb: 150,
     backupGb: 1,
-    nodes: ["SG", "JP"],
+    nodes: ["LA(B)"],
     featured: true,
   },
   {
@@ -65,34 +65,34 @@ export const plans: Plan[] = [
     prices: { krw: 69900, usd: 49, cny: 349, jpy: 7600 },
     trafficGb: null,
     backupGb: 1,
-    nodes: ["SG", "JP", "US"],
+    nodes: ["Tokyo", "LA(A)"],
   },
   {
     id: "hybrid-week",
     product: "global",
-    name: "Hybrid Week",
+    name: "Week",
     prices: { krw: 9900, usd: 8, cny: 49, jpy: 1100 },
     trafficGb: 20,
     backupGb: 1,
-    nodes: ["SG", "JP", "US"],
+    nodes: ["Tokyo", "LA(A)"],
   },
   {
     id: "hybrid-lite",
     product: "global",
-    name: "Hybrid",
+    name: "Month",
     prices: { krw: 19900, usd: 15, cny: 99, jpy: 2300 },
     trafficGb: 100,
     backupGb: 1,
-    nodes: ["SG", "JP", "US"],
+    nodes: ["Tokyo", "LA(A)"],
   },
   {
     id: "hybrid-year",
     product: "global",
-    name: "Hybrid Year",
+    name: "Year",
     prices: { krw: 199000, usd: 150, cny: 990, jpy: 23000 },
     trafficGb: 1200,
     backupGb: 1,
-    nodes: ["SG", "JP", "US"],
+    nodes: ["Tokyo", "LA(A)"],
   },
   {
     id: "marketing-lite",
@@ -129,7 +129,7 @@ export const plans: Plan[] = [
     prices: { krw: 1990000, usd: 1500, cny: 9900, jpy: 230000 },
     trafficGb: 1200,
     backupGb: 1,
-    nodes: ["SG", "JP", "US"],
+    nodes: ["Tokyo", "LA(A)"],
   },
   {
     id: "workspace-b",
@@ -138,7 +138,7 @@ export const plans: Plan[] = [
     prices: { krw: 1990000, usd: 1500, cny: 9900, jpy: 230000 },
     trafficGb: 2400,
     backupGb: 1,
-    nodes: ["SG", "JP", "US"],
+    nodes: ["Tokyo", "LA(A)"],
   },
   {
     id: "workspace-c",
@@ -147,7 +147,7 @@ export const plans: Plan[] = [
     prices: { krw: 1990000, usd: 1500, cny: 9900, jpy: 230000 },
     trafficGb: 12000,
     backupGb: 1,
-    nodes: ["SG", "JP", "US"],
+    nodes: ["Tokyo", "LA(A)"],
   },
 ];
 
@@ -208,6 +208,22 @@ export function planTerm(planId: string): PlanTerm {
     return "year";
   }
   return "month";
+}
+
+export type PlanPricePeriodKey = "periodWeek" | "period1Week" | "periodMonth" | "periodYear";
+
+export function planPricePeriodKey(
+  planId: string,
+  serviceId?: string
+): PlanPricePeriodKey {
+  const term = planTerm(planId);
+  if (term === "week") {
+    return serviceId === "hybrid" ? "period1Week" : "periodWeek";
+  }
+  if (term === "year") {
+    return "periodYear";
+  }
+  return "periodMonth";
 }
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;

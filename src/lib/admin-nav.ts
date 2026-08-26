@@ -1,35 +1,24 @@
 import type { AdminPermission } from "@/lib/admin-permissions";
+import {
+  ADMIN_SERVICES,
+  adminHomeDescKey,
+  adminTabMessageKey,
+  type AdminServiceId,
+} from "@/lib/admin-service";
 import type { ProductId } from "@/lib/plans";
 
-export const ADMIN_TAB_PRODUCTS = ["global", "workspace"] as const satisfies readonly ProductId[];
+export { ADMIN_SERVICES, adminHomeDescKey, adminTabMessageKey };
+export type { AdminServiceId };
 
-export type AdminTabProduct = (typeof ADMIN_TAB_PRODUCTS)[number];
+export const ADMIN_TAB_PRODUCTS = ADMIN_SERVICES;
 
-export function adminTabMessageKey(product: ProductId) {
-  if (product === "workspace") {
-    return "tabWorkspace" as const;
-  }
-  if (product === "marketing") {
-    return "tabMarketing" as const;
-  }
-  return "tabGlobal" as const;
+export type AdminTabProduct = AdminServiceId;
+
+export function productHasBackup(product: ProductId | AdminServiceId) {
+  return product !== "marketing";
 }
 
-export function adminHomeDescKey(product: ProductId) {
-  if (product === "workspace") {
-    return "homeWorkspaceDesc" as const;
-  }
-  if (product === "marketing") {
-    return "homeMarketingDesc" as const;
-  }
-  return "homeGlobalDesc" as const;
-}
-
-export function productHasBackup(product: ProductId) {
-  return product === "global" || product === "workspace";
-}
-
-export function adminNavItems(product: ProductId, permissions?: readonly AdminPermission[]) {
+export function adminNavItems(service: AdminServiceId, permissions?: readonly AdminPermission[]) {
   const items = [
     { suffix: "customers" as const, key: "navCustomers" as const },
     { suffix: "plans" as const, key: "navPlans" as const },
@@ -38,7 +27,7 @@ export function adminNavItems(product: ProductId, permissions?: readonly AdminPe
     { suffix: "nodes" as const, key: "navNodes" as const },
   ];
 
-  const scoped = product === "workspace" ? items : items.filter((item) => item.suffix !== "codes");
+  const scoped = service === "workspace" ? items : items.filter((item) => item.suffix !== "codes");
   if (!permissions) {
     return scoped;
   }
@@ -48,13 +37,13 @@ export function adminNavItems(product: ProductId, permissions?: readonly AdminPe
 }
 
 export function firstAdminPath(
-  product: ProductId,
+  service: AdminServiceId,
   permissions: readonly AdminPermission[],
   owner = false
 ) {
-  const item = adminNavItems(product, permissions)[0];
+  const item = adminNavItems(service, permissions)[0];
   if (item) {
-    return `/admin/${product}/${item.suffix}`;
+    return `/admin/${service}/${item.suffix}`;
   }
 
   if (owner) {

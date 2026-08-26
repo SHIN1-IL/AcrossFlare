@@ -18,6 +18,13 @@ import { useLivePlan } from "@/hooks/use-admin";
 import { isPublicCheckoutProduct } from "@/lib/plans";
 import { cn } from "@/lib/utils";
 
+const STEPS = [
+  { id: "payment", key: "stepPayment" },
+  { id: "xui", key: "stepXui" },
+  { id: "backup", key: "stepBackup" },
+  { id: "ready", key: "stepReady" },
+] as const;
+
 function checkoutProductLabel(
   product: string,
   planId: string,
@@ -59,6 +66,9 @@ export function CheckoutView({
   const [step, setStep] = useState(0);
   const [error, setError] = useState<"failed" | "timeout" | "invalid_code" | "agree" | null>(
     canceled ? "failed" : null
+  );
+  const [payStatus, setPayStatus] = useState<"processing" | "openingWindow" | "redirecting">(
+    "processing"
   );
   const resumeRef = useRef(false);
 
@@ -118,6 +128,7 @@ export function CheckoutView({
     }
 
     setError(null);
+    setPayStatus(method === "card" ? "openingWindow" : "redirecting");
     setPhase("processing");
 
     try {
@@ -145,6 +156,7 @@ export function CheckoutView({
       }
 
       if (checkout.mode === "simulate") {
+        setPayStatus("processing");
         const simulated = await fetch("/api/v1/payments/simulate", {
           method: "POST",
           credentials: "include",
@@ -159,15 +171,18 @@ export function CheckoutView({
       }
 
       if (checkout.redirectUrl) {
+        setPayStatus("redirecting");
         window.location.assign(checkout.redirectUrl);
         return;
       }
 
       if (checkout.portone) {
+        setPayStatus("openingWindow");
         const result = await requestPortOnePayment(checkout.portone);
         if (result === "redirect") {
           return;
         }
+        setPayStatus("processing");
         await finishPaidCheckout(checkout.paymentId);
         return;
       }
@@ -327,9 +342,9 @@ export function CheckoutView({
         ) : null}
 
         {phase === "processing" ? (
-          <div className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
-            <LoaderCircle className="size-4 animate-spin text-primary" />
-            {t("processing")}
+          <div className="mt-6 flex items-start gap-2 text-sm leading-5 text-muted-foreground">
+            <LoaderCircle className="mt-0.5 size-4 shrink-0 animate-spin text-primary" />
+            {t(payStatus)}
           </div>
         ) : null}
 

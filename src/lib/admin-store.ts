@@ -9,6 +9,13 @@ import {
   type NodeRole,
 } from "@/lib/admin";
 import type { Plan, ProductId } from "@/lib/plans";
+import {
+  adminServiceFromPlanId,
+  catalogPlanIds,
+  isCatalogPlanId,
+  productForAdminService,
+  type AdminServiceId,
+} from "@/lib/admin-service";
 
 const empty: AdminState = {
   plans: [],
@@ -120,6 +127,23 @@ export function listPlans(product: ProductId, includeHidden = true) {
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
+export function listPlansForService(service: AdminServiceId) {
+  const catalog = catalogPlanIds(service)
+    .map((id) => memory.plans.find((plan) => plan.id === id))
+    .filter((plan): plan is AdminPlan => Boolean(plan));
+  const leftover = memory.plans
+    .filter((plan) => !isCatalogPlanId(plan.id) && adminServiceFromPlanId(plan.id) === service)
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  return { catalog, leftover };
+}
+
+export function listAllPlansForService(service: AdminServiceId) {
+  const { catalog, leftover } = listPlansForService(service);
+  return [...catalog, ...leftover];
+}
+
 export function getLivePlan(id: string | null | undefined) {
   if (!id) {
     return null;
@@ -140,6 +164,10 @@ export function listNodes(product: ProductId) {
   return memory.nodes.filter((node) => node.product === product);
 }
 
+export function listNodesForService(service: AdminServiceId) {
+  return listNodes(productForAdminService(service));
+}
+
 export function listCustomers(product: ProductId) {
   return memory.customers
     .filter((customer) => customer.product === product)
@@ -147,8 +175,19 @@ export function listCustomers(product: ProductId) {
     .sort((a, b) => a.email.localeCompare(b.email));
 }
 
+export function listCustomersForService(service: AdminServiceId) {
+  return memory.customers
+    .filter((customer) => adminServiceFromPlanId(customer.planId) === service)
+    .slice()
+    .sort((a, b) => a.email.localeCompare(b.email));
+}
+
 export function getCustomer(product: ProductId, id: string) {
   return memory.customers.find((customer) => customer.product === product && customer.id === id) ?? null;
+}
+
+export function getCustomerById(id: string) {
+  return memory.customers.find((customer) => customer.id === id) ?? null;
 }
 
 export function countNodeUsers(nodeId: string) {
@@ -353,7 +392,7 @@ export async function runPlanChange(input: {
     return false;
   }
 
-  const customer = getCustomer(input.product, input.customerId);
+  const customer = getCustomerById(input.customerId);
   if (!customer) {
     return false;
   }

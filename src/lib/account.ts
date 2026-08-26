@@ -195,7 +195,7 @@ function buildGlobal(email: string, planId: string, scenario: ScenarioId): Globa
   const plan = getPlanById(planId);
   const uuid = uuidFrom(email);
   const token = tokenFrom(`${email}:yaml`);
-  const nodes = (plan?.nodes.length ? plan.nodes : ["SG"]).map(
+  const nodes = (plan?.nodes.length ? plan.nodes : ["LA(B)"]).map(
     (code) => `node-${code.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.acrossflare.com`
   );
   const failover = scenario === "exhausted-user";

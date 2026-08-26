@@ -33,6 +33,36 @@ export function PriceAmount({
   );
 }
 
+export function PriceWithPeriod({
+  locale,
+  prices,
+  period,
+  compact,
+  className,
+  amountClassName,
+}: {
+  locale: AppLocale;
+  prices: PlanPrices;
+  period: string | null;
+  compact?: boolean;
+  className?: string;
+  amountClassName?: string;
+}) {
+  return (
+    <span className={cn("inline-flex h-[1.25em] items-baseline whitespace-nowrap", className)}>
+      <PriceAmount
+        locale={locale}
+        prices={prices}
+        compact={compact}
+        className={cn("shrink-0 whitespace-nowrap", amountClassName)}
+      />
+      {period ? (
+        <span className="ml-1.5 shrink-0 text-xs text-muted-foreground sm:text-sm">{period}</span>
+      ) : null}
+    </span>
+  );
+}
+
 export function SecondaryPriceAmount({
   locale,
   prices,

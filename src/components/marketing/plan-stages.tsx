@@ -3,12 +3,11 @@
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { StageBackdrop } from "@/components/marketing/plan-stage-bg";
-import { PriceAmount, SecondaryPriceAmount } from "@/components/marketing/price-amount";
+import { PriceWithPeriod, SecondaryPriceAmount } from "@/components/marketing/price-amount";
 import { buttonVariants } from "@/components/ui/button";
 import { useLivePlans } from "@/hooks/use-admin";
 import { HOME_SLIDE_PRICES, homeSlideFor } from "@/lib/marketing-services";
-import { publicServiceFromPlanId } from "@/lib/public-service";
-import type { Plan } from "@/lib/plans";
+import { planPricePeriodKey, type Plan } from "@/lib/plans";
 import { cn } from "@/lib/utils";
 import type { AppLocale } from "@/i18n/routing";
 
@@ -60,10 +59,10 @@ function PlanStage({
         cta: tSlides(`${plan.id}.cta`),
       }
     : null;
-  const service = publicServiceFromPlanId(plan.id);
-  const productLabel =
-    custom?.eyebrow ?? t(service === "marketing" ? "standard" : service);
+  const service = slide.service;
+  const productLabel = custom?.eyebrow ?? t(service);
   const traffic = plan.trafficGb === null ? t("unlimited") : `${plan.trafficGb} GB`;
+  const period = t(planPricePeriodKey(plan.id, service));
 
   return (
     <section
@@ -85,8 +84,7 @@ function PlanStage({
             }`}
         </p>
         <p className="mt-6 font-mono text-3xl tracking-tight md:text-4xl">
-          <PriceAmount locale={locale} prices={prices} />
-          <span className="ml-2 text-sm text-muted-foreground">{t("perMonth")}</span>
+          <PriceWithPeriod locale={locale} prices={prices} period={period} compact />
         </p>
         <SecondaryPriceAmount
           locale={locale}
