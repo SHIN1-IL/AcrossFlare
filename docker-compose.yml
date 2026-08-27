@@ -83,9 +83,10 @@ services:
       target: deps
     working_dir: /app
     environment:
-      # Do not load root .env DATABASE_URL (localhost). This service talks to Compose postgres.
-      DATABASE_URL: postgresql://${POSTGRES_USER:-acrossflare}:${POSTGRES_PASSWORD:-acrossflare}@postgres:5432/${POSTGRES_DB:-acrossflare}
-    command: ["./node_modules/.bin/prisma", "migrate", "deploy"]
+      POSTGRES_USER: ${POSTGRES_USER:-acrossflare}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-acrossflare}
+      POSTGRES_DB: ${POSTGRES_DB:-acrossflare}
+    command: ["node", "prisma/migrate-deploy.mjs"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -103,7 +104,9 @@ services:
     env_file:
       - .env
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-acrossflare}:${POSTGRES_PASSWORD:-acrossflare}@postgres:5432/${POSTGRES_DB:-acrossflare}
+      POSTGRES_USER: ${POSTGRES_USER:-acrossflare}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-acrossflare}
+      POSTGRES_DB: ${POSTGRES_DB:-acrossflare}
       APP_URL: ${APP_URL:-https://acrossflare.com}
       BACKUP_DASHBOARD_URL: ${BACKUP_DASHBOARD_URL:-https://acrossflare.com/dashboard}
       VAULTWARDEN_URL: ${VAULTWARDEN_URL:-https://vault.acrossflare.com}
