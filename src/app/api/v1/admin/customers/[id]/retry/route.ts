@@ -1,15 +1,14 @@
 import { NextResponse } from "next/server";
 import { writeAdminAudit } from "@/lib/admin-audit";
-import { AdminActionError, rotateAdminCustomer } from "@/lib/admin-actions";
+import { AdminActionError, retryCustomerProvision } from "@/lib/admin-actions";
 import { requirePermission } from "@/lib/admin-auth";
 import { getAdminCustomer } from "@/lib/admin-data";
-import { RotateError } from "@/lib/marketing/rotate";
 
 export async function POST(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = await requirePermission("customers");
+  const auth = await requirePermission("provision");
   if ("response" in auth) {
     return auth.response;
   }
@@ -17,20 +16,17 @@ export async function POST(
   const { id } = await params;
 
   try {
-    const customer = await rotateAdminCustomer(id);
+    const result = await retryCustomerProvision(id);
     await writeAdminAudit({
       actor: auth.user,
-      action: "rotate",
+      action: "retry",
       targetType: "subscription",
       targetId: id,
+      meta: { status: result.customer.status },
     });
-    return NextResponse.json({ customer: (await getAdminCustomer(id)) ?? customer });
+    const customer = (await getAdminCustomer(id)) ?? result.customer;
+    return NextResponse.json({ customer });
   } catch (error) {
-    if (error instanceof RotateError) {
-      const status = error.code === "locked" ? 409 : error.code === "not_found" ? 404 : 400;
-      return NextResponse.json({ error: error.code, lockedUntil: error.lockedUntil }, { status });
-    }
-
     if (error instanceof AdminActionError) {
       return NextResponse.json({ error: error.code }, { status: error.status });
     }

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { writeAdminAudit } from "@/lib/admin-audit";
 import { AdminActionError, saveAdminPlan } from "@/lib/admin-actions";
 import { requirePermission } from "@/lib/admin-auth";
 import { isProductId } from "@/lib/plans";
@@ -43,6 +44,13 @@ export async function POST(request: Request) {
       nodes: Array.isArray(body.nodes) ? body.nodes.map(String) : [],
       visible: body.visible !== false,
       featured: Boolean(body.featured),
+    });
+
+    await writeAdminAudit({
+      actor: auth.user,
+      action: "plan_save",
+      targetType: "plan",
+      targetId: plan.id,
     });
 
     return NextResponse.json({ plan });

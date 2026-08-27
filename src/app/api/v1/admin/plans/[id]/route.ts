@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { writeAdminAudit } from "@/lib/admin-audit";
 import { AdminActionError, removeAdminPlan, saveAdminPlan } from "@/lib/admin-actions";
 import { requirePermission } from "@/lib/admin-auth";
 import { isProductId } from "@/lib/plans";
@@ -48,6 +49,13 @@ export async function PATCH(
       featured: Boolean(body.featured),
     });
 
+    await writeAdminAudit({
+      actor: auth.user,
+      action: "plan_save",
+      targetType: "plan",
+      targetId: plan.id,
+    });
+
     return NextResponse.json({ plan });
   } catch (error) {
     if (error instanceof AdminActionError) {
@@ -71,6 +79,12 @@ export async function DELETE(
 
   try {
     await removeAdminPlan(id);
+    await writeAdminAudit({
+      actor: auth.user,
+      action: "plan_delete",
+      targetType: "plan",
+      targetId: id,
+    });
     return NextResponse.json({ ok: true });
   } catch (error) {
     if (error instanceof AdminActionError) {

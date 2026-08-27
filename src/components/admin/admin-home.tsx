@@ -9,6 +9,7 @@ import { Link } from "@/i18n/navigation";
 import { isOwnerSession } from "@/lib/auth-types";
 import { ADMIN_TAB_PRODUCTS, adminHomeDescKey, adminTabMessageKey, firstAdminPath } from "@/lib/admin-nav";
 import { listCustomersForService, listNodesForService, listPlansForService } from "@/lib/admin-store";
+import { adminQueueCounts } from "@/lib/admin-queue";
 import type { AdminServiceId } from "@/lib/admin-service";
 import { cn } from "@/lib/utils";
 
@@ -21,7 +22,17 @@ function ProductCard({ service }: { service: AdminServiceId }) {
   const { catalog } = listPlansForService(service);
   const planCount = catalog.length;
   const nodeCount = listNodesForService(service).length;
-  const customerCount = listCustomersForService(service).length;
+  const customers = listCustomersForService(service);
+  const customerCount = customers.length;
+  const queue = adminQueueCounts(customers);
+  const queueItems = (
+    [
+      ["failed", queue.failed],
+      ["provisioning", queue.provisioning],
+      ["unpaid", queue.unpaid],
+      ["expiring", queue.expiring],
+    ] as const
+  ).filter(([, count]) => count > 0);
 
   return (
     <article className="flex h-full flex-col rounded-2xl border border-border bg-card p-5">
@@ -43,6 +54,31 @@ function ProductCard({ service }: { service: AdminServiceId }) {
           <dd className="mt-1 font-mono text-xl">{permissions.includes("nodes") ? nodeCount : "—"}</dd>
         </div>
       </dl>
+      {permissions.includes("customers") && queueItems.length ? (
+        <div className="mt-4 border-t border-border pt-4">
+          <p className="text-xs text-muted-foreground">{t("needsAttention")}</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {queueItems.map(([filter, count]) => (
+              <Link
+                key={filter}
+                href={{ pathname: `/admin/${service}/customers`, query: { status: filter } }}
+                className="rounded-md border border-border px-2 py-1 font-mono text-[11px] text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+              >
+                {t(
+                  filter === "failed"
+                    ? "filterFailed"
+                    : filter === "provisioning"
+                      ? "filterProvisioning"
+                      : filter === "unpaid"
+                        ? "filterUnpaid"
+                        : "filterExpiring"
+                )}{" "}
+                {count}
+              </Link>
+            ))}
+          </div>
+        </div>
+      ) : null}
       <Link href={href} className={cn(buttonVariants(), "mt-6 rounded-[10px]")}>
         {t("open")}
       </Link>

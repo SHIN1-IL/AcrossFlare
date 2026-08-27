@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { AdminSteps } from "@/components/admin/admin-steps";
 import { fieldClass } from "@/components/admin/admin-drawer";
@@ -12,17 +12,21 @@ import { WireGuardSnippet } from "@/components/app/wireguard-snippet";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useAdmin } from "@/hooks/use-admin";
+import { useSession } from "@/hooks/use-account";
 import { Link } from "@/i18n/navigation";
 import {
   clearPlanChange,
   getCustomerById,
   listAllPlansForService,
   listNodesForService,
+  loadCustomerDetail,
   recordRotate,
+  retryProvision,
   runPlanChange,
 } from "@/lib/admin-store";
+import { canRetryProvision, fulfillmentSteps } from "@/lib/admin-queue";
 import { AdminPlanLabel, AdminPlanOption } from "@/components/admin/admin-plan-label";
-import { formatDate, formatDateTime } from "@/lib/format-date";
+import { formatDate, formatDateTime, formatMoney } from "@/lib/format-date";
 import type { AdminServiceId } from "@/lib/admin-service";
 import { cn } from "@/lib/utils";
 
@@ -30,12 +34,20 @@ export function CustomerDetail({ service, id }: { service: AdminServiceId; id: s
   const t = useTranslations("admin");
   const tApp = useTranslations("app");
   const locale = useLocale();
+  const session = useSession();
   const { changing } = useAdmin();
   const customer = getCustomerById(id);
   const plans = listAllPlansForService(service);
   const nodes = listNodesForService(service);
   const [toPlanId, setToPlanId] = useState("");
   const [simulateFail, setSimulateFail] = useState(false);
+  const [retrying, setRetrying] = useState(false);
+  const [retryError, setRetryError] = useState("");
+  const canProvision = Boolean(session?.permissions?.includes("provision"));
+
+  useEffect(() => {
+    void loadCustomerDetail(id);
+  }, [id]);
 
   if (!customer) {
     return (
@@ -73,7 +85,10 @@ export function CustomerDetail({ service, id }: { service: AdminServiceId; id: s
             <AdminPlanLabel planId={customer.planId} fallback={customer.planName} />
           </div>
         </div>
-        <Meta label={t("expires")} value={formatDate(locale, customer.expiresAt)} />
+        <Meta
+          label={t("period")}
+          value={`${formatDate(locale, customer.createdAt)} → ${formatDate(locale, customer.expiresAt)}`}
+        />
         <div className="rounded-2xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">{t("status")}</p>
           <div className="mt-2">
@@ -91,6 +106,53 @@ export function CustomerDetail({ service, id }: { service: AdminServiceId; id: s
             />
           </div>
         </div>
+      </section>
+
+      <section className="space-y-4 rounded-2xl border border-border bg-card p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm">{t("step")}</p>
+          {canProvision && canRetryProvision(customer) ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="rounded-[10px]"
+              disabled={retrying}
+              onClick={() => {
+                setRetryError("");
+                setRetrying(true);
+                void retryProvision(customer.id).then((result) => {
+                  setRetrying(false);
+                  if (!result.ok) {
+                    setRetryError(
+                      result.error === "unpaid"
+                        ? t("retryUnpaid")
+                        : result.error === "already_active"
+                          ? t("alreadyActive")
+                          : t("retryFailed")
+                    );
+                  }
+                });
+              }}
+            >
+              {t("retry")}
+            </Button>
+          ) : null}
+        </div>
+        <AdminSteps
+          steps={fulfillmentSteps(customer)}
+          labels={{
+            payment: t("stepPayment"),
+            xui: t("stepXui"),
+            backup: t("stepBackup"),
+            nextcloud: t("stepBackup"),
+            ready: t("stepReady"),
+          }}
+        />
+        {customer.provisionError ? (
+          <p className="font-mono text-xs text-destructive">{customer.provisionError}</p>
+        ) : null}
+        {retryError ? <p className="text-sm text-destructive">{retryError}</p> : null}
       </section>
 
       <section className="rounded-2xl border border-border bg-card p-5">
@@ -149,6 +211,64 @@ export function CustomerDetail({ service, id }: { service: AdminServiceId; id: s
           )}
         </section>
       ) : null}
+
+      <section className="rounded-2xl border border-border bg-card p-5">
+        <p className="text-sm">{t("paymentsTitle")}</p>
+        {customer.payments.length === 0 ? (
+          <p className="mt-3 text-sm text-muted-foreground">{t("emptyPayments")}</p>
+        ) : (
+          <ul className="mt-4 space-y-2">
+            {customer.payments.map((payment) => (
+              <li key={payment.id} className="flex flex-wrap items-center justify-between gap-2 text-sm">
+                <span className="font-mono text-xs text-muted-foreground">{formatDateTime(locale, payment.createdAt)}</span>
+                <span>{formatMoney(locale, payment.amount, payment.currency)}</span>
+                <span className="text-xs text-muted-foreground">
+                  {payment.method === "alipay" ? t("payAlipay") : t("payCard")} · {payment.provider}
+                </span>
+                <StatusPill
+                  label={t(
+                    payment.status === "succeeded"
+                      ? "paySucceeded"
+                      : payment.status === "failed"
+                        ? "payFailed"
+                        : "payPending"
+                  )}
+                  tone={payment.status === "succeeded" ? "ok" : payment.status === "failed" ? "warn" : "neutral"}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="rounded-2xl border border-border bg-card p-5">
+        <p className="text-sm">{t("auditTitle")}</p>
+        {customer.auditLogs.length === 0 ? (
+          <p className="mt-3 text-sm text-muted-foreground">{t("auditEmpty")}</p>
+        ) : (
+          <ul className="mt-4 space-y-2">
+            {customer.auditLogs.map((entry) => (
+              <li key={entry.id} className="flex flex-wrap justify-between gap-2 text-sm">
+                <span>
+                  {entry.action === "provision"
+                    ? t("auditProvision")
+                    : entry.action === "retry"
+                      ? t("auditRetry")
+                      : entry.action === "plan_change"
+                        ? t("auditPlanChange")
+                        : entry.action === "rotate"
+                          ? t("auditRotate")
+                          : entry.action === "migrate"
+                            ? t("auditMigrate")
+                            : entry.action}
+                </span>
+                <span className="font-mono text-xs text-muted-foreground">{entry.actorEmail}</span>
+                <span className="font-mono text-xs text-muted-foreground">{formatDateTime(locale, entry.createdAt)}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       {customer.status === "active" && otherPlans.length ? (
         <section className="space-y-4 rounded-2xl border border-border bg-card p-5">

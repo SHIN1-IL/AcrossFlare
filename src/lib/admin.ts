@@ -82,7 +82,27 @@ export type AdminCustomer = {
   rotateHistory: RotateEvent[];
   planChange: PlanChangeJob | null;
   provisionStep: string;
+  provisionError: string;
+  payments: AdminPayment[];
+  auditLogs: AdminAuditEntry[];
   loginPassword?: string;
+};
+
+export type AdminPayment = {
+  id: string;
+  amount: number;
+  currency: string;
+  method: "card" | "alipay";
+  provider: string;
+  status: "pending" | "succeeded" | "failed";
+  createdAt: string;
+};
+
+export type AdminAuditEntry = {
+  id: string;
+  actorEmail: string;
+  action: string;
+  createdAt: string;
 };
 
 export type ProvisionSession = {

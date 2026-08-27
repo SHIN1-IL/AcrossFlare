@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { writeAdminAudit } from "@/lib/admin-audit";
 import { AdminActionError, removeAdminPromoCode } from "@/lib/admin-actions";
 import { requirePermission } from "@/lib/admin-auth";
 
@@ -15,6 +16,12 @@ export async function DELETE(
 
   try {
     await removeAdminPromoCode(id);
+    await writeAdminAudit({
+      actor: auth.user,
+      action: "promo_delete",
+      targetType: "promo",
+      targetId: id,
+    });
     return NextResponse.json({ ok: true });
   } catch (error) {
     if (error instanceof AdminActionError) {

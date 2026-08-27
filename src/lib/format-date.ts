@@ -15,3 +15,11 @@ export function formatDateTime(locale: string, iso: string) {
     minute: "2-digit",
   }).format(new Date(iso));
 }
+
+export function formatMoney(locale: string, amount: number, currency: string) {
+  try {
+    return new Intl.NumberFormat(locale, { style: "currency", currency }).format(amount);
+  } catch {
+    return `${amount} ${currency}`;
+  }
+}

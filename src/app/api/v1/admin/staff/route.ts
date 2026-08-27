@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireOwner } from "@/lib/admin-auth";
+import { writeAdminAudit } from "@/lib/admin-audit";
 import {
   DEFAULT_STAFF_PERMISSIONS,
   isOwnerEmail,
@@ -97,6 +98,14 @@ export async function PATCH(request: Request) {
   if (updated.role !== "USER" && updated.role !== "STAFF") {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
+
+  await writeAdminAudit({
+    actor: auth.user,
+    action: "staff_update",
+    targetType: "user",
+    targetId: updated.id,
+    meta: { role: updated.role, permissions: staffPermissions },
+  });
 
   return NextResponse.json({
     staff: toStaffUser({ ...updated, role: updated.role }),

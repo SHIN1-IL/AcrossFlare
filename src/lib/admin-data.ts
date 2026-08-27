@@ -1,19 +1,24 @@
 import {
   NodeHealth,
   NodeRole,
+  PaymentMethod,
+  PaymentStatus,
   Product,
   PromoCodeStatus,
   SubscriptionStatus,
   type Credential,
   type Node,
+  type Payment,
   type Plan,
   type PromoCode,
   type RotateEvent as DbRotateEvent,
   type Subscription,
 } from "@prisma/client";
 import type {
+  AdminAuditEntry,
   AdminCustomer,
   AdminNode,
+  AdminPayment,
   AdminPlan,
   AdminPromoCode,
   CustomerCredentials,
@@ -31,9 +36,10 @@ import { yamlUrlFor } from "@/lib/provision/build";
 type CustomerRow = Subscription & {
   user: { email: string };
   plan: Plan;
-  nodes: Node[];
-  credentials: Credential | null;
-  rotateEvents: DbRotateEvent[];
+  nodes: Pick<Node, "id" | "ddns">[] | Node[];
+  credentials?: Credential | null;
+  rotateEvents?: DbRotateEvent[];
+  payments?: Payment[];
 };
 
 export function toUiPlan(plan: Plan): UiPlan {
@@ -89,7 +95,7 @@ export function toCustomerStatus(status: SubscriptionStatus): CustomerStatus {
   }
 }
 
-export function toAdminCustomer(row: CustomerRow): AdminCustomer {
+export function toAdminCustomer(row: CustomerRow, includeSecrets = false): AdminCustomer {
   return {
     id: row.id,
     product: toProductId(row.product),
@@ -101,15 +107,51 @@ export function toAdminCustomer(row: CustomerRow): AdminCustomer {
     status: toCustomerStatus(row.status),
     nodeIds: row.nodes.map((node) => node.id),
     createdAt: row.createdAt.toISOString(),
-    credentials: toCredentials(row),
-    rotateHistory: row.rotateEvents.map((event) => ({
-      id: event.id,
-      at: event.createdAt.toISOString(),
-      fromIp: event.fromIp,
-      toIp: event.toIp,
-    })),
+    credentials: includeSecrets ? toCredentials(row) : null,
+    rotateHistory: includeSecrets
+      ? (row.rotateEvents ?? []).map((event) => ({
+          id: event.id,
+          at: event.createdAt.toISOString(),
+          fromIp: event.fromIp,
+          toIp: event.toIp,
+        }))
+      : [],
     planChange: null,
     provisionStep: row.provisionStep,
+    provisionError: row.provisionError,
+    payments: includeSecrets ? (row.payments ?? []).map(toAdminPayment) : [],
+    auditLogs: [],
+  };
+}
+
+export function toAdminPayment(row: Payment): AdminPayment {
+  return {
+    id: row.id,
+    amount: row.amount,
+    currency: row.currency,
+    method: row.method === PaymentMethod.ALIPAY ? "alipay" : "card",
+    provider: row.provider.toLowerCase(),
+    status:
+      row.status === PaymentStatus.SUCCEEDED
+        ? "succeeded"
+        : row.status === PaymentStatus.FAILED
+          ? "failed"
+          : "pending",
+    createdAt: row.createdAt.toISOString(),
+  };
+}
+
+export function toAdminAuditEntry(row: {
+  id: string;
+  actorEmail: string;
+  action: string;
+  createdAt: Date;
+}): AdminAuditEntry {
+  return {
+    id: row.id,
+    actorEmail: row.actorEmail,
+    action: row.action,
+    createdAt: row.createdAt.toISOString(),
   };
 }
 
@@ -119,7 +161,7 @@ function toCredentials(row: CustomerRow): CustomerCredentials | null {
     return null;
   }
 
-  if (row.product === Product.GLOBAL && creds.uuid) {
+  if ((row.product === Product.GLOBAL || row.product === Product.WORKSPACE) && creds.uuid) {
     return {
       kind: "global",
       uuid: creds.uuid,
@@ -177,6 +219,14 @@ function toUiHealth(status: NodeHealth): UiNodeHealth {
   return "online";
 }
 
+export function customerListInclude() {
+  return {
+    user: { select: { email: true } },
+    plan: true,
+    nodes: { select: { id: true, ddns: true } },
+  };
+}
+
 export function customerInclude() {
   return {
     user: { select: { email: true } },
@@ -184,6 +234,7 @@ export function customerInclude() {
     nodes: true,
     credentials: true,
     rotateEvents: { orderBy: { createdAt: "desc" as const }, take: 20 },
+    payments: { orderBy: { createdAt: "desc" as const }, take: 20 },
   };
 }
 
@@ -209,7 +260,7 @@ export async function listAdminState() {
     prisma.plan.findMany({ orderBy: { name: "asc" } }),
     prisma.node.findMany({ orderBy: { createdAt: "asc" } }),
     prisma.subscription.findMany({
-      include: customerInclude(),
+      include: customerListInclude(),
       orderBy: { createdAt: "desc" },
     }),
     prisma.promoCode.findMany({
@@ -221,18 +272,32 @@ export async function listAdminState() {
   return {
     plans: plans.map(toAdminPlan),
     nodes: nodes.map(toAdminNode),
-    customers: subscriptions.map(toAdminCustomer),
+    customers: subscriptions.map((row) => toAdminCustomer(row, false)),
     promoCodes: promoCodes.map(toAdminPromoCode),
   };
 }
 
 export async function getAdminCustomer(id: string) {
-  const row = await prisma.subscription.findUnique({
-    where: { id },
-    include: customerInclude(),
-  });
+  const [row, auditLogs] = await Promise.all([
+    prisma.subscription.findUnique({
+      where: { id },
+      include: customerInclude(),
+    }),
+    prisma.adminAuditLog.findMany({
+      where: { targetType: "subscription", targetId: id },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    }),
+  ]);
 
-  return row ? toAdminCustomer(row) : null;
+  if (!row) {
+    return null;
+  }
+
+  return {
+    ...toAdminCustomer(row, true),
+    auditLogs: auditLogs.map(toAdminAuditEntry),
+  };
 }
 
 export function parseProduct(value: string | null | undefined): Product | null {

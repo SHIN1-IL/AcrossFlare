@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import { writeAdminAudit } from "@/lib/admin-audit";
 import { AdminActionError, changeCustomerPlan } from "@/lib/admin-actions";
 import { requirePermission } from "@/lib/admin-auth";
+import { getAdminCustomer } from "@/lib/admin-data";
 
 export async function POST(
   request: Request,
@@ -26,7 +28,15 @@ export async function POST(
       toPlanId: body.toPlanId,
       simulateFail: Boolean(body.simulateFail),
     });
-    return NextResponse.json(result);
+    await writeAdminAudit({
+      actor: auth.user,
+      action: "plan_change",
+      targetType: "subscription",
+      targetId: id,
+      meta: { toPlanId: body.toPlanId, failed: result.failed },
+    });
+    const customer = (await getAdminCustomer(id)) ?? result.customer;
+    return NextResponse.json({ ...result, customer });
   } catch (error) {
     if (error instanceof AdminActionError) {
       return NextResponse.json({ error: error.code }, { status: error.status });

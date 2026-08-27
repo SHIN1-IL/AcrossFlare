@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { writeAdminAudit } from "@/lib/admin-audit";
 import { AdminActionError, createAdminPromoCode } from "@/lib/admin-actions";
 import { requirePermission } from "@/lib/admin-auth";
 
@@ -21,6 +22,12 @@ export async function POST(request: Request) {
       planId: body.planId,
       code: body.code,
       note: body.note,
+    });
+    await writeAdminAudit({
+      actor: auth.user,
+      action: "promo_create",
+      targetType: "promo",
+      targetId: code.id,
     });
     return NextResponse.json({ code });
   } catch (error) {

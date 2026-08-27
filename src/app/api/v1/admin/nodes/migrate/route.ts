@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { writeAdminAudit } from "@/lib/admin-audit";
 import { AdminActionError, migrateNodeUsers } from "@/lib/admin-actions";
 import { requirePermission } from "@/lib/admin-auth";
 import { isProductId } from "@/lib/plans";
@@ -22,6 +23,13 @@ export async function POST(request: Request) {
       product: body.product,
       fromNodeId: body.fromNodeId,
       toNodeId: body.toNodeId,
+    });
+    await writeAdminAudit({
+      actor: auth.user,
+      action: "migrate",
+      targetType: "node",
+      targetId: body.toNodeId,
+      meta: { fromNodeId: body.fromNodeId, toNodeId: body.toNodeId, total: result.total },
     });
     return NextResponse.json(result);
   } catch (error) {

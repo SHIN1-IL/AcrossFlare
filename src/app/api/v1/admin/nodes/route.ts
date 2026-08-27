@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { addAdminNode, AdminActionError } from "@/lib/admin-actions";
+import { writeAdminAudit } from "@/lib/admin-audit";
 import { requirePermission } from "@/lib/admin-auth";
 import { parseNodeRole, toAdminNode } from "@/lib/admin-data";
 import { isProductId } from "@/lib/plans";
@@ -38,6 +39,14 @@ export async function POST(request: Request) {
       port: Number(body.port) || 2053,
       username: body.username ?? "",
       password: body.password ?? "",
+    });
+
+    await writeAdminAudit({
+      actor: auth.user,
+      action: "node_add",
+      targetType: "node",
+      targetId: node.id,
+      meta: { name: node.name },
     });
 
     return NextResponse.json({ node: toAdminNode(node) });

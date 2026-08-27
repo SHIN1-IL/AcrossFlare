@@ -279,6 +279,44 @@ export async function provisionManually(input: {
   return { customer, loginPassword };
 }
 
+export async function retryCustomerProvision(customerId: string): Promise<{ customer: AdminCustomer }> {
+  const subscription = await prisma.subscription.findUnique({ where: { id: customerId } });
+  if (!subscription) {
+    throw new AdminActionError("not_found", 404);
+  }
+
+  if (subscription.status === SubscriptionStatus.ACTIVE) {
+    throw new AdminActionError("already_active", 409);
+  }
+  if (subscription.status === SubscriptionStatus.UNPAID) {
+    throw new AdminActionError("unpaid", 409);
+  }
+
+  await prisma.subscription.update({
+    where: { id: customerId },
+    data: {
+      status: SubscriptionStatus.PROVISIONING,
+      provisionStep: "queued",
+      provisionError: "",
+    },
+  });
+
+  try {
+    await provisionSubscription(customerId);
+  } catch (error) {
+    if (!(error instanceof ProvisionError)) {
+      console.error("admin_retry_provision_failed", error);
+    }
+  }
+
+  const customer = await getAdminCustomer(customerId);
+  if (!customer) {
+    throw new AdminActionError("not_found", 404);
+  }
+
+  return { customer };
+}
+
 export async function changeCustomerPlan(input: {
   customerId: string;
   toPlanId: string;

@@ -76,6 +76,10 @@ function mergeCustomers(incoming: AdminCustomer[]) {
     return {
       ...customer,
       planChange: previous?.planChange ?? customer.planChange,
+      credentials: customer.credentials ?? previous?.credentials ?? null,
+      rotateHistory: customer.rotateHistory?.length ? customer.rotateHistory : previous?.rotateHistory ?? [],
+      payments: customer.payments?.length ? customer.payments : previous?.payments ?? [],
+      auditLogs: customer.auditLogs?.length ? customer.auditLogs : previous?.auditLogs ?? [],
     };
   });
 }
@@ -107,6 +111,17 @@ export async function refreshAdmin() {
   });
 
   return refreshPromise;
+}
+
+export async function loadCustomerDetail(id: string) {
+  const response = await fetch(`/api/v1/admin/customers/${id}`, { credentials: "include" });
+  const data = await readJson<{ customer?: AdminCustomer }>(response);
+  if (!response.ok || !data.customer) {
+    return null;
+  }
+
+  patch({ customers: upsertCustomer(memory.customers, data.customer) });
+  return data.customer;
 }
 
 export async function refreshPublicPlans() {
@@ -536,6 +551,20 @@ export function clearMigrate() {
   patch({ migrate: null });
 }
 
+export async function retryProvision(customerId: string) {
+  const response = await fetch(`/api/v1/admin/customers/${customerId}/retry`, {
+    method: "POST",
+    credentials: "include",
+  });
+  const data = await readJson<{ customer?: AdminCustomer; error?: string }>(response);
+  if (!response.ok || !data.customer) {
+    return { ok: false as const, error: data.error ?? "failed" };
+  }
+
+  patch({ customers: upsertCustomer(memory.customers, data.customer) });
+  return { ok: true as const, customer: data.customer };
+}
+
 export async function recordRotate(customerId: string) {
   const response = await fetch(`/api/v1/admin/customers/${customerId}/rotate`, {
     method: "POST",
@@ -564,5 +593,23 @@ export function isMigrateInFlight() {
 
 function upsertCustomer(customers: AdminCustomer[], next: AdminCustomer) {
   const exists = customers.some((item) => item.id === next.id);
-  return exists ? customers.map((item) => (item.id === next.id ? { ...item, ...next } : item)) : [next, ...customers];
+  if (!exists) {
+    return [next, ...customers];
+  }
+
+  return customers.map((item) => {
+    if (item.id !== next.id) {
+      return item;
+    }
+
+    return {
+      ...item,
+      ...next,
+      planChange: next.planChange ?? item.planChange,
+      credentials: next.credentials ?? item.credentials,
+      rotateHistory: next.rotateHistory?.length ? next.rotateHistory : item.rotateHistory,
+      payments: next.payments?.length ? next.payments : item.payments,
+      auditLogs: next.auditLogs?.length ? next.auditLogs : item.auditLogs,
+    };
+  });
 }
