@@ -26,9 +26,6 @@ describe("plan node codes", () => {
 
 describe("planTrafficQuota", () => {
   it("shows yearly catalog totals as monthly amounts", () => {
-    expect(planTrafficQuota(getPlanById("workspace-a")!)).toEqual({ cadence: "month", gb: 100 });
-    expect(planTrafficQuota(getPlanById("workspace-b")!)).toEqual({ cadence: "month", gb: 200 });
-    expect(planTrafficQuota(getPlanById("workspace-c")!)).toEqual({ cadence: "month", gb: 1000 });
     expect(planTrafficQuota(getPlanById("global-year")!)).toEqual({ cadence: "month", gb: 100 });
     expect(planTrafficQuota(getPlanById("hybrid-year")!)).toEqual({ cadence: "month", gb: 100 });
   });
@@ -36,6 +33,9 @@ describe("planTrafficQuota", () => {
   it("keeps week and month plans as a period total", () => {
     expect(planTrafficQuota(getPlanById("global-week")!)).toEqual({ cadence: "total", gb: 20 });
     expect(planTrafficQuota(getPlanById("global-lite")!)).toEqual({ cadence: "total", gb: 100 });
+    expect(planTrafficQuota(getPlanById("workspace-a")!)).toEqual({ cadence: "total", gb: 100 });
+    expect(planTrafficQuota(getPlanById("workspace-b")!)).toEqual({ cadence: "total", gb: 200 });
+    expect(planTrafficQuota(getPlanById("workspace-c")!)).toEqual({ cadence: "total", gb: 1000 });
   });
 
   it("uses catalog traffic on the storefront even when live quota differs", () => {
@@ -62,7 +62,7 @@ describe("planPricePeriodKey", () => {
     expect(planPricePeriodKey("global-lite")).toBe("periodMonth");
     expect(planPricePeriodKey("hybrid-lite", "hybrid")).toBe("periodMonth");
     expect(planPricePeriodKey("global-year")).toBe("periodYear");
-    expect(planPricePeriodKey("workspace-a")).toBe("periodYear");
+    expect(planPricePeriodKey("workspace-a")).toBe("periodMonth");
   });
 });
 

@@ -21,6 +21,10 @@ export function signedInHomeHref(session: PublicSession | null | undefined) {
   return isAdminSession(session) ? "/admin" : "/app";
 }
 
+export function afterLoginHref(session: PublicSession | null | undefined) {
+  return isAdminSession(session) ? "/admin" : "/";
+}
+
 export function toPublicSession(user: {
   email: string;
   role: UserRole;

@@ -3,22 +3,32 @@
 import { Menu, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { Logo } from "@/components/marketing/logo";
 import { ServiceNav } from "@/components/marketing/service-nav";
 import { useHydrated, useSession } from "@/hooks/use-account";
 import { signedInHomeHref } from "@/lib/auth-types";
+import { clearSession } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
 export function MarketingHeader() {
   const t = useTranslations("nav");
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const hydrated = useHydrated();
   const session = useSession();
   const signedIn = hydrated && Boolean(session);
   const consoleHref = signedInHomeHref(session);
+
+  function logout() {
+    setOpen(false);
+    void clearSession().then(() => {
+      router.replace("/");
+      router.refresh();
+    });
+  }
 
   return (
     <header className="sticky top-0 z-40 bg-transparent">
@@ -35,12 +45,21 @@ export function MarketingHeader() {
 
         <div className="hidden items-center gap-2 md:flex">
           {signedIn ? (
-            <Link
-              href={consoleHref}
-              className={cn(buttonVariants({ size: "sm" }), "rounded-[10px]")}
-            >
-              {t("console")}
-            </Link>
+            <>
+              <button
+                type="button"
+                onClick={logout}
+                className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "rounded-[10px]")}
+              >
+                {t("logout")}
+              </button>
+              <Link
+                href={consoleHref}
+                className={cn(buttonVariants({ size: "sm" }), "rounded-[10px]")}
+              >
+                {t("console")}
+              </Link>
+            </>
           ) : (
             <>
               <Link
@@ -74,13 +93,25 @@ export function MarketingHeader() {
           <ServiceNav onNavigate={() => setOpen(false)} />
           <LocaleSwitcher />
           {signedIn ? (
-            <Link
-              href={consoleHref}
-              onClick={() => setOpen(false)}
-              className={cn(buttonVariants({ size: "sm" }), "w-full rounded-[10px]")}
-            >
-              {t("console")}
-            </Link>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={logout}
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "sm" }),
+                  "flex-1 rounded-[10px]"
+                )}
+              >
+                {t("logout")}
+              </button>
+              <Link
+                href={consoleHref}
+                onClick={() => setOpen(false)}
+                className={cn(buttonVariants({ size: "sm" }), "flex-1 rounded-[10px]")}
+              >
+                {t("console")}
+              </Link>
+            </div>
           ) : (
             <div className="flex gap-2">
               <Link

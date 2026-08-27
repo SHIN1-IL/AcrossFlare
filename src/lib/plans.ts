@@ -126,8 +126,8 @@ export const plans: Plan[] = [
     id: "workspace-a",
     product: "workspace",
     name: "A",
-    prices: { krw: 1990000, usd: 1500, cny: 9900, jpy: 230000 },
-    trafficGb: 1200,
+    prices: { krw: 199000, usd: 150, cny: 990, jpy: 23000 },
+    trafficGb: 100,
     backupGb: 1,
     nodes: ["Tokyo", "LA(A)"],
   },
@@ -135,8 +135,8 @@ export const plans: Plan[] = [
     id: "workspace-b",
     product: "workspace",
     name: "B",
-    prices: { krw: 1990000, usd: 1500, cny: 9900, jpy: 230000 },
-    trafficGb: 2400,
+    prices: { krw: 199000, usd: 150, cny: 990, jpy: 23000 },
+    trafficGb: 200,
     backupGb: 1,
     nodes: ["Tokyo", "LA(A)"],
   },
@@ -144,8 +144,8 @@ export const plans: Plan[] = [
     id: "workspace-c",
     product: "workspace",
     name: "C",
-    prices: { krw: 1990000, usd: 1500, cny: 9900, jpy: 230000 },
-    trafficGb: 12000,
+    prices: { krw: 199000, usd: 150, cny: 990, jpy: 23000 },
+    trafficGb: 1000,
     backupGb: 1,
     nodes: ["Tokyo", "LA(A)"],
   },
@@ -204,7 +204,7 @@ export type PlanTerm = "week" | "month" | "year";
 
 export function planTerm(planId: string): PlanTerm {
   if (planId.endsWith("-week")) return "week";
-  if (planId.endsWith("-year") || planId.startsWith("workspace-")) {
+  if (planId.endsWith("-year")) {
     return "year";
   }
   return "month";

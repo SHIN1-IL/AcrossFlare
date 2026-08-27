@@ -18,7 +18,8 @@
       "ja": "日本語",
       "en": "English"
     },
-    "console": "控制台"
+    "console": "控制台",
+    "logout": "退出"
   },
   "footer": {
     "terms": "条款",
@@ -53,7 +54,7 @@
     "supplierValue": "{legalName}（服务名 {serviceName}）",
     "standardTerms": "加密网络接入与 1GB 安全云备份，LA 线路，用于出差、旅行、在线会议等合法用途。流量与期限以所选套餐（1 周、1 个月或 12 个月）为准。",
     "hybridTerms": "加密网络接入与 1GB 安全云备份，东京+LA 线路，用于出差、旅行、在线会议等合法用途。流量与期限以所选套餐（1 周、1 个月或 12 个月）为准。",
-    "workspaceTerms": "团队或定制的加密网络接入与安全云备份。A、B、C 套餐均为 12 个月同一价格，仅人数与每月流量不同。套餐需促销码申请。",
+    "workspaceTerms": "团队或定制的加密网络接入与安全云备份。A、B、C 套餐均为每月 ¥990，仅人数与每月流量不同。套餐需促销码申请。",
     "deliveryValue": "无实物配送。付款完成后立即向已登录账户发放接入信息与备份使用信息。",
     "workspaceDeliveryValue": "无实物配送。促销码确认后，向已登录账户发放接入信息与备份使用信息。",
     "requirementsValue": "可联网的电脑或手机。无需安装专用应用。通过浏览器使用账户与备份。",
@@ -248,7 +249,7 @@
       "description": "面向朋友和团队的定制服务",
       "cta": "输入优惠码",
       "hint": "按人数的 A、B、C 套餐",
-      "priceNote": "A、B、C 套餐均为 12 个月同一价格，仅人数与每月流量不同。",
+      "priceNote": "A、B、C 套餐均为每月 ¥990，仅人数与每月流量不同。",
       "codePlaceholder": "优惠码",
       "codeSubmit": "确认",
       "codeInvalid": "优惠码无效。",

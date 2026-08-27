@@ -18,7 +18,8 @@
       "ja": "日本語",
       "en": "English"
     },
-    "console": "Console"
+    "console": "Console",
+    "logout": "Sign out"
   },
   "footer": {
     "terms": "Terms",
@@ -53,7 +54,7 @@
     "supplierValue": "{legalName} (service name {serviceName})",
     "standardTerms": "Encrypted network access and 1GB secure cloud backup on the LA route, for lawful travel, work, and online meetings. Traffic and term follow the plan you choose (1 week, 1 month, or 12 months).",
     "hybridTerms": "Encrypted network access and 1GB secure cloud backup on Tokyo+LA routes, for lawful travel, work, and online meetings. Traffic and term follow the plan you choose (1 week, 1 month, or 12 months).",
-    "workspaceTerms": "Team or custom encrypted network access and secure cloud backup. Plans A, B, and C share the same 12-month price; they differ only in seats and monthly traffic. Plans require a promotional code.",
+    "workspaceTerms": "Team or custom encrypted network access and secure cloud backup. Plans A, B, and C share the same monthly price of $150; they differ only in seats and monthly traffic. Plans require a promotional code.",
     "deliveryValue": "No physical shipment. After payment, access and backup details are issued immediately to the signed-in account.",
     "workspaceDeliveryValue": "No physical shipment. After the promotional code is confirmed, access and backup details are issued to the signed-in account.",
     "requirementsValue": "A PC or phone with internet access. No dedicated app is required. Use the account and backup in a browser.",
@@ -248,7 +249,7 @@
       "description": "Custom orders for friends and teams",
       "cta": "Enter promotional code",
       "hint": "Plans A, B, and C by headcount",
-      "priceNote": "Plans A, B, and C share the same 12-month price. They differ only in seats and monthly traffic.",
+      "priceNote": "Plans A, B, and C share the same monthly price of $150. They differ only in seats and monthly traffic.",
       "codePlaceholder": "Promotional code",
       "codeSubmit": "Continue",
       "codeInvalid": "This code is not valid.",

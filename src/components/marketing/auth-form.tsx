@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PgReviewNotice } from "@/components/marketing/pg-review-notice";
-import { isAdminSession, type PublicSession } from "@/lib/auth-types";
+import { useHydrated } from "@/hooks/use-account";
+import { afterLoginHref, type PublicSession } from "@/lib/auth-types";
 import { isPublicCheckoutProduct } from "@/lib/plans";
 import { REVIEW_USER_EMAIL } from "@/lib/review-user";
 import { hydrateSession, setPreviewEmail } from "@/lib/session";
@@ -32,8 +33,9 @@ export function AuthForm({
   const [pending, setPending] = useState(false);
   const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [legalAgreed, setLegalAgreed] = useState(false);
+  const hydrated = useHydrated();
   const localDemo =
-    typeof window !== "undefined" &&
+    hydrated &&
     (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
 
   return (
@@ -100,17 +102,12 @@ export function AuthForm({
             return;
           }
 
-          if (isAdminSession(data.user)) {
-            router.push("/admin");
-            return;
-          }
-
           if (isPublicCheckoutProduct(product) && plan) {
             router.push({ pathname: "/checkout", query: { product, plan } });
             return;
           }
 
-          router.push("/app");
+          router.push(afterLoginHref(data.user));
         } catch {
           setError(t("errorGeneric"));
         } finally {
