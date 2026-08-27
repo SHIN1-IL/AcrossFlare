@@ -116,11 +116,12 @@ export function CheckoutView({
 
       setStep(steps.length - 1);
       await sleep(500);
-      await refreshRemoteAccount(session.email);
-      if (session && validProduct && plan) {
-        provisionProduct(session.email, validProduct, plan.id, method);
-        router.push(validProduct === "workspace" ? "/app/workspace" : "/app/global");
+      if (!session || !validProduct || !plan) {
+        return;
       }
+      await refreshRemoteAccount(session.email);
+      provisionProduct(session.email, validProduct, plan.id, method);
+      router.push(validProduct === "workspace" ? "/app/workspace" : "/app/global");
     },
     [method, plan, router, session, steps, validProduct]
   );

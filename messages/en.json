@@ -190,7 +190,22 @@
     "featured": "Popular",
     "alipay": "Alipay"
   },
-  "planSlides": {},
+  "planSlides": {
+    "global-lite": {
+      "eyebrow": "Secure Cloud & Network Optimization",
+      "title": "Standard",
+      "description": "Right-sized speed for short trips and travel backups",
+      "price": "₩9,900/mo",
+      "cta": "Learn more"
+    },
+    "global-pro": {
+      "eyebrow": "Secure Cloud & Network Optimization",
+      "title": "Hybrid",
+      "description": "Secure backup with faster network optimization",
+      "price": "₩19,900/mo",
+      "cta": "Learn more"
+    }
+  },
   "workspace": {
     "eyebrow": "Secure Cloud & Network Optimization",
     "title": "Workspace & Custom",

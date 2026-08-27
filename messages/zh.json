@@ -190,7 +190,22 @@
     "featured": "热门",
     "alipay": "支付宝"
   },
-  "planSlides": {},
+  "planSlides": {
+    "global-lite": {
+      "eyebrow": "安全云及网络优化",
+      "title": "Standard",
+      "description": "适合短期旅行或出差时的安全备份与合适速度",
+      "price": "₩9,900/月",
+      "cta": "了解更多"
+    },
+    "global-pro": {
+      "eyebrow": "安全云及网络优化",
+      "title": "Hybrid",
+      "description": "提供安全备份与更快的网络优化",
+      "price": "₩19,900/月",
+      "cta": "了解更多"
+    }
+  },
   "workspace": {
     "eyebrow": "安全云及网络优化",
     "title": "Workspace & Custom",

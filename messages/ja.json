@@ -190,7 +190,22 @@
     "featured": "人気",
     "alipay": "Alipay"
   },
-  "planSlides": {},
+  "planSlides": {
+    "global-lite": {
+      "eyebrow": "セキュアクラウドおよびネットワーク最適化",
+      "title": "Standard",
+      "description": "短期旅行や出張時のセキュアバックアップに適した速度",
+      "price": "₩9,900/月",
+      "cta": "詳しく見る"
+    },
+    "global-pro": {
+      "eyebrow": "セキュアクラウドおよびネットワーク最適化",
+      "title": "Hybrid",
+      "description": "セキュアバックアップと高速なネットワーク最適化",
+      "price": "₩19,900/月",
+      "cta": "詳しく見る"
+    }
+  },
   "workspace": {
     "eyebrow": "セキュアクラウドおよびネットワーク最適化",
     "title": "Workspace & Custom",

@@ -50,15 +50,22 @@ function PlanStage({
   const locale = useLocale() as AppLocale;
   const slide = homeSlideFor(plan.id);
   const prices = HOME_SLIDE_PRICES[plan.id] ?? plan.prices;
-  const slideKey = `${plan.id}.title`;
-  const custom = tSlides.has(slideKey)
-    ? {
-        eyebrow: tSlides(`${plan.id}.eyebrow`),
-        title: tSlides(`${plan.id}.title`),
-        description: tSlides(`${plan.id}.description`),
-        cta: tSlides(`${plan.id}.cta`),
-      }
-    : null;
+  const custom =
+    plan.id === "global-lite"
+      ? {
+          eyebrow: tSlides("global-lite.eyebrow"),
+          title: tSlides("global-lite.title"),
+          description: tSlides("global-lite.description"),
+          cta: tSlides("global-lite.cta"),
+        }
+      : plan.id === "global-pro"
+        ? {
+            eyebrow: tSlides("global-pro.eyebrow"),
+            title: tSlides("global-pro.title"),
+            description: tSlides("global-pro.description"),
+            cta: tSlides("global-pro.cta"),
+          }
+        : null;
   const service = slide.service;
   const productLabel = custom?.eyebrow ?? t(service);
   const traffic = plan.trafficGb === null ? t("unlimited") : `${plan.trafficGb} GB`;
