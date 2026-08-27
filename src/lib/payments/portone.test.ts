@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { portoneCurrency, portoneCustomerName, portoneLocale } from "@/lib/payments/portone";
+import { portoneCurrency, portoneCustomerName, portoneCustomerPhone, portoneLocale } from "@/lib/payments/portone";
 
 describe("portone currency and locale", () => {
   it("uses the PortOne CURRENCY_ prefix the browser SDK expects", () => {
@@ -17,5 +17,13 @@ describe("portone currency and locale", () => {
 
   it("derives a customer name from the account email", () => {
     expect(portoneCustomerName("shin@acrosstool.com")).toBe("shin");
+  });
+
+  it("normalizes Korean mobiles for Inicis V2", () => {
+    expect(portoneCustomerPhone("010-1234-5678")).toBe("010-1234-5678");
+    expect(portoneCustomerPhone("01012345678")).toBe("010-1234-5678");
+    expect(portoneCustomerPhone("+82 10-1234-5678")).toBe("010-1234-5678");
+    expect(portoneCustomerPhone("070-8065-1258")).toBeNull();
+    expect(portoneCustomerPhone("")).toBeNull();
   });
 });

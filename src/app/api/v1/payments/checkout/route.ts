@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { PromoCodeStatus } from "@prisma/client";
+import { PaymentProvider, PromoCodeStatus } from "@prisma/client";
 import { getAuthUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { isSimulateEnabled } from "@/lib/payments/config";
+import { portoneCustomerPhone } from "@/lib/payments/portone";
 import { defaultPaymentMethod, parseAppLocale, parsePaymentMethod, quotePayment } from "@/lib/payments/quote";
 import { CheckoutStartError, startProviderCheckout } from "@/lib/payments/start";
 import { isPublicCheckoutProduct } from "@/lib/plans";
@@ -21,7 +22,14 @@ export async function POST(request: Request) {
   }
 
   const body = (await request.json().catch(() => null)) as
-    | { product?: string; planId?: string; method?: string; locale?: string; promoCode?: string }
+    | {
+        product?: string;
+        planId?: string;
+        method?: string;
+        locale?: string;
+        promoCode?: string;
+        phoneNumber?: string;
+      }
     | null;
 
   const locale = parseAppLocale(body?.locale);
@@ -47,6 +55,14 @@ export async function POST(request: Request) {
   }
 
   const quote = quotePayment(locale, method, plan);
+  const phoneNumber = portoneCustomerPhone(body.phoneNumber);
+  const needsPortonePhone = !isSimulateEnabled() && quote.provider === PaymentProvider.PORTONE;
+  if (needsPortonePhone && !phoneNumber) {
+    return NextResponse.json(
+      { error: body.phoneNumber?.trim() ? "phone_invalid" : "phone_required" },
+      { status: 400 }
+    );
+  }
   const payment = await prisma.payment.create({
     data: {
       userId: user.id,
@@ -90,6 +106,7 @@ export async function POST(request: Request) {
       plan,
       email: user.email,
       product,
+      phoneNumber,
     });
     return NextResponse.json({ ...base, ...live });
   } catch (error) {

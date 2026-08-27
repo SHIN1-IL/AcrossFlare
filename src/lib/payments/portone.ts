@@ -13,6 +13,7 @@ export type PortOneCheckout = {
   customer: {
     email: string;
     fullName: string;
+    phoneNumber: string;
   };
 };
 
@@ -41,4 +42,17 @@ export function portoneLocale(locale: string) {
 export function portoneCustomerName(email: string) {
   const local = email.split("@")[0]?.trim();
   return local && local.length > 0 ? local : "AcrossFlare";
+}
+
+/** Inicis V2 checkout requires a Korean mobile number. */
+export function portoneCustomerPhone(value: string | null | undefined) {
+  const digits = (value ?? "").replace(/\D/g, "");
+  let mobile = digits;
+  if (digits.startsWith("82") && digits.length >= 11) {
+    mobile = `0${digits.slice(2)}`;
+  }
+  if (!/^010\d{8}$/.test(mobile)) {
+    return null;
+  }
+  return `${mobile.slice(0, 3)}-${mobile.slice(3, 7)}-${mobile.slice(7)}`;
 }

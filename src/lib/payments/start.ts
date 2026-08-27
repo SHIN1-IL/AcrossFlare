@@ -12,6 +12,7 @@ import { md5Hex } from "@/lib/payments/crypto";
 import {
   portoneCurrency,
   portoneCustomerName,
+  portoneCustomerPhone,
   portoneLocale,
   type PortOneCheckout,
 } from "@/lib/payments/portone";
@@ -55,6 +56,7 @@ export async function startProviderCheckout(input: {
   plan: Plan;
   email: string;
   product: string;
+  phoneNumber?: string | null;
 }): Promise<LiveCheckoutSession> {
   const locale = input.payment.locale as AppLocale;
   const successUrl = checkoutReturnUrl({
@@ -159,13 +161,18 @@ function createPaymentwallCheckout(input: { payment: Payment; plan: Plan; email:
 }
 
 function createPortoneCheckout(
-  input: { payment: Payment; plan: Plan; email: string },
+  input: { payment: Payment; plan: Plan; email: string; phoneNumber?: string | null },
   redirectUrl: string
 ): PortOneCheckout {
   const storeId = portoneStoreId();
   const channelKey = portoneChannelKey();
   if (!storeId || !channelKey) {
     throw new CheckoutStartError("portone_not_configured");
+  }
+
+  const phoneNumber = portoneCustomerPhone(input.phoneNumber);
+  if (!phoneNumber) {
+    throw new CheckoutStartError(input.phoneNumber?.trim() ? "phone_invalid" : "phone_required");
   }
 
   return {
@@ -181,6 +188,7 @@ function createPortoneCheckout(
     customer: {
       email: input.email,
       fullName: portoneCustomerName(input.email),
+      phoneNumber,
     },
   };
 }

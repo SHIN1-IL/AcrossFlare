@@ -29,6 +29,8 @@ const CHECKOUT_FAILURES = [
   "stripe_not_configured",
   "stripe_checkout_failed",
   "paymentwall_not_configured",
+  "phone_required",
+  "phone_invalid",
 ] as const;
 
 type CheckoutFailure = (typeof CHECKOUT_FAILURES)[number] | "failed" | "agree";
@@ -75,6 +77,7 @@ export function CheckoutView({
   const validProduct = isPublicCheckoutProduct(product) && plan?.product === product ? product : null;
   const [method, setMethod] = useState<PaymentMethod>(locale === "zh" ? "alipay" : "card");
   const [agreed, setAgreed] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [phase, setPhase] = useState<"form" | "processing" | "provisioning">(
     paymentId && !canceled ? "processing" : "form"
   );
@@ -136,6 +139,11 @@ export function CheckoutView({
       return;
     }
 
+    if (method === "card" && !phoneNumber.trim()) {
+      setError("phone_required");
+      return;
+    }
+
     if (!canStartPublicCheckout(session?.email)) {
       setError("review_only");
       return;
@@ -161,6 +169,7 @@ export function CheckoutView({
           method,
           locale,
           promoCode,
+          phoneNumber,
         }),
       });
       const checkout = (await created.json()) as {
@@ -172,12 +181,14 @@ export function CheckoutView({
       };
       if (checkout.error) {
         throw new Error(
-          checkout.error === "invalid_code" ||
+            checkout.error === "invalid_code" ||
             checkout.error === "review_only" ||
             checkout.error === "portone_not_configured" ||
             checkout.error === "stripe_not_configured" ||
             checkout.error === "stripe_checkout_failed" ||
-            checkout.error === "paymentwall_not_configured"
+            checkout.error === "paymentwall_not_configured" ||
+            checkout.error === "phone_required" ||
+            checkout.error === "phone_invalid"
             ? checkout.error
             : "failed"
         );
@@ -312,6 +323,25 @@ export function CheckoutView({
         {phase === "form" ? (
           <div className="mt-6 space-y-5">
             <PaymentTabs value={method} onChange={setMethod} />
+            {method === "card" ? (
+              <label className="block space-y-1.5">
+                <span className="text-xs text-muted-foreground">{t("phoneLabel")}</span>
+                <input
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
+                  placeholder={t("phonePlaceholder")}
+                  value={phoneNumber}
+                  onChange={(event) => {
+                    setPhoneNumber(event.target.value);
+                    if (error === "phone_required" || error === "phone_invalid") {
+                      setError(null);
+                    }
+                  }}
+                  className="h-10 w-full rounded-[10px] border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+                />
+              </label>
+            ) : null}
             {canStartPublicCheckout(session.email) ? null : <PgReviewNotice />}
             {error ? (
               <p className="text-sm text-destructive">
@@ -323,12 +353,16 @@ export function CheckoutView({
                       ? t("agreeRequired")
                       : error === "review_only"
                         ? t("reviewOnly")
-                        : error === "portone_not_configured" ||
-                            error === "stripe_not_configured" ||
-                            error === "paymentwall_not_configured" ||
-                            error === "stripe_checkout_failed"
-                          ? t("payNotConfigured")
-                          : t("payFailed")}
+                        : error === "phone_required"
+                          ? t("phoneRequired")
+                          : error === "phone_invalid"
+                            ? t("phoneInvalid")
+                            : error === "portone_not_configured" ||
+                                error === "stripe_not_configured" ||
+                                error === "paymentwall_not_configured" ||
+                                error === "stripe_checkout_failed"
+                              ? t("payNotConfigured")
+                              : t("payFailed")}
               </p>
             ) : null}
             <p className="text-xs leading-5 text-muted-foreground">{t("refundNotice")}</p>
