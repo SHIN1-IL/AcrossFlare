@@ -76,6 +76,25 @@ services:
     logging: *default-logging
     profiles: ["origin"]
 
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: deps
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-acrossflare}:${POSTGRES_PASSWORD:-acrossflare}@postgres:5432/${POSTGRES_DB:-acrossflare}
+    command: ["npx", "prisma", "migrate", "deploy"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+    mem_limit: 256m
+    networks: [origin]
+    logging: *default-logging
+    profiles: ["origin"]
+
   web:
     build:
       context: .
@@ -94,7 +113,9 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    mem_limit: 128m
+      migrate:
+        condition: service_completed_successfully
+    mem_limit: 256m
     networks: [origin]
     healthcheck:
       test:
