@@ -81,11 +81,11 @@ services:
       context: .
       dockerfile: Dockerfile
       target: deps
-    env_file:
-      - .env
+    working_dir: /app
     environment:
+      # Do not load root .env DATABASE_URL (localhost). This service talks to Compose postgres.
       DATABASE_URL: postgresql://${POSTGRES_USER:-acrossflare}:${POSTGRES_PASSWORD:-acrossflare}@postgres:5432/${POSTGRES_DB:-acrossflare}
-    command: ["npx", "prisma", "migrate", "deploy"]
+    command: ["./node_modules/.bin/prisma", "migrate", "deploy"]
     depends_on:
       postgres:
         condition: service_healthy
