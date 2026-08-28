@@ -1,22 +1,19 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Link, useRouter } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
+import { localePath } from "@/i18n/path";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PgReviewNotice } from "@/components/marketing/pg-review-notice";
 import { useHydrated } from "@/hooks/use-account";
-import { afterLoginHref, type PublicSession } from "@/lib/auth-types";
+import { loginRedirectHref, type PublicSession } from "@/lib/auth-types";
 import { isPublicCheckoutProduct } from "@/lib/plans";
 import { REVIEW_USER_EMAIL } from "@/lib/review-user";
 import { hydrateSession, setPreviewEmail } from "@/lib/session";
-
-function isSafeNext(value: string | null): value is string {
-  return Boolean(value && value.startsWith("/") && !value.startsWith("//"));
-}
 
 export function AuthForm({
   mode,
@@ -27,7 +24,7 @@ export function AuthForm({
 }) {
   const t = useTranslations("auth");
   const tFooter = useTranslations("footer");
-  const router = useRouter();
+  const locale = useLocale();
   const searchParams = useSearchParams();
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
@@ -91,23 +88,16 @@ export function AuthForm({
 
           setPreviewEmail(null);
           hydrateSession(data.user);
-          router.refresh();
 
           const next = searchParams.get("next");
           const product = searchParams.get("product");
           const plan = searchParams.get("plan");
+          const href =
+            isPublicCheckoutProduct(product) && plan
+              ? `/checkout?product=${encodeURIComponent(product)}&plan=${encodeURIComponent(plan)}`
+              : loginRedirectHref(data.user, next);
 
-          if (isSafeNext(next)) {
-            router.push(next);
-            return;
-          }
-
-          if (isPublicCheckoutProduct(product) && plan) {
-            router.push({ pathname: "/checkout", query: { product, plan } });
-            return;
-          }
-
-          router.push(afterLoginHref(data.user));
+          window.location.assign(localePath(locale, href));
         } catch {
           setError(t("errorGeneric"));
         } finally {

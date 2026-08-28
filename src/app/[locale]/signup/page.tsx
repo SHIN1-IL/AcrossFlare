@@ -3,7 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AuthForm } from "@/components/marketing/auth-form";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { getCurrentUser } from "@/lib/auth";
-import { afterLoginHref } from "@/lib/auth-types";
+import { loginRedirectHref } from "@/lib/auth-types";
 import { resolveLocale } from "@/i18n/locale";
 import { redirect } from "@/i18n/navigation";
 import { isPublicCheckoutProduct } from "@/lib/plans";
@@ -21,7 +21,11 @@ export default async function SignupPage({
 
   const user = await getCurrentUser();
   if (user) {
-    redirect({ href: afterLoginHref(user), locale });
+    const next =
+      isPublicCheckoutProduct(product) && plan
+        ? `/checkout?product=${encodeURIComponent(product)}&plan=${encodeURIComponent(plan)}`
+        : undefined;
+    redirect({ href: loginRedirectHref(user, next), locale });
   }
 
   const t = await getTranslations("auth");

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { afterLoginHref, signedInHomeHref, type PublicSession } from "@/lib/auth-types";
+import { afterLoginHref, loginRedirectHref, signedInHomeHref, type PublicSession } from "@/lib/auth-types";
 
 function session(role: PublicSession["role"]): PublicSession {
   return { email: "ops@acrossflare.com", role, permissions: [] };
@@ -28,5 +28,26 @@ describe("afterLoginHref", () => {
   it("sends customers and the review account to the marketing home", () => {
     expect(afterLoginHref(session("USER"))).toBe("/");
     expect(afterLoginHref(null)).toBe("/");
+  });
+});
+
+describe("loginRedirectHref", () => {
+  it("keeps customers on the homepage even when next points at the console", () => {
+    expect(loginRedirectHref(session("USER"), "/app")).toBe("/");
+    expect(loginRedirectHref(session("USER"), "/app/global")).toBe("/");
+    expect(loginRedirectHref(session("USER"), "/dashboard")).toBe("/");
+    expect(loginRedirectHref(session("USER"), null)).toBe("/");
+  });
+
+  it("still returns customers to checkout", () => {
+    expect(loginRedirectHref(session("USER"), "/checkout?product=global&plan=global-lite")).toBe(
+      "/checkout?product=global&plan=global-lite"
+    );
+  });
+
+  it("returns staff to admin, not the customer console", () => {
+    expect(loginRedirectHref(session("ADMIN"), "/admin/standard/customers")).toBe("/admin/standard/customers");
+    expect(loginRedirectHref(session("OWNER"), "/app")).toBe("/admin");
+    expect(loginRedirectHref(session("STAFF"), null)).toBe("/admin");
   });
 });
