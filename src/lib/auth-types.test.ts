@@ -43,6 +43,7 @@ describe("loginRedirectHref", () => {
     expect(loginRedirectHref(session("USER"), "/checkout?product=global&plan=global-lite")).toBe(
       "/checkout?product=global&plan=global-lite"
     );
+    expect(loginRedirectHref(session("USER"), "/support")).toBe("/support");
   });
 
   it("returns staff to admin, not the customer console", () => {

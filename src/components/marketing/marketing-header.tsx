@@ -8,6 +8,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { Logo } from "@/components/marketing/logo";
 import { ServiceNav } from "@/components/marketing/service-nav";
+import { SupportNav } from "@/components/marketing/support-nav";
 import { useHydrated, useSession } from "@/hooks/use-account";
 import { signedInHomeHref } from "@/lib/auth-types";
 import { clearSession } from "@/lib/session";
@@ -38,6 +39,11 @@ export function MarketingHeader() {
           <div className="hidden md:block">
             <ServiceNav />
           </div>
+          {signedIn ? (
+            <div className="hidden md:block">
+              <SupportNav />
+            </div>
+          ) : null}
           <div className="hidden md:block">
             <LocaleSwitcher />
           </div>
@@ -91,6 +97,7 @@ export function MarketingHeader() {
       {open ? (
         <div className="space-y-3 border-t border-border px-4 py-3 md:hidden">
           <ServiceNav onNavigate={() => setOpen(false)} />
+          {signedIn ? <SupportNav onNavigate={() => setOpen(false)} /> : null}
           <LocaleSwitcher />
           {signedIn ? (
             <div className="flex gap-2">

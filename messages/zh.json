@@ -8,6 +8,7 @@
     "pricing": "定价",
     "docs": "文档",
     "service": "服务",
+    "supportZone": "支持专区",
     "login": "登录",
     "signup": "注册",
     "getStarted": "开始使用",
@@ -34,6 +35,7 @@
     "phone": "电话",
     "email": "邮箱",
     "businessNo": "营业执照号",
+    "vatStatus": "纳税类型",
     "vasNo": "增值电信业务备案号",
     "mailOrderNo": "通信销售备案号",
     "hostingProvider": "托管服务商",
@@ -427,6 +429,83 @@
     "productHybrid": "Hybrid",
     "productWorkspace": "Workspace & Custom",
     "productMarketing": "Marketing IP"
+  },
+  "support": {
+    "title": "支持专区",
+    "lead": "感谢完成付款。为本设备安装 Karing 并添加配置文件后即可使用。",
+    "comingSoon": "服务即将上线",
+    "downloads": {
+      "title": "下载中心",
+      "lead": "点击下方按钮，安装适合本设备的最新客户端。",
+      "cta": "下载适合本设备的 Karing (Auto-Detect)",
+      "ctaOs": "下载 {os} 版 Karing",
+      "ctaOsVersion": "下载 {os} 版 Karing ({version})",
+      "ctaLoading": "正在确认最新版本...",
+      "environment": "当前环境: {os}",
+      "otherOs": "查找其他操作系统文件",
+      "os": {
+        "windows": "Windows",
+        "macos": "macOS",
+        "macosIntel": "macOS (Intel)",
+        "macosAppleSilicon": "macOS (Apple Silicon)",
+        "android": "Android",
+        "ios": "iOS",
+        "ipados": "iPadOS",
+        "linux": "Linux",
+        "other": "未知"
+      }
+    },
+    "setup": {
+      "title": "设置方法",
+      "heading": "三步完成初始设置",
+      "install": {
+        "windows": "运行 .exe 安装包。如出现 SmartScreen，请选择“更多信息”→“仍要运行”。",
+        "macos": "打开 .dmg，将 Karing 拖到“应用程序”。如提示未识别的开发者，请到系统设置 → 隐私与安全性选择“仍要打开”。",
+        "android": "打开 APK，必要时允许从此来源安装。Karing 未上架 Play 商店。",
+        "ios": "请从 App Store 安装 Karing，不要使用非官方 IPA。",
+        "linux": "为 AppImage 添加可执行权限后运行。"
+      },
+      "steps": {
+        "install": {
+          "title": "运行 Karing 安装文件",
+          "body": "打开已下载的文件并按提示完成安装。请参考下方对应系统说明。"
+        },
+        "profile": {
+          "title": "绑定已发放的订阅二维码或链接",
+          "body": "在 Karing 中扫描下方二维码，或复制 YAML URL 粘贴到 Add Profile。也可以复制二维码图片。",
+          "openApp": "打开我的页面",
+          "empty": "尚未发放订阅配置。请到我的页面查看开通状态。",
+          "qrLabel": "订阅二维码",
+          "qrValue": "二维码 / 深链",
+          "copyQr": "复制二维码",
+          "qrCopied": "已复制二维码"
+        },
+        "connect": {
+          "title": "开始连接（Connect）",
+          "body": "配置保存后，打开主界面开关即可连接。"
+        }
+      }
+    },
+    "faq": {
+      "title": "常见问题",
+      "helpTitle": "安装遇到困难？",
+      "helpBody": "如需远程协助或一对一说明，请联系支持团队。",
+      "helpCta": "邮件联系帮助台",
+      "items": {
+        "profileWhere": {
+          "q": "订阅二维码或链接在哪里领取？",
+          "a": "可扫描下方二维码，或复制二维码图片、YAML URL、深链。设置方法第 2 步和“我的页面”也有相同内容。"
+        },
+        "playStore": {
+          "q": "Android 能从 Play 商店下载吗？",
+          "a": "Karing 未上架 Play 商店。请使用本页下载按钮或官方 GitHub Releases 的 APK。"
+        },
+        "macOpen": {
+          "q": "Mac 提示无法验证开发者。",
+          "a": "打开系统设置 → 隐私与安全性，选择“仍要打开”。"
+        }
+      }
+    }
   },
   "common": {
     "docsSoon": "文档即将上线"

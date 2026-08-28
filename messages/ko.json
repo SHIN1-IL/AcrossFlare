@@ -8,6 +8,7 @@
     "pricing": "요금",
     "docs": "문서",
     "service": "서비스",
+    "supportZone": "서포트존",
     "login": "로그인",
     "signup": "회원가입",
     "getStarted": "시작하기",
@@ -34,6 +35,7 @@
     "phone": "전화번호",
     "email": "이메일",
     "businessNo": "사업자등록번호",
+    "vatStatus": "과세유형",
     "vasNo": "부가통신사업 신고번호",
     "mailOrderNo": "통신판매업 신고번호",
     "hostingProvider": "호스팅 제공자",
@@ -427,6 +429,83 @@
     "productHybrid": "Hybrid",
     "productWorkspace": "Workspace & Custom",
     "productMarketing": "Marketing IP"
+  },
+  "support": {
+    "title": "서포트존",
+    "lead": "서비스 결제를 완료해 주셔서 감사합니다. 기기에 맞는 Karing을 설치하고 프로필만 연결하면 바로 이용할 수 있습니다.",
+    "comingSoon": "서비스 곧 추가 예정",
+    "downloads": {
+      "title": "다운로드센터",
+      "lead": "아래 버튼을 눌러 이 기기에 맞는 최신 클라이언트를 설치하세요.",
+      "cta": "내 기기에 맞는 Karing 다운로드 (Auto-Detect)",
+      "ctaOs": "{os}용 Karing 다운로드",
+      "ctaOsVersion": "{os}용 Karing 다운로드 ({version})",
+      "ctaLoading": "최신버전 확인 중...",
+      "environment": "현재 접속 중인 환경: {os}",
+      "otherOs": "다른 운영체제 파일 찾기",
+      "os": {
+        "windows": "Windows",
+        "macos": "macOS",
+        "macosIntel": "macOS (Intel)",
+        "macosAppleSilicon": "macOS (Apple Silicon)",
+        "android": "Android",
+        "ios": "iOS",
+        "ipados": "iPadOS",
+        "linux": "Linux",
+        "other": "알 수 없음"
+      }
+    },
+    "setup": {
+      "title": "설정방법",
+      "heading": "3단계로 끝내는 초기 설정",
+      "install": {
+        "windows": ".exe 설치 파일을 실행하세요. SmartScreen 경고가 뜨면 추가 정보 → 실행을 선택합니다.",
+        "macos": ".dmg를 열고 Karing을 응용 프로그램으로 끌어다 놓으세요. 확인되지 않은 개발자 경고가 뜨면 시스템 설정 → 개인정보 보호 및 보안에서 확인 없이 열기를 누릅니다.",
+        "android": "APK를 연 뒤, 필요하면 이 출처의 앱 설치를 허용하세요. Karing은 Play Store에 없습니다.",
+        "ios": "App Store에서 Karing을 설치하세요. iPhone과 iPad 모두 해당하며, 비공식 IPA는 사용하지 마세요.",
+        "linux": "AppImage를 실행 가능으로 만든 뒤 실행하세요."
+      },
+      "steps": {
+        "install": {
+          "title": "Karing 설치 파일 실행",
+          "body": "다운로드된 파일을 실행하고 안내에 따라 설치를 완료하세요. 사용 중인 OS 안내는 아래를 참고하세요."
+        },
+        "profile": {
+          "title": "발급받은 구독 QR코드 또는 링크 연동",
+          "body": "아래 QR을 Karing에서 스캔하거나, YAML URL을 복사해 Add Profile에 붙여넣으세요. QR 코드 복사로 이미지를 복사할 수도 있습니다.",
+          "openApp": "마이페이지 열기",
+          "empty": "아직 발급된 구독 프로필이 없습니다. 마이페이지에서 발급 상태를 확인하세요.",
+          "qrLabel": "구독 QR",
+          "qrValue": "QR / 딥링크",
+          "copyQr": "QR 코드 복사",
+          "qrCopied": "QR 복사됨"
+        },
+        "connect": {
+          "title": "연결 시작 (Connect)",
+          "body": "프로필이 등록되면 메인 화면 스위치를 켜서 연결하세요."
+        }
+      }
+    },
+    "faq": {
+      "title": "자주하는 질문",
+      "helpTitle": "설치 중 어려움을 겪고 계신가요?",
+      "helpBody": "원격 지원이나 1:1 상담이 필요하면 서포트팀에 문의해 주세요.",
+      "helpCta": "1:1 헬프데스크 문의하기",
+      "items": {
+        "profileWhere": {
+          "q": "구독 QR코드 또는 링크는 어디에서 받나요?",
+          "a": "아래에서 QR을 스캔하거나, QR 이미지·YAML URL·딥링크를 복사하세요. 설정방법 2단계와 마이페이지에도 같은 값이 있습니다."
+        },
+        "playStore": {
+          "q": "Android를 Play Store에서 받을 수 있나요?",
+          "a": "Karing은 Play Store에 없습니다. 이 페이지의 다운로드 버튼 또는 공식 GitHub Releases에서 APK를 받으세요."
+        },
+        "macOpen": {
+          "q": "Mac에서 확인되지 않은 개발자 경고가 뜹니다.",
+          "a": "시스템 설정 → 개인정보 보호 및 보안에서 확인 없이 열기를 선택하세요."
+        }
+      }
+    }
   },
   "common": {
     "docsSoon": "문서는 곧 제공"

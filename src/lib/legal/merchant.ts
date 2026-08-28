@@ -5,6 +5,7 @@ function readEnv(name: string, fallback = "") {
 
 export const MAIL_ORDER_PENDING = "구매안전확인증 발급 후 신고 예정";
 export const DEFAULT_HOSTING_PROVIDER = "Cloudflare";
+export const VAT_SIMPLIFIED = "부가가치세 간이과세자";
 
 export type MerchantInfo = {
   serviceName: string;
@@ -14,6 +15,7 @@ export type MerchantInfo = {
   phone: string;
   email: string;
   businessNumber: string;
+  vatStatus: string;
   vasNumber: string;
   mailOrderNumber: string;
   hostingProvider: string;
@@ -28,6 +30,7 @@ export function getMerchant(): MerchantInfo {
     phone: readEnv("LEGAL_PHONE", "070-8065-1258"),
     email: readEnv("LEGAL_EMAIL", "acrosstool@gmail.com"),
     businessNumber: readEnv("LEGAL_BUSINESS_NO", "163-13-03007"),
+    vatStatus: VAT_SIMPLIFIED,
     vasNumber: readEnv("LEGAL_VAS_NO", "제 2-04-26-0006 호"),
     mailOrderNumber: readEnv("LEGAL_MAIL_ORDER_NO", MAIL_ORDER_PENDING),
     hostingProvider: readEnv("LEGAL_HOSTING_PROVIDER", DEFAULT_HOSTING_PROVIDER),
@@ -42,6 +45,7 @@ export type MerchantRowId =
   | "phone"
   | "email"
   | "businessNo"
+  | "vatStatus"
   | "vasNo"
   | "mailOrderNo"
   | "hostingProvider";
@@ -56,6 +60,7 @@ export function merchantRows(merchant: MerchantInfo): Array<{ id: MerchantRowId;
       { id: "phone", value: merchant.phone },
       { id: "email", value: merchant.email },
       { id: "businessNo", value: merchant.businessNumber },
+      { id: "vatStatus", value: merchant.vatStatus },
       { id: "vasNo", value: merchant.vasNumber },
       { id: "mailOrderNo", value: merchant.mailOrderNumber },
       { id: "hostingProvider", value: merchant.hostingProvider },

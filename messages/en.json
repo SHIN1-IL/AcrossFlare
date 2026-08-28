@@ -8,6 +8,7 @@
     "pricing": "Pricing",
     "docs": "Docs",
     "service": "Service",
+    "supportZone": "Support Zone",
     "login": "Login",
     "signup": "Sign up",
     "getStarted": "Get Started",
@@ -34,6 +35,7 @@
     "phone": "Phone",
     "email": "Email",
     "businessNo": "Business registration no.",
+    "vatStatus": "VAT status",
     "vasNo": "Value-added telecom report no.",
     "mailOrderNo": "Mail-order report no.",
     "hostingProvider": "Hosting provider",
@@ -427,6 +429,83 @@
     "productHybrid": "Hybrid",
     "productWorkspace": "Workspace & Custom",
     "productMarketing": "Marketing IP"
+  },
+  "support": {
+    "title": "Support Zone",
+    "lead": "Thank you for completing payment. Install Karing for this device, then add your profile to start.",
+    "comingSoon": "Service coming soon",
+    "downloads": {
+      "title": "Download Center",
+      "lead": "Use the button below to install the latest client for this device.",
+      "cta": "Download Karing for this device (Auto-Detect)",
+      "ctaOs": "Download Karing for {os}",
+      "ctaOsVersion": "Download Karing for {os} ({version})",
+      "ctaLoading": "Checking the latest version...",
+      "environment": "Current environment: {os}",
+      "otherOs": "Find files for another OS",
+      "os": {
+        "windows": "Windows",
+        "macos": "macOS",
+        "macosIntel": "macOS (Intel)",
+        "macosAppleSilicon": "macOS (Apple Silicon)",
+        "android": "Android",
+        "ios": "iOS",
+        "ipados": "iPadOS",
+        "linux": "Linux",
+        "other": "Unknown"
+      }
+    },
+    "setup": {
+      "title": "Setup Guide",
+      "heading": "Finish setup in three steps",
+      "install": {
+        "windows": "Run the .exe installer. If SmartScreen appears, choose More info → Run anyway.",
+        "macos": "Open the .dmg and drag Karing to Applications. If macOS warns about an unidentified developer, go to System Settings → Privacy & Security and choose Open Anyway.",
+        "android": "Open the APK and allow installs from this source if asked. Karing is not on the Play Store.",
+        "ios": "Install Karing from the App Store. Do not use unofficial IPA files.",
+        "linux": "Make the AppImage executable, then run it."
+      },
+      "steps": {
+        "install": {
+          "title": "Run the Karing installer",
+          "body": "Open the downloaded file and follow the installer. Use the OS notes below for your device."
+        },
+        "profile": {
+          "title": "Add the issued QR code or subscription link",
+          "body": "Scan the QR in Karing, or copy the YAML URL and paste it into Add Profile. You can also copy the QR image.",
+          "openApp": "Open My Page",
+          "empty": "No subscription profile has been issued yet. Check issuance status on My Page.",
+          "qrLabel": "Subscription QR",
+          "qrValue": "QR / deep link",
+          "copyQr": "Copy QR code",
+          "qrCopied": "QR copied"
+        },
+        "connect": {
+          "title": "Connect",
+          "body": "After the profile is saved, turn on the main switch to connect."
+        }
+      }
+    },
+    "faq": {
+      "title": "FAQ",
+      "helpTitle": "Stuck during setup?",
+      "helpBody": "If you need remote help or a 1:1 walkthrough, contact the support team.",
+      "helpCta": "Email the help desk",
+      "items": {
+        "profileWhere": {
+          "q": "Where do I get the subscription QR code or link?",
+          "a": "Scan the QR below, or copy the QR image, YAML URL, or deep link. The same values are in setup step 2 and on My Page."
+        },
+        "playStore": {
+          "q": "Can I get Android from the Play Store?",
+          "a": "Karing is not on the Play Store. Use the download button on this page or the official GitHub Releases APK."
+        },
+        "macOpen": {
+          "q": "macOS says the developer cannot be verified.",
+          "a": "Open System Settings → Privacy & Security and choose Open Anyway."
+        }
+      }
+    }
   },
   "common": {
     "docsSoon": "Docs coming soon"

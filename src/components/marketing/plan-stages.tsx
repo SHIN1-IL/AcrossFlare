@@ -2,19 +2,17 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { StageBackdrop } from "@/components/marketing/plan-stage-bg";
+import { LazyStageBackdrop } from "@/components/marketing/plan-stage-bg";
 import { PriceWithPeriod, SecondaryPriceAmount } from "@/components/marketing/price-amount";
 import { buttonVariants } from "@/components/ui/button";
-import { useLivePlans } from "@/hooks/use-admin";
-import { HOME_SLIDE_PRICES, homeSlideFor } from "@/lib/marketing-services";
-import { planPricePeriodKey, type Plan } from "@/lib/plans";
+import { HOME_SLIDE_PLAN_IDS, HOME_SLIDE_PRICES, homeSlideFor } from "@/lib/marketing-services";
+import { getPlanById, planPricePeriodKey, type Plan } from "@/lib/plans";
 import { cn } from "@/lib/utils";
 import type { AppLocale } from "@/i18n/routing";
 
 export function PlanStages({ showAlipay }: { showAlipay: boolean }) {
-  const globalPlans = useLivePlans("global");
-  const slides = globalPlans.filter(
-    (plan) => plan.id === "global-lite" || plan.id === "global-pro"
+  const slides = HOME_SLIDE_PLAN_IDS.map((id) => getPlanById(id)).filter(
+    (plan): plan is Plan => Boolean(plan)
   );
 
   return (
@@ -76,7 +74,7 @@ function PlanStage({
       id={isFirst ? "plans" : undefined}
       className="relative h-dvh overflow-hidden"
     >
-      <StageBackdrop variant={index} />
+      <LazyStageBackdrop variant={index} />
       <div className="relative z-10 mx-auto flex h-full w-full max-w-3xl flex-col items-center justify-end px-6 pb-[22vh] text-center">
         <p className="text-xs font-medium tracking-[0.22em] text-primary uppercase">
           {productLabel}
@@ -117,7 +115,7 @@ function WorkspaceStage({ index }: { index: number }) {
 
   return (
     <section className="relative h-dvh overflow-hidden">
-      <StageBackdrop variant={index} />
+      <LazyStageBackdrop variant={index} />
       <div className="relative z-10 mx-auto flex h-full w-full max-w-3xl flex-col items-center justify-end px-6 pb-[22vh] text-center">
         <p className="text-xs font-medium tracking-[0.22em] text-primary uppercase">
           {t("eyebrow")}

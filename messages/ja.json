@@ -8,6 +8,7 @@
     "pricing": "料金",
     "docs": "ドキュメント",
     "service": "サービス",
+    "supportZone": "サポートゾーン",
     "login": "ログイン",
     "signup": "新規登録",
     "getStarted": "始める",
@@ -34,6 +35,7 @@
     "phone": "電話",
     "email": "メール",
     "businessNo": "事業者登録番号",
+    "vatStatus": "課税区分",
     "vasNo": "付加通信事業届出番号",
     "mailOrderNo": "通信販売業届出番号",
     "hostingProvider": "ホスティング提供者",
@@ -427,6 +429,83 @@
     "productHybrid": "Hybrid",
     "productWorkspace": "Workspace & Custom",
     "productMarketing": "Marketing IP"
+  },
+  "support": {
+    "title": "サポートゾーン",
+    "lead": "お支払いありがとうございます。このデバイス向けの Karing を入れ、プロファイルを追加すればすぐ使えます。",
+    "comingSoon": "サービスは近日追加予定",
+    "downloads": {
+      "title": "ダウンロードセンター",
+      "lead": "下のボタンから、このデバイス向けの最新クライアントをインストールしてください。",
+      "cta": "このデバイス向けの Karing をダウンロード (Auto-Detect)",
+      "ctaOs": "{os}向け Karing をダウンロード",
+      "ctaOsVersion": "{os}向け Karing をダウンロード ({version})",
+      "ctaLoading": "最新バージョンを確認中...",
+      "environment": "現在の環境: {os}",
+      "otherOs": "他のOSのファイルを探す",
+      "os": {
+        "windows": "Windows",
+        "macos": "macOS",
+        "macosIntel": "macOS (Intel)",
+        "macosAppleSilicon": "macOS (Apple Silicon)",
+        "android": "Android",
+        "ios": "iOS",
+        "ipados": "iPadOS",
+        "linux": "Linux",
+        "other": "不明"
+      }
+    },
+    "setup": {
+      "title": "設定方法",
+      "heading": "3ステップで初期設定",
+      "install": {
+        "windows": ".exe インストーラーを実行します。SmartScreen が出たら「詳細情報」→「実行」を選びます。",
+        "macos": ".dmg を開き、Karing をアプリケーションにドラッグします。「確認されていない開発元」と出たら、システム設定 → プライバシーとセキュリティで「このまま開く」を選びます。",
+        "android": "APK を開き、必要ならこの提供元からのインストールを許可します。Karing は Play ストアにありません。",
+        "ios": "App Store から Karing を入れてください。非公式の IPA は使わないでください。",
+        "linux": "AppImage に実行権限を付けてから起動します。"
+      },
+      "steps": {
+        "install": {
+          "title": "Karing のインストール",
+          "body": "ダウンロードしたファイルを実行し、案内に従って入れてください。OS ごとの注意は下を見てください。"
+        },
+        "profile": {
+          "title": "発行済みの購読 QR またはリンクを追加",
+          "body": "下の QR を Karing で読み取るか、YAML URL をコピーして Add Profile に貼り付けてください。QR 画像のコピーもできます。",
+          "openApp": "マイページを開く",
+          "empty": "まだ購読プロファイルが発行されていません。マイページで発行状態を確認してください。",
+          "qrLabel": "購読 QR",
+          "qrValue": "QR / ディープリンク",
+          "copyQr": "QR コードをコピー",
+          "qrCopied": "QR をコピーしました"
+        },
+        "connect": {
+          "title": "接続を開始（Connect）",
+          "body": "プロファイルを保存したら、メイン画面のスイッチをオンにして接続します。"
+        }
+      }
+    },
+    "faq": {
+      "title": "よくある質問",
+      "helpTitle": "インストールで困っていますか？",
+      "helpBody": "リモート支援や 1:1 の案内が必要なら、サポートチームにご連絡ください。",
+      "helpCta": "ヘルプデスクにメールする",
+      "items": {
+        "profileWhere": {
+          "q": "購読 QR またはリンクはどこで受け取れますか？",
+          "a": "下の QR を読み取るか、QR 画像・YAML URL・ディープリンクをコピーしてください。設定方法の 2 番とマイページにも同じ値があります。"
+        },
+        "playStore": {
+          "q": "Android は Play ストアから入れられますか？",
+          "a": "Karing は Play ストアにありません。このページのダウンロードボタン、または公式 GitHub Releases の APK を使ってください。"
+        },
+        "macOpen": {
+          "q": "Mac で「確認されていない開発元」と出ます。",
+          "a": "システム設定 → プライバシーとセキュリティで「このまま開く」を選んでください。"
+        }
+      }
+    }
   },
   "common": {
     "docsSoon": "ドキュメントは近日公開"

@@ -4,6 +4,7 @@ import {
   getMerchant,
   MAIL_ORDER_PENDING,
   merchantRows,
+  VAT_SIMPLIFIED,
 } from "@/lib/legal/merchant";
 
 describe("legal/merchant", () => {
@@ -37,6 +38,7 @@ describe("legal/merchant", () => {
       { id: "phone", value: "070-8065-1258" },
       { id: "email", value: "acrosstool@gmail.com" },
       { id: "businessNo", value: "163-13-03007" },
+      { id: "vatStatus", value: VAT_SIMPLIFIED },
       { id: "vasNo", value: "제 2-04-26-0006 호" },
       { id: "mailOrderNo", value: MAIL_ORDER_PENDING },
       { id: "hostingProvider", value: DEFAULT_HOSTING_PROVIDER },

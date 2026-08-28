@@ -43,6 +43,8 @@ export function pricingServiceFromQuery(value?: string | null): MarketingService
   return "standard";
 }
 
+export const HOME_SLIDE_PLAN_IDS = ["global-lite", "global-pro"] as const;
+
 export const HOME_SLIDE_PRICES: Record<string, PlanPrices> = {
   "global-lite": { krw: 9900, usd: 8, cny: 49, jpy: 1100 },
   "global-pro": { krw: 19900, usd: 15, cny: 99, jpy: 2300 },

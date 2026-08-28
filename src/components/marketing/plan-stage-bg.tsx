@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+
 function StageBackdrop({ variant }: { variant: number }) {
   const index = variant % 6;
 
@@ -224,6 +228,36 @@ function OrbField() {
 function HorizonGlow() {
   return (
     <div className="absolute inset-x-[-10%] top-[42%] h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+  );
+}
+
+export function LazyStageBackdrop({ variant }: { variant: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(false);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setActive(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "30% 0px", threshold: 0.01 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={ref} className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+      {active ? <StageBackdrop variant={variant} /> : <div className="absolute inset-0 bg-[#07080c]" />}
+    </div>
   );
 }
 
