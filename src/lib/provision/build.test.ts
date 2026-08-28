@@ -7,7 +7,7 @@ import {
   xuiClientEmail,
   yamlUrlFor,
 } from "@/lib/provision/build";
-import { BACKUP_ANNOUNCE, karingSubscriptionHeaders } from "@/lib/provision/subscription";
+import { BACKUP_ANNOUNCE, backupAnnounce, karingSubscriptionHeaders, withBackupNotice } from "@/lib/provision/subscription";
 
 describe("provision/build", () => {
   it("builds a subscription URL and Karing deeplink", () => {
@@ -22,6 +22,9 @@ describe("provision/build", () => {
     expect(yaml).toContain("server: node-tokyo.acrossflare.com");
     expect(yaml).toContain("uuid: uuid-1");
     expect(yaml).toContain("path: /vless");
+    expect(yaml).toContain("#profile-web-page-url: https://acrossflare.com/dashboard");
+    expect(yaml).toContain("#support-url: https://acrossflare.com/dashboard");
+    expect(yaml).toContain(`#announce: ${BACKUP_ANNOUNCE} https://acrossflare.com/dashboard`);
     expect(yaml).toContain(BACKUP_ANNOUNCE);
     expect(yaml).toContain("https://acrossflare.com/dashboard");
   });
@@ -34,7 +37,7 @@ describe("provision/build", () => {
 });
 
 describe("provision/subscription", () => {
-  it("puts the PWA dashboard URL on Karing metadata headers", () => {
+  it("puts the backup dashboard URL on Karing webpage, support, and announce headers", () => {
     const headers = karingSubscriptionHeaders({
       trafficUsedGb: 1,
       trafficLimitGb: 150,
@@ -42,7 +45,14 @@ describe("provision/subscription", () => {
     });
     expect(headers["profile-web-page-url"]).toBe("https://acrossflare.com/dashboard");
     expect(headers["support-url"]).toBe("https://acrossflare.com/dashboard");
-    expect(headers.announce).toBe(BACKUP_ANNOUNCE);
+    expect(headers["announce-url"]).toBe("https://acrossflare.com/dashboard");
+    expect(headers.announce).toBe(backupAnnounce("https://acrossflare.com/dashboard"));
     expect(headers["subscription-userinfo"]).toContain("expire=");
+  });
+
+  it("does not duplicate Hiddify-style backup comments", () => {
+    const once = withBackupNotice("proxies: []\n");
+    const twice = withBackupNotice(once);
+    expect(twice.split("#profile-web-page-url:").length).toBe(2);
   });
 });

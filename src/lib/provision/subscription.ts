@@ -2,13 +2,24 @@ import { backupDashboardUrl } from "@/lib/provision/config";
 
 export const BACKUP_ANNOUNCE = "보안 백업 공간 바로가기";
 
+export function backupAnnounce(url = backupDashboardUrl()) {
+  return `${BACKUP_ANNOUNCE} ${url}`;
+}
+
 export function withBackupNotice(yamlBody: string) {
   const url = backupDashboardUrl();
-  const notice = `# ${BACKUP_ANNOUNCE}: ${url}\n`;
-  if (yamlBody.includes(url)) {
+  if (yamlBody.includes("#profile-web-page-url:")) {
     return yamlBody.endsWith("\n") ? yamlBody : `${yamlBody}\n`;
   }
-  return `${notice}${yamlBody.replace(/^\n+/, "")}`;
+
+  const notice = [
+    `#profile-web-page-url: ${url}`,
+    `#support-url: ${url}`,
+    `#announce: ${backupAnnounce(url)}`,
+    `# ${BACKUP_ANNOUNCE}: ${url}`,
+  ].join("\n");
+
+  return `${notice}\n${yamlBody.replace(/^\n+/, "")}`;
 }
 
 export function karingSubscriptionHeaders(input?: {
@@ -30,7 +41,8 @@ export function karingSubscriptionHeaders(input?: {
     "profile-update-interval": "24",
     "profile-web-page-url": url,
     "support-url": url,
-    announce: BACKUP_ANNOUNCE,
+    announce: backupAnnounce(url),
+    "announce-url": url,
     "subscription-userinfo": `upload=0; download=${download}; total=${total}; expire=${expire}`,
   };
 }

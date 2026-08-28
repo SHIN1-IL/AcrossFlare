@@ -22,7 +22,7 @@ export function SupportNav({ onNavigate }: { onNavigate?: () => void }) {
   function updatePlacement() {
     const rect = rootRef.current?.getBoundingClientRect();
     if (!rect) return;
-    setDropUp(window.innerHeight - rect.bottom < 168 && rect.top > 168);
+    setDropUp(window.innerHeight - rect.bottom < 220 && rect.top > 220);
   }
 
   function showMenu() {

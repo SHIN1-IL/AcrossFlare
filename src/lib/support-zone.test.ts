@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import ko from "../../messages/ko.json";
 import {
+  BACKUP_FAQ_ITEMS,
+  BACKUP_SETUP_STEPS,
   KARING_FAQ_ITEMS,
   KARING_INSTALL_PLATFORMS,
   KARING_SETUP_STEPS,
@@ -10,11 +12,12 @@ import {
 } from "@/lib/support-zone";
 
 describe("support zone", () => {
-  it("keeps download, setup, and FAQ in that order on one page", () => {
+  it("keeps download, setup, backup, and FAQ in that order on one page", () => {
     expect(SUPPORT_HREF).toBe("/support");
     expect(SUPPORT_SECTIONS.map((section) => section.id)).toEqual([
       "downloads",
       "setup",
+      "backup",
       "faq",
     ]);
   });
@@ -29,6 +32,13 @@ describe("support zone", () => {
       "linux",
     ]);
     expect(KARING_FAQ_ITEMS.map((item) => item.id)).toEqual(["profileWhere", "playStore", "macOpen"]);
+    expect(BACKUP_SETUP_STEPS.map((step) => step.id)).toEqual(["open", "save", "optional"]);
+    expect(BACKUP_FAQ_ITEMS.map((item) => item.id)).toEqual([
+      "backupApp",
+      "backupFromKaring",
+      "vaultLogin",
+      "deviceSync",
+    ]);
     expect(KARING_FAQ_ITEMS[0]?.id).toBe("profileWhere");
     expect(karingInstallPlatformFor("macos")).toBe("macos");
     expect(karingInstallPlatformFor("ios")).toBe("ios");
@@ -42,5 +52,21 @@ describe("support zone", () => {
     expect(ko.support.faq.items.profileWhere.a).toBe(ko.support.setup.steps.profile.body);
     expect(ko.support.setup.steps.profile).not.toHaveProperty("qrLabel");
     expect(ko.support.setup.steps.profile).not.toHaveProperty("empty");
+  });
+
+  it("explains browser backup without requiring a home-screen app", () => {
+    expect(ko.support.backup.title).toBe("백업 이용 방법");
+    expect(ko.support.backup.heading).toContain("백업용 앱을 따로 받을 필요는 없습니다");
+    expect(ko.support.faq.items.backupApp.a).toContain("브라우저로 Vaultwarden");
+    expect(ko.support.faq.items.backupFromKaring.a).toContain("웹페이지 또는 공지");
+    expect(ko.services.standard.features).toContain(
+      "Vaultwarden (암호·메모 백업) — 비밀번호, 카드, 보안 메모를 암호화해 보관"
+    );
+    expect(ko.services.standard.features).toContain(
+      "Syncthing (작은 파일 보관) — 중요한 작은 파일을 암호화해 보관"
+    );
+    expect(ko.app.backupDesc).not.toContain("홈 화면");
+    expect(ko.app.vaultTitle).toBe("Vaultwarden (암호·메모 백업)");
+    expect(ko.app.syncthingTitle).toBe("Syncthing (작은 파일 보관)");
   });
 });

@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { buttonVariants } from "@/components/ui/button";
 import { getMerchant } from "@/lib/legal/merchant";
 import {
+  BACKUP_FAQ_ITEMS,
   KARING_FAQ_ITEMS,
   KARING_INSTALL_PLATFORMS,
   KARING_SETUP_STEPS,
@@ -74,7 +75,7 @@ export async function KaringHelpFaq() {
   return (
     <div className="mt-5 space-y-5">
       <dl className="space-y-3">
-        {KARING_FAQ_ITEMS.map((item) => (
+        {[...KARING_FAQ_ITEMS, ...BACKUP_FAQ_ITEMS].map((item) => (
           <div key={item.id} className="rounded-xl border border-border bg-background/50 p-4 md:p-5">
             <dt className="text-sm font-medium">{t(`faq.items.${item.id}.q`)}</dt>
             <dd className="mt-1 text-sm leading-6 text-muted-foreground">{t(`faq.items.${item.id}.a`)}</dd>

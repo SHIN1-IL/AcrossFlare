@@ -51,12 +51,6 @@ export function ServiceDetail({
         <p className="mt-4 text-sm text-muted-foreground md:text-base">
           {t(`${service.id}.description`)}
         </p>
-        {service.id === "workspace" ? (
-          <>
-            <p className="mt-2 text-sm text-muted-foreground md:text-base">{t("workspace.hint")}</p>
-            <p className="mt-1 text-sm text-muted-foreground md:text-base">{t("workspace.priceNote")}</p>
-          </>
-        ) : null}
         <div className={cn("w-full", banners.length === 1 ? "mt-8 min-h-16 max-w-2xl" : "mt-6")} />
         <div className="mt-4 flex w-full justify-center">
           <div

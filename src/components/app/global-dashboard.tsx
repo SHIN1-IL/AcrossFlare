@@ -13,6 +13,7 @@ import { Link } from "@/i18n/navigation";
 import { downloadText } from "@/lib/download";
 import { formatDate } from "@/lib/format-date";
 import { publicServiceFromPlanId } from "@/lib/public-service";
+import { SUPPORT_HREF } from "@/lib/support-zone";
 
 export function GlobalDashboard({ product = "global" }: { product?: "global" | "workspace" }) {
   const t = useTranslations("app");
@@ -110,6 +111,7 @@ export function GlobalDashboard({ product = "global" }: { product?: "global" | "
       {hasBackup ? (
         <section className="rounded-2xl border border-border bg-card p-5">
           <p className="text-sm">{t("backup")}</p>
+          <p className="mt-2 text-sm text-muted-foreground">{t("backupDesc")}</p>
           <div className="mt-4 space-y-4">
             <UsageMeter
               label={t("backupUsage")}
@@ -119,12 +121,20 @@ export function GlobalDashboard({ product = "global" }: { product?: "global" | "
             <CopyField label={t("vaultUrl")} value={lane.vaultUrl} />
             <CopyField label={t("syncthingUrl")} value={lane.syncthingUrl} />
             <CopyField label={t("syncthingFolder")} value={lane.syncthingFolderId} />
-            <Link
-              href="/dashboard"
-              className="inline-flex text-sm text-primary transition-colors hover:text-primary/80"
-            >
-              {t("openBackupPwa")}
-            </Link>
+            <div className="flex flex-wrap gap-x-4 gap-y-2">
+              <Link
+                href="/dashboard"
+                className="inline-flex text-sm text-primary transition-colors hover:text-primary/80"
+              >
+                {t("openBackupPwa")}
+              </Link>
+              <Link
+                href={{ pathname: SUPPORT_HREF, hash: "backup" }}
+                className="inline-flex text-sm text-primary transition-colors hover:text-primary/80"
+              >
+                {t("backupHowToMore")}
+              </Link>
+            </div>
           </div>
         </section>
       ) : null}

@@ -69,13 +69,14 @@
 ## 4. 사용자 UX 플로우 (글로벌)
 
 1. 이메일 회원가입 ➔ 결제 또는 어드민 발급 ➔ **Karing VPN 구독 링크** 발급 (`/api/v1/subscription/{token}`).
-2. Karing 앱 연결 ➔ 구독 공지란의 **[보안 백업 공간 바로가기]** (`https://acrossflare.com/dashboard`)를 탭하거나, 모바일 홈 화면의 PWA를 실행.
+2. Karing 앱 연결 ➔ 프로필 웹페이지 또는 구독 공지의 **[보안 백업 공간 바로가기]** (`https://acrossflare.com/dashboard`)를 탭.
 3. 무설치 웹(PWA)에서 Vaultwarden(보안 메모/암호)과 Syncthing 기반 스토리지 백업을 이용.
 
 Karing 구독 응답은 YAML 본문과 함께 아래 메타데이터/헤더를 포함한다.
 
-* `profile-web-page-url`: `https://acrossflare.com/dashboard`
-* `support-url` / `announce`: 보안 백업 공간 바로가기
+* `profile-web-page-url` / `support-url` / `announce-url`: `https://acrossflare.com/dashboard`
+* `announce`: `보안 백업 공간 바로가기 https://acrossflare.com/dashboard`
+* YAML 상단 주석: `#profile-web-page-url` / `#support-url` / `#announce` (헤더가 빠질 때 대비)
 
 ---
 

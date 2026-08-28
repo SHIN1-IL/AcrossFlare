@@ -59,7 +59,7 @@
     "workspaceTerms": "팀 또는 맞춤형 암호화 네트워크 접속과 보안 클라우드 백업. A·B·C 플랜은 모두 매월 199,000원이며, 인원과 월 트래픽만 다릅니다. 신청은 프로모션 코드로 합니다.",
     "deliveryValue": "실물 배송 없음. 결제 완료 후 로그인 계정으로 접속 정보와 백업 이용 정보를 즉시 제공합니다.",
     "workspaceDeliveryValue": "실물 배송 없음. 프로모션 코드 확인 후 로그인 계정으로 접속 정보와 백업 이용 정보를 제공합니다.",
-    "requirementsValue": "인터넷이 되는 PC 또는 모바일. 전용 앱 설치 의무 없음. 브라우저로 계정과 백업을 이용합니다.",
+    "requirementsValue": "인터넷이 되는 PC 또는 모바일. Vaultwarden(암호·메모 백업)과 Syncthing(작은 파일 보관)은 전용 앱 설치 없이 브라우저로 이용합니다.",
     "withdrawValue": "접속·백업 정보가 발급된 뒤에는 전자상거래법 제17조 제2항 제5호에 따라 청약철회가 제한될 수 있습니다. 미발급·중복결제는 7일 내 전액 환불합니다. 발급 후 중도 해지는 일할 환불을 원칙으로 하지 않습니다.",
     "withdrawLink": "청약철회·환불",
     "vat": "표시 가격은 부가세 포함입니다."
@@ -197,14 +197,14 @@
     "global-lite": {
       "eyebrow": "보안 클라우드+네트워크 최적화",
       "title": "Standard",
-      "description": "단기 여행이나 출장시 보안백업을 위한 적합한 속도를 제공",
+      "description": "단기 여행이나 출장시 보안백업을 위한 적합한 속도를 제공. Vaultwarden(암호·메모 백업)과 Syncthing(작은 파일 보관)을 브라우저로 이용합니다.",
       "price": "₩9,900/월",
       "cta": "더 알아보기"
     },
     "global-pro": {
       "eyebrow": "보안 클라우드+네트워크 최적화",
       "title": "Hybrid",
-      "description": "보안백업과 빠른 속도의 네트워크 최적화를 제공",
+      "description": "보안백업과 빠른 속도의 네트워크 최적화를 제공. Vaultwarden(암호·메모 백업)과 Syncthing(작은 파일 보관)을 브라우저로 이용합니다.",
       "price": "₩19,900/월",
       "cta": "더 알아보기"
     }
@@ -212,7 +212,7 @@
   "workspace": {
     "eyebrow": "보안 클라우드+네트워크 최적화",
     "title": "Workspace & Custom",
-    "description": "친구나 팀원을 위한 맞춤형 주문 서비스",
+    "description": "친구나 팀원을 위한 맞춤형 주문 서비스. Vaultwarden(암호·메모 백업)과 Syncthing(작은 파일 보관)을 브라우저로 이용합니다.",
     "hint": "인원수에 따른 A, B, C 플랜",
     "learnMore": "더 알아보기",
     "cta": "서비스 신청하기"
@@ -222,11 +222,14 @@
     "standard": {
       "eyebrow": "보안 클라우드+네트워크 최적화",
       "title": "Standard",
-      "description": "단기 여행이나 출장시 보안백업을 위한 적합한 속도를 제공",
+      "description": "단기 여행이나 출장시 보안백업을 위한 적합한 속도를 제공. 네트워크 연결과 함께 Vaultwarden(암호·메모 백업)과 Syncthing(작은 파일 보관)을 제공합니다. 백업용 앱을 따로 받을 필요는 없습니다.",
       "cta": "서비스 신청하기",
       "features": [
         "AcrossFlare의 베이스 기술 적용",
-        "보안 클라우드 백업 1GB 제공(중요한 파일 백업가능)",
+        "보안 클라우드 백업 1GB",
+        "Vaultwarden (암호·메모 백업) — 비밀번호, 카드, 보안 메모를 암호화해 보관",
+        "Syncthing (작은 파일 보관) — 중요한 작은 파일을 암호화해 보관",
+        "전용 앱 설치 없이 브라우저로 이용. 결제 후 계정에서 바로 열림",
         "Zoom, Webex, Teams 등등 온라인 회의 가능",
         "국제 전용 회선(LA라인)으로 네트워크 최적화",
         "고급 암호화 기술로 안전한 네트워크 환경 조성"
@@ -235,11 +238,14 @@
     "hybrid": {
       "eyebrow": "보안 클라우드+네트워크 최적화",
       "title": "Hybrid",
-      "description": "보안백업과 빠른 속도의 네트워크 최적화를 제공",
+      "description": "보안백업과 빠른 속도의 네트워크 최적화를 제공. 네트워크 연결과 함께 Vaultwarden(암호·메모 백업)과 Syncthing(작은 파일 보관)을 제공합니다. 백업용 앱을 따로 받을 필요는 없습니다.",
       "cta": "서비스 신청하기",
       "features": [
         "AcrossFlare의 고급 기술 적용",
-        "보안 클라우드 백업 1GB 제공(중요한 파일 백업가능)",
+        "보안 클라우드 백업 1GB",
+        "Vaultwarden (암호·메모 백업) — 비밀번호, 카드, 보안 메모를 암호화해 보관",
+        "Syncthing (작은 파일 보관) — 중요한 작은 파일을 암호화해 보관",
+        "전용 앱 설치 없이 브라우저로 이용. 결제 후 계정에서 바로 열림",
         "Zoom, Webex, Teams 등등 끊김없는 온라인 회의",
         "도쿄+LA라인으로 빠른 네트워크",
         "고급 암호화 기술로 안전한 네트워크 환경 조성"
@@ -248,10 +254,10 @@
     "workspace": {
       "eyebrow": "보안 클라우드+네트워크 최적화",
       "title": "Workspace & Custom",
-      "description": "친구나 팀원을 위한 맞춤형 주문 서비스",
+      "description": "친구나 팀원을 위한 맞춤형 주문 서비스. 네트워크 연결과 함께 Vaultwarden(암호·메모 백업)과 Syncthing(작은 파일 보관)을 제공합니다. 백업용 앱을 따로 받을 필요는 없습니다.",
       "cta": "Promotional Code 입력하기",
-      "hint": "인원수에 따른 A, B, C 플랜",
-      "priceNote": "A·B·C 모두 매월 ₩199,000입니다. 플랜에 따라 인원과 월 트래픽만 다릅니다.",
+      "hint": "",
+      "priceNote": "",
       "codePlaceholder": "프로모션 코드",
       "codeSubmit": "확인",
       "codeInvalid": "유효하지 않은 코드입니다.",
@@ -263,7 +269,10 @@
       },
       "features": [
         "AcrossFlare의 고급 기술 적용",
-        "보안 클라우드 백업 1GB 제공(중요한 파일 백업가능)",
+        "보안 클라우드 백업 1GB",
+        "Vaultwarden (암호·메모 백업) — 비밀번호, 카드, 보안 메모를 암호화해 보관",
+        "Syncthing (작은 파일 보관) — 중요한 작은 파일을 암호화해 보관",
+        "전용 앱 설치 없이 브라우저로 이용. 결제 후 계정에서 바로 열림",
         "Zoom, Webex, Teams 등등 끊김없는 온라인 회의",
         "도쿄+LA라인으로 빠른 네트워크",
         "고급 암호화 기술로 안전한 네트워크 환경 조성"
@@ -350,19 +359,24 @@
     "yamlDownload": ".yaml 다운로드",
     "backup": "백업",
     "backupTitle": "보안 백업 공간",
-    "backupDesc": "Vaultwarden에서 암호와 보안 메모를, Syncthing에서 암호화 파일 동기화를 이용하세요. 홈 화면에 백업 앱을 추가할 수 있습니다.",
+    "backupDesc": "Vaultwarden(암호·메모 백업)과 Syncthing(작은 파일 보관)을 브라우저에서 이용하세요. 백업용 앱을 따로 받을 필요는 없습니다.",
     "backupExpires": "{date}까지 이용",
-    "vaultTitle": "Vaultwarden",
-    "vaultDesc": "암호화된 비밀번호, 카드, 보안 메모.",
+    "vaultTitle": "Vaultwarden (암호·메모 백업)",
+    "vaultDesc": "금고 열기를 누르면 브라우저에서 바로 이용합니다. 로그인 이메일과 같은 계정입니다. 비밀번호, 카드, 보안 메모를 저장하세요. 별도 앱 설치는 필요 없습니다.",
     "vaultUrl": "Vault URL",
     "vaultUser": "Vault 사용자",
     "openVault": "금고 열기",
-    "syncthingTitle": "Syncthing",
-    "syncthingDesc": "서버 파일 시스템에 P2P 암호화 저장. 중앙 문서 DB 없음.",
+    "syncthingTitle": "Syncthing (작은 파일 보관)",
+    "syncthingDesc": "동기화 열기로 내 폴더에 들어갑니다. 브라우저에서 작은 파일을 올리고 받을 수 있습니다. 폰·PC 폴더를 자동으로 맞추려면 그 기기에 Syncthing을 설치해 이 폴더와 연결하면 됩니다. 웹만 쓸 때는 설치하지 않아도 됩니다.",
     "syncthingUrl": "Sync URL",
     "syncthingFolder": "폴더 ID",
     "openSync": "동기화 열기",
-    "openBackupPwa": "백업 PWA 열기",
+    "openBackupPwa": "백업 공간 열기",
+    "backupHowToTitle": "이용 방법",
+    "backupHowTo1": "콘솔 또는 백업 공간에서 금고 열기(Vaultwarden) / 동기화 열기(Syncthing)를 누르세요.",
+    "backupHowTo2": "암호·메모는 Vaultwarden에, 작은 파일은 Syncthing 폴더에 저장하세요.",
+    "backupHowTo3": "기기 폴더를 자동 동기화할 때만 그 기기에 Syncthing을 설치하세요. 웹만 쓸 때는 필요 없습니다.",
+    "backupHowToMore": "자세히 보기",
     "backupUsage": "백업 사용량",
     "exitIp": "출구 IP",
     "region": "리전",
@@ -476,7 +490,25 @@
         },
         "connect": {
           "title": "연결 시작 (Connect)",
-          "body": "프로필이 등록되면 메인 화면 스위치를 켜서 연결하세요."
+          "body": "프로필이 등록되면 메인 화면 스위치를 켜서 연결하세요. 백업 공간은 프로필의 웹페이지 또는 공지 ‘보안 백업 공간 바로가기’를 누르면 브라우저에서 열립니다."
+        }
+      }
+    },
+    "backup": {
+      "title": "백업 이용 방법",
+      "heading": "브라우저에서 암호와 작은 파일을 보관합니다. 백업용 앱을 따로 받을 필요는 없습니다.",
+      "steps": {
+        "open": {
+          "title": "금고 열기 / 동기화 열기",
+          "body": "콘솔 또는 백업 공간에서 Vaultwarden(암호·메모 백업)은 금고 열기, Syncthing(작은 파일 보관)은 동기화 열기를 누르세요. 브라우저에서 바로 열립니다."
+        },
+        "save": {
+          "title": "암호·메모와 작은 파일 저장",
+          "body": "암호·메모는 Vaultwarden에, 작은 파일은 Syncthing 폴더에 저장하세요."
+        },
+        "optional": {
+          "title": "기기 폴더 자동 동기화(선택)",
+          "body": "폰·PC 폴더를 자동으로 맞추려면 그 기기에 Syncthing을 설치하고, 화면에 있는 폴더 ID로 연결하세요. 웹에서만 작은 파일을 올리고 받을 때는 설치하지 않아도 됩니다."
         }
       }
     },
@@ -497,6 +529,22 @@
         "macOpen": {
           "q": "Mac에서 확인되지 않은 개발자 경고가 뜹니다.",
           "a": "시스템 설정 → 개인정보 보호 및 보안에서 확인 없이 열기를 선택하세요."
+        },
+        "backupApp": {
+          "q": "백업을 쓰려면 앱을 꼭 받아야 하나요?",
+          "a": "백업은 아닙니다. 브라우저로 Vaultwarden(암호·메모 백업)과 Syncthing(작은 파일 보관)을 이용합니다. 네트워크 연결만 Karing이 필요합니다."
+        },
+        "backupFromKaring": {
+          "q": "Karing에서 백업 공간은 어떻게 여나요?",
+          "a": "구독을 연결한 뒤, 프로필의 웹페이지 또는 공지 ‘보안 백업 공간 바로가기’를 누르면 브라우저에서 백업 공간이 열립니다. AcrossFlare 로그인이 한 번 필요합니다."
+        },
+        "vaultLogin": {
+          "q": "Vaultwarden 로그인은 어떻게 하나요?",
+          "a": "백업 공간에서 금고 열기를 누른 뒤, 발급된 금고 주소와 계정 이메일을 사용하세요."
+        },
+        "deviceSync": {
+          "q": "폰의 파일을 자동으로 맞추려면 어떻게 하나요?",
+          "a": "그 기기에 Syncthing을 설치하고, 화면에 있는 폴더 ID로 연결하세요. 웹에서 작은 파일만 올리고 받을 때는 설치하지 않아도 됩니다."
         }
       }
     }

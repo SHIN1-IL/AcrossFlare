@@ -7,7 +7,9 @@ import { StatusPill } from "@/components/app/status-pill";
 import { UsageMeter } from "@/components/app/usage-meter";
 import { buttonVariants } from "@/components/ui/button";
 import { useAccount } from "@/hooks/use-account";
+import { Link } from "@/i18n/navigation";
 import { formatDate } from "@/lib/format-date";
+import { SUPPORT_HREF } from "@/lib/support-zone";
 import { cn } from "@/lib/utils";
 
 export function BackupDashboard() {
@@ -95,6 +97,21 @@ export function BackupDashboard() {
             {t("openSync")}
           </a>
         </article>
+      </section>
+
+      <section className="rounded-2xl border border-border bg-card p-5">
+        <p className="text-sm">{t("backupHowToTitle")}</p>
+        <ol className="mt-3 space-y-2 text-sm leading-6 text-muted-foreground">
+          <li>1. {t("backupHowTo1")}</li>
+          <li>2. {t("backupHowTo2")}</li>
+          <li>3. {t("backupHowTo3")}</li>
+        </ol>
+        <Link
+          href={{ pathname: SUPPORT_HREF, hash: "backup" }}
+          className="mt-4 inline-flex text-sm text-primary transition-colors hover:text-primary/80"
+        >
+          {t("backupHowToMore")}
+        </Link>
       </section>
     </div>
   );

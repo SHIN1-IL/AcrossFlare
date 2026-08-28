@@ -4,7 +4,7 @@ from typing import Any
 from urllib.parse import quote
 
 import psycopg
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import PlainTextResponse, Response
 
 BACKUP_DASHBOARD_URL = os.environ.get(
@@ -21,9 +21,13 @@ def health() -> dict[str, str]:
     return {"ok": "true"}
 
 
-@app.get("/api/v1/subscription")
-@app.get("/api/v1/subscription/{token}")
-def subscription(token: str | None = None, q: str | None = Query(default=None, alias="token")) -> Response:
+@app.api_route("/api/v1/subscription", methods=["GET", "HEAD"])
+@app.api_route("/api/v1/subscription/{token}", methods=["GET", "HEAD"])
+def subscription(
+    request: Request,
+    token: str | None = None,
+    q: str | None = Query(default=None, alias="token"),
+) -> Response:
     resolved = token or q
     if not resolved:
         raise HTTPException(status_code=404, detail="not_found")
@@ -32,12 +36,14 @@ def subscription(token: str | None = None, q: str | None = Query(default=None, a
     if not row or row["status"] != "ACTIVE" or not row["yaml_body"]:
         raise HTTPException(status_code=404, detail="not_found")
 
-    body = with_backup_notice(row["yaml_body"])
     headers = karing_headers(
         expire_at=row["expires_at"],
         used_gb=row["traffic_used_gb"],
         limit_gb=row["traffic_gb"],
     )
+    if request.method == "HEAD":
+        return Response(status_code=200, headers=headers)
+    body = with_backup_notice(row["yaml_body"])
     return PlainTextResponse(content=body, headers=headers, media_type="text/yaml; charset=utf-8")
 
 
@@ -78,10 +84,18 @@ def fetch_credential(token: str) -> dict[str, Any] | None:
 
 
 def with_backup_notice(yaml_body: str) -> str:
-    notice = f"# {BACKUP_ANNOUNCE}: {BACKUP_DASHBOARD_URL}\n"
-    if BACKUP_DASHBOARD_URL in yaml_body:
+    if "#profile-web-page-url:" in yaml_body:
         return yaml_body if yaml_body.endswith("\n") else f"{yaml_body}\n"
-    return f"{notice}{yaml_body.lstrip()}"
+    announce = f"{BACKUP_ANNOUNCE} {BACKUP_DASHBOARD_URL}"
+    notice = "\n".join(
+        [
+            f"#profile-web-page-url: {BACKUP_DASHBOARD_URL}",
+            f"#support-url: {BACKUP_DASHBOARD_URL}",
+            f"#announce: {announce}",
+            f"# {BACKUP_ANNOUNCE}: {BACKUP_DASHBOARD_URL}",
+        ]
+    )
+    return f"{notice}\n{yaml_body.lstrip()}"
 
 
 def karing_headers(*, expire_at: datetime | None, used_gb: float, limit_gb: float | None) -> dict[str, str]:
@@ -93,13 +107,15 @@ def karing_headers(*, expire_at: datetime | None, used_gb: float, limit_gb: floa
     download = int(used_gb * 1024 * 1024 * 1024)
     total = 0 if limit_gb is None else int(limit_gb * 1024 * 1024 * 1024)
     title = quote("AcrossFlare")
+    announce = f"{BACKUP_ANNOUNCE} {BACKUP_DASHBOARD_URL}"
     return {
         "Cache-Control": "private, no-store",
-        "profile-title": f"AcrossFlare",
+        "profile-title": "AcrossFlare",
         "profile-update-interval": "24",
         "profile-web-page-url": BACKUP_DASHBOARD_URL,
         "support-url": BACKUP_DASHBOARD_URL,
-        "announce": BACKUP_ANNOUNCE,
+        "announce": announce,
+        "announce-url": BACKUP_DASHBOARD_URL,
         "subscription-userinfo": f"upload=0; download={download}; total={total}; expire={expire}",
         "content-disposition": f'attachment; filename="{title}.yaml"',
     }

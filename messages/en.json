@@ -59,7 +59,7 @@
     "workspaceTerms": "Team or custom encrypted network access and secure cloud backup. Plans A, B, and C share the same monthly price of $150; they differ only in seats and monthly traffic. Plans require a promotional code.",
     "deliveryValue": "No physical shipment. After payment, access and backup details are issued immediately to the signed-in account.",
     "workspaceDeliveryValue": "No physical shipment. After the promotional code is confirmed, access and backup details are issued to the signed-in account.",
-    "requirementsValue": "A PC or phone with internet access. No dedicated app is required. Use the account and backup in a browser.",
+    "requirementsValue": "A PC or phone with internet access. Use Vaultwarden (password & note backup) and Syncthing (small file storage) in a browser. No dedicated backup app is required.",
     "withdrawValue": "After access or backup details are issued, the right to withdraw may be limited under Korean e-commerce law article 17(2)(5). Full refund within 7 days if issuance failed or the charge was duplicated. We do not pro-rate unused time after issuance.",
     "withdrawLink": "Withdrawals & refunds",
     "vat": "Prices include VAT."
@@ -197,14 +197,14 @@
     "global-lite": {
       "eyebrow": "Secure Cloud & Network Optimization",
       "title": "Standard",
-      "description": "Right-sized speed for short trips and travel backups",
+      "description": "Right-sized speed for short trips and travel backups. Use Vaultwarden (password & note backup) and Syncthing (small file storage) in a browser.",
       "price": "₩9,900/mo",
       "cta": "Learn more"
     },
     "global-pro": {
       "eyebrow": "Secure Cloud & Network Optimization",
       "title": "Hybrid",
-      "description": "Secure backup with faster network optimization",
+      "description": "Secure backup with faster network optimization. Use Vaultwarden (password & note backup) and Syncthing (small file storage) in a browser.",
       "price": "₩19,900/mo",
       "cta": "Learn more"
     }
@@ -212,7 +212,7 @@
   "workspace": {
     "eyebrow": "Secure Cloud & Network Optimization",
     "title": "Workspace & Custom",
-    "description": "Custom orders for friends and teams",
+    "description": "Custom orders for friends and teams. Use Vaultwarden (password & note backup) and Syncthing (small file storage) in a browser.",
     "hint": "Plans A, B, and C by headcount",
     "learnMore": "Learn more",
     "cta": "Get started"
@@ -222,11 +222,14 @@
     "standard": {
       "eyebrow": "Secure Cloud & Network Optimization",
       "title": "Standard",
-      "description": "Right-sized speed for short trips and travel backups",
+      "description": "Right-sized speed for short trips and travel backups. Encrypted network access plus Vaultwarden (password & note backup) and Syncthing (small file storage). You do not need a separate backup app.",
       "cta": "Get started",
       "features": [
         "AcrossFlare base technology",
-        "1 GB secure cloud backup for important files",
+        "1 GB secure cloud backup",
+        "Vaultwarden (password & note backup) — encrypted passwords, cards, and secure notes",
+        "Syncthing (small file storage) — encrypted storage for important small files",
+        "Use in a browser with no dedicated app. Opens in your account after payment",
         "Online meetings on Zoom, Webex, Teams, and more",
         "Network optimization over a dedicated international line (LA)",
         "Advanced encryption for a secure network"
@@ -235,11 +238,14 @@
     "hybrid": {
       "eyebrow": "Secure Cloud & Network Optimization",
       "title": "Hybrid",
-      "description": "Secure backup plus faster network optimization",
+      "description": "Secure backup plus faster network optimization. Encrypted network access plus Vaultwarden (password & note backup) and Syncthing (small file storage). You do not need a separate backup app.",
       "cta": "Get started",
       "features": [
         "AcrossFlare advanced technology",
-        "1 GB secure cloud backup for important files",
+        "1 GB secure cloud backup",
+        "Vaultwarden (password & note backup) — encrypted passwords, cards, and secure notes",
+        "Syncthing (small file storage) — encrypted storage for important small files",
+        "Use in a browser with no dedicated app. Opens in your account after payment",
         "Uninterrupted online meetings on Zoom, Webex, Teams, and more",
         "Faster network over Tokyo + LA lines",
         "Advanced encryption for a secure network"
@@ -248,10 +254,10 @@
     "workspace": {
       "eyebrow": "Secure Cloud & Network Optimization",
       "title": "Workspace & Custom",
-      "description": "Custom orders for friends and teams",
+      "description": "Custom orders for friends and teams. Encrypted network access plus Vaultwarden (password & note backup) and Syncthing (small file storage). You do not need a separate backup app.",
       "cta": "Enter promotional code",
-      "hint": "Plans A, B, and C by headcount",
-      "priceNote": "Plans A, B, and C share the same monthly price of $150. They differ only in seats and monthly traffic.",
+      "hint": "",
+      "priceNote": "",
       "codePlaceholder": "Promotional code",
       "codeSubmit": "Continue",
       "codeInvalid": "This code is not valid.",
@@ -263,7 +269,10 @@
       },
       "features": [
         "AcrossFlare advanced technology",
-        "1 GB secure cloud backup for important files",
+        "1 GB secure cloud backup",
+        "Vaultwarden (password & note backup) — encrypted passwords, cards, and secure notes",
+        "Syncthing (small file storage) — encrypted storage for important small files",
+        "Use in a browser with no dedicated app. Opens in your account after payment",
         "Uninterrupted online meetings on Zoom, Webex, Teams, and more",
         "Faster network over Tokyo + LA lines",
         "Advanced encryption for a secure network"
@@ -350,19 +359,24 @@
     "yamlDownload": "Download .yaml",
     "backup": "Backup",
     "backupTitle": "Security backup",
-    "backupDesc": "Open Vaultwarden for passwords and secure notes, or Syncthing for encrypted file sync. Add this PWA to your home screen.",
+    "backupDesc": "Use Vaultwarden (password & note backup) and Syncthing (small file storage) in your browser. You do not need a separate backup app.",
     "backupExpires": "Plan access until {date}",
-    "vaultTitle": "Vaultwarden",
-    "vaultDesc": "Encrypted passwords, cards, and secure notes.",
+    "vaultTitle": "Vaultwarden (password & note backup)",
+    "vaultDesc": "Click Open vault to use it in the browser. Sign in with the same email as your AcrossFlare account. Save passwords, cards, and secure notes. No extra app is required.",
     "vaultUrl": "Vault URL",
     "vaultUser": "Vault user",
     "openVault": "Open vault",
-    "syncthingTitle": "Syncthing",
-    "syncthingDesc": "P2P encrypted files on the server filesystem. No central document database.",
+    "syncthingTitle": "Syncthing (small file storage)",
+    "syncthingDesc": "Click Open sync to enter your folder. You can upload and download small files in the browser. To keep a phone or PC folder in sync automatically, install Syncthing on that device and connect it to this folder. Skip that if you only use the web.",
     "syncthingUrl": "Sync URL",
     "syncthingFolder": "Folder ID",
     "openSync": "Open sync",
-    "openBackupPwa": "Open backup PWA",
+    "openBackupPwa": "Open backup space",
+    "backupHowToTitle": "How to use",
+    "backupHowTo1": "In Console or Backup, tap Open vault (Vaultwarden) or Open sync (Syncthing).",
+    "backupHowTo2": "Save passwords and notes in Vaultwarden, and small files in your Syncthing folder.",
+    "backupHowTo3": "Install Syncthing on a device only if you want that folder to sync automatically. You do not need it for web-only use.",
+    "backupHowToMore": "Read the full guide",
     "backupUsage": "Backup usage",
     "exitIp": "Exit IP",
     "region": "Region",
@@ -476,7 +490,25 @@
         },
         "connect": {
           "title": "Connect",
-          "body": "After the profile is saved, turn on the main switch to connect."
+          "body": "After the profile is saved, turn on the main switch to connect. Open backup from the profile webpage or the announcement “Open backup space”."
+        }
+      }
+    },
+    "backup": {
+      "title": "How to use backup",
+      "heading": "Keep passwords and small files in the browser. You do not need a separate backup app.",
+      "steps": {
+        "open": {
+          "title": "Open vault / Open sync",
+          "body": "In Console or Backup, open Vaultwarden (password & note backup) with Open vault, and Syncthing (small file storage) with Open sync. Both open in the browser."
+        },
+        "save": {
+          "title": "Save passwords, notes, and small files",
+          "body": "Store passwords and notes in Vaultwarden, and small files in your Syncthing folder."
+        },
+        "optional": {
+          "title": "Optional device folder sync",
+          "body": "To keep a phone or PC folder in sync automatically, install Syncthing on that device and connect it with the folder ID on screen. Skip that if you only upload and download small files in the browser."
         }
       }
     },
@@ -497,6 +529,22 @@
         "macOpen": {
           "q": "macOS says the developer cannot be verified.",
           "a": "Open System Settings → Privacy & Security and choose Open Anyway."
+        },
+        "backupApp": {
+          "q": "Do I have to install an app to use backup?",
+          "a": "No. Use Vaultwarden (password & note backup) and Syncthing (small file storage) in the browser. Only network access needs the Karing app."
+        },
+        "backupFromKaring": {
+          "q": "How do I open backup from Karing?",
+          "a": "After you add the subscription, tap the profile webpage or the “Open backup space” announcement. It opens backup in the browser. You will need to sign in to AcrossFlare once."
+        },
+        "vaultLogin": {
+          "q": "How do I sign in to Vaultwarden?",
+          "a": "Open vault from Backup, then use the issued vault address and your account email."
+        },
+        "deviceSync": {
+          "q": "How do I keep files on my phone in sync?",
+          "a": "Install Syncthing on that device and connect it with the folder ID on screen. You do not need that if you only upload and download small files in the browser."
         }
       }
     }

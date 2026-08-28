@@ -1,6 +1,7 @@
-import { BookOpen, CircleHelp, Download, LifeBuoy, type LucideIcon } from "lucide-react";
+import { BookOpen, CircleHelp, Download, HardDrive, LifeBuoy, type LucideIcon } from "lucide-react";
 import { headers } from "next/headers";
 import { getTranslations } from "next-intl/server";
+import { BackupSetupGuide } from "@/components/marketing/backup-guide";
 import { KaringDownloadCta } from "@/components/marketing/karing-download";
 import { KaringHelpFaq, KaringSetupGuide } from "@/components/marketing/karing-guide";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
@@ -15,6 +16,7 @@ import {
 const SECTION_ICONS: Record<SupportSectionId, LucideIcon> = {
   downloads: Download,
   setup: BookOpen,
+  backup: HardDrive,
   faq: CircleHelp,
 };
 
@@ -83,6 +85,7 @@ export async function SupportZone() {
                         {section.id === "setup" ? (
                           <KaringSetupGuide activePlatform={karingInstallPlatformFor(initialOs.id)} />
                         ) : null}
+                        {section.id === "backup" ? <BackupSetupGuide /> : null}
                         {section.id === "faq" ? <KaringHelpFaq /> : null}
                       </div>
                     </div>
