@@ -432,7 +432,7 @@
   },
   "support": {
     "title": "서포트존",
-    "lead": "서비스 결제를 완료해 주셔서 감사합니다. 기기에 맞는 Karing을 설치하고 프로필만 연결하면 바로 이용할 수 있습니다.",
+    "lead": "AcrossFlare를 이용해 주셔서 감사합니다.",
     "comingSoon": "서비스 곧 추가 예정",
     "downloads": {
       "title": "다운로드센터",
@@ -472,13 +472,7 @@
         },
         "profile": {
           "title": "발급받은 구독 QR코드 또는 링크 연동",
-          "body": "아래 QR을 Karing에서 스캔하거나, YAML URL을 복사해 Add Profile에 붙여넣으세요. QR 코드 복사로 이미지를 복사할 수도 있습니다.",
-          "openApp": "마이페이지 열기",
-          "empty": "아직 발급된 구독 프로필이 없습니다. 마이페이지에서 발급 상태를 확인하세요.",
-          "qrLabel": "구독 QR",
-          "qrValue": "QR / 딥링크",
-          "copyQr": "QR 코드 복사",
-          "qrCopied": "QR 복사됨"
+          "body": "결제 완료 후에 화면 우측 상단 콘솔을 클릭하시면, QR코드와 연결링크가 생성되어 있습니다. 이 QR을 Karing에서 스캔하거나, URL을 복사해 Add Profile에 붙여넣으세요. QR 코드 복사로 이미지를 복사할 수도 있습니다."
         },
         "connect": {
           "title": "연결 시작 (Connect)",
@@ -494,7 +488,7 @@
       "items": {
         "profileWhere": {
           "q": "구독 QR코드 또는 링크는 어디에서 받나요?",
-          "a": "아래에서 QR을 스캔하거나, QR 이미지·YAML URL·딥링크를 복사하세요. 설정방법 2단계와 마이페이지에도 같은 값이 있습니다."
+          "a": "결제 완료 후에 화면 우측 상단 콘솔을 클릭하시면, QR코드와 연결링크가 생성되어 있습니다. 이 QR을 Karing에서 스캔하거나, URL을 복사해 Add Profile에 붙여넣으세요. QR 코드 복사로 이미지를 복사할 수도 있습니다."
         },
         "playStore": {
           "q": "Android를 Play Store에서 받을 수 있나요?",

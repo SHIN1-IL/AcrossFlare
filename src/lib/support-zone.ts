@@ -36,32 +36,3 @@ export function karingInstallPlatformFor(osId: string): KaringInstallPlatformId 
     ? (osId as KaringInstallPlatformId)
     : null;
 }
-
-export type KaringSetupProfile = {
-  id: "global" | "workspace";
-  planName: string;
-  deepLink: string;
-  yamlUrl: string;
-};
-
-type SetupLane = {
-  status: string;
-  planName: string;
-  deepLink: string;
-  yamlUrl: string;
-} | null;
-
-export function karingSetupProfilesFrom(account: {
-  global: SetupLane;
-  workspace: SetupLane;
-} | null): KaringSetupProfile[] {
-  if (!account) return [];
-
-  return (["global", "workspace"] as const).flatMap((id) => {
-    const lane = account[id];
-    if (!lane) return [];
-    if (lane.status !== "active" && lane.status !== "provisioning") return [];
-    if (!lane.deepLink && !lane.yamlUrl) return [];
-    return [{ id, planName: lane.planName, deepLink: lane.deepLink, yamlUrl: lane.yamlUrl }];
-  });
-}

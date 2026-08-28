@@ -432,7 +432,7 @@
   },
   "support": {
     "title": "Support Zone",
-    "lead": "Thank you for completing payment. Install Karing for this device, then add your profile to start.",
+    "lead": "Thank you for using AcrossFlare.",
     "comingSoon": "Service coming soon",
     "downloads": {
       "title": "Download Center",
@@ -472,13 +472,7 @@
         },
         "profile": {
           "title": "Add the issued QR code or subscription link",
-          "body": "Scan the QR in Karing, or copy the YAML URL and paste it into Add Profile. You can also copy the QR image.",
-          "openApp": "Open My Page",
-          "empty": "No subscription profile has been issued yet. Check issuance status on My Page.",
-          "qrLabel": "Subscription QR",
-          "qrValue": "QR / deep link",
-          "copyQr": "Copy QR code",
-          "qrCopied": "QR copied"
+          "body": "After payment, click Console in the top right of the screen. Your QR code and connection link are generated there. Scan that QR in Karing, or copy the URL and paste it into Add Profile. You can also copy the QR image."
         },
         "connect": {
           "title": "Connect",
@@ -494,7 +488,7 @@
       "items": {
         "profileWhere": {
           "q": "Where do I get the subscription QR code or link?",
-          "a": "Scan the QR below, or copy the QR image, YAML URL, or deep link. The same values are in setup step 2 and on My Page."
+          "a": "After payment, click Console in the top right of the screen. Your QR code and connection link are generated there. Scan that QR in Karing, or copy the URL and paste it into Add Profile. You can also copy the QR image."
         },
         "playStore": {
           "q": "Can I get Android from the Play Store?",

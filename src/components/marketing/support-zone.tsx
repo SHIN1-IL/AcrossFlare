@@ -5,13 +5,10 @@ import { KaringDownloadCta } from "@/components/marketing/karing-download";
 import { KaringHelpFaq, KaringSetupGuide } from "@/components/marketing/karing-guide";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { StageBackdrop } from "@/components/marketing/plan-stage-bg";
-import { loadAccountSnapshot } from "@/lib/account-from-db";
-import { getAuthUser } from "@/lib/auth";
 import { detectKaringOs, fetchKaringLatestRelease } from "@/lib/karing-download";
 import {
   SUPPORT_SECTIONS,
   karingInstallPlatformFor,
-  karingSetupProfilesFrom,
   type SupportSectionId,
 } from "@/lib/support-zone";
 
@@ -22,14 +19,11 @@ const SECTION_ICONS: Record<SupportSectionId, LucideIcon> = {
 };
 
 export async function SupportZone() {
-  const [t, release, headerStore, user] = await Promise.all([
+  const [t, release, headerStore] = await Promise.all([
     getTranslations("support"),
     fetchKaringLatestRelease(),
     headers(),
-    getAuthUser(),
   ]);
-  const account = user ? await loadAccountSnapshot(user.email, user.id) : null;
-  const profiles = karingSetupProfilesFrom(account);
   const initialOs = detectKaringOs({
     userAgent: headerStore.get("user-agent") ?? "",
   });
@@ -87,14 +81,9 @@ export async function SupportZone() {
                           </div>
                         ) : null}
                         {section.id === "setup" ? (
-                          <KaringSetupGuide
-                            activePlatform={karingInstallPlatformFor(initialOs.id)}
-                            profiles={profiles}
-                          />
+                          <KaringSetupGuide activePlatform={karingInstallPlatformFor(initialOs.id)} />
                         ) : null}
-                        {section.id === "faq" ? (
-                          <KaringHelpFaq profiles={profiles} />
-                        ) : null}
+                        {section.id === "faq" ? <KaringHelpFaq /> : null}
                       </div>
                     </div>
                   </article>

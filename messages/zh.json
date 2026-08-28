@@ -432,7 +432,7 @@
   },
   "support": {
     "title": "支持专区",
-    "lead": "感谢完成付款。为本设备安装 Karing 并添加配置文件后即可使用。",
+    "lead": "感谢使用 AcrossFlare。",
     "comingSoon": "服务即将上线",
     "downloads": {
       "title": "下载中心",
@@ -472,13 +472,7 @@
         },
         "profile": {
           "title": "绑定已发放的订阅二维码或链接",
-          "body": "在 Karing 中扫描下方二维码，或复制 YAML URL 粘贴到 Add Profile。也可以复制二维码图片。",
-          "openApp": "打开我的页面",
-          "empty": "尚未发放订阅配置。请到我的页面查看开通状态。",
-          "qrLabel": "订阅二维码",
-          "qrValue": "二维码 / 深链",
-          "copyQr": "复制二维码",
-          "qrCopied": "已复制二维码"
+          "body": "付款完成后，点击屏幕右上角的控制台，即可看到已生成的二维码和连接链接。在 Karing 中扫描该二维码，或复制 URL 粘贴到 Add Profile。也可以复制二维码图片。"
         },
         "connect": {
           "title": "开始连接（Connect）",
@@ -494,7 +488,7 @@
       "items": {
         "profileWhere": {
           "q": "订阅二维码或链接在哪里领取？",
-          "a": "可扫描下方二维码，或复制二维码图片、YAML URL、深链。设置方法第 2 步和“我的页面”也有相同内容。"
+          "a": "付款完成后，点击屏幕右上角的控制台，即可看到已生成的二维码和连接链接。在 Karing 中扫描该二维码，或复制 URL 粘贴到 Add Profile。也可以复制二维码图片。"
         },
         "playStore": {
           "q": "Android 能从 Play 商店下载吗？",

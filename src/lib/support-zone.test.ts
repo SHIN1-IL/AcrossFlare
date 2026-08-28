@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import ko from "../../messages/ko.json";
 import {
   KARING_FAQ_ITEMS,
   KARING_INSTALL_PLATFORMS,
@@ -6,7 +7,6 @@ import {
   SUPPORT_HREF,
   SUPPORT_SECTIONS,
   karingInstallPlatformFor,
-  karingSetupProfilesFrom,
 } from "@/lib/support-zone";
 
 describe("support zone", () => {
@@ -35,26 +35,12 @@ describe("support zone", () => {
     expect(karingInstallPlatformFor("other")).toBeNull();
   });
 
-  it("exposes issued Karing QR and YAML links from active lanes", () => {
-    expect(
-      karingSetupProfilesFrom({
-        global: {
-          status: "active",
-          planName: "Standard",
-          deepLink: "karing://install-config?url=https://example.com/a",
-          yamlUrl: "https://example.com/a",
-        },
-        workspace: null,
-      })
-    ).toEqual([
-      {
-        id: "global",
-        planName: "Standard",
-        deepLink: "karing://install-config?url=https://example.com/a",
-        yamlUrl: "https://example.com/a",
-      },
-    ]);
-    expect(karingSetupProfilesFrom({ global: { status: "unpaid", planName: "X", deepLink: "", yamlUrl: "" }, workspace: null })).toEqual([]);
-    expect(karingSetupProfilesFrom(null)).toEqual([]);
+  it("explains Console QR setup without showing issued credentials on the support page", () => {
+    expect(ko.support.lead).toBe("AcrossFlare를 이용해 주셔서 감사합니다.");
+    expect(ko.support.setup.steps.profile.body).toContain("우측 상단 콘솔");
+    expect(ko.support.setup.steps.profile.body).not.toContain("아래 QR");
+    expect(ko.support.faq.items.profileWhere.a).toBe(ko.support.setup.steps.profile.body);
+    expect(ko.support.setup.steps.profile).not.toHaveProperty("qrLabel");
+    expect(ko.support.setup.steps.profile).not.toHaveProperty("empty");
   });
 });
