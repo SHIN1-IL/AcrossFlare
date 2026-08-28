@@ -67,7 +67,7 @@
   "legal": {
     "termsTitle": "Terms of Service",
     "privacyTitle": "Privacy Policy",
-    "updated": "Last updated August 26, 2026",
+    "updated": "Last updated August 28, 2026",
     "disclaimer": "These terms and this privacy policy apply to AcrossFlare, operated by 어크로스툴 (CEO: 신일) at acrossflare.com.",
     "termsSections": [
       {
@@ -119,7 +119,7 @@
     "privacySections": [
       {
         "title": "1. Purpose and data we collect",
-        "body": "We process personal data to register accounts, provide the paid service, handle payment and refunds, answer support, and protect against abuse. We store email, password hashes, session cookies, plan and payment records, issued access and backup details, and operational logs. We do not store card numbers; payment processors do."
+        "body": "We process personal data to register accounts, provide the paid service, handle payment and refunds, answer support, and protect against abuse. We store email, password hashes, session cookies, plan and payment records, issued access and backup details, and operational logs. For card checkout we also collect a mobile phone number so the payment processor can verify the payer. We do not store card numbers; payment processors do."
       },
       {
         "title": "2. Retention",
@@ -127,7 +127,7 @@
       },
       {
         "title": "3. Processors",
-        "body": "Payments are processed by PortOne, Stripe, and Paymentwall. Hosting, DNS, WAF, and TLS may use Cloudflare and VPS providers. Encrypted backup features use our password, note, and file-sync systems. We do not sell personal information."
+        "body": "We outsource personal-data processing as follows.\n\nProcessor: PortOne Co., Ltd. (주식회사 포트원) — payments (electronic payment gateway)\nProcessor: Stripe, Inc. — payments (including Alipay)\nProcessor: Paymentwall, Inc. — payments\nProcessor: Cloudflare, Inc. — website hosting, DNS, WAF, and TLS\nProcessor: VPS providers used to run servers — server hosting\n\nRetention lasts until the processing contract ends, or as required by law under section 2. Encrypted backup features use our password, note, and file-sync systems. We do not sell personal information."
       },
       {
         "title": "4. Overseas transfers",
