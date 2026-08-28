@@ -8,6 +8,8 @@ import { PlanStages } from "@/components/marketing/plan-stages";
 const instrumentSans = Instrument_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
+  display: "swap",
+  preload: true,
 });
 
 export default async function LandingPage({

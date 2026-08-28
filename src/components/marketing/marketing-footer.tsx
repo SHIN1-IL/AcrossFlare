@@ -3,6 +3,8 @@ import { MerchantDisclosure } from "@/components/marketing/merchant-disclosure";
 import { LegalFooterLinks } from "@/components/marketing/legal-footer-links";
 import { Logo } from "@/components/marketing/logo";
 
+const COPYRIGHT_YEAR = new Date().getFullYear();
+
 export async function MarketingFooter() {
   const t = await getTranslations("footer");
 
@@ -12,7 +14,7 @@ export async function MarketingFooter() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <Logo />
-            <span className="text-sm text-muted-foreground">{t("copyright", { year: new Date().getFullYear() })}</span>
+            <span className="text-sm text-muted-foreground">{t("copyright", { year: COPYRIGHT_YEAR })}</span>
           </div>
           <LegalFooterLinks className="text-sm" />
         </div>

@@ -3,6 +3,7 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { isBackupSurfacePath } from "@/lib/pwa-surface";
 
 const STORAGE_KEY = "af-pwa-install-dismissed";
 
@@ -35,7 +36,7 @@ function isIos() {
 }
 
 function onBackupSurface() {
-  return /\/(dashboard|app)(\/|$)/.test(window.location.pathname);
+  return isBackupSurfacePath(window.location.pathname);
 }
 
 export function PwaInstallBanner() {

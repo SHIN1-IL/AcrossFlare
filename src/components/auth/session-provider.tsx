@@ -2,17 +2,26 @@
 
 import { useEffect } from "react";
 import type { PublicSession } from "@/lib/auth-types";
-import { hydrateSession } from "@/lib/session";
+import { getSession, hydrateSession, refreshSession } from "@/lib/session";
 
 export function SessionProvider({
   initialSession,
   children,
 }: {
-  initialSession: PublicSession | null;
+  initialSession?: PublicSession | null;
   children: React.ReactNode;
 }) {
   useEffect(() => {
-    hydrateSession(initialSession);
+    if (initialSession !== undefined) {
+      hydrateSession(initialSession);
+      return;
+    }
+
+    if (getSession()) {
+      return;
+    }
+
+    void refreshSession();
   }, [initialSession]);
 
   return children;

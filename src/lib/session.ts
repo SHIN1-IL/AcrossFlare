@@ -75,10 +75,16 @@ export function lookupEmail(session: Session | null) {
 }
 
 export async function refreshSession() {
-  const response = await fetch("/api/auth/me", { credentials: "include" });
+  const response = await fetch("/api/auth/me", {
+    credentials: "include",
+    cache: "no-store",
+  });
+  if (!response.ok) {
+    return current;
+  }
+
   const data = (await response.json()) as { user?: Session | null };
-  current = data.user ?? null;
-  emit();
+  hydrateSession(data.user ?? null);
   return current;
 }
 

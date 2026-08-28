@@ -1,5 +1,9 @@
-const CACHE = "acrossflare-backup-v1";
-const PRECACHE = ["/", "/dashboard", "/manifest.json", "/icon.svg"];
+const CACHE = "acrossflare-backup-v2";
+const PRECACHE = ["/manifest.json", "/icon.svg"];
+
+function isBackupSurfacePath(pathname) {
+  return /\/(dashboard|app)(\/|$)/.test(pathname);
+}
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -32,7 +36,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (url.pathname.startsWith("/api/")) {
+  if (url.pathname.startsWith("/api/") || !isBackupSurfacePath(url.pathname)) {
     return;
   }
 

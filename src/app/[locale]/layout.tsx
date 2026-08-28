@@ -4,7 +4,6 @@ import { getMessages, getTranslations, setRequestLocale } from "next-intl/server
 import { Geist, Geist_Mono } from "next/font/google";
 import { SessionProvider } from "@/components/auth/session-provider";
 import { PwaProvider } from "@/components/pwa/pwa-provider";
-import { getCurrentUser } from "@/lib/auth";
 import { resolveLocale } from "@/i18n/locale";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
@@ -63,7 +62,6 @@ export default async function LocaleLayout({
   const locale = await resolveLocale(params);
   setRequestLocale(locale);
   const messages = await getMessages();
-  const session = await getCurrentUser();
 
   return (
     <html
@@ -72,7 +70,7 @@ export default async function LocaleLayout({
     >
       <body className="min-h-full bg-background text-foreground">
         <NextIntlClientProvider messages={messages}>
-          <SessionProvider initialSession={session}>
+          <SessionProvider>
             <PwaProvider />
             {children}
           </SessionProvider>

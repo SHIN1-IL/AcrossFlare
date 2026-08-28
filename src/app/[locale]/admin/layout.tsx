@@ -1,5 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { SessionProvider } from "@/components/auth/session-provider";
 import { getCurrentUser } from "@/lib/auth";
 import { isAdminSession } from "@/lib/auth-types";
 import { resolveLocale } from "@/i18n/locale";
@@ -22,5 +23,9 @@ export default async function AdminLayout({
     redirect({ href: "/app", locale });
   }
 
-  return <AdminShell>{children}</AdminShell>;
+  return (
+    <SessionProvider initialSession={user}>
+      <AdminShell>{children}</AdminShell>
+    </SessionProvider>
+  );
 }

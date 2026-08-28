@@ -1,6 +1,4 @@
-"use client";
-
-import { useLocale, useTranslations } from "next-intl";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { LazyStageBackdrop } from "@/components/marketing/plan-stage-bg";
 import { PriceWithPeriod, SecondaryPriceAmount } from "@/components/marketing/price-amount";
@@ -10,10 +8,14 @@ import { getPlanById, planPricePeriodKey, type Plan } from "@/lib/plans";
 import { cn } from "@/lib/utils";
 import type { AppLocale } from "@/i18n/routing";
 
-export function PlanStages({ showAlipay }: { showAlipay: boolean }) {
+export async function PlanStages({ showAlipay }: { showAlipay: boolean }) {
   const slides = HOME_SLIDE_PLAN_IDS.map((id) => getPlanById(id)).filter(
     (plan): plan is Plan => Boolean(plan)
   );
+  const t = await getTranslations("pricing");
+  const tSlides = await getTranslations("planSlides");
+  const tWorkspace = await getTranslations("workspace");
+  const locale = (await getLocale()) as AppLocale;
 
   return (
     <div>
@@ -24,9 +26,13 @@ export function PlanStages({ showAlipay }: { showAlipay: boolean }) {
           index={index}
           showAlipay={showAlipay}
           isFirst={index === 0}
+          locale={locale}
+          t={t}
+          tSlides={tSlides}
+          tWorkspace={tWorkspace}
         />
       ))}
-      <WorkspaceStage index={slides.length} />
+      <WorkspaceStage index={slides.length} t={tWorkspace} />
     </div>
   );
 }
@@ -36,16 +42,20 @@ function PlanStage({
   index,
   showAlipay,
   isFirst,
+  locale,
+  t,
+  tSlides,
+  tWorkspace,
 }: {
   plan: Plan;
   index: number;
   showAlipay: boolean;
   isFirst: boolean;
+  locale: AppLocale;
+  t: Awaited<ReturnType<typeof getTranslations>>;
+  tSlides: Awaited<ReturnType<typeof getTranslations>>;
+  tWorkspace: Awaited<ReturnType<typeof getTranslations>>;
 }) {
-  const t = useTranslations("pricing");
-  const tSlides = useTranslations("planSlides");
-  const tWorkspace = useTranslations("workspace");
-  const locale = useLocale() as AppLocale;
   const slide = homeSlideFor(plan.id);
   const prices = HOME_SLIDE_PRICES[plan.id] ?? plan.prices;
   const custom =
@@ -110,9 +120,13 @@ function PlanStage({
   );
 }
 
-function WorkspaceStage({ index }: { index: number }) {
-  const t = useTranslations("workspace");
-
+function WorkspaceStage({
+  index,
+  t,
+}: {
+  index: number;
+  t: Awaited<ReturnType<typeof getTranslations>>;
+}) {
   return (
     <section className="relative h-dvh overflow-hidden">
       <LazyStageBackdrop variant={index} />
