@@ -3,8 +3,9 @@
 import { Layers } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useId, useRef, useState } from "react";
-import { Link, usePathname } from "@/i18n/navigation";
+import { CachedMarketingLink } from "@/components/marketing/cached-marketing-link";
 import { MenuDot } from "@/components/marketing/menu-dot";
+import { usePathname } from "@/i18n/navigation";
 import { MARKETING_SERVICES } from "@/lib/marketing-services";
 import { cn } from "@/lib/utils";
 
@@ -99,7 +100,7 @@ export function ServiceNav({ onNavigate }: { onNavigate?: () => void }) {
 
               return (
                 <li key={service.id} role="none">
-                  <Link
+                  <CachedMarketingLink
                     href={service.href}
                     role="menuitem"
                     aria-current={active ? "page" : undefined}
@@ -116,7 +117,7 @@ export function ServiceNav({ onNavigate }: { onNavigate?: () => void }) {
                   >
                     <MenuDot />
                     {tServices(`${service.id}.title`)}
-                  </Link>
+                  </CachedMarketingLink>
                 </li>
               );
             })}

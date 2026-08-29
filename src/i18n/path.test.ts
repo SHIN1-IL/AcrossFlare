@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isCachedMarketingPath, localePath } from "@/i18n/path";
+import { isCachedMarketingPath, cachedMarketingHref, localePath } from "@/i18n/path";
 
 describe("localePath", () => {
   it("prefixes the marketing home and inner routes", () => {
@@ -12,6 +12,14 @@ describe("localePath", () => {
     expect(localePath("ko", "/checkout?product=global&plan=global-lite")).toBe(
       "/ko/checkout?product=global&plan=global-lite"
     );
+  });
+});
+
+describe("cachedMarketingHref", () => {
+  it("prefixes cached storefront paths and optional hashes", () => {
+    expect(cachedMarketingHref("ja", "/standard")).toBe("/ja/standard");
+    expect(cachedMarketingHref("ko", "/terms", "refund")).toBe("/ko/terms#refund");
+    expect(cachedMarketingHref("en", "/", "#plans")).toBe("/en#plans");
   });
 });
 

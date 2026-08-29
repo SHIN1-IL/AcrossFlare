@@ -1,8 +1,8 @@
-import { Link } from "@/i18n/navigation";
+import { CachedMarketingLink } from "@/components/marketing/cached-marketing-link";
 
 export function Logo({ showWordmark = true }: { showWordmark?: boolean }) {
   return (
-    <Link
+    <CachedMarketingLink
       href="/"
       aria-label="AcrossFlare"
       className="group flex items-center gap-2.5 text-sm font-medium tracking-tight"
@@ -42,6 +42,6 @@ export function Logo({ showWordmark = true }: { showWordmark?: boolean }) {
         </svg>
       </span>
       {showWordmark ? "AcrossFlare" : null}
-    </Link>
+    </CachedMarketingLink>
   );
 }

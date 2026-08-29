@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { CachedMarketingLink } from "@/components/marketing/cached-marketing-link";
 import { cn } from "@/lib/utils";
 
 export function LegalFooterLinks({ className }: { className?: string }) {
@@ -9,18 +9,19 @@ export function LegalFooterLinks({ className }: { className?: string }) {
 
   return (
     <nav className={cn("flex flex-wrap gap-4 text-muted-foreground", className)}>
-      <Link href="/terms" className="transition-colors hover:text-foreground">
+      <CachedMarketingLink href="/terms" className="transition-colors hover:text-foreground">
         {t("terms")}
-      </Link>
-      <Link href="/privacy" className="transition-colors hover:text-foreground">
+      </CachedMarketingLink>
+      <CachedMarketingLink href="/privacy" className="transition-colors hover:text-foreground">
         {t("privacy")}
-      </Link>
-      <Link
-        href={{ pathname: "/terms", hash: "refund" }}
+      </CachedMarketingLink>
+      <CachedMarketingLink
+        href="/terms"
+        hash="refund"
         className="transition-colors hover:text-foreground"
       >
         {t("refund")}
-      </Link>
+      </CachedMarketingLink>
     </nav>
   );
 }

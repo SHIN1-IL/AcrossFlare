@@ -1,8 +1,8 @@
 import { getLocale, getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
 import { LazyStageBackdrop } from "@/components/marketing/plan-stage-bg";
 import { PriceWithPeriod, SecondaryPriceAmount } from "@/components/marketing/price-amount";
 import { buttonVariants } from "@/components/ui/button";
+import { cachedMarketingHref } from "@/i18n/path";
 import { HOME_SLIDE_PLAN_IDS, HOME_SLIDE_PRICES, homeSlideFor } from "@/lib/marketing-services";
 import { getPlanById, planPricePeriodKey, type Plan } from "@/lib/plans";
 import { cn } from "@/lib/utils";
@@ -32,7 +32,7 @@ export async function PlanStages({ showAlipay }: { showAlipay: boolean }) {
           tWorkspace={tWorkspace}
         />
       ))}
-      <WorkspaceStage index={slides.length} t={tWorkspace} />
+      <WorkspaceStage index={slides.length} locale={locale} t={tWorkspace} />
     </div>
   );
 }
@@ -109,12 +109,12 @@ function PlanStage({
         {showAlipay ? (
           <p className="mt-2 text-xs text-primary">{t("alipay")}</p>
         ) : null}
-        <Link
-          href={slide.href}
+        <a
+          href={cachedMarketingHref(locale, slide.href)}
           className={cn(buttonVariants({ size: "lg" }), "mt-8 rounded-[10px] px-8")}
         >
           {tWorkspace("learnMore")}
-        </Link>
+        </a>
       </div>
     </section>
   );
@@ -122,9 +122,11 @@ function PlanStage({
 
 function WorkspaceStage({
   index,
+  locale,
   t,
 }: {
   index: number;
+  locale: AppLocale;
   t: Awaited<ReturnType<typeof getTranslations>>;
 }) {
   return (
@@ -139,12 +141,12 @@ function WorkspaceStage({
         </h2>
         <p className="mt-4 text-sm text-muted-foreground md:text-base">{t("description")}</p>
         <p className="mt-2 text-sm text-muted-foreground md:text-base">{t("hint")}</p>
-        <Link
-          href="/workspace"
+        <a
+          href={cachedMarketingHref(locale, "/workspace")}
           className={cn(buttonVariants({ size: "lg" }), "mt-8 rounded-[10px] px-8")}
         >
           {t("learnMore")}
-        </Link>
+        </a>
       </div>
     </section>
   );

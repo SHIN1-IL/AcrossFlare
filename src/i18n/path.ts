@@ -19,3 +19,11 @@ export function localePath(locale: string, href: string) {
 export function isCachedMarketingPath(pathname: string) {
   return CACHED_MARKETING_PATHS.has(pathname);
 }
+
+export function cachedMarketingHref(locale: string, pathname: string, hash?: string) {
+  const path = localePath(locale, pathname);
+  if (!hash) {
+    return path;
+  }
+  return `${path}#${hash.replace(/^#/, "")}`;
+}
