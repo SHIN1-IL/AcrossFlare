@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { localePath } from "@/i18n/path";
+import { isCachedMarketingPath, localePath } from "@/i18n/path";
 
 describe("localePath", () => {
   it("prefixes the marketing home and inner routes", () => {
@@ -12,5 +12,22 @@ describe("localePath", () => {
     expect(localePath("ko", "/checkout?product=global&plan=global-lite")).toBe(
       "/ko/checkout?product=global&plan=global-lite"
     );
+  });
+});
+
+describe("isCachedMarketingPath", () => {
+  it("marks storefront pages that Cloudflare caches", () => {
+    expect(isCachedMarketingPath("/")).toBe(true);
+    expect(isCachedMarketingPath("/standard")).toBe(true);
+    expect(isCachedMarketingPath("/privacy")).toBe(true);
+  });
+
+  it("leaves console, auth, and checkout on client navigation", () => {
+    expect(isCachedMarketingPath("/login")).toBe(false);
+    expect(isCachedMarketingPath("/checkout")).toBe(false);
+    expect(isCachedMarketingPath("/app")).toBe(false);
+    expect(isCachedMarketingPath("/admin")).toBe(false);
+    expect(isCachedMarketingPath("/dashboard")).toBe(false);
+    expect(isCachedMarketingPath("/support")).toBe(false);
   });
 });

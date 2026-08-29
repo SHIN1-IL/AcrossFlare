@@ -29,7 +29,13 @@ Target: keep the origin container set under **300MB RAM**, with **1GB swap** on 
 | `sync` | CNAME | `@` | Proxied |
 | `node-*` | A | that node’s public IP | DNS only |
 
-6. **Cache Rule** (marketing HTML only): hostname `acrossflare.com` or `www.acrossflare.com`, URI Path matches `^/(en|ko|zh|ja)(/standard|/hybrid|/workspace|/pricing|/terms|/privacy)?$`. Eligible for cache; ignore the `af_session` cookie in the cache key. Origin already sends `CDN-Cache-Control`. Do **not** cache `/login`, `/signup`, `/support`, `/checkout`, `/app`, `/admin`, `/dashboard`, or `/api`.
+6. **Cache Rule** (marketing HTML only, Free/Pro — do not use `matches` regex): name `Marketing HTML`, custom expression editor (not the wildcard builder). Paste:
+
+   ```
+   (http.host in {"acrossflare.com" "www.acrossflare.com"}) and (http.request.uri.path in {"/en" "/ko" "/zh" "/ja" "/en/standard" "/ko/standard" "/zh/standard" "/ja/standard" "/en/hybrid" "/ko/hybrid" "/zh/hybrid" "/ja/hybrid" "/en/workspace" "/ko/workspace" "/zh/workspace" "/ja/workspace" "/en/pricing" "/ko/pricing" "/zh/pricing" "/ja/pricing" "/en/terms" "/ko/terms" "/zh/terms" "/ja/terms" "/en/privacy" "/ko/privacy" "/zh/privacy" "/ja/privacy"})
+   ```
+
+   Eligible for cache. Edge TTL: use origin Cache-Control, otherwise bypass. Origin already sends `CDN-Cache-Control`. Do **not** cache `/login`, `/signup`, `/support`, `/checkout`, `/app`, `/admin`, `/dashboard`, or `/api`. Do **not** use `https://acrossflare.com/*`.
 
 ## Deploy
 

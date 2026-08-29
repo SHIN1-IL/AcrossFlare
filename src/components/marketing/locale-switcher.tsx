@@ -4,11 +4,15 @@ import { Globe } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useId, useRef, useState, useTransition } from "react";
 import { MenuDot } from "@/components/marketing/menu-dot";
+import { isCachedMarketingPath, localePath } from "@/i18n/path";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { type AppLocale } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
 const LOCALE_ORDER: AppLocale[] = ["ko", "zh", "ja", "en"];
+
+const itemClassName =
+  "inline-flex w-full items-start gap-2 whitespace-nowrap px-3 py-1.5 text-left text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground";
 
 export function LocaleSwitcher() {
   const t = useTranslations("nav");
@@ -22,10 +26,13 @@ export function LocaleSwitcher() {
   const openedByHover = useRef(false);
   const menuId = useId();
   const options = LOCALE_ORDER.filter((code) => code !== locale);
+  const documentLoad = isCachedMarketingPath(pathname);
 
   function updatePlacement() {
     const rect = rootRef.current?.getBoundingClientRect();
-    if (!rect) return;
+    if (!rect) {
+      return;
+    }
     setDropUp(window.innerHeight - rect.bottom < 168 && rect.top > 168);
   }
 
@@ -38,8 +45,21 @@ export function LocaleSwitcher() {
     setOpen(false);
   }
 
+  function switchLocale(code: AppLocale) {
+    hideMenu();
+    const params = Object.fromEntries(new URLSearchParams(window.location.search));
+    startTransition(() => {
+      router.replace(
+        Object.keys(params).length > 0 ? { pathname, query: params } : pathname,
+        { locale: code }
+      );
+    });
+  }
+
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      return;
+    }
 
     function onPointerDown(event: PointerEvent) {
       if (!rootRef.current?.contains(event.target as Node)) {
@@ -48,7 +68,9 @@ export function LocaleSwitcher() {
     }
 
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") hideMenu();
+      if (event.key === "Escape") {
+        hideMenu();
+      }
     }
 
     document.addEventListener("pointerdown", onPointerDown);
@@ -79,9 +101,14 @@ export function LocaleSwitcher() {
         aria-controls={menuId}
         disabled={pending}
         onClick={() => {
-          if (openedByHover.current) return;
-          if (open) hideMenu();
-          else showMenu();
+          if (openedByHover.current) {
+            return;
+          }
+          if (open) {
+            hideMenu();
+          } else {
+            showMenu();
+          }
         }}
         className="inline-flex items-center gap-1 whitespace-nowrap text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
@@ -102,25 +129,37 @@ export function LocaleSwitcher() {
           >
             {options.map((code) => (
               <li key={code} role="none">
-                <button
-                  type="button"
-                  role="menuitem"
-                  disabled={pending}
-                  className="inline-flex w-full items-start gap-2 whitespace-nowrap px-3 py-1.5 text-left text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                  onClick={() => {
-                    hideMenu();
-                    startTransition(() => {
-                      const params = Object.fromEntries(new URLSearchParams(window.location.search));
-                      router.replace(
-                        Object.keys(params).length > 0 ? { pathname, query: params } : pathname,
-                        { locale: code }
-                      );
-                    });
-                  }}
-                >
-                  <MenuDot />
-                  {t(`locales.${code}`)}
-                </button>
+                {documentLoad ? (
+                  <a
+                    href={localePath(code, pathname)}
+                    hrefLang={code}
+                    role="menuitem"
+                    className={itemClassName}
+                    onClick={(event) => {
+                      hideMenu();
+                      const search = window.location.search;
+                      if (!search) {
+                        return;
+                      }
+                      event.preventDefault();
+                      window.location.assign(localePath(code, `${pathname}${search}`));
+                    }}
+                  >
+                    <MenuDot />
+                    {t(`locales.${code}`)}
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    disabled={pending}
+                    className={itemClassName}
+                    onClick={() => switchLocale(code)}
+                  >
+                    <MenuDot />
+                    {t(`locales.${code}`)}
+                  </button>
+                )}
               </li>
             ))}
           </ul>
