@@ -32,10 +32,12 @@ Target: keep the origin container set under **300MB RAM**, with **1GB swap** on 
 6. **Cache Rule** (marketing HTML only, Free/Pro — do not use `matches` regex): name `Marketing HTML`, custom expression editor (not the wildcard builder). Paste:
 
    ```
-   (http.host in {"acrossflare.com" "www.acrossflare.com"}) and (http.request.uri.path in {"/en" "/ko" "/zh" "/ja" "/en/standard" "/ko/standard" "/zh/standard" "/ja/standard" "/en/hybrid" "/ko/hybrid" "/zh/hybrid" "/ja/hybrid" "/en/workspace" "/ko/workspace" "/zh/workspace" "/ja/workspace" "/en/pricing" "/ko/pricing" "/zh/pricing" "/ja/pricing" "/en/terms" "/ko/terms" "/zh/terms" "/ja/terms" "/en/privacy" "/ko/privacy" "/zh/privacy" "/ja/privacy" "/en/login" "/ko/login" "/zh/login" "/ja/login" "/en/signup" "/ko/signup" "/zh/signup" "/ja/signup"})
+   (http.host in {"acrossflare.com" "www.acrossflare.com"}) and (http.request.uri.path in {"/" "/en" "/ko" "/zh" "/ja" "/en/standard" "/ko/standard" "/zh/standard" "/ja/standard" "/en/hybrid" "/ko/hybrid" "/zh/hybrid" "/ja/hybrid" "/en/workspace" "/ko/workspace" "/zh/workspace" "/ja/workspace" "/en/pricing" "/ko/pricing" "/zh/pricing" "/ja/pricing" "/en/terms" "/ko/terms" "/zh/terms" "/ja/terms" "/en/privacy" "/ko/privacy" "/zh/privacy" "/ja/privacy" "/en/login" "/ko/login" "/zh/login" "/ja/login" "/en/signup" "/ko/signup" "/zh/signup" "/ja/signup"})
    ```
 
-   Eligible for cache. Edge TTL: use origin Cache-Control, otherwise bypass. Origin already sends `CDN-Cache-Control`. Login/signup **shells** are anonymous (no session in HTML); `POST /api/auth/*` stays private. Do **not** cache `/support`, `/checkout`, `/app`, `/admin`, `/dashboard`, or `/api`. Do **not** use `https://acrossflare.com/*`.
+   Eligible for cache. Edge TTL: use origin Cache-Control, otherwise bypass. Origin already sends `CDN-Cache-Control`. Login/signup **shells** are anonymous (no session in HTML); `POST /api/auth/*` stays private. `/` is the locale redirect (`307` → `/en`); locale detection is off, so that redirect is the same for every visitor. Do **not** cache `/support`, `/checkout`, `/app`, `/admin`, `/dashboard`, or `/api`. Do **not** use `https://acrossflare.com/*`.
+
+   **Caching → Configuration → Browser Cache TTL:** Respect Existing Headers. Do not leave the zone default (often 4 hours). Origin marketing HTML uses `max-age=0` so browsers revalidate while the edge keeps `s-maxage=3600`.
 
 7. **Cache Rule** (Next static assets): name `Next static`, custom expression:
 

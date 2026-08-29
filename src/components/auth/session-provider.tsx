@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import type { PublicSession } from "@/lib/auth-types";
 import {
   clearSignedInFlag,
@@ -17,7 +17,7 @@ export function SessionProvider({
   initialSession?: PublicSession | null;
   children: React.ReactNode;
 }) {
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (initialSession !== undefined) {
       hydrateSession(initialSession);
       if (initialSession) {

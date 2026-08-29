@@ -50,14 +50,25 @@ describe("refreshSession", () => {
     expect(shouldRefreshSession()).toBe(false);
   });
 
-  it("keeps the current session when the lookup fails", async () => {
-    hydrateSession({ email: "a@b.c", role: "USER", permissions: [] });
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false }));
-
-    await expect(refreshSession()).resolves.toEqual({
-      email: "a@b.c",
-      role: "USER",
-      permissions: [],
+  it("clears the presence cookie when the lookup returns no user", async () => {
+    let cookie = "af_signed_in=1";
+    vi.stubGlobal("document", {
+      get cookie() {
+        return cookie;
+      },
+      set cookie(value: string) {
+        cookie = value;
+      },
     });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ user: null }),
+      })
+    );
+
+    await expect(refreshSession()).resolves.toBeNull();
+    expect(hasSignedInFlag()).toBe(false);
   });
 });

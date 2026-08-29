@@ -10,7 +10,7 @@ import {
   refreshRemoteAccount,
   subscribeAccount,
 } from "@/lib/account-store";
-import { getPreviewEmail, getSession, lookupEmail, subscribeSession } from "@/lib/session";
+import { getPreviewEmail, getSession, hasSignedInFlag, lookupEmail, subscribeSession } from "@/lib/session";
 
 export function useHydrated() {
   return useSyncExternalStore(
@@ -22,6 +22,10 @@ export function useHydrated() {
 
 export function useSession() {
   return useSyncExternalStore(subscribeSession, getSession, () => null);
+}
+
+export function useSignedInFlag() {
+  return useSyncExternalStore(subscribeSession, hasSignedInFlag, () => false);
 }
 
 export function useAccount() {

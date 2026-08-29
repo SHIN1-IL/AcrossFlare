@@ -11,7 +11,7 @@ import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { Logo } from "@/components/marketing/logo";
 import { ServiceNav } from "@/components/marketing/service-nav";
 import { SupportNav } from "@/components/marketing/support-nav";
-import { useHydrated, useSession } from "@/hooks/use-account";
+import { useHydrated, useSession, useSignedInFlag } from "@/hooks/use-account";
 import { signedInHomeHref } from "@/lib/auth-types";
 import { clearSession } from "@/lib/session";
 import { cn } from "@/lib/utils";
@@ -22,7 +22,8 @@ export function MarketingHeader() {
   const [open, setOpen] = useState(false);
   const hydrated = useHydrated();
   const session = useSession();
-  const signedIn = hydrated && Boolean(session);
+  const signedInFlag = useSignedInFlag();
+  const signedIn = hydrated && (Boolean(session) || signedInFlag);
   const consoleHref = signedInHomeHref(session);
 
   function logout() {

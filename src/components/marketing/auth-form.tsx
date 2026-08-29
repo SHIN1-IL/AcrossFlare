@@ -9,11 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PgReviewNotice } from "@/components/marketing/pg-review-notice";
-import { useHydrated } from "@/hooks/use-account";
-import { loginRedirectHref, type PublicSession } from "@/lib/auth-types";
+import { useHydrated, useSignedInFlag } from "@/hooks/use-account";
+import { type PublicSession } from "@/lib/auth-types";
+import { signedInContinuePath } from "@/lib/checkout-path";
 import { isPublicCheckoutProduct } from "@/lib/plans";
 import { REVIEW_USER_EMAIL } from "@/lib/review-user";
-import { hasSignedInFlag, hydrateSession, refreshSession, setPreviewEmail } from "@/lib/session";
+import { hydrateSession, refreshSession, setPreviewEmail } from "@/lib/session";
 
 export function AuthForm({
   mode,
@@ -29,6 +30,8 @@ export function AuthForm({
   const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [legalAgreed, setLegalAgreed] = useState(false);
   const hydrated = useHydrated();
+  const signedInFlag = useSignedInFlag();
+  const [sessionMissing, setSessionMissing] = useState(false);
   const localDemo =
     hydrated &&
     (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
@@ -39,29 +42,43 @@ export function AuthForm({
     : undefined;
 
   useEffect(() => {
-    if (!hasSignedInFlag()) {
+    if (!hydrated || !signedInFlag) {
       return;
     }
 
     let cancelled = false;
     void refreshSession().then((session) => {
-      if (cancelled || !session) {
+      if (cancelled) {
         return;
       }
-      const next = searchParams.get("next");
-      const checkoutProduct = searchParams.get("product");
-      const checkoutPlan = searchParams.get("plan");
-      const href =
-        isPublicCheckoutProduct(checkoutProduct) && checkoutPlan
-          ? `/checkout?product=${encodeURIComponent(checkoutProduct)}&plan=${encodeURIComponent(checkoutPlan)}`
-          : loginRedirectHref(session, next);
-      window.location.replace(localePath(locale, href));
+      if (!session) {
+        setSessionMissing(true);
+        return;
+      }
+      window.location.replace(
+        localePath(
+          locale,
+          signedInContinuePath(session, {
+            next: searchParams.get("next"),
+            product: searchParams.get("product"),
+            plan: searchParams.get("plan"),
+          })
+        )
+      );
     });
 
     return () => {
       cancelled = true;
     };
-  }, [locale, searchParams]);
+  }, [hydrated, locale, searchParams, signedInFlag]);
+
+  if (!hydrated || (signedInFlag && !sessionMissing)) {
+    return (
+      <div className="flex justify-center py-8">
+        <div className="h-8 w-8 animate-pulse rounded-full bg-primary/20" />
+      </div>
+    );
+  }
 
   return (
     <form
@@ -117,15 +134,16 @@ export function AuthForm({
           setPreviewEmail(null);
           hydrateSession(data.user);
 
-          const next = searchParams.get("next");
-          const product = searchParams.get("product");
-          const plan = searchParams.get("plan");
-          const href =
-            isPublicCheckoutProduct(product) && plan
-              ? `/checkout?product=${encodeURIComponent(product)}&plan=${encodeURIComponent(plan)}`
-              : loginRedirectHref(data.user, next);
-
-          window.location.assign(localePath(locale, href));
+          window.location.assign(
+            localePath(
+              locale,
+              signedInContinuePath(data.user, {
+                next: searchParams.get("next"),
+                product: searchParams.get("product"),
+                plan: searchParams.get("plan"),
+              })
+            )
+          );
         } catch {
           setError(t("errorGeneric"));
         } finally {

@@ -95,6 +95,7 @@ export function writeSignedInFlag() {
   const maxAge = Math.floor(SESSION_TTL_MS / 1000);
   const secure = window.location.protocol === "https:" ? "; Secure" : "";
   document.cookie = `${SIGNED_IN_COOKIE}=${SIGNED_IN_COOKIE_VALUE}; Path=/; Max-Age=${maxAge}; SameSite=Lax${secure}`;
+  emit();
 }
 
 export function clearSignedInFlag() {
@@ -103,6 +104,7 @@ export function clearSignedInFlag() {
   }
 
   document.cookie = `${SIGNED_IN_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax`;
+  emit();
 }
 
 export function shouldRefreshSession() {
@@ -120,6 +122,11 @@ export async function refreshSession() {
 
   const data = (await response.json()) as { user?: Session | null };
   hydrateSession(data.user ?? null);
+  if (data.user) {
+    writeSignedInFlag();
+  } else {
+    clearSignedInFlag();
+  }
   return current;
 }
 

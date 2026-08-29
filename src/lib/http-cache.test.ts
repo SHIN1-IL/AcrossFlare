@@ -9,6 +9,7 @@ describe("http cache paths", () => {
   it("caches anonymous storefront HTML including login and signup shells", () => {
     expect(MARKETING_CACHE_SOURCES.join("\n")).toMatch(/\/login/);
     expect(MARKETING_CACHE_SOURCES.join("\n")).toMatch(/\/signup/);
+    expect(MARKETING_CACHE_SOURCES[0]).toBe("/");
     expect(MARKETING_CACHE_SOURCES.join("\n")).not.toMatch(/support|checkout|\/app|admin|dashboard|api/);
     expect(PRIVATE_CACHE_SOURCES).toEqual(
       expect.arrayContaining([

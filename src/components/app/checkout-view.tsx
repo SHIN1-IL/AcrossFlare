@@ -12,6 +12,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { useAccount, useHydrated } from "@/hooks/use-account";
 import { Link, useRouter } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
+import type { PublicSession } from "@/lib/auth-types";
 import { type PaymentMethod } from "@/lib/account";
 import { provisionProduct, refreshRemoteAccount } from "@/lib/account-store";
 import { PriceAmount, SecondaryPriceAmount } from "@/components/marketing/price-amount";
@@ -53,6 +54,7 @@ function checkoutProductLabel(
 }
 
 export function CheckoutView({
+  initialSession,
   product,
   planId,
   paymentId,
@@ -60,6 +62,7 @@ export function CheckoutView({
   canceled = false,
   merchant,
 }: {
+  initialSession: PublicSession;
   product?: string;
   planId?: string;
   paymentId?: string;
@@ -73,6 +76,7 @@ export function CheckoutView({
   const router = useRouter();
   const hydrated = useHydrated();
   const { session } = useAccount();
+  const user = session ?? initialSession;
   const plan = useLivePlan(planId);
   const validProduct = isPublicCheckoutProduct(product) && plan?.product === product ? product : null;
   const [method, setMethod] = useState<PaymentMethod>(locale === "zh" ? "alipay" : "card");
@@ -119,14 +123,14 @@ export function CheckoutView({
 
       setStep(steps.length - 1);
       await sleep(500);
-      if (!session || !validProduct || !plan) {
+      if (!user || !validProduct || !plan) {
         return;
       }
-      await refreshRemoteAccount(session.email);
-      provisionProduct(session.email, validProduct, plan.id, method);
+      await refreshRemoteAccount(user.email);
+      provisionProduct(user.email, validProduct, plan.id, method);
       router.push(validProduct === "workspace" ? "/app/workspace" : "/app/global");
     },
-    [method, plan, router, session, steps, validProduct]
+    [method, plan, router, steps, user, validProduct]
   );
 
   async function startPayment() {
@@ -144,7 +148,7 @@ export function CheckoutView({
       return;
     }
 
-    if (!canStartPublicCheckout(session?.email)) {
+    if (!canStartPublicCheckout(user.email)) {
       setError("review_only");
       return;
     }
@@ -237,7 +241,7 @@ export function CheckoutView({
   }
 
   useEffect(() => {
-    if (canceled || !paymentId || resumeRef.current || !hydrated || !session || !validProduct || !plan) {
+    if (canceled || !paymentId || resumeRef.current || !hydrated || !user || !validProduct || !plan) {
       return;
     }
 
@@ -246,29 +250,7 @@ export function CheckoutView({
       setPhase("form");
       setError(checkoutFailure(cause));
     });
-  }, [canceled, finishPaidCheckout, hydrated, paymentId, plan, session, validProduct]);
-
-  useEffect(() => {
-    if (hydrated && !session) {
-      const query = new URLSearchParams();
-      if (product) query.set("product", product);
-      if (planId) query.set("plan", planId);
-      if (promoCode) query.set("code", promoCode);
-      if (paymentId) query.set("paymentId", paymentId);
-      router.replace({
-        pathname: "/login",
-        query: { next: `/checkout?${query.toString()}` },
-      });
-    }
-  }, [hydrated, paymentId, planId, product, promoCode, router, session]);
-
-  if (!hydrated || !session) {
-    return (
-      <div className="flex min-h-dvh items-center justify-center">
-        <div className="h-8 w-8 animate-pulse rounded-full bg-primary/20" />
-      </div>
-    );
-  }
+  }, [canceled, finishPaidCheckout, hydrated, paymentId, plan, user, validProduct]);
 
   if (!validProduct || !plan) {
     return (
@@ -342,7 +324,7 @@ export function CheckoutView({
                 />
               </label>
             ) : null}
-            {canStartPublicCheckout(session.email) ? null : <PgReviewNotice />}
+            {canStartPublicCheckout(user.email) ? null : <PgReviewNotice />}
             {error ? (
               <p className="text-sm text-destructive">
                 {error === "timeout"
@@ -397,7 +379,7 @@ export function CheckoutView({
             <Button
               type="button"
               className="h-10 w-full rounded-[10px]"
-              disabled={!canStartPublicCheckout(session.email)}
+              disabled={!canStartPublicCheckout(user.email)}
               onClick={() => {
                 void startPayment();
               }}

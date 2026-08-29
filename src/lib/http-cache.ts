@@ -7,6 +7,7 @@ const LOCALE = ":locale(en|ko|zh|ja)";
 
 /** Paths whose HTML is identical for every visitor and safe to cache at the edge. */
 export const MARKETING_CACHE_SOURCES = [
+  "/",
   `/${LOCALE}`,
   `/${LOCALE}/standard`,
   `/${LOCALE}/hybrid`,
