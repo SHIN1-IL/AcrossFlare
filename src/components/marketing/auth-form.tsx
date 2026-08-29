@@ -1,9 +1,9 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Link } from "@/i18n/navigation";
+import { CachedMarketingLink } from "@/components/marketing/cached-marketing-link";
 import { localePath } from "@/i18n/path";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,14 +13,12 @@ import { useHydrated } from "@/hooks/use-account";
 import { loginRedirectHref, type PublicSession } from "@/lib/auth-types";
 import { isPublicCheckoutProduct } from "@/lib/plans";
 import { REVIEW_USER_EMAIL } from "@/lib/review-user";
-import { hydrateSession, setPreviewEmail } from "@/lib/session";
+import { hasSignedInFlag, hydrateSession, refreshSession, setPreviewEmail } from "@/lib/session";
 
 export function AuthForm({
   mode,
-  productHint,
 }: {
   mode: "login" | "signup";
-  productHint?: string;
 }) {
   const t = useTranslations("auth");
   const tFooter = useTranslations("footer");
@@ -34,6 +32,36 @@ export function AuthForm({
   const localDemo =
     hydrated &&
     (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+  const product = searchParams.get("product");
+  const plan = searchParams.get("plan");
+  const productHint = isPublicCheckoutProduct(product)
+    ? [product, plan].filter(Boolean).join(" / ")
+    : undefined;
+
+  useEffect(() => {
+    if (!hasSignedInFlag()) {
+      return;
+    }
+
+    let cancelled = false;
+    void refreshSession().then((session) => {
+      if (cancelled || !session) {
+        return;
+      }
+      const next = searchParams.get("next");
+      const checkoutProduct = searchParams.get("product");
+      const checkoutPlan = searchParams.get("plan");
+      const href =
+        isPublicCheckoutProduct(checkoutProduct) && checkoutPlan
+          ? `/checkout?product=${encodeURIComponent(checkoutProduct)}&plan=${encodeURIComponent(checkoutPlan)}`
+          : loginRedirectHref(session, next);
+      window.location.replace(localePath(locale, href));
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [locale, searchParams]);
 
   return (
     <form
@@ -155,13 +183,13 @@ export function AuthForm({
             />
             <span>
               {t("agreeLegal")}{" "}
-              <Link href="/terms" className="underline-offset-2 hover:text-foreground hover:underline">
+              <CachedMarketingLink href="/terms" className="underline-offset-2 hover:text-foreground hover:underline">
                 {tFooter("terms")}
-              </Link>
+              </CachedMarketingLink>
               {" · "}
-              <Link href="/privacy" className="underline-offset-2 hover:text-foreground hover:underline">
+              <CachedMarketingLink href="/privacy" className="underline-offset-2 hover:text-foreground hover:underline">
                 {tFooter("privacy")}
-              </Link>
+              </CachedMarketingLink>
             </span>
           </label>
         </div>
@@ -181,12 +209,12 @@ export function AuthForm({
         <p className="font-mono text-xs text-muted-foreground">{t("demoHint")}</p>
       ) : null}
 
-      <Link
+      <CachedMarketingLink
         href={mode === "login" ? "/signup" : "/login"}
         className="block text-center text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         {mode === "login" ? t("switchToSignup") : t("switchToLogin")}
-      </Link>
+      </CachedMarketingLink>
     </form>
   );
 }

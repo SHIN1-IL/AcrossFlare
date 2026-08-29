@@ -1,5 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { getSession, hydrateSession, refreshSession } from "@/lib/session";
+import {
+  getSession,
+  hasSignedInFlag,
+  hydrateSession,
+  refreshSession,
+  shouldRefreshSession,
+} from "@/lib/session";
 
 afterEach(() => {
   hydrateSession(null);
@@ -21,6 +27,27 @@ describe("refreshSession", () => {
       expect.objectContaining({ cache: "no-store", credentials: "include" })
     );
     expect(getSession()?.email).toBe("a@b.c");
+  });
+
+  it("skips origin when no presence cookie and no in-memory session", () => {
+    hydrateSession(null);
+    vi.stubGlobal("document", { cookie: "" });
+    expect(hasSignedInFlag()).toBe(false);
+    expect(shouldRefreshSession()).toBe(false);
+  });
+
+  it("refreshes only when the presence cookie is set", () => {
+    hydrateSession(null);
+    vi.stubGlobal("document", { cookie: "af_signed_in=1" });
+    expect(hasSignedInFlag()).toBe(true);
+    expect(shouldRefreshSession()).toBe(true);
+  });
+
+  it("does not treat a lookalike cookie as signed in", () => {
+    hydrateSession(null);
+    vi.stubGlobal("document", { cookie: "xaf_signed_in=1; theme=dark" });
+    expect(hasSignedInFlag()).toBe(false);
+    expect(shouldRefreshSession()).toBe(false);
   });
 
   it("keeps the current session when the lookup fails", async () => {

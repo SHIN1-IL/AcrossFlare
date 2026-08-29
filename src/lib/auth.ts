@@ -3,8 +3,22 @@ import { cache } from "react";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/db";
 import { isOwnerEmail, permissionsFor } from "@/lib/admin-permissions";
+import {
+  SESSION_COOKIE,
+  SESSION_TTL_MS,
+  SIGNED_IN_COOKIE,
+  SIGNED_IN_COOKIE_VALUE,
+  sessionCookieOptions,
+} from "@/lib/auth-cookies";
 import { toPublicSession, type PublicSession, type UserRole } from "@/lib/auth-types";
 import type { AdminPermission } from "@/lib/admin-permissions";
+
+export {
+  SESSION_COOKIE,
+  SESSION_TTL_MS,
+  SIGNED_IN_COOKIE,
+  SIGNED_IN_COOKIE_VALUE,
+} from "@/lib/auth-cookies";
 
 export type AuthUser = {
   id: string;
@@ -19,9 +33,6 @@ type UserAuthRow = {
   role: UserRole;
   staffPermissions: string[];
 };
-
-export const SESSION_COOKIE = "af_session";
-export const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 30;
 
 function hashToken(token: string) {
   return createHash("sha256").update(token).digest("hex");
@@ -47,18 +58,15 @@ export async function createSession(userId: string) {
 
 export async function setSessionCookie(token: string) {
   const cookieStore = await cookies();
-  cookieStore.set(SESSION_COOKIE, token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: Math.floor(SESSION_TTL_MS / 1000),
-  });
+  const base = sessionCookieOptions();
+  cookieStore.set(SESSION_COOKIE, token, { ...base, httpOnly: true });
+  cookieStore.set(SIGNED_IN_COOKIE, SIGNED_IN_COOKIE_VALUE, { ...base, httpOnly: false });
 }
 
 export async function clearSessionCookie() {
   const cookieStore = await cookies();
-  cookieStore.delete(SESSION_COOKIE);
+  cookieStore.delete({ name: SESSION_COOKIE, path: "/" });
+  cookieStore.delete({ name: SIGNED_IN_COOKIE, path: "/" });
 }
 
 export async function destroySession(token?: string | null) {

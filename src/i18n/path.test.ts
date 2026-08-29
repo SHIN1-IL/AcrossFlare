@@ -28,10 +28,11 @@ describe("isCachedMarketingPath", () => {
     expect(isCachedMarketingPath("/")).toBe(true);
     expect(isCachedMarketingPath("/standard")).toBe(true);
     expect(isCachedMarketingPath("/privacy")).toBe(true);
+    expect(isCachedMarketingPath("/login")).toBe(true);
+    expect(isCachedMarketingPath("/signup")).toBe(true);
   });
 
-  it("leaves console, auth, and checkout on client navigation", () => {
-    expect(isCachedMarketingPath("/login")).toBe(false);
+  it("leaves console and checkout on client navigation", () => {
     expect(isCachedMarketingPath("/checkout")).toBe(false);
     expect(isCachedMarketingPath("/app")).toBe(false);
     expect(isCachedMarketingPath("/admin")).toBe(false);

@@ -1,10 +1,12 @@
 "use client";
 
 import { Menu, X } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
-import { Link, useRouter } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
+import { localePath } from "@/i18n/path";
 import { buttonVariants } from "@/components/ui/button";
+import { CachedMarketingLink } from "@/components/marketing/cached-marketing-link";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { Logo } from "@/components/marketing/logo";
 import { ServiceNav } from "@/components/marketing/service-nav";
@@ -16,7 +18,7 @@ import { cn } from "@/lib/utils";
 
 export function MarketingHeader() {
   const t = useTranslations("nav");
-  const router = useRouter();
+  const locale = useLocale();
   const [open, setOpen] = useState(false);
   const hydrated = useHydrated();
   const session = useSession();
@@ -26,8 +28,7 @@ export function MarketingHeader() {
   function logout() {
     setOpen(false);
     void clearSession().then(() => {
-      router.replace("/");
-      router.refresh();
+      window.location.assign(localePath(locale, "/"));
     });
   }
 
@@ -68,18 +69,18 @@ export function MarketingHeader() {
             </>
           ) : (
             <>
-              <Link
+              <CachedMarketingLink
                 href="/login"
                 className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "rounded-[10px]")}
               >
                 {t("login")}
-              </Link>
-              <Link
+              </CachedMarketingLink>
+              <CachedMarketingLink
                 href="/signup"
                 className={cn(buttonVariants({ size: "sm" }), "rounded-[10px]")}
               >
                 {t("signup")}
-              </Link>
+              </CachedMarketingLink>
             </>
           )}
         </div>
@@ -121,20 +122,20 @@ export function MarketingHeader() {
             </div>
           ) : (
             <div className="flex gap-2">
-              <Link
+              <CachedMarketingLink
                 href="/login"
                 onClick={() => setOpen(false)}
                 className={cn(buttonVariants({ variant: "outline", size: "sm" }), "flex-1 rounded-[10px]")}
               >
                 {t("login")}
-              </Link>
-              <Link
+              </CachedMarketingLink>
+              <CachedMarketingLink
                 href="/signup"
                 onClick={() => setOpen(false)}
                 className={cn(buttonVariants({ size: "sm" }), "flex-1 rounded-[10px]")}
               >
                 {t("signup")}
-              </Link>
+              </CachedMarketingLink>
             </div>
           )}
         </div>

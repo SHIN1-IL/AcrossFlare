@@ -7,7 +7,6 @@ import { StageBackdrop } from "@/components/marketing/plan-stage-bg";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PriceWithPeriod, SecondaryPriceAmount } from "@/components/marketing/price-amount";
-import { useLivePlans } from "@/hooks/use-admin";
 import { getMarketingService, type MarketingServiceId } from "@/lib/marketing-services";
 import {
   getPlanById,
@@ -15,7 +14,6 @@ import {
   planPricePeriodKey,
   planTerm,
   planTrafficQuota,
-  publicPlanFrom,
   type Plan,
 } from "@/lib/plans";
 import { cn } from "@/lib/utils";
@@ -32,9 +30,8 @@ export function ServiceDetail({
   const tPricing = useTranslations("pricing");
   const locale = useLocale() as AppLocale;
   const service = getMarketingService(serviceId);
-  const livePlans = useLivePlans(service.product);
   const plans = service.planIds
-    .map((id) => publicPlanFrom(getPlanById(id), livePlans.find((plan) => plan.id === id)))
+    .map((id) => getPlanById(id))
     .filter((plan): plan is Plan => Boolean(plan));
   const banners = plans.map((plan) => ({ key: plan.id, plan }));
 

@@ -2,7 +2,13 @@
 
 import { useEffect } from "react";
 import type { PublicSession } from "@/lib/auth-types";
-import { getSession, hydrateSession, refreshSession } from "@/lib/session";
+import {
+  clearSignedInFlag,
+  hydrateSession,
+  refreshSession,
+  shouldRefreshSession,
+  writeSignedInFlag,
+} from "@/lib/session";
 
 export function SessionProvider({
   initialSession,
@@ -14,10 +20,15 @@ export function SessionProvider({
   useEffect(() => {
     if (initialSession !== undefined) {
       hydrateSession(initialSession);
+      if (initialSession) {
+        writeSignedInFlag();
+      } else {
+        clearSignedInFlag();
+      }
       return;
     }
 
-    if (getSession()) {
+    if (!shouldRefreshSession()) {
       return;
     }
 

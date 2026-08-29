@@ -14,12 +14,12 @@ export const MARKETING_CACHE_SOURCES = [
   `/${LOCALE}/pricing`,
   `/${LOCALE}/terms`,
   `/${LOCALE}/privacy`,
+  `/${LOCALE}/login`,
+  `/${LOCALE}/signup`,
 ] as const;
 
 /** Paths that read cookies or user input and must never be shared. */
 export const PRIVATE_CACHE_SOURCES = [
-  `/${LOCALE}/login`,
-  `/${LOCALE}/signup`,
   `/${LOCALE}/support`,
   `/${LOCALE}/checkout`,
   `/${LOCALE}/app`,

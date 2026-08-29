@@ -4,13 +4,12 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { PlanCard } from "@/components/marketing/plan-card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useLivePlans } from "@/hooks/use-admin";
 import {
   MARKETING_SERVICES,
   getMarketingService,
   type MarketingServiceId,
 } from "@/lib/marketing-services";
-import { getPlanById, publicPlanFrom, type Plan } from "@/lib/plans";
+import { getPlanById, type Plan } from "@/lib/plans";
 
 export function PricingView({
   initialService,
@@ -22,9 +21,8 @@ export function PricingView({
   const t = useTranslations("pricing");
   const [service, setService] = useState<MarketingServiceId>(initialService);
   const current = getMarketingService(service);
-  const livePlans = useLivePlans(current.product);
   const plans = current.planIds
-    .map((id) => publicPlanFrom(getPlanById(id), livePlans.find((plan) => plan.id === id)))
+    .map((id) => getPlanById(id))
     .filter((plan): plan is Plan => Boolean(plan));
 
   return (

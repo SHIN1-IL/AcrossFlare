@@ -1,5 +1,10 @@
 import type { PublicSession } from "@/lib/auth-types";
 import { clearRemoteAccount } from "@/lib/account-store";
+import {
+  SESSION_TTL_MS,
+  SIGNED_IN_COOKIE,
+  SIGNED_IN_COOKIE_VALUE,
+} from "@/lib/auth-cookies";
 import { normalizeEmail } from "@/lib/email";
 
 export type Session = PublicSession;
@@ -74,6 +79,36 @@ export function lookupEmail(session: Session | null) {
   return getPreviewEmail() ?? session?.email ?? null;
 }
 
+export function hasSignedInFlag() {
+  if (typeof document === "undefined") {
+    return false;
+  }
+
+  return document.cookie.split(";").some((part) => part.trim() === `${SIGNED_IN_COOKIE}=${SIGNED_IN_COOKIE_VALUE}`);
+}
+
+export function writeSignedInFlag() {
+  if (typeof document === "undefined") {
+    return;
+  }
+
+  const maxAge = Math.floor(SESSION_TTL_MS / 1000);
+  const secure = window.location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `${SIGNED_IN_COOKIE}=${SIGNED_IN_COOKIE_VALUE}; Path=/; Max-Age=${maxAge}; SameSite=Lax${secure}`;
+}
+
+export function clearSignedInFlag() {
+  if (typeof document === "undefined") {
+    return;
+  }
+
+  document.cookie = `${SIGNED_IN_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax`;
+}
+
+export function shouldRefreshSession() {
+  return !getSession() && hasSignedInFlag();
+}
+
 export async function refreshSession() {
   const response = await fetch("/api/auth/me", {
     credentials: "include",
@@ -91,6 +126,7 @@ export async function refreshSession() {
 export async function clearSession() {
   await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
   current = null;
+  clearSignedInFlag();
   setPreviewEmail(null);
   clearRemoteAccount();
   emit();

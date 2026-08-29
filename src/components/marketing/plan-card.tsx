@@ -2,6 +2,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { CachedMarketingLink } from "@/components/marketing/cached-marketing-link";
 import { PriceAmount, SecondaryPriceAmount } from "@/components/marketing/price-amount";
 import { publicServiceFromPlanId, publicServiceHref } from "@/lib/public-service";
 import { planHasPrice, planTerm, planTrafficQuota, type Plan } from "@/lib/plans";
@@ -90,19 +91,24 @@ export function PlanCard({
         </dl>
       ) : null}
 
-      <Link
-        href={
-          browse
-            ? publicServiceHref(service)
-            : {
-                pathname: "/checkout",
-                query: { product: plan.product, plan: plan.id },
-              }
-        }
-        className={cn(buttonVariants({ size: "lg" }), "mt-6 w-full rounded-[10px]")}
-      >
-        {browse ? t("viewService") : t("cta")}
-      </Link>
+      {browse ? (
+        <CachedMarketingLink
+          href={publicServiceHref(service)}
+          className={cn(buttonVariants({ size: "lg" }), "mt-6 w-full rounded-[10px]")}
+        >
+          {t("viewService")}
+        </CachedMarketingLink>
+      ) : (
+        <Link
+          href={{
+            pathname: "/checkout",
+            query: { product: plan.product, plan: plan.id },
+          }}
+          className={cn(buttonVariants({ size: "lg" }), "mt-6 w-full rounded-[10px]")}
+        >
+          {t("cta")}
+        </Link>
+      )}
     </article>
   );
 }

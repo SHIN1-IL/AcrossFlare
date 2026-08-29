@@ -2,27 +2,15 @@ import { Suspense } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AuthForm } from "@/components/marketing/auth-form";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
-import { getCurrentUser } from "@/lib/auth";
-import { loginRedirectHref } from "@/lib/auth-types";
 import { resolveLocale } from "@/i18n/locale";
-import { redirect } from "@/i18n/navigation";
 
 export default async function LoginPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ next?: string }>;
 }) {
   const locale = await resolveLocale(params);
   setRequestLocale(locale);
-
-  const user = await getCurrentUser();
-  if (user) {
-    const { next } = await searchParams;
-    redirect({ href: loginRedirectHref(user, next), locale });
-  }
-
   const t = await getTranslations("auth");
 
   return (

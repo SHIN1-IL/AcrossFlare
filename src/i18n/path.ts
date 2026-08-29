@@ -6,6 +6,8 @@ const CACHED_MARKETING_PATHS = new Set([
   "/pricing",
   "/terms",
   "/privacy",
+  "/login",
+  "/signup",
 ]);
 
 /** Prefix a site-absolute path for `localePrefix: "always"`. */
