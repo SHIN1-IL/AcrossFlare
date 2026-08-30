@@ -7,7 +7,6 @@ const LOCALE = ":locale(en|ko|zh|ja)";
 
 /** Paths whose HTML is identical for every visitor and safe to cache at the edge. */
 export const MARKETING_CACHE_SOURCES = [
-  "/",
   `/${LOCALE}`,
   `/${LOCALE}/standard`,
   `/${LOCALE}/hybrid`,
@@ -19,8 +18,9 @@ export const MARKETING_CACHE_SOURCES = [
   `/${LOCALE}/signup`,
 ] as const;
 
-/** Paths that read cookies or user input and must never be shared. */
+/** Paths that read cookies, Accept-Language, or user input and must never be shared. */
 export const PRIVATE_CACHE_SOURCES = [
+  "/",
   `/${LOCALE}/support`,
   `/${LOCALE}/checkout`,
   `/${LOCALE}/app`,

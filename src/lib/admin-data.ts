@@ -30,8 +30,9 @@ import { maskHost, maskSecret } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import type { Plan as UiPlan, ProductId } from "@/lib/plans";
 import { toPrismaProduct, toProductId } from "@/lib/product";
-import { appUrl } from "@/lib/provision/config";
+import { appUrl, isProvisionSimulate } from "@/lib/provision/config";
 import { yamlUrlFor } from "@/lib/provision/build";
+import { nodeWiring } from "@/lib/provision/node-wiring";
 
 type CustomerRow = Subscription & {
   user: { email: string };
@@ -76,9 +77,12 @@ export function toAdminNode(node: Node): AdminNode {
     role: toUiRole(node.role),
     status: toUiHealth(node.status),
     hostMasked: maskHost(node.host),
-    portMasked: node.port ? "••••" : "••••",
+    port: node.port,
+    portMasked: node.port ? String(node.port) : "",
     usernameMasked: maskSecret(node.username),
     passwordMasked: maskSecret(node.password),
+    inboundId: node.inboundId,
+    wiring: nodeWiring(node),
   };
 }
 
@@ -274,6 +278,7 @@ export async function listAdminState() {
     nodes: nodes.map(toAdminNode),
     customers: subscriptions.map((row) => toAdminCustomer(row, false)),
     promoCodes: promoCodes.map(toAdminPromoCode),
+    provisionSimulate: isProvisionSimulate(),
   };
 }
 

@@ -9,6 +9,23 @@ export class XuiError extends Error {
   }
 }
 
+export type XuiPanelTarget = {
+  id?: string;
+  host: string;
+  port: number;
+  username: string;
+  password: string;
+  inboundId?: number | null;
+};
+
+export type XuiInboundSummary = {
+  id: number;
+  protocol: string;
+  port: number;
+  remark: string;
+  enable: boolean;
+};
+
 type XuiClientInput = {
   uuid: string;
   email: string;
@@ -22,7 +39,7 @@ type XuiJson = {
   obj?: unknown;
 };
 
-function panelBase(node: Node) {
+function panelBase(node: XuiPanelTarget) {
   if (node.host.startsWith("http://") || node.host.startsWith("https://")) {
     return node.host.replace(/\/$/, "");
   }
@@ -90,13 +107,18 @@ async function panelFetch(url: string, init: RequestInit) {
     ...init,
     headers,
     redirect: init.redirect ?? "manual",
+    signal: init.signal ?? AbortSignal.timeout(10_000),
     ...(dispatcher ? { dispatcher } : {}),
   } as RequestInit);
 
   return response;
 }
 
-async function login(node: Node): Promise<XuiSession> {
+function panelLabel(node: XuiPanelTarget) {
+  return node.id || node.host || "panel";
+}
+
+async function login(node: XuiPanelTarget): Promise<XuiSession> {
   const token = xuiApiToken();
   if (token) {
     return { baseUrl: panelBase(node), cookie: "", csrf: "", bearer: token };
@@ -122,11 +144,11 @@ async function login(node: Node): Promise<XuiSession> {
   const body = (await response.json().catch(() => null)) as XuiJson | null;
 
   if (!cookie && !body?.success) {
-    throw new XuiError(body?.msg || `login_failed:${node.id}`);
+    throw new XuiError(body?.msg || `login_failed:${panelLabel(node)}`);
   }
 
   if (body?.success === false) {
-    throw new XuiError(body.msg || `login_failed:${node.id}`);
+    throw new XuiError(body.msg || `login_failed:${panelLabel(node)}`);
   }
 
   return { baseUrl, cookie, csrf, bearer: "" };
@@ -155,6 +177,52 @@ async function panelRequest(session: XuiSession, path: string, init: RequestInit
   }
 
   return body;
+}
+
+export function summarizeXuiInbounds(obj: unknown): XuiInboundSummary[] {
+  const list = Array.isArray(obj) ? obj : [];
+  return list.flatMap((item) => {
+    if (!item || typeof item !== "object") {
+      return [];
+    }
+
+    const row = item as {
+      id?: number;
+      protocol?: string;
+      port?: number;
+      remark?: string;
+      enable?: boolean;
+    };
+    if (!row.id) {
+      return [];
+    }
+
+    return [
+      {
+        id: row.id,
+        protocol: String(row.protocol ?? ""),
+        port: Number(row.port) || 0,
+        remark: String(row.remark ?? ""),
+        enable: row.enable !== false,
+      },
+    ];
+  });
+}
+
+export async function probeXuiPanel(node: XuiPanelTarget) {
+  try {
+    const session = await login(node);
+    const listed = await panelRequest(session, "/panel/api/inbounds/list");
+    return { ok: true as const, inbounds: summarizeXuiInbounds(listed?.obj) };
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.name === "TimeoutError" || error.name === "AbortError"
+          ? "probe_timeout"
+          : error.message
+        : "probe_failed";
+    return { ok: false as const, error: message };
+  }
 }
 
 function inboundIdFrom(node: Node, obj: unknown, protocol = "vless") {

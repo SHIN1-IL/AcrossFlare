@@ -4,7 +4,9 @@ export const routing = defineRouting({
   locales: ["en", "ko", "zh", "ja"],
   defaultLocale: "en",
   localePrefix: "always",
-  localeDetection: false,
+  // Unprefixed `/` follows Accept-Language (device language). Keep the cookie
+  // off so locale-prefixed marketing HTML stays CDN-cacheable.
+  localeDetection: true,
   localeCookie: false,
 });
 

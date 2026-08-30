@@ -1,8 +1,6 @@
 "use client";
 
-import { Menu, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { localePath } from "@/i18n/path";
 import { buttonVariants } from "@/components/ui/button";
@@ -19,7 +17,6 @@ import { cn } from "@/lib/utils";
 export function MarketingHeader() {
   const t = useTranslations("nav");
   const locale = useLocale();
-  const [open, setOpen] = useState(false);
   const hydrated = useHydrated();
   const session = useSession();
   const signedInFlag = useSignedInFlag();
@@ -27,7 +24,6 @@ export function MarketingHeader() {
   const consoleHref = signedInHomeHref(session);
 
   function logout() {
-    setOpen(false);
     void clearSession().then(() => {
       window.location.assign(localePath(locale, "/"));
     });
@@ -35,112 +31,61 @@ export function MarketingHeader() {
 
   return (
     <header className="sticky top-0 z-40 bg-transparent">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        <div className="flex items-center gap-4">
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-3 sm:px-4">
+        <div className="flex min-w-0 items-center gap-2.5 md:gap-4">
           <Logo showWordmark={false} />
-          <div className="hidden md:block">
-            <ServiceNav />
-          </div>
-          {signedIn ? (
-            <div className="hidden md:block">
-              <SupportNav />
-            </div>
-          ) : null}
-          <div className="hidden md:block">
-            <LocaleSwitcher />
-          </div>
-        </div>
-
-        <div className="hidden items-center gap-2 md:flex">
-          {signedIn ? (
-            <>
-              <button
-                type="button"
-                onClick={logout}
-                className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "rounded-[10px]")}
-              >
-                {t("logout")}
-              </button>
-              <Link
-                href={consoleHref}
-                className={cn(buttonVariants({ size: "sm" }), "rounded-[10px]")}
-              >
-                {t("console")}
-              </Link>
-            </>
-          ) : (
-            <>
-              <CachedMarketingLink
-                href="/login"
-                className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "rounded-[10px]")}
-              >
-                {t("login")}
-              </CachedMarketingLink>
-              <CachedMarketingLink
-                href="/signup"
-                className={cn(buttonVariants({ size: "sm" }), "rounded-[10px]")}
-              >
-                {t("signup")}
-              </CachedMarketingLink>
-            </>
-          )}
-        </div>
-
-        <button
-          type="button"
-          className="inline-flex size-8 items-center justify-center rounded-[10px] border border-border md:hidden"
-          aria-label="Menu"
-          onClick={() => setOpen((value) => !value)}
-        >
-          {open ? <X className="size-4" /> : <Menu className="size-4" />}
-        </button>
-      </div>
-
-      {open ? (
-        <div className="space-y-3 border-t border-border px-4 py-3 md:hidden">
-          <ServiceNav onNavigate={() => setOpen(false)} />
-          {signedIn ? <SupportNav onNavigate={() => setOpen(false)} /> : null}
+          <ServiceNav />
+          {signedIn ? <SupportNav /> : null}
           <LocaleSwitcher />
+        </div>
+
+        <div className="flex shrink-0 items-center gap-1 md:gap-2">
           {signedIn ? (
-            <div className="flex gap-2">
+            <>
               <button
                 type="button"
                 onClick={logout}
                 className={cn(
-                  buttonVariants({ variant: "outline", size: "sm" }),
-                  "flex-1 rounded-[10px]"
+                  buttonVariants({ variant: "ghost", size: "sm" }),
+                  "rounded-[10px] px-2 md:px-2.5"
                 )}
               >
                 {t("logout")}
               </button>
               <Link
                 href={consoleHref}
-                onClick={() => setOpen(false)}
-                className={cn(buttonVariants({ size: "sm" }), "flex-1 rounded-[10px]")}
+                className={cn(
+                  buttonVariants({ size: "sm" }),
+                  "rounded-[10px] px-2 md:px-2.5"
+                )}
               >
                 {t("console")}
               </Link>
-            </div>
+            </>
           ) : (
-            <div className="flex gap-2">
+            <>
               <CachedMarketingLink
                 href="/login"
-                onClick={() => setOpen(false)}
-                className={cn(buttonVariants({ variant: "outline", size: "sm" }), "flex-1 rounded-[10px]")}
+                className={cn(
+                  buttonVariants({ variant: "ghost", size: "sm" }),
+                  "rounded-[10px] px-2 md:px-2.5"
+                )}
               >
                 {t("login")}
               </CachedMarketingLink>
               <CachedMarketingLink
                 href="/signup"
-                onClick={() => setOpen(false)}
-                className={cn(buttonVariants({ size: "sm" }), "flex-1 rounded-[10px]")}
+                className={cn(
+                  buttonVariants({ size: "sm" }),
+                  "rounded-[10px] px-2 md:px-2.5"
+                )}
               >
                 {t("signup")}
               </CachedMarketingLink>
-            </div>
+            </>
           )}
         </div>
-      ) : null}
+      </div>
     </header>
   );
 }

@@ -78,9 +78,9 @@ export function ServiceNav({ onNavigate }: { onNavigate?: () => void }) {
           if (open) hideMenu();
           else showMenu();
         }}
-        className="inline-flex items-center gap-1 whitespace-nowrap text-sm text-muted-foreground transition-colors hover:text-foreground"
+        className="inline-flex items-center gap-0.5 whitespace-nowrap text-[13px] text-muted-foreground transition-colors hover:text-foreground md:gap-1 md:text-sm"
       >
-        <Layers aria-hidden="true" className="size-3.5" />
+        <Layers aria-hidden="true" className="hidden size-3.5 md:block" />
         {t("service")}
         <svg aria-hidden="true" viewBox="0 0 10 6" className="size-2 fill-current">
           <path d="M0 0h10L5 6z" />

@@ -151,16 +151,12 @@ async function main() {
   for (const node of SEED_NODES) {
     await prisma.node.upsert({
       where: { id: node.id },
+      // Do not overwrite host/port/credentials/inbound — admins wire real panels in /admin.
       update: {
         product: node.product,
         name: node.name,
         ddns: node.ddns,
         role: node.role,
-        status: node.status,
-        host: node.host,
-        port: node.port,
-        username: node.username,
-        password: node.password,
       },
       create: node,
     });

@@ -1,4 +1,5 @@
 import type { Plan, ProductId } from "@/lib/plans";
+import type { NodeWiring } from "@/lib/provision/node-wiring";
 
 export type JobStepStatus = "pending" | "running" | "done" | "failed";
 
@@ -22,9 +23,20 @@ export type AdminNode = {
   role: NodeRole;
   status: NodeHealth;
   hostMasked: string;
+  port: number;
   portMasked: string;
   usernameMasked: string;
   passwordMasked: string;
+  inboundId: number | null;
+  wiring: NodeWiring;
+};
+
+export type XuiProbeInbound = {
+  id: number;
+  protocol: string;
+  port: number;
+  remark: string;
+  enable: boolean;
 };
 
 export type GlobalCredentials = {
@@ -146,6 +158,7 @@ export type AdminState = {
   promoCodes: AdminPromoCode[];
   provision: ProvisionSession | null;
   migrate: MigrateJob | null;
+  provisionSimulate: boolean;
 };
 
 export function maskSecret(value: string) {

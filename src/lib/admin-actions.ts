@@ -1,4 +1,5 @@
 import {
+  NodeHealth,
   Product,
   PromoCodeStatus,
   SubscriptionStatus,
@@ -27,7 +28,7 @@ import {
 } from "@/lib/provision/build";
 import { appUrl, isProvisionSimulate } from "@/lib/provision/config";
 import { provisionSubscription, ProvisionError, selectNodesForPlan } from "@/lib/provision/run";
-import { addXuiClient, deleteXuiClient } from "@/lib/provision/xui";
+import { addXuiClient, deleteXuiClient, probeXuiPanel } from "@/lib/provision/xui";
 
 export class AdminActionError extends Error {
   constructor(
@@ -158,6 +159,7 @@ export async function addAdminNode(input: {
   port: number;
   username: string;
   password: string;
+  inboundId?: number | null;
 }) {
   const name = input.name.trim();
   const ddns = input.ddns.trim().toLowerCase();
@@ -176,8 +178,96 @@ export async function addAdminNode(input: {
       port: input.port,
       username: input.username.trim(),
       password: input.password,
+      inboundId: parseInboundId(input.inboundId),
     },
   });
+}
+
+export async function updateAdminNode(
+  id: string,
+  input: {
+    name: string;
+    ddns: string;
+    role: "BANDWAGON" | "RACKNERD";
+    host: string;
+    port: number;
+    username: string;
+    password?: string;
+    inboundId?: number | null;
+  }
+) {
+  const existing = await prisma.node.findUnique({ where: { id } });
+  if (!existing) {
+    throw new AdminActionError("not_found", 404);
+  }
+
+  const name = input.name.trim();
+  const ddns = input.ddns.trim().toLowerCase();
+  const host = input.host.trim() || existing.host;
+  const username = input.username.trim() || existing.username;
+  if (!name || !ddns || !host || !username) {
+    throw new AdminActionError("required");
+  }
+
+  return prisma.node.update({
+    where: { id },
+    data: {
+      name,
+      ddns,
+      role: input.role,
+      host,
+      port: input.port,
+      username,
+      password: input.password ? input.password : existing.password,
+      inboundId: input.inboundId === undefined ? existing.inboundId : parseInboundId(input.inboundId),
+    },
+  });
+}
+
+export async function probeAdminPanel(input: {
+  id?: string;
+  host?: string;
+  port?: number;
+  username?: string;
+  password?: string;
+}) {
+  const stored = input.id ? await prisma.node.findUnique({ where: { id: input.id } }) : null;
+  if (input.id && !stored) {
+    throw new AdminActionError("not_found", 404);
+  }
+
+  const host = (input.host ?? stored?.host ?? "").trim();
+  const username = (input.username ?? stored?.username ?? "").trim();
+  const password = input.password || stored?.password || "";
+  const port = Number(input.port) || stored?.port || 2053;
+  if (!host || !username || !password) {
+    throw new AdminActionError("required");
+  }
+
+  const result = await probeXuiPanel({
+    id: stored?.id,
+    host,
+    port,
+    username,
+    password,
+  });
+
+  if (stored) {
+    await prisma.node.update({
+      where: { id: stored.id },
+      data: { status: result.ok ? NodeHealth.ONLINE : NodeHealth.OFFLINE },
+    });
+  }
+
+  return result;
+}
+
+function parseInboundId(value: number | null | undefined) {
+  if (value == null || value === 0) {
+    return null;
+  }
+  const parsed = Math.round(Number(value));
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 }
 
 export async function removeAdminNode(id: string) {

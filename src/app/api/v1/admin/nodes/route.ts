@@ -21,6 +21,7 @@ export async function POST(request: Request) {
         port?: string | number;
         username?: string;
         password?: string;
+        inboundId?: string | number | null;
       }
     | null;
 
@@ -39,6 +40,7 @@ export async function POST(request: Request) {
       port: Number(body.port) || 2053,
       username: body.username ?? "",
       password: body.password ?? "",
+      inboundId: body.inboundId == null || body.inboundId === "" ? null : Number(body.inboundId),
     });
 
     await writeAdminAudit({

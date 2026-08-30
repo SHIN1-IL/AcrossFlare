@@ -1,6 +1,6 @@
-import { Product, SubscriptionStatus } from "@prisma/client";
+import { NodeHealth, NodeRole, Product, SubscriptionStatus, type Node } from "@prisma/client";
 import { describe, expect, it } from "vitest";
-import { toAdminCustomer } from "@/lib/admin-data";
+import { toAdminCustomer, toAdminNode } from "@/lib/admin-data";
 
 const row = {
   id: "sub1",
@@ -68,5 +68,32 @@ describe("toAdminCustomer", () => {
         createdAt: "2026-08-01T00:00:00.000Z",
       },
     ]);
+  });
+});
+
+describe("toAdminNode", () => {
+  it("masks the panel host and flags seed nodes as unwired", () => {
+    const node = {
+      id: "g-tokyo-bw",
+      product: Product.GLOBAL,
+      name: "Tokyo-Bandwagon",
+      ddns: "node-tokyo.acrossflare.com",
+      role: NodeRole.BANDWAGON,
+      status: NodeHealth.ONLINE,
+      host: "10.0.0.22",
+      port: 2053,
+      username: "admin",
+      password: "seed-only",
+      inboundId: null,
+      createdAt: new Date("2026-08-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-08-01T00:00:00.000Z"),
+    } satisfies Node;
+
+    expect(toAdminNode(node)).toMatchObject({
+      hostMasked: "•••.•••.•••.22",
+      port: 2053,
+      inboundId: null,
+      wiring: "placeholder",
+    });
   });
 });

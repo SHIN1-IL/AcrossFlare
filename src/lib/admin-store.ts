@@ -7,6 +7,7 @@ import {
   type AdminState,
   type JobStep,
   type NodeRole,
+  type XuiProbeInbound,
 } from "@/lib/admin";
 import type { Plan, ProductId } from "@/lib/plans";
 import {
@@ -24,6 +25,7 @@ const empty: AdminState = {
   promoCodes: [],
   provision: null,
   migrate: null,
+  provisionSimulate: false,
 };
 
 type Listener = () => void;
@@ -99,12 +101,15 @@ export async function refreshAdmin() {
       return;
     }
 
-    const data = await readJson<Pick<AdminState, "plans" | "nodes" | "customers" | "promoCodes">>(response);
+    const data = await readJson<
+      Pick<AdminState, "plans" | "nodes" | "customers" | "promoCodes" | "provisionSimulate">
+    >(response);
     patch({
       plans: data.plans ?? [],
       nodes: data.nodes ?? [],
       customers: mergeCustomers(data.customers ?? []),
       promoCodes: data.promoCodes ?? [],
+      provisionSimulate: Boolean(data.provisionSimulate),
     });
   })().finally(() => {
     refreshPromise = null;
@@ -278,6 +283,7 @@ export async function addNode(input: {
   port: string;
   username: string;
   password: string;
+  inboundId?: string;
 }) {
   const response = await fetch("/api/v1/admin/nodes", {
     method: "POST",
@@ -287,11 +293,68 @@ export async function addNode(input: {
   });
   const data = await readJson<{ node?: AdminNode; error?: string }>(response);
   if (!response.ok || !data.node) {
-    return null;
+    return { ok: false as const, error: data.error ?? "failed" };
   }
 
   await refreshAdmin();
-  return data.node;
+  return { ok: true as const, node: data.node };
+}
+
+export async function updateNode(
+  id: string,
+  input: {
+    name: string;
+    ddns: string;
+    role: NodeRole;
+    host: string;
+    port: string;
+    username: string;
+    password: string;
+    inboundId?: string;
+  }
+) {
+  const response = await fetch(`/api/v1/admin/nodes/${id}`, {
+    method: "PATCH",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  const data = await readJson<{ node?: AdminNode; error?: string }>(response);
+  if (!response.ok || !data.node) {
+    return { ok: false as const, error: data.error ?? "failed" };
+  }
+
+  await refreshAdmin();
+  return { ok: true as const, node: data.node };
+}
+
+export async function probeNode(input: {
+  id?: string;
+  host?: string;
+  port?: string;
+  username?: string;
+  password?: string;
+}) {
+  const response = await fetch("/api/v1/admin/nodes/probe", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  const data = await readJson<{
+    ok?: boolean;
+    inbounds?: XuiProbeInbound[];
+    error?: string;
+  }>(response);
+  if (!response.ok) {
+    return { ok: false as const, error: data.error ?? "failed" };
+  }
+  if (data.ok) {
+    await refreshAdmin();
+    return { ok: true as const, inbounds: data.inbounds ?? [] };
+  }
+  await refreshAdmin();
+  return { ok: false as const, error: data.error ?? "probe_failed" };
 }
 
 export async function deleteNode(id: string) {
