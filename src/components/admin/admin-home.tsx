@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { OpsHealthPanel } from "@/components/admin/ops-health";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { buttonVariants } from "@/components/ui/button";
 import { useAdmin } from "@/hooks/use-admin";
@@ -88,10 +89,13 @@ function ProductCard({ service }: { service: AdminServiceId }) {
 
 export function AdminHome() {
   const t = useTranslations("admin");
+  const session = useSession();
+  const owner = isOwnerSession(session);
 
   return (
     <div className="mx-auto max-w-5xl">
       <AdminPageHeader title={t("homeTitle")} subtitle={t("homeSubtitle")} />
+      <OpsHealthPanel owner={owner} />
       <div className="grid items-stretch gap-4 md:grid-cols-3">
         {ADMIN_TAB_PRODUCTS.map((service) => (
           <ProductCard key={service} service={service} />

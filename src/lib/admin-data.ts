@@ -82,6 +82,11 @@ export function toAdminNode(node: Node): AdminNode {
     usernameMasked: maskSecret(node.username),
     passwordMasked: maskSecret(node.password),
     inboundId: node.inboundId,
+    vlessPort: node.vlessPort,
+    realityPublicKey: node.realityPublicKey ?? "",
+    realityShortId: node.realityShortId ?? "",
+    realityServerName: node.realityServerName ?? "",
+    realityFingerprint: node.realityFingerprint ?? "",
     wiring: nodeWiring(node),
   };
 }

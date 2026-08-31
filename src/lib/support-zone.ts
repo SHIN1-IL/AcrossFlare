@@ -31,6 +31,7 @@ export const KARING_FAQ_ITEMS = [
   { id: "profileWhere" },
   { id: "playStore" },
   { id: "macOpen" },
+  { id: "manualRefresh" },
 ] as const;
 
 export const BACKUP_FAQ_ITEMS = [

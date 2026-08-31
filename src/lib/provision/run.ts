@@ -16,16 +16,18 @@ import {
 import { exitHostFor, issueMarketingSecrets, nextWgAddress, regionFrom } from "@/lib/marketing/secrets";
 import { nodeNameMatchesCode } from "@/lib/provision/node-match";
 import {
-  buildVlessYaml,
+  buildVlessYamlFromNodes,
   defaultExitIp,
   karingDeepLink,
   newClientUuid,
   newYamlToken,
+  prismaNodeToYamlNode,
   syncthingFolderId,
   vaultUserId,
   xuiClientEmail,
   yamlUrlFor,
 } from "@/lib/provision/build";
+import { assertRealityConfigured } from "@/lib/provision/reality";
 import { ensureSyncthingFolder } from "@/lib/provision/syncthing";
 import { inviteVaultwardenUser } from "@/lib/provision/vaultwarden";
 import { addXuiClient, addWireGuardPeer, updateXuiClientExpiry } from "@/lib/provision/xui";
@@ -223,8 +225,8 @@ async function issueGlobal(subscription: LoadedSubscription, nodes: Node[]) {
   const uuid = newClientUuid();
   const xuiEmail = xuiClientEmail(subscription.id);
   const yamlToken = newYamlToken();
-  const hosts = nodes.map((node) => node.ddns);
-  const yamlBody = buildVlessYaml(hosts, uuid);
+  const yamlNodes = nodes.map(prismaNodeToYamlNode);
+  const yamlBody = buildVlessYamlFromNodes(yamlNodes, uuid, false);
   const yamlUrl = yamlUrlFor(yamlToken, appUrl());
   const vaultUser = vaultUserId(subscription.id);
   const folderId = syncthingFolderId(subscription.id);
@@ -336,6 +338,7 @@ async function addClients(
     return;
   }
 
+  assertRealityConfigured(nodes);
   await Promise.all(nodes.map((node) => addXuiClient(node, input)));
 }
 

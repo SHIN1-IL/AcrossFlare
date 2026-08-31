@@ -10,9 +10,24 @@ import {
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
+const fastApiOrigin =
+  process.env.FASTAPI_INTERNAL_URL ?? process.env.FASTAPI_URL ?? "http://127.0.0.1:8000";
+
 const nextConfig: NextConfig = {
   output: "standalone",
   allowedDevOrigins: ["127.0.0.1", "localhost"],
+  async rewrites() {
+    return [
+      {
+        source: "/api/v1/subscription",
+        destination: `${fastApiOrigin}/api/v1/subscription`,
+      },
+      {
+        source: "/api/v1/subscription/:token",
+        destination: `${fastApiOrigin}/api/v1/subscription/:token`,
+      },
+    ];
+  },
   outputFileTracingIncludes: {
     "/*": ["./messages/**/*", "./prisma/**/*"],
   },

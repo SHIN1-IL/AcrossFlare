@@ -9,6 +9,8 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:api": "cd services/api && PYTHONPATH=. python3 -m pytest tests -q",
+    "test:api:scenarios": "cd services/api && PYTHONPATH=. python3 -m pytest tests/test_scenarios.py tests/test_subscription_api.py tests/test_traffic_sync_integration.py tests/test_failover_integration.py -q",
     "postinstall": "prisma generate",
     "db:up": "docker compose up -d postgres",
     "db:migrate": "prisma migrate dev",

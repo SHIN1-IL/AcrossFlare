@@ -22,6 +22,11 @@ export async function POST(request: Request) {
         username?: string;
         password?: string;
         inboundId?: string | number | null;
+        vlessPort?: string | number;
+        realityPublicKey?: string;
+        realityShortId?: string;
+        realityServerName?: string;
+        realityFingerprint?: string;
       }
     | null;
 
@@ -41,6 +46,11 @@ export async function POST(request: Request) {
       username: body.username ?? "",
       password: body.password ?? "",
       inboundId: body.inboundId == null || body.inboundId === "" ? null : Number(body.inboundId),
+      vlessPort: Number(body.vlessPort) || 443,
+      realityPublicKey: body.realityPublicKey,
+      realityShortId: body.realityShortId,
+      realityServerName: body.realityServerName,
+      realityFingerprint: body.realityFingerprint,
     });
 
     await writeAdminAudit({

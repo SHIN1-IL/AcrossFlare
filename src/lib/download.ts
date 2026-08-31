@@ -7,3 +7,12 @@ export function downloadText(filename: string, contents: string, mimeType: strin
   anchor.click();
   URL.revokeObjectURL(url);
 }
+
+export async function downloadFromUrl(filename: string, url: string, mimeType: string) {
+  const response = await fetch(url, { credentials: "same-origin" });
+  if (!response.ok) {
+    throw new Error("download_failed");
+  }
+  const contents = await response.text();
+  downloadText(filename, contents, mimeType);
+}

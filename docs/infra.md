@@ -49,11 +49,14 @@ Target: keep the origin container set under **300MB RAM**, with **1GB swap** on 
 
 ## Deploy
 
-1. Copy `.env.example` → `.env` and set `AUTH_SECRET`, `VAULTWARDEN_ADMIN_TOKEN`, live payment/provision values, and `APP_URL=https://acrossflare.com`.
+1. Copy `.env.example` → `.env` and set production values (see [beta-ops.md](./beta-ops.md) §1): `AUTH_SECRET`, `VAULTWARDEN_ADMIN_TOKEN`, `PROVISION_MODE=live`, `PAYMENT_MODE=live`, `APP_URL=https://acrossflare.com`, node/panel creds.
 2. Place Origin CA files in `infra/certs/`.
 3. `sh infra/scripts/setup-swap.sh` once on the VPS.
 4. `npm run origin:up`
 5. Confirm `https://acrossflare.com/api/health`, `https://acrossflare.com/dashboard`, `https://vault.acrossflare.com`, and `https://sync.acrossflare.com`.
+6. After deploy, verify traffic cron: `docker logs acrossflare-api-1 2>&1 | grep traffic_sync_scheduler_started`.
+
+For beta monitoring and launch checklist, see [beta-ops.md](./beta-ops.md).
 
 Customers open the backup PWA at `https://acrossflare.com/dashboard` after connecting Karing. Vaultwarden is `https://vault.acrossflare.com`. Syncthing GUI is `https://sync.acrossflare.com`. On first Syncthing boot, set a GUI password and enable **Skip Host check** (or `insecureSkipHostcheck`) so Caddy can proxy `sync.acrossflare.com`. Copy the API key into `SYNCTHING_API_KEY` if live provisioning should create per-user folders.
 

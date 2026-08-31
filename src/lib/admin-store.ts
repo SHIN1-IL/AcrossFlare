@@ -284,6 +284,11 @@ export async function addNode(input: {
   username: string;
   password: string;
   inboundId?: string;
+  vlessPort?: string;
+  realityPublicKey?: string;
+  realityShortId?: string;
+  realityServerName?: string;
+  realityFingerprint?: string;
 }) {
   const response = await fetch("/api/v1/admin/nodes", {
     method: "POST",
@@ -311,6 +316,11 @@ export async function updateNode(
     username: string;
     password: string;
     inboundId?: string;
+    vlessPort?: string;
+    realityPublicKey?: string;
+    realityShortId?: string;
+    realityServerName?: string;
+    realityFingerprint?: string;
   }
 ) {
   const response = await fetch(`/api/v1/admin/nodes/${id}`, {

@@ -56,6 +56,11 @@ services:
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-acrossflare}:${POSTGRES_PASSWORD:-acrossflare}@postgres:5432/${POSTGRES_DB:-acrossflare}
       BACKUP_DASHBOARD_URL: ${BACKUP_DASHBOARD_URL:-https://acrossflare.com/dashboard}
+      XUI_API_TOKEN: ${XUI_API_TOKEN:-}
+      XUI_TLS_INSECURE: ${XUI_TLS_INSECURE:-0}
+      PROVISION_MODE: ${PROVISION_MODE:-live}
+      TRAFFIC_SYNC_ENABLED: ${TRAFFIC_SYNC_ENABLED:-1}
+      TRAFFIC_SYNC_INTERVAL: ${TRAFFIC_SYNC_INTERVAL:-300}
     depends_on:
       postgres:
         condition: service_healthy
@@ -109,6 +114,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-acrossflare}
       APP_URL: ${APP_URL:-https://acrossflare.com}
       BACKUP_DASHBOARD_URL: ${BACKUP_DASHBOARD_URL:-https://acrossflare.com/dashboard}
+      FASTAPI_INTERNAL_URL: http://api:8000
       VAULTWARDEN_URL: ${VAULTWARDEN_URL:-https://vault.acrossflare.com}
       VAULTWARDEN_INTERNAL_URL: http://vaultwarden:80
       SYNCTHING_URL: ${SYNCTHING_URL:-https://sync.acrossflare.com}

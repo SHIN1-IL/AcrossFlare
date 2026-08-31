@@ -28,6 +28,11 @@ export type AdminNode = {
   usernameMasked: string;
   passwordMasked: string;
   inboundId: number | null;
+  vlessPort: number;
+  realityPublicKey: string;
+  realityShortId: string;
+  realityServerName: string;
+  realityFingerprint: string;
   wiring: NodeWiring;
 };
 

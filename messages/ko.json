@@ -351,6 +351,7 @@
     "usageTraffic": "Bandwagon 트래픽",
     "usageUnlimited": "Racknerd 무제한",
     "failoverBanner": "Bandwagon 150GB가 소진되었습니다. 트래픽은 Racknerd 무제한으로 전환됩니다.",
+    "karingRefreshHint": "Karing 앱에 바로 반영되지 않을 수 있습니다. 앱 상단 [서브스크립션 수동 업데이트]를 눌러 주세요.",
     "nodes": "노드",
     "karing": "Karing",
     "karingQr": "QR",
@@ -530,6 +531,10 @@
           "q": "Mac에서 확인되지 않은 개발자 경고가 뜹니다.",
           "a": "시스템 설정 → 개인정보 보호 및 보안에서 확인 없이 열기를 선택하세요."
         },
+        "manualRefresh": {
+          "q": "트래픽 초과 안내를 받았거나 노드가 보이지 않을 때 어떻게 하나요?",
+          "a": "서버는 약 5분마다 사용량을 갱신하지만, Karing은 구독을 최대 24시간마다 자동으로 가져옵니다. 트래픽 초과 안내를 받았거나 노드가 보이지 않을 때 Karing 앱 상단 [서브스크립션 수동 업데이트]를 눌러 주세요."
+        },
         "backupApp": {
           "q": "백업을 쓰려면 앱을 꼭 받아야 하나요?",
           "a": "백업은 아닙니다. 브라우저로 Vaultwarden(암호·메모 백업)과 Syncthing(작은 파일 보관)을 이용합니다. 네트워크 연결만 Karing이 필요합니다."
@@ -695,7 +700,7 @@
     "tempPassword": "로그인 비밀번호",
     "issueAnother": "다른 고객 발급",
     "nodesTitle": "노드",
-    "nodesSubtitle": "고객 앱은 DDNS로 붙습니다. 실제 VPS는 아래 패널 호스트(3x-ui)로 연결하세요. Standard는 LA(B), Hybrid는 Tokyo+LA(A).",
+    "nodesSubtitle": "고객 앱은 DDNS로 붙습니다. REALITY inbound(VLESS·tcp·vision)의 Public key·Short ID·dest SNI를 노드마다 등록하세요. Standard는 LA(B), Hybrid는 Tokyo+LA(A).",
     "addNode": "노드 추가",
     "editNode": "노드 수정",
     "nodeName": "이름",
@@ -714,6 +719,12 @@
     "wiring_local": "로컬 패널",
     "wiring_ready": "패널 등록됨",
     "inboundId": "Inbound ID",
+    "realitySection": "REALITY (Karing 구독)",
+    "vlessPort": "VLESS 포트",
+    "realityPublicKey": "Public key",
+    "realityShortId": "Short ID",
+    "realityServerName": "Server name (dest SNI)",
+    "realityFingerprint": "Client fingerprint",
     "inboundNone": "inbound 없음",
     "inboundValue": "inbound {id}",
     "probe": "연결 테스트",
@@ -753,7 +764,42 @@
     "statusRedeemed": "사용됨",
     "emptyCodes": "코드가 없습니다.",
     "codeTaken": "이미 있는 코드입니다.",
-    "codeInUse": "이미 쓰인 코드는 삭제할 수 없습니다."
+    "codeInUse": "이미 쓰인 코드는 삭제할 수 없습니다.",
+    "ops": {
+      "banner": {
+        "title": "Phase 2 전환 검토 필요",
+        "lag": "트래픽 Sync 지연 {minutes}분",
+        "errorRate": "에러율 {rate} (24h)",
+        "activeUsers": "활성 {count}명",
+        "simulate": "PROVISION_MODE=simulate",
+        "syncOff": "TRAFFIC_SYNC 꺼짐",
+        "neverRan": "Sync 미실행",
+        "details": "상세 보기",
+        "copyCursor": "Cursor 설계 요청 복사",
+        "copied": "복사됨",
+        "dismissToday": "오늘 하루 숨기기",
+        "cursorPrompt": "Phase 2 XrayR 전환 설계해 줘. 현재: 활성 {active}명, sync 에러율 {errorRate}, 지연 {lag}분."
+      },
+      "panel": {
+        "title": "시스템 운영 (Phase 1)",
+        "subtitle": "Phase 1 · 3x-ui 중앙 집계",
+        "phase2Review": "Phase 2 전환 검토 대상",
+        "activeGlobal": "활성 GLOBAL",
+        "errorRate": "Sync 에러율 (24h)",
+        "lastSync": "마지막 Sync",
+        "nextSync": "다음 예정",
+        "provisionLive": "PROVISION_MODE=live",
+        "provisionSimulate": "PROVISION_MODE=simulate",
+        "trafficSync": "TRAFFIC_SYNC",
+        "cron": "Cron",
+        "none": "없음",
+        "justNow": "방금",
+        "minutesAgo": "{count}분 전",
+        "hoursAgo": "{count}시간 전",
+        "minutesUntil": "~{count}분 후",
+        "dueNow": "지금"
+      }
+    }
   },
   "pwa": {
     "eyebrow": "PWA",

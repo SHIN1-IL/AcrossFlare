@@ -19,14 +19,16 @@ import type { ProductId } from "@/lib/plans";
 import { toPrismaProduct } from "@/lib/product";
 import { generatePromoCode, normalizePromoCode } from "@/lib/promo";
 import {
-  buildVlessYaml,
+  buildVlessYamlFromNodes,
   karingDeepLink,
   newClientUuid,
   newSecret,
+  prismaNodeToYamlNode,
   xuiClientEmail,
   yamlUrlFor,
 } from "@/lib/provision/build";
 import { appUrl, isProvisionSimulate } from "@/lib/provision/config";
+import { assertRealityConfigured } from "@/lib/provision/reality";
 import { provisionSubscription, ProvisionError, selectNodesForPlan } from "@/lib/provision/run";
 import { addXuiClient, deleteXuiClient, probeXuiPanel } from "@/lib/provision/xui";
 
@@ -160,6 +162,11 @@ export async function addAdminNode(input: {
   username: string;
   password: string;
   inboundId?: number | null;
+  vlessPort?: number;
+  realityPublicKey?: string;
+  realityShortId?: string;
+  realityServerName?: string;
+  realityFingerprint?: string;
 }) {
   const name = input.name.trim();
   const ddns = input.ddns.trim().toLowerCase();
@@ -179,6 +186,11 @@ export async function addAdminNode(input: {
       username: input.username.trim(),
       password: input.password,
       inboundId: parseInboundId(input.inboundId),
+      vlessPort: parseVlessPort(input.vlessPort),
+      realityPublicKey: trimOptional(input.realityPublicKey),
+      realityShortId: trimOptional(input.realityShortId),
+      realityServerName: trimOptional(input.realityServerName),
+      realityFingerprint: trimOptional(input.realityFingerprint),
     },
   });
 }
@@ -194,6 +206,11 @@ export async function updateAdminNode(
     username: string;
     password?: string;
     inboundId?: number | null;
+    vlessPort?: number;
+    realityPublicKey?: string;
+    realityShortId?: string;
+    realityServerName?: string;
+    realityFingerprint?: string;
   }
 ) {
   const existing = await prisma.node.findUnique({ where: { id } });
@@ -220,8 +237,32 @@ export async function updateAdminNode(
       username,
       password: input.password ? input.password : existing.password,
       inboundId: input.inboundId === undefined ? existing.inboundId : parseInboundId(input.inboundId),
+      vlessPort: input.vlessPort === undefined ? existing.vlessPort : parseVlessPort(input.vlessPort),
+      realityPublicKey:
+        input.realityPublicKey === undefined ? existing.realityPublicKey : trimOptional(input.realityPublicKey),
+      realityShortId:
+        input.realityShortId === undefined ? existing.realityShortId : trimOptional(input.realityShortId),
+      realityServerName:
+        input.realityServerName === undefined ? existing.realityServerName : trimOptional(input.realityServerName),
+      realityFingerprint:
+        input.realityFingerprint === undefined
+          ? existing.realityFingerprint
+          : trimOptional(input.realityFingerprint),
     },
   });
+}
+
+function trimOptional(value: string | undefined) {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : null;
+}
+
+function parseVlessPort(value: number | undefined) {
+  const parsed = Math.round(Number(value));
+  if (!Number.isFinite(parsed) || parsed <= 0 || parsed > 65535) {
+    return 443;
+  }
+  return parsed;
 }
 
 export async function probeAdminPanel(input: {
@@ -529,9 +570,10 @@ export async function migrateNodeUsers(input: {
     const yamlPatch =
       subscription.product === Product.GLOBAL && subscription.credentials?.uuid && subscription.credentials.yamlToken
         ? {
-            yamlBody: buildVlessYaml(
-              nextNodes.map((node) => node.ddns),
-              subscription.credentials.uuid
+            yamlBody: buildVlessYamlFromNodes(
+              nextNodes.map(prismaNodeToYamlNode),
+              subscription.credentials.uuid,
+              subscription.failover
             ),
             deepLink: karingDeepLink(yamlUrlFor(subscription.credentials.yamlToken, appUrl())),
           }
@@ -622,7 +664,10 @@ async function destroyXuiClients(
 }
 
 async function recreateClients(
-  subscription: Subscription & { credentials: { yamlToken: string | null; vaultUrl: string | null; vaultUser: string | null; syncthingUrl: string | null; syncthingFolderId: string | null } | null },
+  subscription: Subscription & {
+    failover: boolean;
+    credentials: { yamlToken: string | null; vaultUrl: string | null; vaultUser: string | null; syncthingUrl: string | null; syncthingFolderId: string | null } | null;
+  },
   plan: Plan,
   nodes: Node[]
 ) {
@@ -630,6 +675,7 @@ async function recreateClients(
   const xuiEmail = xuiClientEmail(subscription.id);
 
   if (!isProvisionSimulate()) {
+    assertRealityConfigured(nodes);
     await Promise.all(
       nodes.map((node) =>
         addXuiClient(node, {
@@ -650,9 +696,10 @@ async function recreateClients(
       uuid,
       xuiEmail,
       yamlToken,
-      yamlBody: buildVlessYaml(
-        nodes.map((node) => node.ddns),
-        uuid
+      yamlBody: buildVlessYamlFromNodes(
+        nodes.map(prismaNodeToYamlNode),
+        uuid,
+        subscription.failover
       ),
       deepLink: karingDeepLink(yamlUrl),
       vaultUrl: subscription.credentials?.vaultUrl,

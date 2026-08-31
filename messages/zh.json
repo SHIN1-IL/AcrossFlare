@@ -351,6 +351,7 @@
     "usageTraffic": "Bandwagon 流量",
     "usageUnlimited": "Racknerd 不限量",
     "failoverBanner": "Bandwagon 150GB 已用尽。流量已切换到 Racknerd 不限量。",
+    "karingRefreshHint": "Karing 可能不会立即更新。请在应用顶部点击「手动更新订阅」。",
     "nodes": "节点",
     "karing": "Karing",
     "karingQr": "二维码",
@@ -530,6 +531,10 @@
           "q": "Mac 提示无法验证开发者。",
           "a": "打开系统设置 → 隐私与安全性，选择“仍要打开”。"
         },
+        "manualRefresh": {
+          "q": "收到流量超限提示或看不到节点时怎么办？",
+          "a": "服务器约每 5 分钟更新用量，但 Karing 最多每 24 小时才会自动拉取订阅。若收到流量超限提示或节点消失，请在 Karing 应用顶部点击「手动更新订阅」。"
+        },
         "backupApp": {
           "q": "使用备份必须安装应用吗？",
           "a": "备份不需要。请在浏览器中使用 Vaultwarden（密码与备忘录备份）和 Syncthing（小文件存储）。只有网络连接需要 Karing。"
@@ -695,7 +700,7 @@
     "tempPassword": "登录密码",
     "issueAnother": "再签发一位",
     "nodesTitle": "节点",
-    "nodesSubtitle": "客户应用通过 DDNS 连接。请用下方 3x-ui 面板主机接入真实 VPS。Standard 使用 LA(B)，Hybrid 使用 Tokyo+LA(A)。",
+    "nodesSubtitle": "客户应用通过 DDNS 连接。请为每个节点填写 REALITY inbound（VLESS·tcp·vision）的 Public key、Short ID、dest SNI。Standard 使用 LA(B)，Hybrid 使用 Tokyo+LA(A)。",
     "addNode": "添加节点",
     "editNode": "编辑节点",
     "nodeName": "名称",
@@ -714,6 +719,12 @@
     "wiring_local": "本地面板",
     "wiring_ready": "已登记面板",
     "inboundId": "Inbound ID",
+    "realitySection": "REALITY（Karing 订阅）",
+    "vlessPort": "VLESS 端口",
+    "realityPublicKey": "Public key",
+    "realityShortId": "Short ID",
+    "realityServerName": "Server name（dest SNI）",
+    "realityFingerprint": "Client fingerprint",
     "inboundNone": "无 inbound",
     "inboundValue": "inbound {id}",
     "probe": "测试连接",
@@ -753,7 +764,42 @@
     "statusRedeemed": "已使用",
     "emptyCodes": "暂无优惠码。",
     "codeTaken": "该优惠码已存在。",
-    "codeInUse": "已使用的优惠码无法删除。"
+    "codeInUse": "已使用的优惠码无法删除。",
+    "ops": {
+      "banner": {
+        "title": "需要评估 Phase 2 迁移",
+        "lag": "流量 Sync 延迟 {minutes} 分钟",
+        "errorRate": "错误率 {rate} (24h)",
+        "activeUsers": "活跃 {count} 人",
+        "simulate": "PROVISION_MODE=simulate",
+        "syncOff": "TRAFFIC_SYNC 已关闭",
+        "neverRan": "Sync 未运行",
+        "details": "查看详情",
+        "copyCursor": "复制 Cursor 设计请求",
+        "copied": "已复制",
+        "dismissToday": "今天隐藏",
+        "cursorPrompt": "请设计 Phase 2 XrayR 迁移。当前：活跃 {active} 人，sync 错误率 {errorRate}，延迟 {lag} 分钟。"
+      },
+      "panel": {
+        "title": "系统运维 (Phase 1)",
+        "subtitle": "Phase 1 · 3x-ui 集中汇总",
+        "phase2Review": "Phase 2 迁移评估对象",
+        "activeGlobal": "活跃 GLOBAL",
+        "errorRate": "Sync 错误率 (24h)",
+        "lastSync": "上次 Sync",
+        "nextSync": "下次预计",
+        "provisionLive": "PROVISION_MODE=live",
+        "provisionSimulate": "PROVISION_MODE=simulate",
+        "trafficSync": "TRAFFIC_SYNC",
+        "cron": "Cron",
+        "none": "无",
+        "justNow": "刚刚",
+        "minutesAgo": "{count} 分钟前",
+        "hoursAgo": "{count} 小时前",
+        "minutesUntil": "约 {count} 分钟后",
+        "dueNow": "现在"
+      }
+    }
   },
   "pwa": {
     "eyebrow": "PWA",

@@ -30,6 +30,11 @@ const emptyDraft = {
   username: "",
   password: "",
   inboundId: "",
+  vlessPort: "443",
+  realityPublicKey: "",
+  realityShortId: "",
+  realityServerName: "",
+  realityFingerprint: "chrome",
 };
 
 export function NodeManager({ product }: { product: ProductId }) {
@@ -72,6 +77,11 @@ export function NodeManager({ product }: { product: ProductId }) {
       username: "",
       password: "",
       inboundId: node.inboundId ? String(node.inboundId) : "",
+      vlessPort: String(node.vlessPort || 443),
+      realityPublicKey: node.realityPublicKey,
+      realityShortId: node.realityShortId,
+      realityServerName: node.realityServerName,
+      realityFingerprint: node.realityFingerprint,
     });
     setFormError("");
     setProbeNote("");
@@ -111,7 +121,9 @@ export function NodeManager({ product }: { product: ProductId }) {
         }
         const vless = result.inbounds.find((item) => item.protocol.toLowerCase().includes("vless") && item.enable);
         const picked = vless ?? result.inbounds[0];
-        return picked ? { ...current, inboundId: String(picked.id) } : current;
+        return picked
+          ? { ...current, inboundId: String(picked.id), vlessPort: String(picked.port || 443) }
+          : current;
       });
       setProbeOk(true);
       setProbeNote(text);
@@ -400,6 +412,46 @@ export function NodeManager({ product }: { product: ProductId }) {
               placeholder={editing && editing !== "new" ? t("passwordKeep") : ""}
               value={draft.password}
               onChange={(event) => setDraft({ ...draft, password: event.target.value })}
+            />
+          </Field>
+          <p className="text-xs font-medium tracking-wide text-primary uppercase">{t("realitySection")}</p>
+          <Field label={t("vlessPort")}>
+            <input
+              className={fieldClass}
+              inputMode="numeric"
+              value={draft.vlessPort}
+              onChange={(event) => setDraft({ ...draft, vlessPort: event.target.value })}
+            />
+          </Field>
+          <Field label={t("realityPublicKey")}>
+            <input
+              className={fieldClass}
+              placeholder={editing && editing !== "new" && editing.realityPublicKey ? t("passwordKeep") : ""}
+              value={draft.realityPublicKey}
+              onChange={(event) => setDraft({ ...draft, realityPublicKey: event.target.value })}
+            />
+          </Field>
+          <Field label={t("realityShortId")}>
+            <input
+              className={fieldClass}
+              value={draft.realityShortId}
+              onChange={(event) => setDraft({ ...draft, realityShortId: event.target.value })}
+            />
+          </Field>
+          <Field label={t("realityServerName")}>
+            <input
+              className={fieldClass}
+              placeholder="www.microsoft.com"
+              value={draft.realityServerName}
+              onChange={(event) => setDraft({ ...draft, realityServerName: event.target.value })}
+            />
+          </Field>
+          <Field label={t("realityFingerprint")}>
+            <input
+              className={fieldClass}
+              placeholder="chrome"
+              value={draft.realityFingerprint}
+              onChange={(event) => setDraft({ ...draft, realityFingerprint: event.target.value })}
             />
           </Field>
           <Field label={t("inboundId")}>

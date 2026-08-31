@@ -351,6 +351,7 @@
     "usageTraffic": "Bandwagon トラフィック",
     "usageUnlimited": "Racknerd 無制限",
     "failoverBanner": "Bandwagon 150GB を使い切りました。トラフィックは Racknerd 無制限に切り替わります。",
+    "karingRefreshHint": "Karing にすぐ反映されない場合があります。アプリ上部の［サブスクリプション手動更新］をタップしてください。",
     "nodes": "ノード",
     "karing": "Karing",
     "karingQr": "QR",
@@ -530,6 +531,10 @@
           "q": "Mac で「確認されていない開発元」と出ます。",
           "a": "システム設定 → プライバシーとセキュリティで「このまま開く」を選んでください。"
         },
+        "manualRefresh": {
+          "q": "トラフィック超過の案内を受けた、またはノードが見えないときは？",
+          "a": "サーバーは約 5 分ごとに使用量を更新しますが、Karing は最大 24 時間に 1 回しか自動取得しません。超過案内を受けた、またはノードが見えないときは Karing アプリ上部の［サブスクリプション手動更新］をタップしてください。"
+        },
         "backupApp": {
           "q": "バックアップを使うにはアプリが必要ですか？",
           "a": "バックアップには不要です。ブラウザで Vaultwarden（パスワード・メモのバックアップ）と Syncthing（小さなファイル保管）を使います。ネットワーク接続だけ Karing が必要です。"
@@ -695,7 +700,7 @@
     "tempPassword": "ログインパスワード",
     "issueAnother": "別の顧客を発行",
     "nodesTitle": "ノード",
-    "nodesSubtitle": "顧客アプリは DDNS で接続します。実 VPS は下の 3x-ui パネルホストで結線してください。Standard は LA(B)、Hybrid は Tokyo+LA(A) です。",
+    "nodesSubtitle": "顧客アプリは DDNS で接続します。各ノードに REALITY inbound（VLESS·tcp·vision）の Public key・Short ID・dest SNI を登録してください。Standard は LA(B)、Hybrid は Tokyo+LA(A) です。",
     "addNode": "ノードを追加",
     "editNode": "ノードを編集",
     "nodeName": "名前",
@@ -714,6 +719,12 @@
     "wiring_local": "ローカルパネル",
     "wiring_ready": "パネル登録済",
     "inboundId": "Inbound ID",
+    "realitySection": "REALITY（Karing サブスクリプション）",
+    "vlessPort": "VLESS ポート",
+    "realityPublicKey": "Public key",
+    "realityShortId": "Short ID",
+    "realityServerName": "Server name（dest SNI）",
+    "realityFingerprint": "Client fingerprint",
     "inboundNone": "inbound なし",
     "inboundValue": "inbound {id}",
     "probe": "接続テスト",
@@ -753,7 +764,42 @@
     "statusRedeemed": "使用済み",
     "emptyCodes": "コードはありません。",
     "codeTaken": "すでに存在するコードです。",
-    "codeInUse": "使用済みコードは削除できません。"
+    "codeInUse": "使用済みコードは削除できません。",
+    "ops": {
+      "banner": {
+        "title": "Phase 2 移行の検討が必要",
+        "lag": "トラフィック Sync 遅延 {minutes}分",
+        "errorRate": "エラー率 {rate} (24h)",
+        "activeUsers": "アクティブ {count}名",
+        "simulate": "PROVISION_MODE=simulate",
+        "syncOff": "TRAFFIC_SYNC 停止",
+        "neverRan": "Sync 未実行",
+        "details": "詳細を見る",
+        "copyCursor": "Cursor 設計依頼をコピー",
+        "copied": "コピーしました",
+        "dismissToday": "今日は非表示",
+        "cursorPrompt": "Phase 2 XrayR 移行を設計して。現状: アクティブ {active}名、sync エラー率 {errorRate}、遅延 {lag}分。"
+      },
+      "panel": {
+        "title": "システム運用 (Phase 1)",
+        "subtitle": "Phase 1 · 3x-ui 中央集約",
+        "phase2Review": "Phase 2 移行検討対象",
+        "activeGlobal": "アクティブ GLOBAL",
+        "errorRate": "Sync エラー率 (24h)",
+        "lastSync": "最終 Sync",
+        "nextSync": "次回予定",
+        "provisionLive": "PROVISION_MODE=live",
+        "provisionSimulate": "PROVISION_MODE=simulate",
+        "trafficSync": "TRAFFIC_SYNC",
+        "cron": "Cron",
+        "none": "なし",
+        "justNow": "たった今",
+        "minutesAgo": "{count}分前",
+        "hoursAgo": "{count}時間前",
+        "minutesUntil": "約{count}分後",
+        "dueNow": "今すぐ"
+      }
+    }
   },
   "pwa": {
     "eyebrow": "PWA",

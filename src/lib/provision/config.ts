@@ -52,3 +52,18 @@ export function xuiApiToken() {
 export function xuiTlsInsecure() {
   return process.env.XUI_TLS_INSECURE === "1";
 }
+
+export function trafficSyncIntervalSeconds() {
+  const parsed = Number.parseInt(process.env.TRAFFIC_SYNC_INTERVAL ?? "300", 10);
+  return Number.isFinite(parsed) ? Math.max(60, parsed) : 300;
+}
+
+export function isTrafficSyncEnabled() {
+  if (process.env.TRAFFIC_SYNC_ENABLED === "0") {
+    return false;
+  }
+  if (isProvisionSimulate()) {
+    return false;
+  }
+  return Boolean(process.env.DATABASE_URL);
+}

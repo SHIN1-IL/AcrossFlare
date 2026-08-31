@@ -1,6 +1,7 @@
 import type { Node } from "@prisma/client";
 import { Agent } from "undici";
 import { xuiApiToken, xuiTlsInsecure } from "@/lib/provision/config";
+import { VLESS_CLIENT_FLOW } from "@/lib/provision/reality";
 
 export class XuiError extends Error {
   constructor(message: string) {
@@ -257,7 +258,7 @@ function clientFields(input: XuiClientInput) {
     totalGB: input.trafficGb ? input.trafficGb * 1024 * 1024 * 1024 : 0,
     limitIp: 0,
     subId: input.email,
-    flow: "",
+    flow: VLESS_CLIENT_FLOW,
   };
 }
 

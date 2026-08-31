@@ -85,6 +85,11 @@ describe("toAdminNode", () => {
       username: "admin",
       password: "seed-only",
       inboundId: null,
+      vlessPort: 443,
+      realityPublicKey: null,
+      realityShortId: null,
+      realityServerName: null,
+      realityFingerprint: null,
       createdAt: new Date("2026-08-01T00:00:00.000Z"),
       updatedAt: new Date("2026-08-01T00:00:00.000Z"),
     } satisfies Node;

@@ -5,10 +5,11 @@ import { REVIEW_USER_EMAIL, REVIEW_USER_PASSWORD } from "../src/lib/review-user"
 import { plans } from "../src/lib/plans";
 import { toPrismaProduct } from "../src/lib/product";
 import {
-  buildVlessYaml,
+  buildVlessYamlFromNodes,
   karingDeepLink,
   newClientUuid,
   newYamlToken,
+  prismaNodeToYamlNode,
   syncthingFolderId,
   vaultUserId,
   xuiClientEmail,
@@ -16,6 +17,15 @@ import {
 } from "../src/lib/provision/build";
 
 const prisma = new PrismaClient();
+
+const SEED_REALITY = {
+  vlessPort: 443,
+  realityPublicKey:
+    "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+  realityShortId: "0123456789",
+  realityServerName: "www.microsoft.com",
+  realityFingerprint: "chrome",
+} as const;
 
 const DEMO_PASSWORD = "acrossflare";
 
@@ -48,6 +58,7 @@ const SEED_NODES = [
     port: 2053,
     username: "admin",
     password: "seed-only",
+    ...SEED_REALITY,
   },
   {
     id: "g-la-b-bw",
@@ -60,6 +71,7 @@ const SEED_NODES = [
     port: 2053,
     username: "admin",
     password: "seed-only",
+    ...SEED_REALITY,
   },
   {
     id: "g-la-a-bw",
@@ -72,6 +84,33 @@ const SEED_NODES = [
     port: 2053,
     username: "admin",
     password: "seed-only",
+    ...SEED_REALITY,
+  },
+  {
+    id: "g-la-rn",
+    product: Product.GLOBAL,
+    name: "LA-RackNerd",
+    ddns: "node-la-rn.acrossflare.com",
+    role: "RACKNERD" as const,
+    status: "ONLINE" as const,
+    host: "10.0.0.99",
+    port: 2053,
+    username: "admin",
+    password: "seed-only",
+    ...SEED_REALITY,
+  },
+  {
+    id: "g-tokyo-rn",
+    product: Product.GLOBAL,
+    name: "Tokyo-RackNerd",
+    ddns: "node-tokyo-rn.acrossflare.com",
+    role: "RACKNERD" as const,
+    status: "ONLINE" as const,
+    host: "10.0.0.23",
+    port: 2053,
+    username: "admin",
+    password: "seed-only",
+    ...SEED_REALITY,
   },
   {
     id: "m-use-bw",
@@ -84,6 +123,7 @@ const SEED_NODES = [
     port: 2053,
     username: "admin",
     password: "seed-only",
+    ...SEED_REALITY,
   },
   {
     id: "m-usw-bw",
@@ -96,6 +136,7 @@ const SEED_NODES = [
     port: 2053,
     username: "admin",
     password: "seed-only",
+    ...SEED_REALITY,
   },
 ];
 
@@ -214,8 +255,8 @@ const DEMO_SUBSCRIPTIONS = [
   {
     email: "exhausted-user@acrossflare.com",
     product: Product.GLOBAL,
-    planId: "global-pro",
-    nodeIds: ["g-la-a-bw"],
+    planId: "global-standard",
+    nodeIds: ["g-la-a-bw", "g-la-rn"],
     status: SubscriptionStatus.ACTIVE,
     memo: "Failed over to Racknerd",
     failover: true,
@@ -299,7 +340,11 @@ async function seedDemoSubscriptions() {
             ? {
                 create:
                   row.product === Product.GLOBAL
-                    ? globalSeedCredentials(subscriptionId, nodes.map((node) => node.ddns))
+                    ? globalSeedCredentials(
+                        subscriptionId,
+                        nodes,
+                        Boolean(row.failover)
+                      )
                     : marketingSeedCredentials(subscriptionId, nodes, used),
               }
             : undefined,
@@ -308,7 +353,7 @@ async function seedDemoSubscriptions() {
   }
 }
 
-function globalSeedCredentials(subscriptionId: string, hosts: string[]) {
+function globalSeedCredentials(subscriptionId: string, nodes: Node[], failover: boolean) {
   const uuid = newClientUuid();
   const yamlToken = newYamlToken();
   const yamlUrl = yamlUrlFor(yamlToken, "http://localhost:3000");
@@ -318,7 +363,7 @@ function globalSeedCredentials(subscriptionId: string, hosts: string[]) {
     xuiEmail: xuiClientEmail(subscriptionId),
     deepLink: karingDeepLink(yamlUrl),
     yamlToken,
-    yamlBody: buildVlessYaml(hosts, uuid),
+    yamlBody: buildVlessYamlFromNodes(nodes.map(prismaNodeToYamlNode), uuid, failover),
     vaultUrl: "https://vault.acrossflare.com",
     vaultUser: vaultUserId(subscriptionId),
     syncthingUrl: "https://sync.acrossflare.com",

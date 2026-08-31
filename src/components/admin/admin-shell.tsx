@@ -3,6 +3,7 @@
 import { LayoutGrid, LogOut, Menu, Server, Shield, Ticket, Users, Wallet, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { Phase2OpsBanner } from "@/components/admin/ops-health";
 import { AdminTabSwitch } from "@/components/admin/admin-tab-switch";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { Logo } from "@/components/marketing/logo";
@@ -194,6 +195,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             <SessionIdentity email={session.email} owner={owner} />
           </div>
         ) : null}
+        <Phase2OpsBanner owner={owner} />
         <main className="flex-1 px-4 py-8 md:px-8">{children}</main>
       </div>
     </div>

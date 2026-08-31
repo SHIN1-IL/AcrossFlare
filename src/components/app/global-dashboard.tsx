@@ -10,7 +10,7 @@ import { UsageMeter } from "@/components/app/usage-meter";
 import { Button } from "@/components/ui/button";
 import { useAccount } from "@/hooks/use-account";
 import { Link } from "@/i18n/navigation";
-import { downloadText } from "@/lib/download";
+import { downloadFromUrl } from "@/lib/download";
 import { formatDate } from "@/lib/format-date";
 import { publicServiceFromPlanId } from "@/lib/public-service";
 import { SUPPORT_HREF } from "@/lib/support-zone";
@@ -59,7 +59,8 @@ export function GlobalDashboard({ product = "global" }: { product?: "global" | "
 
       {lane.failover ? (
         <div className="rounded-[10px] border border-amber-400/25 bg-amber-400/10 px-4 py-3 text-sm text-amber-200">
-          {t("failoverBanner")}
+          <p>{t("failoverBanner")}</p>
+          <p className="mt-2 text-xs text-amber-200/90">{t("karingRefreshHint")}</p>
         </div>
       ) : null}
 
@@ -83,6 +84,7 @@ export function GlobalDashboard({ product = "global" }: { product?: "global" | "
           <section className="grid gap-4 lg:grid-cols-[auto_1fr]">
             <div className="rounded-2xl border border-border bg-card p-5">
               <p className="text-sm">{t("karing")}</p>
+              <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("karingRefreshHint")}</p>
               <div className="mt-4">
                 <QrPanel value={lane.deepLink} label={t("karingQr")} />
               </div>
@@ -94,7 +96,7 @@ export function GlobalDashboard({ product = "global" }: { product?: "global" | "
                 type="button"
                 variant="outline"
                 className="rounded-[10px]"
-                onClick={() => downloadText("acrossflare.yaml", lane.yamlBody, "text/yaml")}
+                onClick={() => downloadFromUrl("acrossflare.yaml", lane.yamlUrl, "text/yaml")}
               >
                 <Download />
                 {t("yamlDownload")}

@@ -351,6 +351,7 @@
     "usageTraffic": "Bandwagon traffic",
     "usageUnlimited": "Unlimited on Racknerd",
     "failoverBanner": "Bandwagon 150GB is exhausted. Traffic now fails over to Racknerd unlimited.",
+    "karingRefreshHint": "Changes may not appear in Karing right away. Tap Manual subscription update at the top of the Karing app.",
     "nodes": "Nodes",
     "karing": "Karing",
     "karingQr": "QR",
@@ -530,6 +531,10 @@
           "q": "macOS says the developer cannot be verified.",
           "a": "Open System Settings → Privacy & Security and choose Open Anyway."
         },
+        "manualRefresh": {
+          "q": "What should I do after a traffic limit notice or when nodes disappear?",
+          "a": "The server refreshes usage about every 5 minutes, but Karing may auto-fetch the subscription only once every 24 hours. If you see a traffic limit notice or nodes are missing, tap Manual subscription update at the top of the Karing app."
+        },
         "backupApp": {
           "q": "Do I have to install an app to use backup?",
           "a": "No. Use Vaultwarden (password & note backup) and Syncthing (small file storage) in the browser. Only network access needs the Karing app."
@@ -695,7 +700,7 @@
     "tempPassword": "Login password",
     "issueAnother": "Issue another",
     "nodesTitle": "Nodes",
-    "nodesSubtitle": "Customers connect via DDNS. Wire the real VPS through the 3x-ui panel host below. Standard uses LA(B); Hybrid uses Tokyo + LA(A).",
+    "nodesSubtitle": "Customers connect via DDNS. Register REALITY inbound values (VLESS·tcp·vision): public key, short ID, dest SNI per node. Standard uses LA(B); Hybrid uses Tokyo + LA(A).",
     "addNode": "Add node",
     "editNode": "Edit node",
     "nodeName": "Name",
@@ -714,6 +719,12 @@
     "wiring_local": "Local panel",
     "wiring_ready": "Panel saved",
     "inboundId": "Inbound ID",
+    "realitySection": "REALITY (Karing subscription)",
+    "vlessPort": "VLESS port",
+    "realityPublicKey": "Public key",
+    "realityShortId": "Short ID",
+    "realityServerName": "Server name (dest SNI)",
+    "realityFingerprint": "Client fingerprint",
     "inboundNone": "No inbound",
     "inboundValue": "inbound {id}",
     "probe": "Test connection",
@@ -753,7 +764,42 @@
     "statusRedeemed": "Redeemed",
     "emptyCodes": "No codes yet.",
     "codeTaken": "That code already exists.",
-    "codeInUse": "A used code cannot be deleted."
+    "codeInUse": "A used code cannot be deleted.",
+    "ops": {
+      "banner": {
+        "title": "Review Phase 2 migration",
+        "lag": "Traffic sync lag {minutes}m",
+        "errorRate": "Error rate {rate} (24h)",
+        "activeUsers": "{count} active users",
+        "simulate": "PROVISION_MODE=simulate",
+        "syncOff": "TRAFFIC_SYNC off",
+        "neverRan": "Sync never ran",
+        "details": "View details",
+        "copyCursor": "Copy Cursor prompt",
+        "copied": "Copied",
+        "dismissToday": "Hide for today",
+        "cursorPrompt": "Design the Phase 2 XrayR migration. Current: {active} active users, sync error rate {errorRate}, lag {lag}m."
+      },
+      "panel": {
+        "title": "System ops (Phase 1)",
+        "subtitle": "Phase 1 · centralized 3x-ui aggregation",
+        "phase2Review": "Phase 2 review candidate",
+        "activeGlobal": "Active GLOBAL",
+        "errorRate": "Sync error rate (24h)",
+        "lastSync": "Last sync",
+        "nextSync": "Next expected",
+        "provisionLive": "PROVISION_MODE=live",
+        "provisionSimulate": "PROVISION_MODE=simulate",
+        "trafficSync": "TRAFFIC_SYNC",
+        "cron": "Cron",
+        "none": "None",
+        "justNow": "Just now",
+        "minutesAgo": "{count}m ago",
+        "hoursAgo": "{count}h ago",
+        "minutesUntil": "~{count}m",
+        "dueNow": "Due now"
+      }
+    }
   },
   "pwa": {
     "eyebrow": "PWA",
