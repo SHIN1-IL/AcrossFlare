@@ -1,7 +1,9 @@
 import type { AppLocale } from "@/i18n/routing";
 import { plans, type PlanPrices } from "@/lib/plans";
 
-export function splitPrimaryPrice(locale: AppLocale, prices: PlanPrices) {
+type PriceParts = { symbol: string; amount: string };
+
+export function splitPrimaryPrice(locale: AppLocale, prices: PlanPrices): PriceParts {
   switch (locale) {
     case "ko":
       return { symbol: "₩", amount: prices.krw.toLocaleString("ko-KR") };
@@ -19,7 +21,7 @@ export function formatPrimaryPrice(locale: AppLocale, prices: PlanPrices) {
   return `${symbol}${amount}`;
 }
 
-export function splitSecondaryPrice(_locale: AppLocale, _prices: PlanPrices) {
+export function splitSecondaryPrice(_locale: AppLocale, _prices: PlanPrices): PriceParts | null {
   return null;
 }
 
