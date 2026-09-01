@@ -3,15 +3,15 @@ import { LazyStageBackdrop } from "@/components/marketing/plan-stage-bg";
 import { PriceWithPeriod, SecondaryPriceAmount } from "@/components/marketing/price-amount";
 import { buttonVariants } from "@/components/ui/button";
 import { cachedMarketingHref } from "@/i18n/path";
-import { HOME_SLIDE_PLAN_IDS, HOME_SLIDE_PRICES, homeSlideFor } from "@/lib/marketing-services";
-import { getPlanById, planPricePeriodKey, type Plan } from "@/lib/plans";
+import { listPublicPlans } from "@/lib/admin-data";
+import { HOME_SLIDE_PLAN_IDS, homeSlideFor } from "@/lib/marketing-services";
+import { planPricePeriodKey, resolveMarketingPlans, type Plan } from "@/lib/plans";
 import { cn } from "@/lib/utils";
 import type { AppLocale } from "@/i18n/routing";
 
 export async function PlanStages({ showAlipay }: { showAlipay: boolean }) {
-  const slides = HOME_SLIDE_PLAN_IDS.map((id) => getPlanById(id)).filter(
-    (plan): plan is Plan => Boolean(plan)
-  );
+  const livePlans = await listPublicPlans("global");
+  const slides = resolveMarketingPlans(HOME_SLIDE_PLAN_IDS, livePlans);
   const t = await getTranslations("pricing");
   const tSlides = await getTranslations("planSlides");
   const tWorkspace = await getTranslations("workspace");
@@ -57,7 +57,7 @@ function PlanStage({
   tWorkspace: Awaited<ReturnType<typeof getTranslations>>;
 }) {
   const slide = homeSlideFor(plan.id);
-  const prices = HOME_SLIDE_PRICES[plan.id] ?? plan.prices;
+  const prices = plan.prices;
   const custom =
     plan.id === "global-lite"
       ? {

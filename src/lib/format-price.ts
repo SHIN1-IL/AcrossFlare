@@ -19,12 +19,8 @@ export function formatPrimaryPrice(locale: AppLocale, prices: PlanPrices) {
   return `${symbol}${amount}`;
 }
 
-export function splitSecondaryPrice(locale: AppLocale, prices: PlanPrices) {
-  if (locale !== "zh") {
-    return null;
-  }
-
-  return { symbol: "$", amount: prices.usd.toLocaleString("en-US") };
+export function splitSecondaryPrice(_locale: AppLocale, _prices: PlanPrices) {
+  return null;
 }
 
 export function formatSecondaryPrice(locale: AppLocale, prices: PlanPrices) {

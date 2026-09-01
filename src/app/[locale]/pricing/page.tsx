@@ -2,7 +2,12 @@ import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 import { resolveLocale } from "@/i18n/locale";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { PricingView } from "@/components/marketing/pricing-view";
-import { pricingServiceFromQuery } from "@/lib/marketing-services";
+import { listPublicPlans } from "@/lib/admin-data";
+import {
+  MARKETING_SERVICES,
+  pricingServiceFromQuery,
+} from "@/lib/marketing-services";
+import { resolveMarketingPlans, type Plan } from "@/lib/plans";
 
 export default async function PricingPage({
   params,
@@ -18,6 +23,14 @@ export default async function PricingPage({
   const t = await getTranslations("pricing");
   const currentLocale = await getLocale();
   const initialService = pricingServiceFromQuery(product);
+  const liveGlobal = await listPublicPlans("global");
+  const liveWorkspace = await listPublicPlans("workspace");
+  const plansByService = Object.fromEntries(
+    MARKETING_SERVICES.map((item) => [
+      item.id,
+      resolveMarketingPlans(item.planIds, item.product === "workspace" ? liveWorkspace : liveGlobal),
+    ])
+  ) as Record<(typeof MARKETING_SERVICES)[number]["id"], Plan[]>;
 
   return (
     <MarketingShell>
@@ -27,6 +40,7 @@ export default async function PricingPage({
         <div className="mt-10">
           <PricingView
             initialService={initialService}
+            plansByService={plansByService}
             showAlipay={currentLocale === "zh"}
           />
         </div>

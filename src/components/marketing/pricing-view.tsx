@@ -9,21 +9,21 @@ import {
   getMarketingService,
   type MarketingServiceId,
 } from "@/lib/marketing-services";
-import { getPlanById, type Plan } from "@/lib/plans";
+import { type Plan } from "@/lib/plans";
 
 export function PricingView({
   initialService,
+  plansByService,
   showAlipay,
 }: {
   initialService: MarketingServiceId;
+  plansByService: Record<MarketingServiceId, Plan[]>;
   showAlipay: boolean;
 }) {
   const t = useTranslations("pricing");
   const [service, setService] = useState<MarketingServiceId>(initialService);
   const current = getMarketingService(service);
-  const plans = current.planIds
-    .map((id) => getPlanById(id))
-    .filter((plan): plan is Plan => Boolean(plan));
+  const plans = plansByService[current.id] ?? [];
 
   return (
     <div className="space-y-8">

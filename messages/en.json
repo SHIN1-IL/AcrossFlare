@@ -599,7 +599,7 @@
     "statNodes": "Nodes",
     "open": "Open",
     "plansTitle": "Plans",
-    "plansSubtitle": "Homepage cards are fixed to Standard / Hybrid / Workspace catalog IDs. Edit price and nodes here. Hiding only affects this console, not the public cards.",
+    "plansSubtitle": "Standard / Hybrid / Workspace card IDs are fixed. Price, traffic, nodes, and backup changes apply to service pages, checkout, and provisioning. Yearly traffic is stored as a 12-month total (e.g. 1200 = 100 GB/month).",
     "newPlan": "New plan",
     "edit": "Edit",
     "delete": "Delete",

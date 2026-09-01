@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { PriceAmount, SecondaryPriceAmount } from "@/components/marketing/price-amount";
 import { getMarketingService, type MarketingServiceId } from "@/lib/marketing-services";
 import {
-  getPlanById,
   planHasPrice,
   planPricePeriodKey,
   planTerm,
@@ -21,18 +20,17 @@ import type { AppLocale } from "@/i18n/routing";
 
 export function ServiceDetail({
   service: serviceId,
+  plans,
   showAlipay,
 }: {
   service: MarketingServiceId;
+  plans: Plan[];
   showAlipay: boolean;
 }) {
   const t = useTranslations("services");
   const tPricing = useTranslations("pricing");
   const locale = useLocale() as AppLocale;
   const service = getMarketingService(serviceId);
-  const plans = service.planIds
-    .map((id) => getPlanById(id))
-    .filter((plan): plan is Plan => Boolean(plan));
   const banners = plans.map((plan) => ({ key: plan.id, plan }));
 
   return (

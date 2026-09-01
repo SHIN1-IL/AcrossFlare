@@ -599,7 +599,7 @@
     "statNodes": "节点",
     "open": "打开",
     "plansTitle": "套餐",
-    "plansSubtitle": "首页卡片固定为 Standard / Hybrid / Workspace 目录 ID。在此修改价格与节点。隐藏只影响控制台，首页卡片仍在。",
+    "plansSubtitle": "Standard / Hybrid / Workspace 卡片 ID 固定。修改价格、流量、节点、备份容量会同步到服务页、结账与开通。年付流量字段为 12 个月合计（如 1200 = 每月 100GB）。",
     "newPlan": "新套餐",
     "edit": "编辑",
     "delete": "删除",

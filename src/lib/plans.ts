@@ -163,6 +163,14 @@ export function getPlanById(id: string | null | undefined) {
   return plans.find((plan) => plan.id === id) ?? null;
 }
 
+export function catalogPlanIdForDisplay(planId: string): string {
+  if (planId === "global-pro") {
+    return "hybrid-lite";
+  }
+
+  return planId;
+}
+
 export function publicPlanFrom(catalog: Plan | null | undefined, live: Plan | undefined): Plan | undefined {
   const pricedLive = live && planHasPrice(live) ? live : undefined;
   const plan = pricedLive ?? catalog ?? live;
@@ -173,7 +181,29 @@ export function publicPlanFrom(catalog: Plan | null | undefined, live: Plan | un
     return plan;
   }
 
-  return { ...plan, trafficGb: catalog.trafficGb };
+  const trafficGb = live?.trafficGb !== undefined ? live.trafficGb : catalog.trafficGb;
+  const backupGb = live?.backupGb !== undefined ? live.backupGb : catalog.backupGb;
+  const nodes = live?.nodes?.length ? live.nodes : catalog.nodes;
+
+  return { ...plan, trafficGb, backupGb, nodes };
+}
+
+export function resolveMarketingPlans(planIds: readonly string[], livePlans: Plan[]): Plan[] {
+  const liveById = new Map(livePlans.map((plan) => [plan.id, plan]));
+
+  return planIds
+    .map((id) => {
+      const catalogId = catalogPlanIdForDisplay(id);
+      const catalog = getPlanById(catalogId) ?? getPlanById(id);
+      const live = liveById.get(catalogId) ?? liveById.get(id);
+      const merged = publicPlanFrom(catalog, live);
+      if (!merged) {
+        return null;
+      }
+
+      return id === merged.id ? merged : { ...merged, id };
+    })
+    .filter((plan): plan is Plan => Boolean(plan));
 }
 
 export function isProductId(value: string | null | undefined): value is ProductId {

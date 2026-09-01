@@ -599,7 +599,7 @@
     "statNodes": "노드",
     "open": "열기",
     "plansTitle": "요금제",
-    "plansSubtitle": "홈 카드는 Standard / Hybrid / Workspace 카탈로그 ID로 고정됩니다. 여기서 그 요금제의 가격·노드를 고칩니다. 숨기기는 제어판 목록용이며 홈 카드는 그대로입니다.",
+    "plansSubtitle": "Standard / Hybrid / Workspace 카드 ID는 고정입니다. 가격·트래픽·노드·백업 용량을 바꾸면 서비스 페이지·결제·발급에 반영됩니다. 연간 요금제 트래픽 필드는 12개월 합계(예: 1200 = 월 100GB)입니다.",
     "newPlan": "새 요금제",
     "edit": "수정",
     "delete": "삭제",

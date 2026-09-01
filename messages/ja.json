@@ -599,7 +599,7 @@
     "statNodes": "ノード",
     "open": "開く",
     "plansTitle": "プラン",
-    "plansSubtitle": "ホームのカードは Standard / Hybrid / Workspace のカタログIDに固定されます。ここではその料金とノードを直します。非表示は管理画面のみで、ホームカードは残ります。",
+    "plansSubtitle": "Standard / Hybrid / Workspace のカード ID は固定です。価格・トラフィック・ノード・バックアップを変更するとサービスページ・決済・発行に反映されます。年間プランのトラフィックは12か月合計（例: 1200 = 月100GB）です。",
     "newPlan": "新規プラン",
     "edit": "編集",
     "delete": "削除",

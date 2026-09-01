@@ -55,7 +55,7 @@
 
 ### F-3. 어드민 제어판 (`/admin`)
 * **상품별 탭 완전 격리:** [글로벌 우회 관리] 탭과 [마케팅 IP 관리] 탭 분리.
-* **동적 요금제 빌더:** 어드민 GUI에서 요금제 신규 생성/수정/삭제 (가격 월 OO원/$OO 설정, 트래픽 한도, 백업 용량, 노드 조합 바인딩).
+* **동적 요금제 빌더:** 어드민 GUI에서 요금제 신규 생성/수정/삭제 (가격 월 OO원/$OO 설정, 트래픽 한도, 백업 용량, 노드 조합 바인딩). **운영 SSOT:** PostgreSQL `Plan` 테이블 — 서비스 페이지·결제·프로비저닝이 동일 값을 사용한다.
 * **수동 고객 등록 (Manual Provisioning):** 회원가입/PG 결제 없이 어드민에서 고객 이메일/만료일 직접 입력 ➔ 3x-ui / Vaultwarden / Syncthing 즉시 발급 및 QR/프록시 URL 원클릭 복사.
 * **유저 요금제/노드 동적 변경:** 유저 상세 페이지에서 요금제 변경 시 3x-ui 기존 계정 파기 ➔ 신규 노드 계정 생성 ➔ DB 업데이트 원클릭 통합 처리.
 * **동적 노드 관리:** 3x-ui API 접속 정보(IP, Port, Creds)를 통한 VPS 노드 추가/삭제 및 1클릭 전체 유저 노드 이관.
@@ -88,3 +88,23 @@ Karing 구독 응답은 YAML 본문과 함께 아래 메타데이터/헤더를 �
 | `vault.acrossflare.com` | Vaultwarden (`:80`) |
 | `sync.acrossflare.com` | Syncthing GUI (`:8384`) |
 | `node-*.acrossflare.com` | 3x-ui 노드 (DNS only, 오리진 Compose에 포함하지 않음) |
+
+---
+
+## 6. 요금제·트래픽 (Phase 1)
+
+마케팅 카드 ID는 `src/lib/plans.ts` + `src/lib/marketing-services.ts`에 고정되어 있고, **가격·트래픽·노드·백업 용량**은 Admin 제어판(`/admin/{standard|hybrid|workspace}/plans`)에서 PostgreSQL `Plan`으로 편집한다. `prisma db seed`는 카탈로그 기본값을 DB에 동기화한다.
+
+| 서비스 | 플랜 ID | 트래픽 (표시) | 노드 |
+|---|---|---|---|
+| **Standard** | `global-week` | 20 GB (1주) | LA(B) |
+| | `global-lite` | 100 GB (1개월) | LA(B) |
+| | `global-year` | 100 GB/월 (DB 저장 1200 = 12×100) | LA(B) |
+| **Hybrid** | `hybrid-week` | 20 GB (1주) | Tokyo + LA(A) |
+| | `hybrid-lite` | **100 GB/인 (1개월)** | Tokyo + LA(A) |
+| | `hybrid-year` | 100 GB/월 (DB 저장 1200) | Tokyo + LA(A) |
+| **Workspace** | `workspace-a` | 100 GB | Tokyo + LA(A) |
+| | `workspace-b` | 200 GB | Tokyo + LA(A) |
+| | `workspace-c` | 1000 GB | Tokyo + LA(A) |
+
+홈 히어로의 Hybrid 슬라이드는 카탈로그 ID `global-pro`(카피 전용)가 **`hybrid-lite` 요금·트래픽**을 표시한다. 연간 플랜의 Admin 트래픽 필드는 **12개월 합계**이며, UI는 `trafficGb ÷ 12`로 월간 표시한다.

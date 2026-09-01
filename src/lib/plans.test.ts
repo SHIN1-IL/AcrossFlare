@@ -6,6 +6,7 @@ import {
   planTrafficQuota,
   plans,
   publicPlanFrom,
+  resolveMarketingPlans,
 } from "@/lib/plans";
 
 describe("plan node codes", () => {
@@ -38,16 +39,31 @@ describe("planTrafficQuota", () => {
     expect(planTrafficQuota(getPlanById("workspace-c")!)).toEqual({ cadence: "total", gb: 1000 });
   });
 
-  it("uses catalog traffic on the storefront even when live quota differs", () => {
+  it("uses live traffic and prices when admin quota differs from catalog", () => {
     const catalog = getPlanById("global-lite")!;
     const live = { ...catalog, trafficGb: 80 };
-    expect(planTrafficQuota(publicPlanFrom(catalog, live)!)).toEqual({ cadence: "total", gb: 100 });
+    expect(planTrafficQuota(publicPlanFrom(catalog, live)!)).toEqual({ cadence: "total", gb: 80 });
 
     const year = getPlanById("global-year")!;
-    expect(planTrafficQuota(publicPlanFrom(year, { ...year, trafficGb: 80 })!)).toEqual({
+    expect(planTrafficQuota(publicPlanFrom(year, { ...year, trafficGb: 960 })!)).toEqual({
       cadence: "month",
-      gb: 100,
+      gb: 80,
     });
+  });
+
+  it("falls back to catalog when live plan is missing", () => {
+    const catalog = getPlanById("hybrid-lite")!;
+    expect(planTrafficQuota(publicPlanFrom(catalog, undefined)!)).toEqual({ cadence: "total", gb: 100 });
+  });
+});
+
+describe("resolveMarketingPlans", () => {
+  it("maps the hybrid home slide to hybrid-lite quota", () => {
+    const live = getPlanById("hybrid-lite")!;
+    const [slide] = resolveMarketingPlans(["global-pro"], [live]);
+    expect(slide?.id).toBe("global-pro");
+    expect(planTrafficQuota(slide!)).toEqual({ cadence: "total", gb: 100 });
+    expect(slide?.prices.krw).toBe(live.prices.krw);
   });
 
   it("treats unlimited traffic as no quota", () => {
