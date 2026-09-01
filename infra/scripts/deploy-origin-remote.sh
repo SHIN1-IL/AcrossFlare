@@ -43,7 +43,7 @@ echo "==> docker compose up --build (migrate runs via compose migrate service)"
 "${COMPOSE[@]}" up -d --build
 
 echo "==> seed plan defaults (idempotent upsert)"
-"${COMPOSE[@]}" run --rm web npx prisma db seed
+"${COMPOSE[@]}" run --rm seed
 
 echo "==> compose ps"
 "${COMPOSE[@]}" ps

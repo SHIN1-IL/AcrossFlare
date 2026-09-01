@@ -8,4 +8,8 @@ if [ -n "${POSTGRES_PASSWORD:-}" ]; then
   export DATABASE_URL
 fi
 
+if [ "$#" -gt 0 ]; then
+  exec "$@"
+fi
+
 exec node server.js

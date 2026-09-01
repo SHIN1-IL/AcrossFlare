@@ -17,6 +17,7 @@
     "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset --force",
     "origin:up": "docker compose --profile origin up -d --build",
+    "origin:seed": "docker compose --profile origin run --rm seed",
     "origin:down": "docker compose --profile origin down",
     "origin:logs": "docker compose --profile origin logs -f --tail=200",
     "certs:dev": "sh infra/scripts/gen-dev-origin-certs.sh",

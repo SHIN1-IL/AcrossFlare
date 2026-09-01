@@ -101,6 +101,29 @@ services:
     logging: *default-logging
     profiles: ["origin"]
 
+  seed:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    working_dir: /app
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-acrossflare}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-acrossflare}
+      POSTGRES_DB: ${POSTGRES_DB:-acrossflare}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-acrossflare}:${POSTGRES_PASSWORD:-acrossflare}@postgres:5432/${POSTGRES_DB:-acrossflare}
+    command: ["npx", "prisma", "db", "seed"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    restart: "no"
+    mem_limit: 512m
+    networks: [origin]
+    logging: *default-logging
+    profiles: ["origin"]
+
   web:
     build:
       context: .
