@@ -5,6 +5,8 @@ import { HeroAtmosphere } from "@/components/marketing/hero-atmosphere";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { PlanStages } from "@/components/marketing/plan-stages";
 
+export const dynamic = "force-dynamic";
+
 const instrumentSans = Instrument_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600"],

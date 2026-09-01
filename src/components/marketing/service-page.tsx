@@ -3,9 +3,8 @@ import { resolveLocale } from "@/i18n/locale";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { ProductNotice } from "@/components/marketing/product-notice";
 import { ServiceDetail } from "@/components/marketing/service-detail";
-import { listPublicPlans } from "@/lib/admin-data";
-import { getMarketingService, type MarketingServiceId } from "@/lib/marketing-services";
-import { resolveMarketingPlans } from "@/lib/plans";
+import { type MarketingServiceId } from "@/lib/marketing-services";
+import { loadStorefrontPlansForService } from "@/lib/storefront-plans";
 
 export async function ServicePage({
   params,
@@ -17,9 +16,7 @@ export async function ServicePage({
   const locale = await resolveLocale(params);
   setRequestLocale(locale);
   const currentLocale = await getLocale();
-  const marketing = getMarketingService(service);
-  const livePlans = await listPublicPlans(marketing.product);
-  const plans = resolveMarketingPlans(marketing.planIds, livePlans);
+  const plans = await loadStorefrontPlansForService(service);
 
   return (
     <MarketingShell>

@@ -3,15 +3,14 @@ import { LazyStageBackdrop } from "@/components/marketing/plan-stage-bg";
 import { PriceWithPeriod, SecondaryPriceAmount } from "@/components/marketing/price-amount";
 import { buttonVariants } from "@/components/ui/button";
 import { cachedMarketingHref } from "@/i18n/path";
-import { listPublicPlans } from "@/lib/admin-data";
-import { HOME_SLIDE_PLAN_IDS, homeSlideFor } from "@/lib/marketing-services";
-import { planPricePeriodKey, resolveMarketingPlans, type Plan } from "@/lib/plans";
+import { homeSlideFor } from "@/lib/marketing-services";
+import { loadHomeSlidePlans } from "@/lib/storefront-plans";
+import { planPricePeriodKey, type Plan } from "@/lib/plans";
 import { cn } from "@/lib/utils";
 import type { AppLocale } from "@/i18n/routing";
 
 export async function PlanStages({ showAlipay }: { showAlipay: boolean }) {
-  const livePlans = await listPublicPlans("global");
-  const slides = resolveMarketingPlans(HOME_SLIDE_PLAN_IDS, livePlans);
+  const slides = await loadHomeSlidePlans();
   const t = await getTranslations("pricing");
   const tSlides = await getTranslations("planSlides");
   const tWorkspace = await getTranslations("workspace");
