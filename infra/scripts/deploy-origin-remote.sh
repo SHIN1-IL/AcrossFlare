@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
+# Run on the origin VPS (any cwd). Uses docker compose only — no host npm/npx.
 set -euo pipefail
 
+COMPOSE=(docker compose --profile origin)
+
 find_project_dir() {
-  for d in "$HOME/acrossflare-app" "/root/acrossflare-app" "/opt/acrossflare-app"; do
-    if [[ -d "$d/.git" ]]; then
+  for d in "/opt/acrossflare-app" "$HOME/acrossflare-app" "/root/acrossflare-app"; do
+    if [[ -f "$d/docker-compose.yml" && -d "$d/.git" ]]; then
       echo "$d"
       return 0
     fi
@@ -12,8 +15,8 @@ find_project_dir() {
 }
 
 PROJECT_DIR="$(find_project_dir)" || {
-  echo "ERROR: acrossflare-app git repo not found."
-  echo "Clone first: git clone https://github.com/SHIN1-IL/AcrossFlare.git ~/acrossflare-app"
+  echo "ERROR: acrossflare-app not found under /opt, ~, or /root."
+  echo "Clone: git clone https://github.com/SHIN1-IL/AcrossFlare.git /opt/acrossflare-app"
   exit 1
 }
 
@@ -23,24 +26,30 @@ echo "==> Project: $PROJECT_DIR"
 echo "==> git pull"
 git pull --ff-only
 
-echo "==> prisma migrate deploy"
-npx prisma migrate deploy
-
 if [[ -f .env ]]; then
   echo "==> .env production flags"
-  grep -E '^(PROVISION_MODE|APP_URL|PAYMENT_MODE|TRAFFIC_SYNC_ENABLED)=' .env || true
+  grep -E '^(PROVISION_MODE|APP_URL|PAYMENT_MODE|TRAFFIC_SYNC_ENABLED|XUI_TLS_INSECURE)=' .env || true
   if grep -q '^PROVISION_MODE=simulate' .env 2>/dev/null; then
-    echo "WARN: PROVISION_MODE=simulate — switch to live in .env before real provisioning."
+    echo "WARN: PROVISION_MODE=simulate — set live in .env before real provisioning."
   fi
 else
   echo "WARN: .env missing — copy from .env.example before live use."
 fi
 
-echo "==> origin:up (docker rebuild)"
-npm run origin:up
+echo "==> stop stale one-off web run containers (seed/build leftovers)"
+docker ps -q --filter "name=acrossflare-web-run-" | xargs -r docker stop 2>/dev/null || true
+
+echo "==> docker compose up --build (migrate runs via compose migrate service)"
+"${COMPOSE[@]}" up -d --build
+
+echo "==> seed plan defaults (idempotent upsert)"
+"${COMPOSE[@]}" run --rm web npx prisma db seed
+
+echo "==> compose ps"
+"${COMPOSE[@]}" ps
 
 echo "==> traffic sync scheduler"
-docker logs acrossflare-api-1 2>&1 | grep traffic_sync_scheduler_started || echo "WARN: traffic_sync_scheduler_started not found yet"
+docker logs acrossflare-api-1 2>&1 | grep traffic_sync_scheduler_started || echo "WARN: traffic_sync_scheduler_started not in logs yet"
 
 echo "==> health"
 curl -sf https://acrossflare.com/api/health && echo || echo "WARN: health check failed"
