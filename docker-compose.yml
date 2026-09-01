@@ -111,8 +111,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-acrossflare}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-acrossflare}
       POSTGRES_DB: ${POSTGRES_DB:-acrossflare}
-      DATABASE_URL: postgresql://${POSTGRES_USER:-acrossflare}:${POSTGRES_PASSWORD:-acrossflare}@postgres:5432/${POSTGRES_DB:-acrossflare}
-    command: ["npx", "prisma", "db", "seed"]
+    command: ["node", "prisma/seed-deploy.mjs"]
     depends_on:
       postgres:
         condition: service_healthy
