@@ -1,5 +1,6 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { PlanCard } from "@/components/marketing/plan-card";
@@ -7,19 +8,20 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   MARKETING_SERVICES,
   getMarketingService,
+  pricingServiceFromQuery,
   type MarketingServiceId,
 } from "@/lib/marketing-services";
 import { type Plan } from "@/lib/plans";
 
 export function PricingView({
-  initialService,
   plansByService,
   showAlipay,
 }: {
-  initialService: MarketingServiceId;
   plansByService: Record<MarketingServiceId, Plan[]>;
   showAlipay: boolean;
 }) {
+  const searchParams = useSearchParams();
+  const initialService = pricingServiceFromQuery(searchParams.get("product"));
   const t = useTranslations("pricing");
   const [service, setService] = useState<MarketingServiceId>(initialService);
   const current = getMarketingService(service);

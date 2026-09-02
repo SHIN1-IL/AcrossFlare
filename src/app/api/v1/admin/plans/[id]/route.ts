@@ -3,6 +3,7 @@ import { writeAdminAudit } from "@/lib/admin-audit";
 import { AdminActionError, removeAdminPlan, saveAdminPlan } from "@/lib/admin-actions";
 import { requirePermission } from "@/lib/admin-auth";
 import { isProductId } from "@/lib/plans";
+import { revalidateStorefrontPlans } from "@/lib/revalidate-storefront";
 
 export async function PATCH(
   request: Request,
@@ -56,6 +57,8 @@ export async function PATCH(
       targetId: plan.id,
     });
 
+    revalidateStorefrontPlans();
+
     return NextResponse.json({ plan });
   } catch (error) {
     if (error instanceof AdminActionError) {
@@ -85,6 +88,7 @@ export async function DELETE(
       targetType: "plan",
       targetId: id,
     });
+    revalidateStorefrontPlans();
     return NextResponse.json({ ok: true });
   } catch (error) {
     if (error instanceof AdminActionError) {

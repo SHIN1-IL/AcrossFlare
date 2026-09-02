@@ -4,8 +4,7 @@ import { resolveLocale } from "@/i18n/locale";
 import { HeroAtmosphere } from "@/components/marketing/hero-atmosphere";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { PlanStages } from "@/components/marketing/plan-stages";
-
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 const instrumentSans = Instrument_Sans({
   subsets: ["latin"],

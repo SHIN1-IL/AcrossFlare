@@ -3,6 +3,7 @@ import { writeAdminAudit } from "@/lib/admin-audit";
 import { AdminActionError, saveAdminPlan } from "@/lib/admin-actions";
 import { requirePermission } from "@/lib/admin-auth";
 import { isProductId } from "@/lib/plans";
+import { revalidateStorefrontPlans } from "@/lib/revalidate-storefront";
 
 export async function POST(request: Request) {
   const auth = await requirePermission("plans");
@@ -52,6 +53,8 @@ export async function POST(request: Request) {
       targetType: "plan",
       targetId: plan.id,
     });
+
+    revalidateStorefrontPlans();
 
     return NextResponse.json({ plan });
   } catch (error) {

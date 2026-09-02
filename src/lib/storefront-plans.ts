@@ -1,4 +1,6 @@
+import { unstable_cache } from "next/cache";
 import { listPublicPlans } from "@/lib/admin-data";
+import { STOREFRONT_REVALIDATE_SECONDS } from "@/lib/http-cache";
 import {
   getMarketingService,
   HOME_SLIDE_PLAN_IDS,
@@ -7,13 +9,23 @@ import {
 } from "@/lib/marketing-services";
 import { resolveMarketingPlans, type Plan, type ProductId } from "@/lib/plans";
 
+export const STOREFRONT_PLANS_TAG = "storefront-plans";
+
+async function cachedPublicPlans(product: ProductId) {
+  return unstable_cache(
+    () => listPublicPlans(product),
+    [STOREFRONT_PLANS_TAG, product],
+    { revalidate: STOREFRONT_REVALIDATE_SECONDS, tags: [STOREFRONT_PLANS_TAG] }
+  )();
+}
+
 export async function loadStorefrontPlans(
   planIds: readonly string[],
   product: ProductId
 ): Promise<Plan[]> {
   let live: Plan[] = [];
   try {
-    live = await listPublicPlans(product);
+    live = await cachedPublicPlans(product);
   } catch {
     // Docker build has no Postgres; catalog defaults apply until runtime.
   }
@@ -36,8 +48,8 @@ export async function loadAllStorefrontPlansByService(): Promise<
   let liveWorkspace: Plan[] = [];
   try {
     [liveGlobal, liveWorkspace] = await Promise.all([
-      listPublicPlans("global"),
-      listPublicPlans("workspace"),
+      cachedPublicPlans("global"),
+      cachedPublicPlans("workspace"),
     ]);
   } catch {
     // catalog fallback during build

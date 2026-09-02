@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AuthForm } from "@/components/marketing/auth-form";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { resolveLocale } from "@/i18n/locale";
+export const revalidate = 3600;
 
 export default async function LoginPage({
   params,
