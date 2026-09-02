@@ -54,15 +54,15 @@
     "withdraw": "撤回与解约",
     "support": "消费者咨询",
     "supplierValue": "{legalName}（服务名 {serviceName}）",
-    "standardTerms": "加密网络接入与 1GB 安全云备份，LA 线路，用于出差、旅行、在线会议等合法用途。流量与期限以所选套餐（1 周、1 个月或 12 个月）为准。",
-    "hybridTerms": "加密网络接入与 1GB 安全云备份，东京+LA 线路，用于出差、旅行、在线会议等合法用途。流量与期限以所选套餐（1 周、1 个月或 12 个月）为准。",
-    "workspaceTerms": "团队或定制的加密网络接入与安全云备份。A、B、C 套餐均为每月 ¥990，仅人数与每月流量不同。套餐需促销码申请。",
+    "standardTerms": "加密网络接入与 1GB 安全云备份，LA 线路，用于出差、旅行、在线会议等合法用途。流量与期限以所选套餐（1 周、1 个月或 12 个月）为准。所有付费套餐均为单次付款，不提供定期扣款、自动续费或自动支付。",
+    "hybridTerms": "加密网络接入与 1GB 安全云备份，东京+LA 线路，用于出差、旅行、在线会议等合法用途。流量与期限以所选套餐（1 周、1 个月或 12 个月）为准。所有付费套餐均为单次付款，不提供定期扣款、自动续费或自动支付。",
+    "workspaceTerms": "团队或定制的加密网络接入与安全云备份。A、B、C 套餐均为 1 个月单次付款（¥990），仅人数与每月流量不同。套餐需促销码申请。不提供定期扣款、自动续费或自动支付。",
     "deliveryValue": "无实物配送。付款完成后立即向已登录账户发放接入信息与备份使用信息。",
     "workspaceDeliveryValue": "无实物配送。促销码确认后，向已登录账户发放接入信息与备份使用信息。",
     "requirementsValue": "可联网的电脑或手机。Vaultwarden（密码与备忘录备份）和 Syncthing（小文件存储）无需安装专用应用，通过浏览器使用。",
     "withdrawValue": "接入或备份信息发放后，依据韩国电子商务法第17条第2款第5项，撤回权可能受限。未发放或重复扣款的，7 日内全额退款。发放后中途退订原则上不按日折算。",
     "withdrawLink": "撤回与退款",
-    "vat": "标示价格含增值税。"
+    "vat": "标示价格含增值税。所有套餐均为单次付款，无自动续费或定期扣款。"
   },
   "legal": {
     "termsTitle": "服务条款",
@@ -88,7 +88,7 @@
       },
       {
         "title": "5. 付款与套餐",
-        "body": "标示价格含增值税，并按语言对应货币显示。银行卡与支付宝由 PortOne、Stripe、Paymentwall 处理。Standard 与 Hybrid 在付款成功后立即开始提供数字内容（发放接入与备份信息）。Workspace 在促销码确认后付款，由公司向账户发放。流量、备份容量与期限以所购套餐为准；除非另有说明，未用流量不结转。撤回与退款见第6条。"
+        "body": "标示价格含增值税，并按语言对应货币显示。银行卡与支付宝由 PortOne、Stripe、Paymentwall 处理。所有付费套餐均为单次付款，不提供定期扣款、自动续费或自动支付。期限结束后需另行付款才能延长。\n\nStandard 与 Hybrid 在付款成功后立即开始提供数字内容（发放接入与备份信息）。Workspace 在促销码确认后付款，由公司向账户发放。流量、备份容量与期限以所购套餐为准；除非另有说明，未用流量不结转。撤回与退款见第6条。"
       },
       {
         "id": "refund",
@@ -177,10 +177,13 @@
     "marketing": "Workspace",
     "perMonth": "/ 月",
     "perWeek": "/ 一周",
-    "periodWeek": "/ 一周",
-    "period1Week": "/ 一周",
-    "periodMonth": "/ 1个月",
-    "periodYear": "/ 12个月",
+    "periodWeek": "1 周使用",
+    "period1Week": "1 周使用",
+    "periodMonth": "1 个月使用",
+    "periodYear": "12 个月使用",
+    "billingOneTime": "单次付款",
+    "billingOneTimeCaption": "无自动续费或定期扣款",
+    "periodOneTimeLine": "{period} · {billing}",
     "traffic": "流量",
     "backup": "备份",
     "nodes": "节点",
@@ -198,14 +201,14 @@
       "eyebrow": "安全云及网络优化",
       "title": "Standard",
       "description": "适合短期旅行或出差时的安全备份与合适速度。可在浏览器中使用 Vaultwarden（密码与备忘录备份）和 Syncthing（小文件存储）。",
-      "price": "₩9,900/月",
+      "price": "₩9,900 · 1个月",
       "cta": "了解更多"
     },
     "global-pro": {
       "eyebrow": "安全云及网络优化",
       "title": "Hybrid",
       "description": "提供安全备份与更快的网络优化。可在浏览器中使用 Vaultwarden（密码与备忘录备份）和 Syncthing（小文件存储）。",
-      "price": "₩19,900/月",
+      "price": "₩19,900 · 1个月",
       "cta": "了解更多"
     }
   },
@@ -395,7 +398,7 @@
     "rotateCooldown": "冷却 {seconds}s",
     "rotateFailed": "无法轮换出口 IP。请等锁定结束后再试。",
     "billingTitle": "账单",
-    "nextCharge": "下次扣款",
+    "serviceExpires": "服务到期日",
     "paymentMethod": "支付方式",
     "methodCard": "卡片 · ••{last4}",
     "methodAlipay": "支付宝",
@@ -432,6 +435,9 @@
     "invalidCode": "需要有效的优惠码。",
     "backWorkspace": "返回 Workspace",
     "taxIncluded": "含增值税",
+    "billingMode": "付款方式",
+    "billingOneTime": "单次付款（无自动续费）",
+    "noAutoRenew": "到期后需另行付款才能延长。不提供银行卡自动扣款或定期付款。",
     "refundNotice": "本服务为付款后立即开始提供的数字内容。接入信息或备份使用信息发放后，依据《电子商务等中的消费者保护法》第17条第2项第5号，撤回权可能受到限制。",
     "agreeLabel": "我同意服务条款、隐私政策及撤回限制说明。",
     "agreeRequired": "支付前请同意条款与撤回限制。",

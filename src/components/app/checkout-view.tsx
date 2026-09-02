@@ -15,9 +15,11 @@ import type { AppLocale } from "@/i18n/routing";
 import type { PublicSession } from "@/lib/auth-types";
 import { type PaymentMethod } from "@/lib/account";
 import { provisionProduct, refreshRemoteAccount } from "@/lib/account-store";
+import { PaymentModeBadge } from "@/components/marketing/payment-mode-badge";
+import { PlanPeriodCaption } from "@/components/marketing/plan-period-caption";
 import { PriceAmount, SecondaryPriceAmount } from "@/components/marketing/price-amount";
 import { useLivePlan } from "@/hooks/use-admin";
-import { isPublicCheckoutProduct } from "@/lib/plans";
+import { isPublicCheckoutProduct, planPricePeriodKey } from "@/lib/plans";
 import type { PortOneCheckout } from "@/lib/payments/portone";
 import { canStartPublicCheckout } from "@/lib/review-user";
 import { cn } from "@/lib/utils";
@@ -71,6 +73,7 @@ export function CheckoutView({
   merchant?: React.ReactNode;
 }) {
   const t = useTranslations("checkout");
+  const tPricing = useTranslations("pricing");
   const tFooter = useTranslations("footer");
   const locale = useLocale() as AppLocale;
   const router = useRouter();
@@ -79,6 +82,7 @@ export function CheckoutView({
   const user = session ?? initialSession;
   const plan = useLivePlan(planId);
   const validProduct = isPublicCheckoutProduct(product) && plan?.product === product ? product : null;
+  const planPeriod = plan ? tPricing(planPricePeriodKey(plan.id)) : null;
   const [method, setMethod] = useState<PaymentMethod>(locale === "zh" ? "alipay" : "card");
   const [agreed, setAgreed] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -284,8 +288,11 @@ export function CheckoutView({
       <h1 className="mt-3 text-3xl tracking-tight">{t("title")}</h1>
       <p className="mt-2 text-sm text-muted-foreground">{t("subtitle")}</p>
 
-      <div className="mt-8 rounded-2xl border border-border bg-card p-6">
-        <div className="flex items-end justify-between gap-3">
+      <div className="relative mt-8 rounded-2xl border border-border bg-card p-6">
+        <div className="absolute top-4 right-4">
+          <PaymentModeBadge />
+        </div>
+        <div className="flex items-end justify-between gap-3 pr-24">
           <div>
             <p className="text-sm text-muted-foreground">
               {checkoutProductLabel(validProduct, plan.id, t)} · {plan.name}
@@ -294,6 +301,8 @@ export function CheckoutView({
               <PriceAmount locale={locale} prices={plan.prices} />
             </p>
             <p className="mt-1 text-xs text-muted-foreground">{t("taxIncluded")}</p>
+            {planPeriod ? <PlanPeriodCaption period={planPeriod} className="mt-1" /> : null}
+            <p className="mt-1 text-xs text-muted-foreground">{t("billingOneTime")}</p>
             <SecondaryPriceAmount
               locale={locale}
               prices={plan.prices}
@@ -348,6 +357,7 @@ export function CheckoutView({
               </p>
             ) : null}
             <p className="text-xs leading-5 text-muted-foreground">{t("refundNotice")}</p>
+            <p className="text-xs leading-5 text-muted-foreground">{t("noAutoRenew")}</p>
             <label className="flex items-start gap-2 text-xs leading-5 text-muted-foreground">
               <input
                 type="checkbox"

@@ -54,15 +54,15 @@
     "withdraw": "Withdrawal and cancellation",
     "support": "Customer support",
     "supplierValue": "{legalName} (service name {serviceName})",
-    "standardTerms": "Encrypted network access and 1GB secure cloud backup on the LA route, for lawful travel, work, and online meetings. Traffic and term follow the plan you choose (1 week, 1 month, or 12 months).",
-    "hybridTerms": "Encrypted network access and 1GB secure cloud backup on Tokyo+LA routes, for lawful travel, work, and online meetings. Traffic and term follow the plan you choose (1 week, 1 month, or 12 months).",
-    "workspaceTerms": "Team or custom encrypted network access and secure cloud backup. Plans A, B, and C share the same monthly price of $150; they differ only in seats and monthly traffic. Plans require a promotional code.",
+    "standardTerms": "Encrypted network access and 1GB secure cloud backup on the LA route, for lawful travel, work, and online meetings. Traffic and term follow the plan you choose (1 week, 1 month, or 12 months). All paid plans are one-time purchases only; we do not offer recurring billing or auto-renewal.",
+    "hybridTerms": "Encrypted network access and 1GB secure cloud backup on Tokyo+LA routes, for lawful travel, work, and online meetings. Traffic and term follow the plan you choose (1 week, 1 month, or 12 months). All paid plans are one-time purchases only; we do not offer recurring billing or auto-renewal.",
+    "workspaceTerms": "Team or custom encrypted network access and secure cloud backup. Plans A, B, and C are one-time purchases for a 1-month term at $150; they differ only in seats and monthly traffic. Plans require a promotional code. We do not offer recurring billing or auto-renewal.",
     "deliveryValue": "No physical shipment. After payment, access and backup details are issued immediately to the signed-in account.",
     "workspaceDeliveryValue": "No physical shipment. After the promotional code is confirmed, access and backup details are issued to the signed-in account.",
     "requirementsValue": "A PC or phone with internet access. Use Vaultwarden (password & note backup) and Syncthing (small file storage) in a browser. No dedicated backup app is required.",
     "withdrawValue": "After access or backup details are issued, the right to withdraw may be limited under Korean e-commerce law article 17(2)(5). Full refund within 7 days if issuance failed or the charge was duplicated. We do not pro-rate unused time after issuance.",
     "withdrawLink": "Withdrawals & refunds",
-    "vat": "Prices include VAT."
+    "vat": "Prices include VAT. All plans are one-time purchases; there is no auto-renewal or subscription billing."
   },
   "legal": {
     "termsTitle": "Terms of Service",
@@ -88,7 +88,7 @@
       },
       {
         "title": "5. Payments and plans",
-        "body": "Prices include VAT and are shown in the currency that follows your language. Card and Alipay charges are processed by PortOne, Stripe, or Paymentwall. For Standard and Hybrid, digital delivery (access and backup details) starts immediately when payment succeeds. For Workspace, you pay after a promotional code is confirmed, and the company issues details to the account. Traffic, backup quota, and term follow the plan; unused traffic does not roll over unless stated. Withdrawals and refunds follow section 6."
+        "body": "Prices include VAT and are shown in the currency that follows your language. Card and Alipay charges are processed by PortOne, Stripe, or Paymentwall. All paid plans are one-time purchases only; we do not offer recurring billing, auto-renewal, or automatic card charges. When your term ends, you must pay again to extend access.\n\nFor Standard and Hybrid, digital delivery (access and backup details) starts immediately when payment succeeds. For Workspace, you pay after a promotional code is confirmed, and the company issues details to the account. Traffic, backup quota, and term follow the plan; unused traffic does not roll over unless stated. Withdrawals and refunds follow section 6."
       },
       {
         "id": "refund",
@@ -177,10 +177,13 @@
     "marketing": "Workspace",
     "perMonth": "/ mo",
     "perWeek": "/ week",
-    "periodWeek": "/ 1 week",
-    "period1Week": "/ 1 week",
-    "periodMonth": "/ 1 month",
-    "periodYear": "/ 12 months",
+    "periodWeek": "1-week term",
+    "period1Week": "1-week term",
+    "periodMonth": "1-month term",
+    "periodYear": "12-month term",
+    "billingOneTime": "One-time",
+    "billingOneTimeCaption": "No auto-renewal or subscription billing",
+    "periodOneTimeLine": "{period} · {billing}",
     "traffic": "Traffic",
     "backup": "Backup",
     "nodes": "Nodes",
@@ -198,14 +201,14 @@
       "eyebrow": "Secure Cloud & Network Optimization",
       "title": "Standard",
       "description": "Right-sized speed for short trips and travel backups. Use Vaultwarden (password & note backup) and Syncthing (small file storage) in a browser.",
-      "price": "₩9,900/mo",
+      "price": "₩9,900 · 1 month",
       "cta": "Learn more"
     },
     "global-pro": {
       "eyebrow": "Secure Cloud & Network Optimization",
       "title": "Hybrid",
       "description": "Secure backup with faster network optimization. Use Vaultwarden (password & note backup) and Syncthing (small file storage) in a browser.",
-      "price": "₩19,900/mo",
+      "price": "₩19,900 · 1 month",
       "cta": "Learn more"
     }
   },
@@ -395,7 +398,7 @@
     "rotateCooldown": "Cooldown {seconds}s",
     "rotateFailed": "Could not rotate the exit IP. Try again after the lock clears.",
     "billingTitle": "Billing",
-    "nextCharge": "Next charge",
+    "serviceExpires": "Service expires",
     "paymentMethod": "Payment method",
     "methodCard": "Card · ••{last4}",
     "methodAlipay": "Alipay",
@@ -432,6 +435,9 @@
     "invalidCode": "A valid promotional code is required.",
     "backWorkspace": "Back to Workspace",
     "taxIncluded": "VAT included",
+    "billingMode": "Payment type",
+    "billingOneTime": "One-time purchase (no auto-renewal)",
+    "noAutoRenew": "Extension after expiry requires a new payment. We do not offer automatic card charges or subscription billing.",
     "refundNotice": "This service is digital content that begins as soon as payment succeeds. After access or backup details are issued, withdrawal may be limited under Article 17(2)(5) of Korea’s Act on Consumer Protection in Electronic Commerce.",
     "agreeLabel": "I agree to the Terms, Privacy Policy, and the withdrawal limitation notice.",
     "agreeRequired": "Agree to the terms and withdrawal limitation before paying.",

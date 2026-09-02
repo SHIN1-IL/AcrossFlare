@@ -1,6 +1,8 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { LazyStageBackdrop } from "@/components/marketing/plan-stage-bg";
-import { PriceWithPeriod, SecondaryPriceAmount } from "@/components/marketing/price-amount";
+import { PaymentModeBadge } from "@/components/marketing/payment-mode-badge";
+import { PlanPeriodCaption } from "@/components/marketing/plan-period-caption";
+import { PriceAmount, SecondaryPriceAmount } from "@/components/marketing/price-amount";
 import { buttonVariants } from "@/components/ui/button";
 import { cachedMarketingHref } from "@/i18n/path";
 import { homeSlideFor } from "@/lib/marketing-services";
@@ -97,14 +99,20 @@ function PlanStage({
               plan.backupGb !== null ? ` · ${t("backup")} ${plan.backupGb} GB` : ""
             }`}
         </p>
-        <p className="mt-6 font-mono text-3xl tracking-tight md:text-4xl">
-          <PriceWithPeriod locale={locale} prices={prices} period={period} compact />
-        </p>
-        <SecondaryPriceAmount
-          locale={locale}
-          prices={prices}
-          className="mt-1 font-mono text-xs text-muted-foreground"
-        />
+        <div className="relative mt-6 w-full max-w-md">
+          <div className="absolute top-0 right-0">
+            <PaymentModeBadge />
+          </div>
+          <p className="font-mono text-3xl tracking-tight md:text-4xl">
+            <PriceAmount locale={locale} prices={prices} compact />
+          </p>
+          <SecondaryPriceAmount
+            locale={locale}
+            prices={prices}
+            className="mt-1 justify-center font-mono text-xs text-muted-foreground"
+          />
+          <PlanPeriodCaption period={period} className="mt-1 text-center" />
+        </div>
         {showAlipay ? (
           <p className="mt-2 text-xs text-primary">{t("alipay")}</p>
         ) : null}

@@ -18,7 +18,7 @@ export function BillingView() {
     return null;
   }
 
-  const nextCharge =
+  const serviceExpires =
     account.global?.expiresAt ?? account.workspace?.expiresAt ?? account.marketing?.expiresAt;
 
   return (
@@ -27,9 +27,9 @@ export function BillingView() {
 
       <section className="grid gap-4 sm:grid-cols-2">
         <div className="rounded-2xl border border-border bg-card p-5">
-          <p className="text-xs text-muted-foreground">{t("nextCharge")}</p>
+          <p className="text-xs text-muted-foreground">{t("serviceExpires")}</p>
           <p className="mt-2 text-sm">
-            {nextCharge ? formatDate(locale, nextCharge) : t("noReceipts")}
+            {serviceExpires ? formatDate(locale, serviceExpires) : t("noReceipts")}
           </p>
         </div>
         <div className="rounded-2xl border border-border bg-card p-5">

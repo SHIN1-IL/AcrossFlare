@@ -4,8 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { CachedMarketingLink } from "@/components/marketing/cached-marketing-link";
 import { PriceAmount, SecondaryPriceAmount } from "@/components/marketing/price-amount";
+import { PaymentModeBadge } from "@/components/marketing/payment-mode-badge";
+import { PlanPeriodCaption } from "@/components/marketing/plan-period-caption";
 import { publicServiceFromPlanId, publicServiceHref } from "@/lib/public-service";
-import { planHasPrice, planTerm, planTrafficQuota, type Plan } from "@/lib/plans";
+import { planHasPrice, planPricePeriodKey, planTrafficQuota, type Plan } from "@/lib/plans";
 import { cn } from "@/lib/utils";
 import type { AppLocale } from "@/i18n/routing";
 
@@ -21,36 +23,35 @@ export function PlanCard({
   const service = publicServiceFromPlanId(plan.id);
   const priced = planHasPrice(plan);
   const browse = service === "workspace" || !priced;
-  const period =
-    planTerm(plan.id) === "week"
-      ? t("periodWeek")
-      : planTerm(plan.id) === "year"
-        ? t("periodYear")
-        : t("periodMonth");
+  const period = t(planPricePeriodKey(plan.id, service === "hybrid" ? "hybrid" : undefined));
 
   return (
     <article
       className={cn(
-        "flex flex-col rounded-2xl border bg-card p-5",
-        plan.featured ? "border-primary/40" : "border-border"
+        "relative flex flex-col rounded-2xl border bg-card p-5",
+        plan.featured ? "border-primary/40" : "border-border",
+        priced && "pt-8"
       )}
     >
+      {priced ? (
+        <div className="absolute top-3 right-3">
+          <PaymentModeBadge />
+        </div>
+      ) : null}
       <div className="mb-5 flex items-start justify-between gap-2">
         <div>
           <p className="text-sm text-muted-foreground">{plan.name}</p>
           {priced ? (
             <>
-              <div className="mt-2 flex items-end gap-2">
-                <p className="font-mono text-3xl tracking-tight text-foreground">
-                  <PriceAmount locale={locale} prices={plan.prices} />
-                </p>
-                <span className="mb-1 text-xs text-muted-foreground">{period}</span>
-              </div>
+              <p className="mt-2 font-mono text-3xl tracking-tight text-foreground">
+                <PriceAmount locale={locale} prices={plan.prices} />
+              </p>
               <SecondaryPriceAmount
                 locale={locale}
                 prices={plan.prices}
                 className="mt-1 font-mono text-xs text-muted-foreground"
               />
+              <PlanPeriodCaption period={period} className="mt-1" />
             </>
           ) : (
             <p className="mt-2 text-sm text-muted-foreground">{t("inquire")}</p>
