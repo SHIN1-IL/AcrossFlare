@@ -24,7 +24,7 @@ cd "$PROJECT_DIR"
 echo "==> Project: $PROJECT_DIR"
 
 echo "==> git pull"
-git pull --ff-only
+git pull --ff-only origin main
 
 if [[ -f .env ]]; then
   echo "==> .env production flags"
