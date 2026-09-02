@@ -43,6 +43,10 @@ export function useAccount() {
       return;
     }
 
+    if (isRemoteAccountReady(session.email)) {
+      return;
+    }
+
     void refreshRemoteAccount(session.email);
   }, [session]);
 

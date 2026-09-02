@@ -9,5 +9,7 @@ export async function GET() {
     return auth.response;
   }
 
-  return NextResponse.json(filterAdminState(await listAdminState(), auth.user.permissions));
+  return NextResponse.json(filterAdminState(await listAdminState(), auth.user.permissions), {
+    headers: { "Cache-Control": "private, no-store" },
+  });
 }

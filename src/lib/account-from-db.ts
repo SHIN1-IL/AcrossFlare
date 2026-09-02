@@ -3,10 +3,10 @@ import {
   PaymentStatus,
   Product,
   SubscriptionStatus,
-  type Credential,
   type Payment,
   type Plan,
   type Subscription,
+  type Credential,
 } from "@prisma/client";
 import type { AccountSnapshot, GlobalAccount, MarketingAccount, Receipt } from "@/lib/account";
 import { scenarioFromEmail } from "@/lib/account";
@@ -18,19 +18,69 @@ import { yamlUrlFor } from "@/lib/provision/build";
 type SubscriptionRow = Subscription & {
   plan: Plan;
   nodes: { ddns: string }[];
-  credentials: Credential | null;
+  credentials: Pick<
+    Credential,
+    | "uuid"
+    | "deepLink"
+    | "yamlToken"
+    | "vaultUrl"
+    | "vaultUser"
+    | "syncthingUrl"
+    | "syncthingFolderId"
+    | "exitIp"
+    | "region"
+    | "lastRotateAt"
+    | "rotateLockedUntil"
+    | "httpUser"
+    | "httpPass"
+    | "httpPort"
+    | "socksPort"
+    | "wgPrivateKey"
+    | "wgPublicKey"
+    | "wgAddress"
+    | "wgEndpointPort"
+  > | null;
 };
 
+const subscriptionInclude = {
+  plan: true,
+  nodes: { select: { ddns: true } },
+  credentials: {
+    select: {
+      uuid: true,
+      deepLink: true,
+      yamlToken: true,
+      vaultUrl: true,
+      vaultUser: true,
+      syncthingUrl: true,
+      syncthingFolderId: true,
+      exitIp: true,
+      region: true,
+      lastRotateAt: true,
+      rotateLockedUntil: true,
+      httpUser: true,
+      httpPass: true,
+      httpPort: true,
+      socksPort: true,
+      wgPrivateKey: true,
+      wgPublicKey: true,
+      wgAddress: true,
+      wgEndpointPort: true,
+    },
+  },
+} as const;
+
+const RECEIPT_LIMIT = 12;
+
 export async function loadAccountSnapshot(email: string, userId: string): Promise<AccountSnapshot> {
-  const [subscriptions, payments] = await Promise.all([
-    prisma.subscription.findMany({
-      where: { userId },
-      include: { plan: true, nodes: { select: { ddns: true } }, credentials: true },
-      orderBy: { createdAt: "desc" },
-    }),
+  const [globalSub, marketingSub, workspaceSub, payments] = await Promise.all([
+    latestSubscription(userId, Product.GLOBAL),
+    latestSubscription(userId, Product.MARKETING),
+    latestSubscription(userId, Product.WORKSPACE),
     prisma.payment.findMany({
       where: { userId, status: PaymentStatus.SUCCEEDED },
       orderBy: { createdAt: "desc" },
+      take: RECEIPT_LIMIT,
     }),
   ]);
 
@@ -38,16 +88,20 @@ export async function loadAccountSnapshot(email: string, userId: string): Promis
   return {
     email,
     scenario: scenarioFromEmail(email),
-    global: toGlobalAccount(latestByProduct(subscriptions, Product.GLOBAL)),
-    marketing: toMarketingAccount(latestByProduct(subscriptions, Product.MARKETING)),
-    workspace: toGlobalAccount(latestByProduct(subscriptions, Product.WORKSPACE)),
+    global: toGlobalAccount(globalSub),
+    marketing: toMarketingAccount(marketingSub),
+    workspace: toGlobalAccount(workspaceSub),
     method: latestMethod === PrismaPaymentMethod.ALIPAY ? "alipay" : "card",
     receipts: payments.map(toReceipt),
   };
 }
 
-function latestByProduct(subscriptions: SubscriptionRow[], product: Product) {
-  return subscriptions.find((item) => item.product === product) ?? null;
+async function latestSubscription(userId: string, product: Product) {
+  return prisma.subscription.findFirst({
+    where: { userId, product },
+    orderBy: { createdAt: "desc" },
+    include: subscriptionInclude,
+  });
 }
 
 export function toUiStatus(status: SubscriptionStatus): GlobalAccount["status"] | null {
@@ -91,7 +145,7 @@ function toGlobalAccount(subscription: SubscriptionRow | null): GlobalAccount | 
     uuid: creds?.uuid ?? "",
     deepLink: creds?.deepLink ?? "",
     yamlUrl,
-    yamlBody: creds?.yamlBody ?? "",
+    yamlBody: "",
     vaultUrl: creds?.vaultUrl ?? "",
     vaultUser: creds?.vaultUser ?? "",
     syncthingUrl: creds?.syncthingUrl ?? "",
@@ -141,4 +195,3 @@ function toReceipt(payment: Payment): Receipt {
     planId: payment.planId,
   };
 }
-

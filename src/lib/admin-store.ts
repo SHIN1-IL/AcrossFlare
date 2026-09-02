@@ -39,6 +39,22 @@ let provisionInFlight = false;
 let changeInFlight = false;
 let migrateInFlight = false;
 let refreshPromise: Promise<void> | null = null;
+let adminSeeded = false;
+
+export function seedAdminState(
+  state: Pick<AdminState, "plans" | "nodes" | "customers" | "promoCodes" | "provisionSimulate">
+) {
+  memory = {
+    ...memory,
+    plans: state.plans ?? [],
+    nodes: state.nodes ?? [],
+    customers: state.customers ?? [],
+    promoCodes: state.promoCodes ?? [],
+    provisionSimulate: Boolean(state.provisionSimulate),
+  };
+  adminSeeded = true;
+  emit();
+}
 
 function emit() {
   version += 1;

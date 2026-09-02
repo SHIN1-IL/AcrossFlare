@@ -76,6 +76,13 @@ export function isRemoteAccountReady(email: string) {
   return remoteReadyEmail === email;
 }
 
+/** Hydrate from SSR so the console shell renders without waiting on /api/v1/account. */
+export function seedRemoteAccount(account: AccountSnapshot) {
+  remoteAccount = account;
+  remoteReadyEmail = account.email;
+  emit();
+}
+
 export function getAccount(email: string, preview = false): AccountSnapshot | null {
   if (preview) {
     return resolveAccount(email, getOverlay(email));

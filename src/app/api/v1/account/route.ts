@@ -9,5 +9,8 @@ export async function GET() {
   }
 
   const account = await loadAccountSnapshot(user.email, user.id);
-  return NextResponse.json({ account });
+  return NextResponse.json(
+    { account },
+    { headers: { "Cache-Control": "private, no-store" } }
+  );
 }
