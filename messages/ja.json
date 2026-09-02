@@ -183,7 +183,7 @@
     "periodYear": "12か月利用",
     "billingOneTime": "単発決済",
     "billingOneTimeCaption": "自動更新・定期課金なし",
-    "periodOneTimeLine": "{period} · {billing}",
+    "periodOneTimeLine": "{period} ({billing})",
     "traffic": "トラフィック",
     "backup": "バックアップ",
     "nodes": "ノード",

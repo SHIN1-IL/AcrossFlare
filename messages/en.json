@@ -183,7 +183,7 @@
     "periodYear": "12-month term",
     "billingOneTime": "One-time",
     "billingOneTimeCaption": "No auto-renewal or subscription billing",
-    "periodOneTimeLine": "{period} · {billing}",
+    "periodOneTimeLine": "{period} ({billing})",
     "traffic": "Traffic",
     "backup": "Backup",
     "nodes": "Nodes",

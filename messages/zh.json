@@ -183,7 +183,7 @@
     "periodYear": "12 个月使用",
     "billingOneTime": "单次付款",
     "billingOneTimeCaption": "无自动续费或定期扣款",
-    "periodOneTimeLine": "{period} · {billing}",
+    "periodOneTimeLine": "{period} ({billing})",
     "traffic": "流量",
     "backup": "备份",
     "nodes": "节点",

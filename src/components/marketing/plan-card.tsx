@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { CachedMarketingLink } from "@/components/marketing/cached-marketing-link";
 import { PriceAmount, SecondaryPriceAmount } from "@/components/marketing/price-amount";
-import { PaymentModeBadge } from "@/components/marketing/payment-mode-badge";
 import { PlanPeriodCaption } from "@/components/marketing/plan-period-caption";
 import { publicServiceFromPlanId, publicServiceHref } from "@/lib/public-service";
 import { planHasPrice, planPricePeriodKey, planTrafficQuota, type Plan } from "@/lib/plans";
@@ -28,16 +27,10 @@ export function PlanCard({
   return (
     <article
       className={cn(
-        "relative flex flex-col rounded-2xl border bg-card p-5",
-        plan.featured ? "border-primary/40" : "border-border",
-        priced && "pt-8"
+        "flex flex-col rounded-2xl border bg-card p-5",
+        plan.featured ? "border-primary/40" : "border-border"
       )}
     >
-      {priced ? (
-        <div className="absolute top-3 right-3">
-          <PaymentModeBadge />
-        </div>
-      ) : null}
       <div className="mb-5 flex items-start justify-between gap-2">
         <div>
           <p className="text-sm text-muted-foreground">{plan.name}</p>

@@ -15,7 +15,6 @@ import type { AppLocale } from "@/i18n/routing";
 import type { PublicSession } from "@/lib/auth-types";
 import { type PaymentMethod } from "@/lib/account";
 import { provisionProduct, refreshRemoteAccount } from "@/lib/account-store";
-import { PaymentModeBadge } from "@/components/marketing/payment-mode-badge";
 import { PlanPeriodCaption } from "@/components/marketing/plan-period-caption";
 import { PriceAmount, SecondaryPriceAmount } from "@/components/marketing/price-amount";
 import { useLivePlan } from "@/hooks/use-admin";
@@ -288,11 +287,8 @@ export function CheckoutView({
       <h1 className="mt-3 text-3xl tracking-tight">{t("title")}</h1>
       <p className="mt-2 text-sm text-muted-foreground">{t("subtitle")}</p>
 
-      <div className="relative mt-8 rounded-2xl border border-border bg-card p-6">
-        <div className="absolute top-4 right-4">
-          <PaymentModeBadge />
-        </div>
-        <div className="flex items-end justify-between gap-3 pr-24">
+      <div className="mt-8 rounded-2xl border border-border bg-card p-6">
+        <div className="flex items-end justify-between gap-3">
           <div>
             <p className="text-sm text-muted-foreground">
               {checkoutProductLabel(validProduct, plan.id, t)} · {plan.name}
@@ -302,7 +298,6 @@ export function CheckoutView({
             </p>
             <p className="mt-1 text-xs text-muted-foreground">{t("taxIncluded")}</p>
             {planPeriod ? <PlanPeriodCaption period={planPeriod} className="mt-1" /> : null}
-            <p className="mt-1 text-xs text-muted-foreground">{t("billingOneTime")}</p>
             <SecondaryPriceAmount
               locale={locale}
               prices={plan.prices}

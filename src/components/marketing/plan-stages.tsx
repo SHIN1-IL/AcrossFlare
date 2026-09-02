@@ -1,6 +1,5 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { LazyStageBackdrop } from "@/components/marketing/plan-stage-bg";
-import { PaymentModeBadge } from "@/components/marketing/payment-mode-badge";
 import { PlanPeriodCaption } from "@/components/marketing/plan-period-caption";
 import { PriceAmount, SecondaryPriceAmount } from "@/components/marketing/price-amount";
 import { buttonVariants } from "@/components/ui/button";
@@ -99,10 +98,7 @@ function PlanStage({
               plan.backupGb !== null ? ` · ${t("backup")} ${plan.backupGb} GB` : ""
             }`}
         </p>
-        <div className="relative mt-6 w-full max-w-md">
-          <div className="absolute top-0 right-0">
-            <PaymentModeBadge />
-          </div>
+        <div className="mt-6 w-full max-w-md">
           <p className="font-mono text-3xl tracking-tight md:text-4xl">
             <PriceAmount locale={locale} prices={prices} compact />
           </p>

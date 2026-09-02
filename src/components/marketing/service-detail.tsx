@@ -7,7 +7,6 @@ import { StageBackdrop } from "@/components/marketing/plan-stage-bg";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PriceAmount, SecondaryPriceAmount } from "@/components/marketing/price-amount";
-import { PaymentModeBadge } from "@/components/marketing/payment-mode-badge";
 import { PlanPeriodCaption } from "@/components/marketing/plan-period-caption";
 import { getMarketingService, type MarketingServiceId } from "@/lib/marketing-services";
 import {
@@ -91,8 +90,7 @@ export function ServiceDetail({
                 cta={t(`${service.id}.cta`)}
                 needsCode={service.id === "workspace"}
             period={priced ? tPricing(planPricePeriodKey(plan.id, service.id)) : null}
-            showPaymentMode={priced}
-            showPeriodCaption={priced}
+                showPeriodCaption={priced}
               />
               );
             })}
@@ -117,7 +115,6 @@ function ServicePlanCard({
   cta,
   needsCode,
   period,
-  showPaymentMode,
   showPeriodCaption,
 }: {
   plan: Plan;
@@ -133,7 +130,6 @@ function ServicePlanCard({
   cta: string;
   needsCode?: boolean;
   period: string | null;
-  showPaymentMode?: boolean;
   showPeriodCaption?: boolean;
 }) {
   const tPricing = useTranslations("pricing");
@@ -148,16 +144,11 @@ function ServicePlanCard({
     <article
       className={cn(
         "relative flex min-w-0 flex-col items-center overflow-hidden rounded-2xl border border-border bg-card/80 px-2 py-4 text-center backdrop-blur-sm sm:px-3 sm:py-5",
-        (badge || showPaymentMode) && "pt-7 sm:pt-8"
+        badge && "pt-6 sm:pt-7"
       )}
     >
-      {showPaymentMode ? (
-        <div className="absolute top-1.5 right-1.5 z-10 sm:top-2 sm:right-2">
-          <PaymentModeBadge compact />
-        </div>
-      ) : null}
       {badge ? (
-        <p className="absolute top-1.5 left-1.5 right-12 text-left text-[9px] font-medium leading-tight tracking-wide text-orange-400 sm:top-2 sm:text-[11px]">
+        <p className="absolute top-1.5 right-1 left-1 text-[9px] font-medium leading-tight tracking-wide text-orange-400 sm:top-2 sm:text-[11px]">
           {badge}
         </p>
       ) : null}

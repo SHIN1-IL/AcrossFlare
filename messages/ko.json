@@ -183,7 +183,7 @@
     "periodYear": "12개월 이용",
     "billingOneTime": "단건결제",
     "billingOneTimeCaption": "자동 갱신·정기결제 없음",
-    "periodOneTimeLine": "{period} · {billing}",
+    "periodOneTimeLine": "{period} ({billing})",
     "traffic": "트래픽",
     "backup": "백업",
     "nodes": "노드",
