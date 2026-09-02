@@ -4,19 +4,19 @@ set -euo pipefail
 
 ORIGIN_HOST="${ORIGIN_HOST:-root@167.179.86.16}"
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-ASKPASS_SCRIPT="$(mktemp)"
-trap 'rm -f "$ASKPASS_SCRIPT"' EXIT
+REMOTE_SCRIPT="$ROOT/infra/scripts/deploy-origin-remote.sh"
 
 echo "==> AcrossFlare origin deploy → $ORIGIN_HOST"
 
-PASSWORD="$(
-  osascript <<'APPLESCRIPT' || true
-display dialog "Origin VPS SSH 비밀번호
+if ! command -v expect >/dev/null 2>&1; then
+  echo "ERROR: expect가 필요합니다. Xcode Command Line Tools를 설치하세요."
+  exit 1
+fi
 
-root@167.179.86.16" default answer "" with title "AcrossFlare 배포" with hidden answer buttons {"취소", "배포 시작"} default button "배포 시작"
-if button returned of result is "취소" then error number -128
-text returned of result
-APPLESCRIPT
+PASSWORD="$(
+  osascript \
+    -e 'display dialog "Origin VPS SSH 비밀번호를 입력하세요." & return & return & "root@167.179.86.16" default answer "" with title "AcrossFlare 배포" with hidden answer with icon note buttons {"취소", "배포 시작"} default button "배포 시작"' \
+    -e 'text returned of result'
 )" || {
   echo "배포가 취소되었습니다."
   exit 1
@@ -28,17 +28,30 @@ if [[ -z "$PASSWORD" ]]; then
 fi
 
 export AF_SSH_PASS="$PASSWORD"
-cat >"$ASKPASS_SCRIPT" <<'EOF'
-#!/bin/sh
-printf '%s' "$AF_SSH_PASS"
-EOF
-chmod 700 "$ASKPASS_SCRIPT"
-
-export SSH_ASKPASS="$ASKPASS_SCRIPT"
-export SSH_ASKPASS_REQUIRE=force
-export DISPLAY="${DISPLAY:-:0}"
+export AF_ORIGIN_HOST="$ORIGIN_HOST"
+export AF_REMOTE_SCRIPT="$REMOTE_SCRIPT"
 
 echo "==> SSH 연결 및 배포 진행 중..."
-ssh -t -o StrictHostKeyChecking=accept-new -o PreferredAuthentications=password -o PubkeyAuthentication=no "$ORIGIN_HOST" 'bash -s' <"$ROOT/infra/scripts/deploy-origin-remote.sh"
+/usr/bin/expect <<'EXPECT'
+set timeout 1200
+set password $env(AF_SSH_PASS)
+set host $env(AF_ORIGIN_HOST)
+set script_path $env(AF_REMOTE_SCRIPT)
+
+log_user 1
+
+spawn bash -c "ssh -t -o StrictHostKeyChecking=accept-new -o PreferredAuthentications=password -o PubkeyAuthentication=no $host bash -s < $script_path"
+expect {
+  -re "(?i)password:" {
+    send "$password\r"
+    exp_continue
+  }
+  eof
+}
+catch wait result
+set exit_code [lindex $result 3]
+if {$exit_code eq ""} { set exit_code 0 }
+exit $exit_code
+EXPECT
 
 echo "==> 완료"
