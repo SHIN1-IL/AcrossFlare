@@ -1,10 +1,8 @@
+import { Suspense } from "react";
 import { setRequestLocale } from "next-intl/server";
-import { AppShell } from "@/components/app/app-shell";
-import { SessionProvider } from "@/components/auth/session-provider";
-import { MerchantDisclosure } from "@/components/marketing/merchant-disclosure";
-import { getCurrentUser } from "@/lib/auth";
+import { AppAuthShell } from "@/components/auth/app-auth-shell";
+import { AppShellLoading } from "@/components/app/shell-loading";
 import { resolveLocale } from "@/i18n/locale";
-import { redirect } from "@/i18n/navigation";
 
 export default async function AppLayout({
   children,
@@ -16,14 +14,11 @@ export default async function AppLayout({
   const locale = await resolveLocale(params);
   setRequestLocale(locale);
 
-  const user = await getCurrentUser();
-  if (!user) {
-    redirect({ href: { pathname: "/login", query: { next: "/app" } }, locale });
-  }
-
   return (
-    <SessionProvider initialSession={user}>
-      <AppShell merchant={<MerchantDisclosure />}>{children}</AppShell>
-    </SessionProvider>
+    <Suspense fallback={<AppShellLoading />}>
+      <AppAuthShell locale={locale} nextPath="/app">
+        {children}
+      </AppAuthShell>
+    </Suspense>
   );
 }

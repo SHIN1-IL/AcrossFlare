@@ -1,12 +1,18 @@
+"use client";
+
 import { BookOpen, CircleHelp, Download, HardDrive, LifeBuoy, type LucideIcon } from "lucide-react";
-import { headers } from "next/headers";
-import { getTranslations } from "next-intl/server";
+import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { BackupSetupGuide } from "@/components/marketing/backup-guide";
 import { KaringDownloadCta } from "@/components/marketing/karing-download";
 import { KaringHelpFaq, KaringSetupGuide } from "@/components/marketing/karing-guide";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { StageBackdrop } from "@/components/marketing/plan-stage-bg";
-import { detectKaringOs, fetchKaringLatestRelease } from "@/lib/karing-download";
+import {
+  detectKaringOsFromNavigator,
+  type DetectedKaringOs,
+  type NavigatorLike,
+} from "@/lib/karing-download";
 import {
   SUPPORT_SECTIONS,
   karingInstallPlatformFor,
@@ -20,15 +26,23 @@ const SECTION_ICONS: Record<SupportSectionId, LucideIcon> = {
   faq: CircleHelp,
 };
 
-export async function SupportZone() {
-  const [t, release, headerStore] = await Promise.all([
-    getTranslations("support"),
-    fetchKaringLatestRelease(),
-    headers(),
-  ]);
-  const initialOs = detectKaringOs({
-    userAgent: headerStore.get("user-agent") ?? "",
-  });
+const DEFAULT_OS: DetectedKaringOs = {
+  id: "other",
+  label: "other",
+  arch: "unknown",
+};
+
+export function SupportZone() {
+  const t = useTranslations("support");
+  const [initialOs, setInitialOs] = useState(DEFAULT_OS);
+
+  useEffect(() => {
+    const nav = navigator as NavigatorLike;
+    setInitialOs(detectKaringOsFromNavigator(nav));
+    nav.userAgentData?.getHighEntropyValues?.(["architecture", "platform"]).then((hints) => {
+      setInitialOs(detectKaringOsFromNavigator(nav, { architecture: hints.architecture }));
+    });
+  }, []);
 
   return (
     <MarketingShell>
@@ -75,9 +89,9 @@ export async function SupportZone() {
                               {t("downloads.lead")}
                             </p>
                             <KaringDownloadCta
-                              assets={release?.assets ?? []}
+                              assets={[]}
                               initialOs={initialOs}
-                              tagName={release?.tagName ?? ""}
+                              tagName=""
                               className="mt-5 flex flex-col items-center"
                             />
                           </div>

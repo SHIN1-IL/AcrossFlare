@@ -1,8 +1,8 @@
+import { Suspense } from "react";
 import { setRequestLocale } from "next-intl/server";
-import { SupportZone } from "@/components/marketing/support-zone";
-import { getCurrentUser } from "@/lib/auth";
+import { SupportAuthShell } from "@/components/auth/support-auth-shell";
+import { CheckoutLoading } from "@/components/app/checkout-loading";
 import { resolveLocale } from "@/i18n/locale";
-import { redirect } from "@/i18n/navigation";
 
 export default async function SupportRoute({
   params,
@@ -12,10 +12,9 @@ export default async function SupportRoute({
   const locale = await resolveLocale(params);
   setRequestLocale(locale);
 
-  const user = await getCurrentUser();
-  if (!user) {
-    redirect({ href: { pathname: "/login", query: { next: "/support" } }, locale });
-  }
-
-  return <SupportZone />;
+  return (
+    <Suspense fallback={<CheckoutLoading />}>
+      <SupportAuthShell locale={locale} />
+    </Suspense>
+  );
 }

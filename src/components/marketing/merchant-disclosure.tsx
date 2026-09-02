@@ -1,4 +1,6 @@
-import { getTranslations } from "next-intl/server";
+"use client";
+
+import { useTranslations } from "next-intl";
 import { getMerchant, merchantRows, type MerchantRowId } from "@/lib/legal/merchant";
 
 function MerchantValue({ id, value }: { id: MerchantRowId; value: string }) {
@@ -21,8 +23,8 @@ function MerchantValue({ id, value }: { id: MerchantRowId; value: string }) {
   return value;
 }
 
-export async function MerchantDisclosure() {
-  const t = await getTranslations("footer");
+export function MerchantDisclosure() {
+  const t = useTranslations("footer");
   const rows = merchantRows(getMerchant());
 
   return (

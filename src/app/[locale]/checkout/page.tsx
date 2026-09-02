@@ -1,12 +1,8 @@
+import { Suspense } from "react";
 import { setRequestLocale } from "next-intl/server";
-import { CheckoutView } from "@/components/app/checkout-view";
-import { SessionProvider } from "@/components/auth/session-provider";
-import { MerchantDisclosure } from "@/components/marketing/merchant-disclosure";
+import { CheckoutAuthShell } from "@/components/auth/checkout-auth-shell";
+import { CheckoutLoading } from "@/components/app/checkout-loading";
 import { resolveLocale } from "@/i18n/locale";
-import { redirect } from "@/i18n/navigation";
-import { getCurrentUser } from "@/lib/auth";
-import { checkoutReturnPath } from "@/lib/checkout-path";
-import { lookupPromoCode } from "@/lib/promo";
 
 export default async function CheckoutPage({
   params,
@@ -25,45 +21,16 @@ export default async function CheckoutPage({
   const { product, plan, paymentId, canceled, code } = await searchParams;
   setRequestLocale(locale);
 
-  const user = await getCurrentUser();
-  if (!user) {
-    redirect({
-      href: {
-        pathname: "/login",
-        query: {
-          next: checkoutReturnPath({
-            product,
-            plan,
-            paymentId,
-            canceled: canceled === "1" || canceled === "true",
-            promoCode: code,
-          }),
-        },
-      },
-      locale,
-    });
-    return;
-  }
-
-  let promoCode: string | undefined;
-  if (code && plan) {
-    const result = await lookupPromoCode(code);
-    if (result.ok && result.planId === plan && (!product || result.product === product)) {
-      promoCode = result.code;
-    }
-  }
-
   return (
-    <SessionProvider initialSession={user}>
-      <CheckoutView
-        initialSession={user}
+    <Suspense fallback={<CheckoutLoading />}>
+      <CheckoutAuthShell
+        locale={locale}
         product={product}
-        planId={plan}
+        plan={plan}
         paymentId={paymentId}
-        promoCode={promoCode}
-        canceled={canceled === "1" || canceled === "true"}
-        merchant={<MerchantDisclosure />}
+        canceled={canceled}
+        code={code}
       />
-    </SessionProvider>
+    </Suspense>
   );
 }

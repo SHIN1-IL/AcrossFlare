@@ -60,6 +60,7 @@ export function CheckoutView({
   planId,
   paymentId,
   promoCode,
+  promoCodeHint,
   canceled = false,
   merchant,
 }: {
@@ -68,6 +69,7 @@ export function CheckoutView({
   planId?: string;
   paymentId?: string;
   promoCode?: string;
+  promoCodeHint?: string;
   canceled?: boolean;
   merchant?: React.ReactNode;
 }) {
@@ -85,6 +87,7 @@ export function CheckoutView({
   const [method, setMethod] = useState<PaymentMethod>(locale === "zh" ? "alipay" : "card");
   const [agreed, setAgreed] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [resolvedPromoCode, setResolvedPromoCode] = useState<string | undefined>(promoCode);
   const [phase, setPhase] = useState<"form" | "processing" | "provisioning">(
     paymentId && !canceled ? "processing" : "form"
   );
@@ -94,6 +97,41 @@ export function CheckoutView({
     "processing"
   );
   const resumeRef = useRef(false);
+
+  useEffect(() => {
+    if (promoCode || !promoCodeHint || !planId) {
+      return;
+    }
+
+    let cancelled = false;
+    void fetch("/api/v1/promo/validate", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: promoCodeHint, planId }),
+    })
+      .then(async (response) => {
+        if (!response.ok || cancelled) {
+          return null;
+        }
+        return (await response.json()) as { code?: string; product?: string };
+      })
+      .then((result) => {
+        if (cancelled || !result?.code) {
+          return;
+        }
+        if (product && result.product && result.product !== product) {
+          return;
+        }
+        setResolvedPromoCode(result.code);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [planId, product, promoCode, promoCodeHint]);
+
+  const activePromoCode = resolvedPromoCode;
 
   const steps = useMemo(
     () =>
@@ -156,7 +194,7 @@ export function CheckoutView({
       return;
     }
 
-    if (validProduct === "workspace" && !promoCode) {
+    if (validProduct === "workspace" && !activePromoCode) {
       setError("invalid_code");
       return;
     }
@@ -175,7 +213,7 @@ export function CheckoutView({
           planId: plan.id,
           method,
           locale,
-          promoCode,
+          promoCode: activePromoCode,
           phoneNumber,
         }),
       });
@@ -267,7 +305,7 @@ export function CheckoutView({
     );
   }
 
-  if (validProduct === "workspace" && !promoCode && !paymentId) {
+  if (validProduct === "workspace" && !activePromoCode && !paymentId) {
     return (
       <CheckoutFrame merchant={merchant}>
         <h1 className="text-3xl tracking-tight">{t("title")}</h1>

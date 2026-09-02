@@ -1,8 +1,10 @@
-import { getTranslations } from "next-intl/server";
+"use client";
+
+import { useTranslations } from "next-intl";
 import { BACKUP_SETUP_STEPS } from "@/lib/support-zone";
 
-export async function BackupSetupGuide() {
-  const t = await getTranslations("support");
+export function BackupSetupGuide() {
+  const t = useTranslations("support");
 
   return (
     <div className="mt-5 space-y-5">

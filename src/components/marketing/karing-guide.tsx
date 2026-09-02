@@ -1,4 +1,6 @@
-import { getTranslations } from "next-intl/server";
+"use client";
+
+import { useTranslations } from "next-intl";
 import { buttonVariants } from "@/components/ui/button";
 import { getMerchant } from "@/lib/legal/merchant";
 import {
@@ -10,12 +12,12 @@ import {
 } from "@/lib/support-zone";
 import { cn } from "@/lib/utils";
 
-export async function KaringSetupGuide({
+export function KaringSetupGuide({
   activePlatform,
 }: {
   activePlatform: KaringInstallPlatformId | null;
 }) {
-  const t = await getTranslations("support");
+  const t = useTranslations("support");
 
   return (
     <div className="mt-5 space-y-5">
@@ -67,8 +69,8 @@ export async function KaringSetupGuide({
   );
 }
 
-export async function KaringHelpFaq() {
-  const t = await getTranslations("support");
+export function KaringHelpFaq() {
+  const t = useTranslations("support");
   const merchant = getMerchant();
   const mailto = `mailto:${merchant.email}?subject=${encodeURIComponent("Karing setup")}`;
 

@@ -1,10 +1,8 @@
+import { Suspense } from "react";
 import { setRequestLocale } from "next-intl/server";
-import { AdminShell } from "@/components/admin/admin-shell";
-import { SessionProvider } from "@/components/auth/session-provider";
-import { getCurrentUser } from "@/lib/auth";
-import { isAdminSession } from "@/lib/auth-types";
+import { AdminAuthShell } from "@/components/auth/admin-auth-shell";
+import { AdminShellLoading } from "@/components/admin/shell-loading";
 import { resolveLocale } from "@/i18n/locale";
-import { redirect } from "@/i18n/navigation";
 
 export default async function AdminLayout({
   children,
@@ -16,16 +14,9 @@ export default async function AdminLayout({
   const locale = await resolveLocale(params);
   setRequestLocale(locale);
 
-  const user = await getCurrentUser();
-  if (!user) {
-    redirect({ href: { pathname: "/login", query: { next: "/admin" } }, locale });
-  } else if (!isAdminSession(user)) {
-    redirect({ href: "/app", locale });
-  }
-
   return (
-    <SessionProvider initialSession={user}>
-      <AdminShell>{children}</AdminShell>
-    </SessionProvider>
+    <Suspense fallback={<AdminShellLoading />}>
+      <AdminAuthShell locale={locale}>{children}</AdminAuthShell>
+    </Suspense>
   );
 }
