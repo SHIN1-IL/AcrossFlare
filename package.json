@@ -24,7 +24,7 @@
     "smoke:live": "tsx scripts/live-smoke.ts"
   },
   "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "seed": "node ./node_modules/tsx/dist/cli.mjs prisma/seed.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
