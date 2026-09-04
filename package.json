@@ -20,6 +20,10 @@
     "origin:seed": "docker compose --profile origin run --rm seed",
     "origin:down": "docker compose --profile origin down",
     "origin:logs": "docker compose --profile origin logs -f --tail=200",
+    "edge:warm": "bash infra/scripts/warm-edge-cache.sh",
+    "edge:purge": "bash infra/scripts/purge-cloudflare-cache.sh",
+    "edge:slo": "bash infra/scripts/check-edge-slo.sh",
+    "edge:cron:install": "bash infra/scripts/install-edge-cron.sh",
     "certs:dev": "sh infra/scripts/gen-dev-origin-certs.sh",
     "smoke:live": "tsx scripts/live-smoke.ts"
   },

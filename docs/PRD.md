@@ -4,7 +4,7 @@
 * **제품명:** AcrossFlare (acrossflare.com)
 * **디자인 정체성:** Vercel/Stripe 스타일의 미니멀 고대비 다크 테크 SaaS (딥 차콜 `#090A0F` + 네온 에메랄드 `#10B981`)
 * **지원 언어:** 한국어(`ko`), 중국어(`zh`), 일본어(`ja`), 영어(`en`) - URL 라우팅 기반 (`/[locale]`)
-* **리팩토링 목표:** Nextcloud(PHP / MySQL / Redis) 레이어를 제거하고, 1GB RAM VPS에서 **전체 컨테이너 RAM 300MB 미만**을 유지하는 초경량 백엔드로 전환한다. Swap 1GB를 구성해 피크 메모리를 흡수한다.
+* **리팩토링 목표:** Nextcloud(PHP / MySQL / Redis) 레이어를 제거하고, **2GB RAM** 오리진 VPS(+ Swap 1GB)에서 초경량으로 유지한다. 마케팅 HTML은 Cloudflare edge HIT + warm cron으로 속도를 보장하고, `/app`·`/admin`(DYNAMIC)은 2GB 메모리 한도 안에서 안정화한다.
 
 ---
 
@@ -35,9 +35,9 @@
 | Syncthing | ~60MB |
 | Caddy | ~20MB |
 | FastAPI | ~40MB |
-| Next.js web | ~80–120MB |
-| PostgreSQL (tiny) | ~40–60MB |
-| **합계** | **300MB 미만 목표** (+ Swap 1GB) |
+| Next.js web | ~384–512MB (capped) |
+| PostgreSQL (tiny) | ~64–96MB |
+| **합계** | **~830MB steady caps on 2GB host** (+ Swap 1GB; marketing via CF edge) |
 
 제거된 스택: Nextcloud, PHP-FPM, MariaDB/MySQL(Nextcloud용), Redis.
 

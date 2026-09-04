@@ -1,5 +1,5 @@
 #!/bin/sh
-# 1GB swap for the 1GB RAM origin VPS. Safe to re-run.
+# 1GB swap for the 2GB RAM origin VPS. Safe to re-run.
 set -eu
 
 SWAPFILE="${SWAPFILE:-/swapfile}"

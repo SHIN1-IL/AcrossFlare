@@ -1,5 +1,5 @@
-/** Storefront HTML ISR + Cloudflare edge TTL (seconds). */
-export const STOREFRONT_REVALIDATE_SECONDS = 3600;
+/** Storefront HTML ISR + Cloudflare edge TTL (seconds). Long TTL + purge/warm keeps Free PoPs hot without hammering the origin. */
+export const STOREFRONT_REVALIDATE_SECONDS = 86400;
 
 export const MARKETING_CACHE_CONTROL = `public, max-age=0, s-maxage=${STOREFRONT_REVALIDATE_SECONDS}, stale-while-revalidate=86400`;
 export const MARKETING_CDN_CACHE_CONTROL = `public, s-maxage=${STOREFRONT_REVALIDATE_SECONDS}, stale-while-revalidate=86400`;

@@ -20,6 +20,8 @@ See also: [infra.md](./infra.md) (origin deploy), [.env.example](../.env.example
 | `XUI_API_TOKEN` + per-node creds in Admin | Match panels | Traffic pull and Failover provision fail |
 | Node REALITY fields in Admin | `realityPublicKey`, `realityShortId`, `realityServerName` per node | Karing YAML missing `reality-opts`; live provision fails |
 | `WG_SERVER_PUBLIC_KEY` | Set | Marketing WireGuard fails in live mode |
+| `CLOUDFLARE_ZONE_ID` + `CLOUDFLARE_API_TOKEN` | Set on origin | No deploy/admin purge; edge stays cold after TTL |
+| `SLO_ALERT_WEBHOOK_URL` | Optional | No Slack/Discord on edge SLO breach |
 
 Cron is explicitly off when `PROVISION_MODE=simulate`:
 
@@ -43,11 +45,12 @@ docker logs acrossflare-api-1 2>&1 | grep traffic_sync_scheduler_started
 On the origin VPS, in order:
 
 1. Cloudflare Origin CA → `infra/certs/origin.pem` / `origin.key`
-2. `sh infra/scripts/setup-swap.sh` (1GB swap — required on ~300MB RAM)
+2. `sh infra/scripts/setup-swap.sh` (1GB swap — keep on the 2GB origin)
 3. `npm run origin:up` (or redeploy)
 4. Health: `https://acrossflare.com/api/health`, `/dashboard`, `vault.`, `sync.`
-5. Admin: Bandwagon + RackNerd nodes **ONLINE**, API creds verified
-6. `npx prisma migrate deploy` (TrafficSnapshot / TrafficSyncRun migrations)
+5. `npm run edge:cron:install` after Cloudflare purge token is in `.env`
+6. Admin: Bandwagon + RackNerd nodes **ONLINE**, API creds verified
+7. `npx prisma migrate deploy` (TrafficSnapshot / TrafficSyncRun migrations)
 
 ---
 
@@ -93,6 +96,17 @@ docker logs acrossflare-api-1 --since 1h 2>&1 | grep -E "traffic_sync_(complete|
 docker stats --no-stream
 free -h
 ```
+
+**Edge cache / SLO (2GB origin + Cloudflare)**
+
+```bash
+npm run edge:slo
+# expect: health within EDGE_SLO_HEALTH_MS, marketing HIT ratio ≥ 70%
+tail -n 50 /var/log/acrossflare/slo.log
+tail -n 50 /var/log/acrossflare/warm.log
+```
+
+Manual warm if HIT ratio drops: `npm run edge:warm`.
 
 **Database (periodic)**
 

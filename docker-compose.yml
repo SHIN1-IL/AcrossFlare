@@ -19,6 +19,7 @@ x-logging: &default-logging
     max-file: "3"
 
 services:
+  # 2GB Vultr origin (~830MB steady container caps + OS headroom). Edge warm still required for marketing HIT.
   postgres:
     image: postgres:16-alpine
     container_name: acrossflare-postgres
@@ -26,7 +27,7 @@ services:
     command:
       - postgres
       - -c
-      - shared_buffers=16MB
+      - shared_buffers=32MB
       - -c
       - max_connections=40
     environment:
@@ -37,7 +38,7 @@ services:
       - "127.0.0.1:5434:5432"
     volumes:
       - acrossflare_pgdata:/var/lib/postgresql/data
-    mem_limit: 64m
+    mem_limit: 96m
     networks: [origin]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-acrossflare} -d ${POSTGRES_DB:-acrossflare}"]
@@ -64,7 +65,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    mem_limit: 48m
+    mem_limit: 64m
     networks: [origin]
     healthcheck:
       test:
@@ -141,12 +142,16 @@ services:
       VAULTWARDEN_INTERNAL_URL: http://vaultwarden:80
       SYNCTHING_URL: ${SYNCTHING_URL:-https://sync.acrossflare.com}
       SYNCTHING_INTERNAL_URL: http://syncthing:8384
+      # Leave ~128MB under the 512MB cap for native/Prisma buffers on the 2GB host.
+      NODE_OPTIONS: ${NODE_OPTIONS:---max-old-space-size=384}
+      CLOUDFLARE_ZONE_ID: ${CLOUDFLARE_ZONE_ID:-}
+      CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN:-}
     depends_on:
       postgres:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
-    mem_limit: 256m
+    mem_limit: 512m
     networks: [origin]
     healthcheck:
       test:

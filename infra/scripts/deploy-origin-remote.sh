@@ -54,4 +54,14 @@ docker logs acrossflare-api-1 2>&1 | grep traffic_sync_scheduler_started || echo
 echo "==> health"
 curl -sf https://acrossflare.com/api/health && echo || echo "WARN: health check failed"
 
+if [[ -f .env ]] && grep -q '^CLOUDFLARE_API_TOKEN=' .env 2>/dev/null && grep -q '^CLOUDFLARE_ZONE_ID=' .env 2>/dev/null; then
+  echo "==> Cloudflare marketing purge"
+  EDGE_ENV_FILE="$PROJECT_DIR/.env" bash "$PROJECT_DIR/infra/scripts/purge-cloudflare-cache.sh" || echo "WARN: purge failed"
+else
+  echo "==> skip Cloudflare purge (CLOUDFLARE_ZONE_ID / CLOUDFLARE_API_TOKEN not in .env)"
+fi
+
+echo "==> warm edge cache"
+EDGE_ENV_FILE="$PROJECT_DIR/.env" bash "$PROJECT_DIR/infra/scripts/warm-edge-cache.sh" || echo "WARN: warm incomplete"
+
 echo "==> done"
