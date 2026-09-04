@@ -55,6 +55,8 @@ echo "==> health"
 curl -sf https://acrossflare.com/api/health && echo || echo "WARN: health check failed"
 
 if [[ -f .env ]] && grep -q '^CLOUDFLARE_API_TOKEN=' .env 2>/dev/null && grep -q '^CLOUDFLARE_ZONE_ID=' .env 2>/dev/null; then
+  echo "==> Cloudflare cache rules"
+  EDGE_ENV_FILE="$PROJECT_DIR/.env" bash "$PROJECT_DIR/infra/scripts/ensure-cloudflare-cache-rules.sh" || echo "WARN: cache rules update failed"
   echo "==> Cloudflare marketing purge"
   EDGE_ENV_FILE="$PROJECT_DIR/.env" bash "$PROJECT_DIR/infra/scripts/purge-cloudflare-cache.sh" || echo "WARN: purge failed"
 else

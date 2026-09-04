@@ -15,6 +15,7 @@ const listeners = new Set<Listener>();
 const PREVIEW_KEY = "acrossflare.previewEmail";
 
 let current: Session | null = null;
+let sessionProbeDone = false;
 
 function emit() {
   listeners.forEach((listener) => listener());
@@ -39,6 +40,24 @@ function isSameSession(a: Session | null, b: Session | null) {
     return false;
   }
   return a.email === b.email && a.role === b.role && samePermissions(a.permissions, b.permissions);
+}
+
+export function isSessionProbeDone() {
+  return sessionProbeDone;
+}
+
+export function markSessionProbeDone() {
+  if (sessionProbeDone) {
+    return;
+  }
+  sessionProbeDone = true;
+  emit();
+}
+
+export function resetSessionClientState() {
+  current = null;
+  sessionProbeDone = false;
+  emit();
 }
 
 export function hydrateSession(session: Session | null) {

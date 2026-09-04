@@ -56,6 +56,10 @@ export function seedAdminState(
   emit();
 }
 
+export function isAdminSeeded() {
+  return adminSeeded;
+}
+
 function emit() {
   version += 1;
   listeners.forEach((listener) => listener());
@@ -128,7 +132,9 @@ export async function refreshAdmin() {
       provisionSimulate: Boolean(data.provisionSimulate),
     });
   })().finally(() => {
+    adminSeeded = true;
     refreshPromise = null;
+    emit();
   });
 
   return refreshPromise;

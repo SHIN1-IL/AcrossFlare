@@ -8,7 +8,7 @@ import { AdminTabSwitch } from "@/components/admin/admin-tab-switch";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { Logo } from "@/components/marketing/logo";
 import { buttonVariants } from "@/components/ui/button";
-import { useHydrated, useSession } from "@/hooks/use-account";
+import { useHydrated, useSession, useSessionProbeDone } from "@/hooks/use-account";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { isAdminSession, isOwnerSession } from "@/lib/auth-types";
 import { adminNavItems } from "@/lib/admin-nav";
@@ -75,6 +75,7 @@ function NavLinks({
           <Link
             key={item.suffix}
             href={href}
+            prefetch
             onClick={onNavigate}
             className={cn(
               "flex items-center gap-2 rounded-[10px] px-3 py-2 text-sm transition-colors",
@@ -91,6 +92,7 @@ function NavLinks({
       {owner ? (
         <Link
           href={staffHref}
+          prefetch
           onClick={onNavigate}
           className={cn(
             "flex items-center gap-2 rounded-[10px] px-3 py-2 text-sm transition-colors",
@@ -112,6 +114,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const hydrated = useHydrated();
+  const probeDone = useSessionProbeDone();
   const session = useSession();
   const [open, setOpen] = useState(false);
   const product = serviceFromPath(pathname);
@@ -119,7 +122,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const owner = isOwnerSession(session);
 
   useEffect(() => {
-    if (!hydrated) {
+    if (!hydrated || !probeDone) {
       return;
     }
 
@@ -134,9 +137,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     if (!isAdminSession(session)) {
       router.replace("/app");
     }
-  }, [hydrated, pathname, router, session]);
+  }, [hydrated, pathname, probeDone, router, session]);
 
-  if (!hydrated || !session || !isAdminSession(session)) {
+  if (!hydrated || !probeDone || !session || !isAdminSession(session)) {
     return (
       <div className="flex min-h-dvh items-center justify-center bg-background">
         <div className="h-8 w-8 animate-pulse rounded-full bg-primary/20" />

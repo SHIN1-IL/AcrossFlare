@@ -1,8 +1,9 @@
-import { Suspense } from "react";
 import { setRequestLocale } from "next-intl/server";
 import { AdminAuthShell } from "@/components/auth/admin-auth-shell";
-import { AdminShellLoading } from "@/components/admin/shell-loading";
 import { resolveLocale } from "@/i18n/locale";
+
+export const dynamic = "force-static";
+export const revalidate = 3600;
 
 export default async function AdminLayout({
   children,
@@ -14,9 +15,5 @@ export default async function AdminLayout({
   const locale = await resolveLocale(params);
   setRequestLocale(locale);
 
-  return (
-    <Suspense fallback={<AdminShellLoading />}>
-      <AdminAuthShell locale={locale}>{children}</AdminAuthShell>
-    </Suspense>
-  );
+  return <AdminAuthShell>{children}</AdminAuthShell>;
 }

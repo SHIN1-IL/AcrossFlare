@@ -5,6 +5,7 @@ import type { PublicSession } from "@/lib/auth-types";
 import {
   clearSignedInFlag,
   hydrateSession,
+  markSessionProbeDone,
   refreshSession,
   shouldRefreshSession,
   writeSignedInFlag,
@@ -25,14 +26,18 @@ export function SessionProvider({
       } else {
         clearSignedInFlag();
       }
+      markSessionProbeDone();
       return;
     }
 
     if (!shouldRefreshSession()) {
+      markSessionProbeDone();
       return;
     }
 
-    void refreshSession();
+    void refreshSession().finally(() => {
+      markSessionProbeDone();
+    });
   }, [initialSession]);
 
   return children;

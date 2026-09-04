@@ -24,7 +24,6 @@ export default async function CheckoutPage({
   return (
     <Suspense fallback={<CheckoutLoading />}>
       <CheckoutAuthShell
-        locale={locale}
         product={product}
         plan={plan}
         paymentId={paymentId}

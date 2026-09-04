@@ -1,8 +1,9 @@
-import { Suspense } from "react";
 import { setRequestLocale } from "next-intl/server";
 import { AppAuthShell } from "@/components/auth/app-auth-shell";
-import { AppShellLoading } from "@/components/app/shell-loading";
 import { resolveLocale } from "@/i18n/locale";
+
+export const dynamic = "force-static";
+export const revalidate = 3600;
 
 export default async function AppLayout({
   children,
@@ -14,11 +15,5 @@ export default async function AppLayout({
   const locale = await resolveLocale(params);
   setRequestLocale(locale);
 
-  return (
-    <Suspense fallback={<AppShellLoading />}>
-      <AppAuthShell locale={locale} nextPath="/app">
-        {children}
-      </AppAuthShell>
-    </Suspense>
-  );
+  return <AppAuthShell>{children}</AppAuthShell>;
 }

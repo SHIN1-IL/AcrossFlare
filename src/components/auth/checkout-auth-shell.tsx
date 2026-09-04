@@ -1,57 +1,65 @@
-import { CheckoutView } from "@/components/app/checkout-view";
-import { SessionProvider } from "@/components/auth/session-provider";
-import { MerchantDisclosure } from "@/components/marketing/merchant-disclosure";
-import { getCurrentUser } from "@/lib/auth";
-import { checkoutReturnPath } from "@/lib/checkout-path";
-import { redirect } from "@/i18n/navigation";
-import type { AppLocale } from "@/i18n/routing";
+"use client";
 
-export async function CheckoutAuthShell({
-  locale,
+import { useEffect } from "react";
+import { CheckoutView } from "@/components/app/checkout-view";
+import { MerchantDisclosure } from "@/components/marketing/merchant-disclosure";
+import { useHydrated, useSession, useSessionProbeDone } from "@/hooks/use-account";
+import { checkoutReturnPath } from "@/lib/checkout-path";
+import { useRouter } from "@/i18n/navigation";
+
+export function CheckoutAuthShell({
   product,
   plan,
   paymentId,
   canceled,
   code,
 }: {
-  locale: AppLocale;
   product?: string;
   plan?: string;
   paymentId?: string;
   canceled?: string;
   code?: string;
 }) {
-  const user = await getCurrentUser();
-  if (!user) {
-    redirect({
-      href: {
+  const hydrated = useHydrated();
+  const probeDone = useSessionProbeDone();
+  const session = useSession();
+  const router = useRouter();
+  const canceledFlag = canceled === "1" || canceled === "true";
+
+  useEffect(() => {
+    if (hydrated && probeDone && !session) {
+      router.replace({
         pathname: "/login",
         query: {
           next: checkoutReturnPath({
             product,
             plan,
             paymentId,
-            canceled: canceled === "1" || canceled === "true",
+            canceled: canceledFlag,
             promoCode: code,
           }),
         },
-      },
-      locale,
-    });
-    return null;
+      });
+    }
+  }, [canceledFlag, code, hydrated, paymentId, plan, probeDone, product, router, session]);
+
+  if (!hydrated || !probeDone || !session) {
+    return (
+      <div className="flex min-h-dvh items-center justify-center bg-background">
+        <div className="h-8 w-8 animate-pulse rounded-full bg-primary/20" />
+      </div>
+    );
   }
 
   return (
-    <SessionProvider initialSession={user}>
-      <CheckoutView
-        initialSession={user}
-        product={product}
-        planId={plan}
-        paymentId={paymentId}
-        promoCodeHint={code}
-        canceled={canceled === "1" || canceled === "true"}
-        merchant={<MerchantDisclosure />}
-      />
-    </SessionProvider>
+    <CheckoutView
+      initialSession={session}
+      product={product}
+      planId={plan}
+      paymentId={paymentId}
+      promoCodeHint={code}
+      canceled={canceledFlag}
+      merchant={<MerchantDisclosure />}
+    />
   );
 }

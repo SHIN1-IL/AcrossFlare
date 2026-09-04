@@ -43,6 +43,8 @@ const nextConfig: NextConfig = {
         headers: [
           { key: "Cache-Control", value: MARKETING_CACHE_CONTROL },
           { key: "CDN-Cache-Control", value: MARKETING_CDN_CACHE_CONTROL },
+          { key: "Cloudflare-CDN-Cache-Control", value: MARKETING_CDN_CACHE_CONTROL },
+          { key: "Vary", value: "Accept-Encoding" },
         ],
       })),
       ...PRIVATE_CACHE_SOURCES.map((source) => ({
@@ -59,6 +61,9 @@ const nextConfig: NextConfig = {
       };
     }
     return config;
+  },
+  experimental: {
+    optimizePackageImports: ["lucide-react"],
   },
 };
 

@@ -3,12 +3,15 @@ import {
   getSession,
   hasSignedInFlag,
   hydrateSession,
+  isSessionProbeDone,
+  markSessionProbeDone,
   refreshSession,
+  resetSessionClientState,
   shouldRefreshSession,
 } from "@/lib/session";
 
 afterEach(() => {
-  hydrateSession(null);
+  resetSessionClientState();
   vi.unstubAllGlobals();
 });
 
@@ -70,5 +73,12 @@ describe("refreshSession", () => {
 
     await expect(refreshSession()).resolves.toBeNull();
     expect(hasSignedInFlag()).toBe(false);
+  });
+
+  it("marks the client session probe complete once", () => {
+    expect(isSessionProbeDone()).toBe(false);
+    markSessionProbeDone();
+    markSessionProbeDone();
+    expect(isSessionProbeDone()).toBe(true);
   });
 });

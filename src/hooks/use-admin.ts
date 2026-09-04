@@ -4,6 +4,7 @@ import {
   getAdminVersion,
   getLivePlan,
   getPublicPlanVersion,
+  isAdminSeeded,
   isChangeInFlight,
   isMigrateInFlight,
   isProvisionInFlight,
@@ -18,16 +19,16 @@ import { useHydrated } from "@/hooks/use-account";
 export function useAdmin() {
   useSyncExternalStore(subscribeAdmin, getAdminVersion, () => 0);
   const state = getAdminState();
+  const ready = useSyncExternalStore(subscribeAdmin, isAdminSeeded, () => false);
   const provisioning = useSyncExternalStore(subscribeAdmin, isProvisionInFlight, () => false);
   const changing = useSyncExternalStore(subscribeAdmin, isChangeInFlight, () => false);
   const migrating = useSyncExternalStore(subscribeAdmin, isMigrateInFlight, () => false);
 
   useEffect(() => {
-    // Always refresh so SSR seed stays fresh; also hydrates when SSR prefetch failed.
     void refreshAdmin();
   }, []);
 
-  return { ...state, provisioning, changing, migrating };
+  return { ...state, ready, provisioning, changing, migrating };
 }
 
 export function useLivePlans(product: ProductId) {

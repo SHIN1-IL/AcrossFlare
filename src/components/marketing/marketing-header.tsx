@@ -54,6 +54,7 @@ export function MarketingHeader() {
               </button>
               <Link
                 href={consoleHref}
+                prefetch
                 className={cn(
                   buttonVariants({ size: "sm" }),
                   "rounded-[10px] px-2 md:px-2.5"

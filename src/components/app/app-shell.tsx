@@ -7,7 +7,7 @@ import { LegalFooterLinks } from "@/components/marketing/legal-footer-links";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { Logo } from "@/components/marketing/logo";
 import { buttonVariants } from "@/components/ui/button";
-import { useAccount, useHydrated } from "@/hooks/use-account";
+import { useAccount, useHydrated, useSessionProbeDone } from "@/hooks/use-account";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { publicServiceFromPlanId } from "@/lib/public-service";
 import { clearSession } from "@/lib/session";
@@ -51,6 +51,7 @@ function NavLinks({
           <Link
             key={item.href}
             href={item.href}
+            prefetch
             onClick={onNavigate}
             className={cn(
               "flex items-center gap-2 rounded-[10px] px-3 py-2 text-sm transition-colors",
@@ -79,19 +80,20 @@ export function AppShell({
   const router = useRouter();
   const pathname = usePathname();
   const hydrated = useHydrated();
+  const probeDone = useSessionProbeDone();
   const { session, accountReady } = useAccount();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (hydrated && !session) {
+    if (hydrated && probeDone && !session) {
       router.replace({
         pathname: "/login",
         query: { next: pathname },
       });
     }
-  }, [hydrated, pathname, router, session]);
+  }, [hydrated, pathname, probeDone, router, session]);
 
-  if (!hydrated || !session || !accountReady) {
+  if (!hydrated || !probeDone || !session || !accountReady) {
     return (
       <div className="flex min-h-dvh items-center justify-center bg-background">
         <div className="h-8 w-8 animate-pulse rounded-full bg-primary/20" />

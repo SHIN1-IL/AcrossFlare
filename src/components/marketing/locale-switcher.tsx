@@ -2,10 +2,10 @@
 
 import { Globe } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useId, useRef, useState, useTransition } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { MenuDot } from "@/components/marketing/menu-dot";
-import { isCachedMarketingPath, localePath } from "@/i18n/path";
-import { usePathname, useRouter } from "@/i18n/navigation";
+import { localePath } from "@/i18n/path";
+import { usePathname } from "@/i18n/navigation";
 import { type AppLocale } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
@@ -17,16 +17,13 @@ const itemClassName =
 export function LocaleSwitcher() {
   const t = useTranslations("nav");
   const locale = useLocale();
-  const router = useRouter();
   const pathname = usePathname();
-  const [pending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
   const [dropUp, setDropUp] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const openedByHover = useRef(false);
   const menuId = useId();
   const options = LOCALE_ORDER.filter((code) => code !== locale);
-  const documentLoad = isCachedMarketingPath(pathname);
 
   function updatePlacement() {
     const rect = rootRef.current?.getBoundingClientRect();
@@ -43,17 +40,6 @@ export function LocaleSwitcher() {
 
   function hideMenu() {
     setOpen(false);
-  }
-
-  function switchLocale(code: AppLocale) {
-    hideMenu();
-    const params = Object.fromEntries(new URLSearchParams(window.location.search));
-    startTransition(() => {
-      router.replace(
-        Object.keys(params).length > 0 ? { pathname, query: params } : pathname,
-        { locale: code }
-      );
-    });
   }
 
   useEffect(() => {
@@ -99,7 +85,6 @@ export function LocaleSwitcher() {
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={menuId}
-        disabled={pending}
         onClick={() => {
           if (openedByHover.current) {
             return;
@@ -129,37 +114,24 @@ export function LocaleSwitcher() {
           >
             {options.map((code) => (
               <li key={code} role="none">
-                {documentLoad ? (
-                  <a
-                    href={localePath(code, pathname)}
-                    hrefLang={code}
-                    role="menuitem"
-                    className={itemClassName}
-                    onClick={(event) => {
-                      hideMenu();
-                      const search = window.location.search;
-                      if (!search) {
-                        return;
-                      }
-                      event.preventDefault();
-                      window.location.assign(localePath(code, `${pathname}${search}`));
-                    }}
-                  >
-                    <MenuDot />
-                    {t(`locales.${code}`)}
-                  </a>
-                ) : (
-                  <button
-                    type="button"
-                    role="menuitem"
-                    disabled={pending}
-                    className={itemClassName}
-                    onClick={() => switchLocale(code)}
-                  >
-                    <MenuDot />
-                    {t(`locales.${code}`)}
-                  </button>
-                )}
+                <a
+                  href={localePath(code, pathname)}
+                  hrefLang={code}
+                  role="menuitem"
+                  className={itemClassName}
+                  onClick={(event) => {
+                    hideMenu();
+                    const search = window.location.search;
+                    if (!search) {
+                      return;
+                    }
+                    event.preventDefault();
+                    window.location.assign(localePath(code, `${pathname}${search}`));
+                  }}
+                >
+                  <MenuDot />
+                  {t(`locales.${code}`)}
+                </a>
               </li>
             ))}
           </ul>
