@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it } from "vitest";
 import {
   DEFAULT_HOSTING_PROVIDER,
+  DEFAULT_MAIL_ORDER_NO,
   getMerchant,
-  MAIL_ORDER_PENDING,
   merchantRows,
   VAT_SIMPLIFIED,
 } from "@/lib/legal/merchant";
@@ -27,7 +27,7 @@ describe("legal/merchant", () => {
     delete process.env.LEGAL_HOSTING_PROVIDER;
   }
 
-  it("uses the registered merchant defaults and a 통신판매업 pending notice", () => {
+  it("uses the registered merchant defaults including 통신판매업 number", () => {
     clearLegalEnv();
 
     expect(merchantRows(getMerchant())).toEqual([
@@ -40,7 +40,7 @@ describe("legal/merchant", () => {
       { id: "businessNo", value: "163-13-03007" },
       { id: "vatStatus", value: VAT_SIMPLIFIED },
       { id: "vasNo", value: "제 2-04-26-0006 호" },
-      { id: "mailOrderNo", value: MAIL_ORDER_PENDING },
+      { id: "mailOrderNo", value: DEFAULT_MAIL_ORDER_NO },
       { id: "hostingProvider", value: DEFAULT_HOSTING_PROVIDER },
     ]);
   });
@@ -51,18 +51,18 @@ describe("legal/merchant", () => {
     process.env.LEGAL_HOSTING_PROVIDER = "  ";
     const rows = merchantRows(getMerchant());
     expect(rows.find((row) => row.id === "phone")?.value).toBe("070-8065-1258");
-    expect(rows.find((row) => row.id === "mailOrderNo")?.value).toBe(MAIL_ORDER_PENDING);
+    expect(rows.find((row) => row.id === "mailOrderNo")?.value).toBe(DEFAULT_MAIL_ORDER_NO);
     expect(rows.find((row) => row.id === "hostingProvider")?.value).toBe(DEFAULT_HOSTING_PROVIDER);
   });
 
   it("lets env override fields including a later phone number and 통신판매업 number", () => {
     process.env.LEGAL_PHONE = "070-000-0000";
-    process.env.LEGAL_MAIL_ORDER_NO = "제2026-양양-0000호";
+    process.env.LEGAL_MAIL_ORDER_NO = "제 2099-양양-0000 호";
     process.env.LEGAL_HOSTING_PROVIDER = "Cloudflare, Inc.";
 
     const rows = merchantRows(getMerchant());
     expect(rows.find((row) => row.id === "phone")?.value).toBe("070-000-0000");
-    expect(rows.find((row) => row.id === "mailOrderNo")?.value).toBe("제2026-양양-0000호");
+    expect(rows.find((row) => row.id === "mailOrderNo")?.value).toBe("제 2099-양양-0000 호");
     expect(rows.find((row) => row.id === "hostingProvider")?.value).toBe("Cloudflare, Inc.");
   });
 });

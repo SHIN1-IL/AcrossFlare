@@ -4,6 +4,7 @@ function readEnv(name: string, fallback = "") {
 }
 
 export const MAIL_ORDER_PENDING = "구매안전확인증 발급 후 신고 예정";
+export const DEFAULT_MAIL_ORDER_NO = "제 2026-강원양양-0089 호";
 export const DEFAULT_HOSTING_PROVIDER = "Cloudflare";
 export const VAT_SIMPLIFIED = "부가가치세 간이과세자";
 
@@ -32,7 +33,7 @@ export function getMerchant(): MerchantInfo {
     businessNumber: readEnv("LEGAL_BUSINESS_NO", "163-13-03007"),
     vatStatus: VAT_SIMPLIFIED,
     vasNumber: readEnv("LEGAL_VAS_NO", "제 2-04-26-0006 호"),
-    mailOrderNumber: readEnv("LEGAL_MAIL_ORDER_NO", MAIL_ORDER_PENDING),
+    mailOrderNumber: readEnv("LEGAL_MAIL_ORDER_NO", DEFAULT_MAIL_ORDER_NO),
     hostingProvider: readEnv("LEGAL_HOSTING_PROVIDER", DEFAULT_HOSTING_PROVIDER),
   };
 }
