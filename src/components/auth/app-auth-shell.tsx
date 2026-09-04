@@ -24,7 +24,14 @@ export async function AppAuthShell({
   }
 
   const session = toPublicSession(user);
-  const account = await loadAccountSnapshot(user.email, user.id);
+
+  // Prefer SSR hydrate; on DB/timeout failure the client fetches /api/v1/account.
+  let account = null;
+  try {
+    account = await loadAccountSnapshot(user.email, user.id);
+  } catch {
+    account = null;
+  }
 
   return (
     <SessionProvider initialSession={session}>

@@ -3,6 +3,12 @@
     "title": "AcrossFlare",
     "description": "Secure cloud and network optimization services"
   },
+  "errors": {
+    "title": "This page couldn't load",
+    "body": "Try again in a moment, or reload the page.",
+    "retry": "Retry",
+    "reload": "Reload"
+  },
   "nav": {
     "product": "Product",
     "pricing": "Pricing",

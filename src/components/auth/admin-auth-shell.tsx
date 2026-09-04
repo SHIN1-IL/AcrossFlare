@@ -27,7 +27,13 @@ export async function AdminAuthShell({
     return null;
   }
 
-  const initialState = filterAdminState(await listAdminState(), user.permissions);
+  // Prefer SSR hydrate; on DB/timeout failure the client fetches /api/v1/admin/state.
+  let initialState = null;
+  try {
+    initialState = filterAdminState(await listAdminState(), user.permissions);
+  } catch {
+    initialState = null;
+  }
 
   return (
     <SessionProvider initialSession={session}>

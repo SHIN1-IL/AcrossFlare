@@ -3,6 +3,12 @@
     "title": "AcrossFlare",
     "description": "보안 클라우드 및 네트워크 최적화 서비스"
   },
+  "errors": {
+    "title": "페이지를 불러오지 못했습니다",
+    "body": "잠시 후 다시 시도하거나 새로고침해 주세요.",
+    "retry": "다시 시도",
+    "reload": "새로고침"
+  },
   "nav": {
     "product": "제품",
     "pricing": "요금",

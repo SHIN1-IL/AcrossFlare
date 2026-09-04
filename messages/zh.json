@@ -3,6 +3,12 @@
     "title": "AcrossFlare",
     "description": "安全云及网络优化服务"
   },
+  "errors": {
+    "title": "无法加载此页面",
+    "body": "请稍后重试，或刷新页面。",
+    "retry": "重试",
+    "reload": "刷新"
+  },
   "nav": {
     "product": "产品",
     "pricing": "定价",

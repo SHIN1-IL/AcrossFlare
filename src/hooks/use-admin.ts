@@ -23,6 +23,7 @@ export function useAdmin() {
   const migrating = useSyncExternalStore(subscribeAdmin, isMigrateInFlight, () => false);
 
   useEffect(() => {
+    // Always refresh so SSR seed stays fresh; also hydrates when SSR prefetch failed.
     void refreshAdmin();
   }, []);
 

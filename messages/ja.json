@@ -3,6 +3,12 @@
     "title": "AcrossFlare",
     "description": "セキュアクラウドおよびネットワーク最適化サービス"
   },
+  "errors": {
+    "title": "ページを読み込めませんでした",
+    "body": "しばらくしてから再試行するか、再読み込みしてください。",
+    "retry": "再試行",
+    "reload": "再読み込み"
+  },
   "nav": {
     "product": "プロダクト",
     "pricing": "料金",

@@ -11,11 +11,13 @@ export function AdminBootstrap({
   initialState: Pick<
     AdminState,
     "plans" | "nodes" | "customers" | "promoCodes" | "provisionSimulate"
-  >;
+  > | null;
   children: React.ReactNode;
 }) {
   useLayoutEffect(() => {
-    seedAdminState(initialState);
+    if (initialState) {
+      seedAdminState(initialState);
+    }
   }, [initialState]);
 
   return children;

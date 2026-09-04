@@ -8,11 +8,13 @@ export function AccountBootstrap({
   initialAccount,
   children,
 }: {
-  initialAccount: AccountSnapshot;
+  initialAccount: AccountSnapshot | null;
   children: React.ReactNode;
 }) {
   useLayoutEffect(() => {
-    seedRemoteAccount(initialAccount);
+    if (initialAccount) {
+      seedRemoteAccount(initialAccount);
+    }
   }, [initialAccount]);
 
   return children;
