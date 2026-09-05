@@ -1,9 +1,13 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import {
+  CachedMarketingLink,
+  DocumentLink,
+} from "@/components/marketing/cached-marketing-link";
 import { buttonVariants } from "@/components/ui/button";
 import { StatusPill } from "@/components/app/status-pill";
+import { checkoutReturnPath } from "@/lib/checkout-path";
 import { cn } from "@/lib/utils";
 import { isPublicCheckoutProduct, type ProductId } from "@/lib/plans";
 import { publicServiceFromPlanId, publicServiceHref } from "@/lib/public-service";
@@ -30,16 +34,21 @@ export function ProductEmpty({
       <p className="mt-2 max-w-md text-sm text-muted-foreground">
         {failed ? t("failedBody") : t("unpaidBody")}
       </p>
-      <Link
-        href={
-          failed && isPublicCheckoutProduct(product)
-            ? { pathname: "/checkout", query: { product, plan: retryPlan } }
-            : browse
-        }
-        className={cn(buttonVariants(), "mt-6 rounded-[10px]")}
-      >
-        {failed ? t("failedCta") : t("unpaidCta")}
-      </Link>
+      {failed && isPublicCheckoutProduct(product) ? (
+        <DocumentLink
+          href={checkoutReturnPath({ product, plan: retryPlan })}
+          className={cn(buttonVariants(), "mt-6 rounded-[10px]")}
+        >
+          {t("failedCta")}
+        </DocumentLink>
+      ) : (
+        <CachedMarketingLink
+          href={browse}
+          className={cn(buttonVariants(), "mt-6 rounded-[10px]")}
+        >
+          {t("unpaidCta")}
+        </CachedMarketingLink>
+      )}
     </div>
   );
 }

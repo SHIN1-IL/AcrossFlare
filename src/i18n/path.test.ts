@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isCachedMarketingPath, cachedMarketingHref, localePath } from "@/i18n/path";
+import { isCachedMarketingPath, cachedMarketingHref, documentHref, localePath } from "@/i18n/path";
 
 describe("localePath", () => {
   it("prefixes the marketing home and inner routes", () => {
@@ -12,6 +12,16 @@ describe("localePath", () => {
     expect(localePath("ko", "/checkout?product=global&plan=global-lite")).toBe(
       "/ko/checkout?product=global&plan=global-lite"
     );
+  });
+});
+
+describe("documentHref", () => {
+  it("prefixes private routes and hashes so the browser follows login 307s", () => {
+    expect(documentHref("ko", "/support", "downloads")).toBe("/ko/support#downloads");
+    expect(documentHref("en", "/checkout?product=global&plan=global-lite")).toBe(
+      "/en/checkout?product=global&plan=global-lite"
+    );
+    expect(documentHref("ja", "/app")).toBe("/ja/app");
   });
 });
 

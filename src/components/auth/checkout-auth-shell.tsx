@@ -5,7 +5,8 @@ import { CheckoutView } from "@/components/app/checkout-view";
 import { MerchantDisclosure } from "@/components/marketing/merchant-disclosure";
 import { useHydrated, useSession, useSessionProbeDone } from "@/hooks/use-account";
 import { checkoutReturnPath } from "@/lib/checkout-path";
-import { useRouter } from "@/i18n/navigation";
+import { useLocale } from "next-intl";
+import { localePath } from "@/i18n/path";
 
 export function CheckoutAuthShell({
   product,
@@ -23,25 +24,27 @@ export function CheckoutAuthShell({
   const hydrated = useHydrated();
   const probeDone = useSessionProbeDone();
   const session = useSession();
-  const router = useRouter();
+  const locale = useLocale();
   const canceledFlag = canceled === "1" || canceled === "true";
 
   useEffect(() => {
     if (hydrated && probeDone && !session) {
-      router.replace({
-        pathname: "/login",
-        query: {
-          next: checkoutReturnPath({
-            product,
-            plan,
-            paymentId,
-            canceled: canceledFlag,
-            promoCode: code,
-          }),
-        },
-      });
+      window.location.replace(
+        localePath(
+          locale,
+          `/login?next=${encodeURIComponent(
+            checkoutReturnPath({
+              product,
+              plan,
+              paymentId,
+              canceled: canceledFlag,
+              promoCode: code,
+            })
+          )}`
+        )
+      );
     }
-  }, [canceledFlag, code, hydrated, paymentId, plan, probeDone, product, router, session]);
+  }, [canceledFlag, code, hydrated, locale, paymentId, plan, probeDone, product, session]);
 
   if (!hydrated || !probeDone || !session) {
     return (

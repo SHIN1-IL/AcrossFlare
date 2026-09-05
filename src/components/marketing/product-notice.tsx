@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
+import { CachedMarketingLink } from "@/components/marketing/cached-marketing-link";
 import { getMerchant } from "@/lib/legal/merchant";
 import type { MarketingServiceId } from "@/lib/marketing-services";
 
@@ -52,12 +52,13 @@ export async function ProductNotice({ service }: { service: MarketingServiceId }
                     {row.id === "withdraw" ? (
                       <>
                         {row.value}{" "}
-                        <Link
-                          href={{ pathname: "/terms", hash: "refund" }}
+                        <CachedMarketingLink
+                          href="/terms"
+                          hash="refund"
                           className="transition-colors hover:text-foreground"
                         >
                           {t("withdrawLink")}
-                        </Link>
+                        </CachedMarketingLink>
                       </>
                     ) : row.id === "support" ? (
                       <>

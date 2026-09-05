@@ -8,6 +8,7 @@ import { UsageMeter } from "@/components/app/usage-meter";
 import { buttonVariants } from "@/components/ui/button";
 import { useAccount } from "@/hooks/use-account";
 import { Link } from "@/i18n/navigation";
+import { DocumentLink } from "@/components/marketing/cached-marketing-link";
 import { formatDate } from "@/lib/format-date";
 import { SUPPORT_HREF } from "@/lib/support-zone";
 import { cn } from "@/lib/utils";
@@ -106,12 +107,13 @@ export function BackupDashboard() {
           <li>2. {t("backupHowTo2")}</li>
           <li>3. {t("backupHowTo3")}</li>
         </ol>
-        <Link
-          href={{ pathname: SUPPORT_HREF, hash: "backup" }}
+        <DocumentLink
+          href={SUPPORT_HREF}
+          hash="backup"
           className="mt-4 inline-flex text-sm text-primary transition-colors hover:text-primary/80"
         >
           {t("backupHowToMore")}
-        </Link>
+        </DocumentLink>
       </section>
     </div>
   );

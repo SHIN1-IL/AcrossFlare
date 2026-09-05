@@ -3,7 +3,8 @@
 import { LifeBuoy } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useId, useRef, useState } from "react";
-import { Link, usePathname } from "@/i18n/navigation";
+import { usePathname } from "@/i18n/navigation";
+import { DocumentLink } from "@/components/marketing/cached-marketing-link";
 import { MenuDot } from "@/components/marketing/menu-dot";
 import { SUPPORT_HREF, SUPPORT_SECTIONS } from "@/lib/support-zone";
 import { cn } from "@/lib/utils";
@@ -110,8 +111,9 @@ export function SupportNav({ onNavigate }: { onNavigate?: () => void }) {
 
               return (
                 <li key={section.id} role="none">
-                  <Link
-                    href={{ pathname: SUPPORT_HREF, hash: section.id }}
+                  <DocumentLink
+                    href={SUPPORT_HREF}
+                    hash={section.id}
                     role="menuitem"
                     aria-current={active ? "page" : undefined}
                     onClick={() => {
@@ -128,7 +130,7 @@ export function SupportNav({ onNavigate }: { onNavigate?: () => void }) {
                   >
                     <MenuDot />
                     {tSupport(`${section.id}.title`)}
-                  </Link>
+                  </DocumentLink>
                 </li>
               );
             })}

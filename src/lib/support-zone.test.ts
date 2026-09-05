@@ -31,7 +31,12 @@ describe("support zone", () => {
       "ios",
       "linux",
     ]);
-    expect(KARING_FAQ_ITEMS.map((item) => item.id)).toEqual(["profileWhere", "playStore", "macOpen"]);
+    expect(KARING_FAQ_ITEMS.map((item) => item.id)).toEqual([
+      "profileWhere",
+      "playStore",
+      "macOpen",
+      "manualRefresh",
+    ]);
     expect(BACKUP_SETUP_STEPS.map((step) => step.id)).toEqual(["open", "save", "optional"]);
     expect(BACKUP_FAQ_ITEMS.map((item) => item.id)).toEqual([
       "backupApp",

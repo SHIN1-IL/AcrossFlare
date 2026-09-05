@@ -10,6 +10,7 @@ import { UsageMeter } from "@/components/app/usage-meter";
 import { Button } from "@/components/ui/button";
 import { useAccount } from "@/hooks/use-account";
 import { Link } from "@/i18n/navigation";
+import { DocumentLink } from "@/components/marketing/cached-marketing-link";
 import { downloadFromUrl } from "@/lib/download";
 import { formatDate } from "@/lib/format-date";
 import { publicServiceFromPlanId } from "@/lib/public-service";
@@ -130,12 +131,13 @@ export function GlobalDashboard({ product = "global" }: { product?: "global" | "
               >
                 {t("openBackupPwa")}
               </Link>
-              <Link
-                href={{ pathname: SUPPORT_HREF, hash: "backup" }}
+              <DocumentLink
+                href={SUPPORT_HREF}
+                hash="backup"
                 className="inline-flex text-sm text-primary transition-colors hover:text-primary/80"
               >
                 {t("backupHowToMore")}
-              </Link>
+              </DocumentLink>
             </div>
           </div>
         </section>

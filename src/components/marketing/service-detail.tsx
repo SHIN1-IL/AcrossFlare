@@ -2,8 +2,10 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
-import { Link, useRouter } from "@/i18n/navigation";
+import { DocumentLink } from "@/components/marketing/cached-marketing-link";
 import { StageBackdrop } from "@/components/marketing/plan-stage-bg";
+import { localePath } from "@/i18n/path";
+import { checkoutReturnPath } from "@/lib/checkout-path";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PriceAmount, SecondaryPriceAmount } from "@/components/marketing/price-amount";
@@ -186,15 +188,12 @@ function ServicePlanCard({
         {needsCode ? (
           <PromoCta planId={plan.id} product={plan.product} cta={cta} buttonClass={buttonClass} />
         ) : (
-          <Link
-            href={{
-              pathname: "/checkout",
-              query: { product: plan.product, plan: plan.id },
-            }}
+          <DocumentLink
+            href={checkoutReturnPath({ product: plan.product, plan: plan.id })}
             className={buttonClass}
           >
             {cta}
-          </Link>
+          </DocumentLink>
         )}
       </div>
     </article>
@@ -213,7 +212,7 @@ function PromoCta({
   buttonClass: string;
 }) {
   const t = useTranslations("services");
-  const router = useRouter();
+  const locale = useLocale();
   const [open, setOpen] = useState(false);
   const [code, setCode] = useState("");
   const [error, setError] = useState(false);
@@ -235,10 +234,12 @@ function PromoCta({
         return;
       }
 
-      router.push({
-        pathname: "/checkout",
-        query: { product, plan: planId, code: data.code },
-      });
+      window.location.assign(
+        localePath(
+          locale,
+          checkoutReturnPath({ product, plan: planId, promoCode: data.code })
+        )
+      );
     } catch {
       setError(true);
     } finally {

@@ -1,10 +1,12 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
 import { localePath } from "@/i18n/path";
 import { buttonVariants } from "@/components/ui/button";
-import { CachedMarketingLink } from "@/components/marketing/cached-marketing-link";
+import {
+  CachedMarketingLink,
+  DocumentLink,
+} from "@/components/marketing/cached-marketing-link";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { Logo } from "@/components/marketing/logo";
 import { ServiceNav } from "@/components/marketing/service-nav";
@@ -52,16 +54,15 @@ export function MarketingHeader() {
               >
                 {t("logout")}
               </button>
-              <Link
+              <DocumentLink
                 href={consoleHref}
-                prefetch
                 className={cn(
                   buttonVariants({ size: "sm" }),
                   "rounded-[10px] px-2 md:px-2.5"
                 )}
               >
                 {t("console")}
-              </Link>
+              </DocumentLink>
             </>
           ) : (
             <>
