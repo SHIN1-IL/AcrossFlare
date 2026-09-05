@@ -1,5 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import { SupportAuthShell } from "@/components/auth/support-auth-shell";
+import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { resolveLocale } from "@/i18n/locale";
 
 export const dynamic = "force-static";
@@ -13,5 +14,9 @@ export default async function SupportRoute({
   const locale = await resolveLocale(params);
   setRequestLocale(locale);
 
-  return <SupportAuthShell />;
+  return (
+    <MarketingShell>
+      <SupportAuthShell />
+    </MarketingShell>
+  );
 }

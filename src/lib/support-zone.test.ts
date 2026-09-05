@@ -74,4 +74,12 @@ describe("support zone", () => {
     expect(ko.app.vaultTitle).toBe("Vaultwarden (암호·메모 백업)");
     expect(ko.app.syncthingTitle).toBe("Syncthing (작은 파일 보관)");
   });
+
+  it("keeps MarketingShell on the server page so the footer is not rendered from a client tree", async () => {
+    const { readFile } = await import("node:fs/promises");
+    const zone = await readFile("src/components/marketing/support-zone.tsx", "utf8");
+    const page = await readFile("src/app/[locale]/support/page.tsx", "utf8");
+    expect(zone).not.toContain("MarketingShell");
+    expect(page).toContain("MarketingShell");
+  });
 });

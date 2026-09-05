@@ -24,7 +24,7 @@ export function SupportAuthShell() {
 
   if (!hydrated || !probeDone || !session) {
     return (
-      <div className="flex min-h-dvh items-center justify-center bg-background">
+      <div className="flex min-h-[50vh] items-center justify-center bg-background">
         <div className="h-8 w-8 animate-pulse rounded-full bg-primary/20" />
       </div>
     );
