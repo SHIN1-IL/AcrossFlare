@@ -78,7 +78,7 @@ describe("support zone", () => {
   it("keeps MarketingShell on the server page so the footer is not rendered from a client tree", async () => {
     const { readFile } = await import("node:fs/promises");
     const zone = await readFile("src/components/marketing/support-zone.tsx", "utf8");
-    const page = await readFile("src/app/[locale]/support/page.tsx", "utf8");
+    const page = await readFile("src/app/[locale]/(console)/support/page.tsx", "utf8");
     expect(zone).not.toContain("MarketingShell");
     expect(page).toContain("MarketingShell");
   });

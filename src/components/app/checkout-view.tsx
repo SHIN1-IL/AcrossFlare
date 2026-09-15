@@ -93,6 +93,7 @@ export function CheckoutView({
   );
   const [step, setStep] = useState(0);
   const [error, setError] = useState<CheckoutFailure | null>(canceled ? "failed" : null);
+  const [errorDetail, setErrorDetail] = useState<string | null>(null);
   const [payStatus, setPayStatus] = useState<"processing" | "openingWindow" | "redirecting">(
     "processing"
   );
@@ -200,6 +201,7 @@ export function CheckoutView({
     }
 
     setError(null);
+    setErrorDetail(null);
     setPayStatus(method === "card" ? "openingWindow" : "redirecting");
     setPhase("processing");
 
@@ -266,11 +268,18 @@ export function CheckoutView({
       if (checkout.portone) {
         setPayStatus("openingWindow");
         const result = await requestPortOnePayment(checkout.portone);
-        if (result === "redirect") {
+        if (result.kind === "redirect") {
           return;
         }
         setPayStatus("processing");
-        await finishPaidCheckout(checkout.paymentId);
+        try {
+          await finishPaidCheckout(checkout.paymentId);
+        } catch (cause) {
+          if (result.detail) {
+            throw new Error(`portone:${result.detail}`);
+          }
+          throw cause;
+        }
         return;
       }
 
@@ -278,6 +287,7 @@ export function CheckoutView({
     } catch (cause) {
       setPhase("form");
       setError(checkoutFailure(cause));
+      setErrorDetail(portoneErrorDetail(cause));
     }
   }
 
@@ -290,6 +300,7 @@ export function CheckoutView({
     void finishPaidCheckout(paymentId).catch((cause: unknown) => {
       setPhase("form");
       setError(checkoutFailure(cause));
+      setErrorDetail(portoneErrorDetail(cause));
     });
   }, [canceled, finishPaidCheckout, hydrated, paymentId, plan, user, validProduct]);
 
@@ -368,26 +379,29 @@ export function CheckoutView({
             ) : null}
             {canStartPublicCheckout(user.email) ? null : <PgReviewNotice />}
             {error ? (
-              <p className="text-sm text-destructive">
-                {error === "timeout"
-                  ? t("payTimeout")
-                  : error === "invalid_code"
-                    ? t("invalidCode")
-                    : error === "agree"
-                      ? t("agreeRequired")
-                      : error === "review_only"
-                        ? t("reviewOnly")
-                        : error === "phone_required"
-                          ? t("phoneRequired")
-                          : error === "phone_invalid"
-                            ? t("phoneInvalid")
-                            : error === "portone_not_configured" ||
-                                error === "stripe_not_configured" ||
-                                error === "paymentwall_not_configured" ||
-                                error === "stripe_checkout_failed"
-                              ? t("payNotConfigured")
-                              : t("payFailed")}
-              </p>
+              <div className="space-y-1">
+                <p className="text-sm text-destructive">
+                  {error === "timeout"
+                    ? t("payTimeout")
+                    : error === "invalid_code"
+                      ? t("invalidCode")
+                      : error === "agree"
+                        ? t("agreeRequired")
+                        : error === "review_only"
+                          ? t("reviewOnly")
+                          : error === "phone_required"
+                            ? t("phoneRequired")
+                            : error === "phone_invalid"
+                              ? t("phoneInvalid")
+                              : error === "portone_not_configured" ||
+                                  error === "stripe_not_configured" ||
+                                  error === "paymentwall_not_configured" ||
+                                  error === "stripe_checkout_failed"
+                                ? t("payNotConfigured")
+                                : t("payFailed")}
+                </p>
+                {errorDetail ? <p className="text-xs text-muted-foreground">{errorDetail}</p> : null}
+              </div>
             ) : null}
             <p className="text-xs leading-5 text-muted-foreground">{t("refundNotice")}</p>
             <p className="text-xs leading-5 text-muted-foreground">{t("noAutoRenew")}</p>
@@ -490,13 +504,13 @@ type PaymentPoll = {
 };
 
 async function waitForPayment(paymentId: string) {
-  for (let attempt = 0; attempt < 40; attempt += 1) {
+  for (let attempt = 0; attempt < 90; attempt += 1) {
     const data = await pollPayment(paymentId);
     if (data.status === "SUCCEEDED" || data.status === "FAILED") {
       return data;
     }
 
-    await sleep(400);
+    await sleep(500);
   }
 
   throw new Error("timeout");
@@ -535,8 +549,15 @@ function sleep(ms: number) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
+type PortOnePayResult = {
+  code?: string;
+  message?: string;
+  pgCode?: string;
+  pgMessage?: string;
+} | null;
+
 type PortOneSdk = {
-  requestPayment: (input: PortOneCheckout) => Promise<{ code?: string } | null>;
+  requestPayment: (input: PortOneCheckout) => Promise<PortOnePayResult>;
 };
 
 declare global {
@@ -545,19 +566,51 @@ declare global {
   }
 }
 
-async function requestPortOnePayment(checkout: PortOneCheckout): Promise<"redirect" | "complete"> {
+async function requestPortOnePayment(
+  checkout: PortOneCheckout
+): Promise<{ kind: "redirect" | "complete"; detail?: string }> {
   const sdk = await loadPortOneSdk();
   const href = window.location.href;
   const result = await sdk.requestPayment(checkout);
   if (window.location.href !== href) {
-    return "redirect";
+    return { kind: "redirect" };
   }
 
-  if (result?.code) {
-    throw new Error("failed");
+  if (isPortOneUserCancel(result)) {
+    throw new Error(portoneSdkDetail(result) ? `portone:${portoneSdkDetail(result)}` : "failed");
   }
 
-  return "complete";
+  return { kind: "complete", detail: portoneSdkDetail(result) ?? undefined };
+}
+
+function portoneSdkDetail(result: PortOnePayResult) {
+  if (!result) {
+    return null;
+  }
+  const parts = [result.pgMessage, result.message, result.pgCode].filter(
+    (part): part is string => Boolean(part && part.trim())
+  );
+  return parts.length > 0 ? parts.join(" · ") : null;
+}
+
+function isPortOneUserCancel(result: PortOnePayResult) {
+  const code = result?.code ?? "";
+  const message = result?.message ?? "";
+  if (!code && !message) {
+    return false;
+  }
+  if (code === "FAILURE_TYPE_USER") {
+    return true;
+  }
+  return /사용자.*취소|canceled by the user|user cancelled|user canceled/i.test(`${code} ${message}`);
+}
+
+function portoneErrorDetail(cause: unknown) {
+  if (cause instanceof Error && cause.message.startsWith("portone:")) {
+    return cause.message.slice("portone:".length).trim() || null;
+  }
+
+  return null;
 }
 
 function loadPortOneSdk(): Promise<PortOneSdk> {

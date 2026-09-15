@@ -1,4 +1,5 @@
 import { PaymentMethod, PaymentProvider, type Payment, type Plan } from "@prisma/client";
+import { localePath } from "@/i18n/path";
 import type { AppLocale } from "@/i18n/routing";
 import {
   paymentwallProjectKey,
@@ -8,6 +9,7 @@ import {
   publicAppUrl,
   stripeSecretKey,
 } from "@/lib/payments/config";
+import { getMerchant } from "@/lib/legal/merchant";
 import { md5Hex } from "@/lib/payments/crypto";
 import {
   portoneCurrency,
@@ -48,7 +50,7 @@ export function checkoutReturnUrl(input: {
     params.set("canceled", "1");
   }
 
-  return `${publicAppUrl()}/${input.locale}/checkout?${params.toString()}`;
+  return `${publicAppUrl()}${localePath(input.locale, `/checkout?${params.toString()}`)}`;
 }
 
 export async function startProviderCheckout(input: {
@@ -175,11 +177,14 @@ function createPortoneCheckout(
     throw new CheckoutStartError(input.phoneNumber?.trim() ? "phone_invalid" : "phone_required");
   }
 
+  const merchant = getMerchant();
+  const orderName = `${merchant.serviceName} ${input.plan.name}`.slice(0, 40);
+
   return {
     storeId,
     channelKey,
     paymentId: input.payment.id,
-    orderName: input.plan.name,
+    orderName,
     totalAmount: input.payment.amount,
     currency: portoneCurrency(input.payment.currency),
     payMethod: input.payment.method === PaymentMethod.ALIPAY ? "ALIPAY" : "CARD",
@@ -187,7 +192,7 @@ function createPortoneCheckout(
     locale: portoneLocale(input.payment.locale),
     customer: {
       email: input.email,
-      fullName: portoneCustomerName(input.email),
+      fullName: portoneCustomerName(input.email, merchant.ceo),
       phoneNumber,
     },
   };

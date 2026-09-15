@@ -50,5 +50,10 @@ describe("loginRedirectHref", () => {
     expect(loginRedirectHref(session("ADMIN"), "/admin/standard/customers")).toBe("/admin/standard/customers");
     expect(loginRedirectHref(session("OWNER"), "/app")).toBe("/admin");
     expect(loginRedirectHref(session("STAFF"), null)).toBe("/admin");
+    expect(loginRedirectHref(session("USER"), "/en/app")).toBe("/");
+    expect(loginRedirectHref(session("USER"), "/en/checkout?product=global&plan=global-lite")).toBe(
+      "/checkout?product=global&plan=global-lite"
+    );
+    expect(loginRedirectHref(session("ADMIN"), "/en/admin/standard")).toBe("/admin/standard");
   });
 });

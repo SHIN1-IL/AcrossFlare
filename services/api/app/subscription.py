@@ -2,13 +2,20 @@ from datetime import datetime, timezone
 
 from app.headers import karing_headers
 from app.nodes import NodeRow, pick_nodes
-from app.yaml_builder import build_vless_yaml_with_hint, empty_proxies_yaml
+from app.yaml_builder import build_vless_sub_base64, build_vless_uri_list, build_vless_yaml_with_hint, empty_proxies_yaml
+
+VLESS_FORMATS = {"vless", "v2ray", "xray", "uri"}
+
+
+def is_vless_format(fmt: str) -> bool:
+    return fmt in VLESS_FORMATS
 
 
 def resolve_subscription(
     row: dict,
     *,
     now: datetime | None = None,
+    fmt: str = "clash",
 ) -> tuple[str, dict[str, str]]:
     uuid = row.get("uuid")
     status = row.get("status")
@@ -30,18 +37,29 @@ def resolve_subscription(
         and used_gb >= float(limit_gb)
     )
 
+    attachment = "AcrossFlare.yaml" if fmt in {"clash", "clash-meta", "yaml"} else "AcrossFlare.txt"
     headers = karing_headers(
         expire_at=expires_at,
         used_gb=used_gb,
         limit_gb=None if failover else limit_gb,
+        filename=attachment,
     )
 
     if expired or over_limit:
+        if is_vless_format(fmt):
+            return "", headers
         return empty_proxies_yaml(refresh_hint=over_limit), headers
 
     hosts = pick_nodes(nodes, failover=failover, pool_nodes=pool_nodes)
     if not hosts:
+        if is_vless_format(fmt):
+            return "", headers
         return empty_proxies_yaml(), headers
+
+    if is_vless_format(fmt):
+        if fmt == "uri":
+            return build_vless_uri_list(hosts, uuid), headers
+        return build_vless_sub_base64(hosts, uuid), headers
 
     return build_vless_yaml_with_hint(hosts, uuid, refresh_hint=failover), headers
 

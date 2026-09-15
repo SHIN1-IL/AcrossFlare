@@ -3,6 +3,7 @@
 set -euo pipefail
 
 LOCALES=(en ko zh ja)
+DEFAULT_LOCALE=ko
 SUFFIXES=("" /standard /hybrid /workspace /pricing /terms /privacy /login /signup)
 
 edge_origin() {
@@ -20,10 +21,19 @@ edge_origin() {
 edge_marketing_urls() {
   local origin locale suffix
   origin="$(edge_origin)"
+  printf '%s/\n' "$origin"
+  for suffix in "${SUFFIXES[@]}"; do
+    [[ -z "$suffix" ]] && continue
+    printf '%s%s\n' "$origin" "$suffix"
+  done
   for locale in "${LOCALES[@]}"; do
+    [[ "$locale" == "$DEFAULT_LOCALE" ]] && continue
     for suffix in "${SUFFIXES[@]}"; do
       printf '%s/%s%s\n' "$origin" "$locale" "$suffix"
     done
+  done
+  for suffix in "${SUFFIXES[@]}"; do
+    printf '%s/%s%s\n' "$origin" "$DEFAULT_LOCALE" "$suffix"
   done
 }
 

@@ -6,51 +6,52 @@ export function webhookTimestampToleranceSec() {
   return TIMESTAMP_TOLERANCE_SEC;
 }
 
+function env(name: string) {
+  return process.env[name] || "";
+}
+
 export function isSimulateEnabled() {
-  return process.env.PAYMENT_MODE === "simulate";
+  return env("PAYMENT_MODE") === "simulate";
 }
 
 export function paymentWebhookSecret() {
-  return process.env.PAYMENT_WEBHOOK_SECRET || process.env.AUTH_SECRET || "";
+  return env("PAYMENT_WEBHOOK_SECRET") || env("AUTH_SECRET");
 }
 
 export function portoneWebhookSecret() {
-  return process.env.PORTONE_WEBHOOK_SECRET || "";
+  return env("PORTONE_WEBHOOK_SECRET");
 }
 
 export function stripeWebhookSecret() {
-  return process.env.STRIPE_WEBHOOK_SECRET || "";
+  return env("STRIPE_WEBHOOK_SECRET");
 }
 
 export function paymentwallSecret() {
-  return process.env.PAYMENTWALL_SECRET || "";
+  return env("PAYMENTWALL_SECRET");
 }
 
 export function paymentwallProjectKey() {
-  return process.env.PAYMENTWALL_PROJECT_KEY || "";
+  return env("PAYMENTWALL_PROJECT_KEY");
 }
 
 export function stripeSecretKey() {
-  return process.env.STRIPE_SECRET_KEY || "";
+  return env("STRIPE_SECRET_KEY");
 }
 
 export function portoneStoreId() {
-  return process.env.PORTONE_STORE_ID || "";
+  return env("PORTONE_STORE_ID");
 }
 
 export function portoneChannelKey() {
-  return process.env.PORTONE_CHANNEL_KEY || "";
+  return env("PORTONE_CHANNEL_KEY");
 }
 
 export function publicAppUrl() {
-  return (process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(
-    /\/$/,
-    ""
-  );
+  return (env("APP_URL") || env("NEXT_PUBLIC_APP_URL") || "http://localhost:3000").replace(/\/$/, "");
 }
 
 export function alipayProvider(): PaymentProvider {
-  return process.env.PAYMENT_ALIPAY_PROVIDER === "paymentwall"
+  return env("PAYMENT_ALIPAY_PROVIDER") === "paymentwall"
     ? PaymentProvider.PAYMENTWALL
     : PaymentProvider.STRIPE;
 }

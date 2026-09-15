@@ -2,9 +2,8 @@ import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { Geist, Geist_Mono } from "next/font/google";
-import { SessionProvider } from "@/components/auth/session-provider";
-import { PwaProvider } from "@/components/pwa/pwa-provider";
 import { resolveLocale } from "@/i18n/locale";
+import { pickMessages } from "@/i18n/messages";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
 
@@ -61,7 +60,7 @@ export default async function LocaleLayout({
 }) {
   const locale = await resolveLocale(params);
   setRequestLocale(locale);
-  const messages = await getMessages();
+  const messages = pickMessages(await getMessages(), ["errors"]);
 
   return (
     <html
@@ -69,12 +68,7 @@ export default async function LocaleLayout({
       className={`dark ${geistSans.variable} ${geistMono.variable} h-full`}
     >
       <body className="min-h-full bg-background text-foreground">
-        <NextIntlClientProvider messages={messages}>
-          <SessionProvider>
-            <PwaProvider />
-            {children}
-          </SessionProvider>
-        </NextIntlClientProvider>
+        <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>
       </body>
     </html>
   );

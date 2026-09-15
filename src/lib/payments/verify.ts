@@ -91,21 +91,37 @@ function verifyPortone(headers: Headers, rawBody: string): VerifiedWebhook {
   const body = parseJson(rawBody);
   const data = asRecord(body.data) ?? body;
   const type = String(body.type ?? data.status ?? "");
-  const paymentId = stringField(data, ["paymentId", "merchant_uid", "customData"]);
-  const externalId = stringField(data, ["transactionId", "imp_uid", "txId"]) || id;
+  const paymentId =
+    stringField(data, ["paymentId", "merchant_uid", "customData"]) ||
+    stringField(asRecord(data.payment) ?? {}, ["paymentId", "id", "merchant_uid"]);
+  const externalId =
+    stringField(data, ["transactionId", "imp_uid", "txId"]) ||
+    stringField(asRecord(data.payment) ?? {}, ["transactionId", "id"]) ||
+    id;
 
   if (!paymentId) {
     throw new WebhookVerifyError("missing_payment_id", 400);
   }
+
+  const status = portoneEventStatus(type, optionalString(data.status) ?? optionalString(asRecord(data.payment)?.status));
+  if (!status) {
+    throw new WebhookVerifyError("ignored_event", 200);
+  }
+
+  const amountRecord = asRecord(data.amount) ?? asRecord(asRecord(data.payment)?.amount) ?? data;
+  const currency =
+    optionalString(data.currency) ||
+    optionalString(asRecord(data.payment)?.currency) ||
+    optionalString(amountRecord.currency);
 
   return {
     eventId: `portone:${id}`,
     provider: PaymentProvider.PORTONE,
     paymentId,
     externalId,
-    status: isFailureType(type) ? PaymentStatus.FAILED : PaymentStatus.SUCCEEDED,
-    amount: numberField(asRecord(data.amount) ?? data, ["total", "paid", "amount"]),
-    currency: optionalString(data.currency),
+    status,
+    amount: numberField(amountRecord, ["total", "paid", "amount"]),
+    currency: normalizePortoneCurrency(currency),
   };
 }
 
@@ -289,6 +305,15 @@ function numberField(record: Record<string, unknown>, keys: string[]) {
   return undefined;
 }
 
+function normalizePortoneCurrency(value?: string) {
+  if (!value) {
+    return undefined;
+  }
+
+  const upper = value.trim().toUpperCase();
+  return upper.startsWith("CURRENCY_") ? upper.slice("CURRENCY_".length) : upper;
+}
+
 function asProvider(value: unknown): PaymentProvider | null {
   if (value === PaymentProvider.PORTONE || value === PaymentProvider.STRIPE || value === PaymentProvider.PAYMENTWALL) {
     return value;
@@ -297,9 +322,26 @@ function asProvider(value: unknown): PaymentProvider | null {
   return null;
 }
 
-function isFailureType(type: string) {
-  const lower = type.toLowerCase();
-  return lower.includes("fail") || lower.includes("cancel") || lower.includes("virtual_account_issued");
+function portoneEventStatus(
+  type: string,
+  dataStatus?: string
+): Extract<PaymentStatus, "SUCCEEDED" | "FAILED"> | null {
+  const event = type.toLowerCase();
+  const status = (dataStatus ?? "").toLowerCase();
+  if (event === "transaction.paid" || status === "paid") {
+    return PaymentStatus.SUCCEEDED;
+  }
+  if (event.includes("fail") || status.includes("fail")) {
+    return PaymentStatus.FAILED;
+  }
+  if (
+    (event.includes("cancel") || status.includes("cancel")) &&
+    !event.includes("partial") &&
+    !status.includes("partial")
+  ) {
+    return PaymentStatus.FAILED;
+  }
+  return null;
 }
 
 const STRIPE_SUCCEEDED_TYPES = new Set([

@@ -8,7 +8,7 @@ from urllib.parse import quote
 
 import httpx
 
-from app.config import VLESS_CLIENT_FLOW, XUI_API_TOKEN, XUI_TLS_INSECURE
+from app.config import REALITY_MIN_CLIENT_VER, VLESS_CLIENT_FLOW, XUI_API_TOKEN, XUI_TLS_INSECURE
 
 logger = logging.getLogger(__name__)
 
@@ -187,6 +187,57 @@ def _inbound_id_from(listed: dict[str, Any] | None, protocol: str = "vless") -> 
     return int(inbound_id)
 
 
+def as_json_obj(value: Any) -> dict[str, Any]:
+    if isinstance(value, str):
+        try:
+            parsed = json.loads(value)
+        except json.JSONDecodeError:
+            return {}
+        return parsed if isinstance(parsed, dict) else {}
+    return value if isinstance(value, dict) else {}
+
+
+def apply_reality_inbound_defaults(reality: dict[str, Any]) -> dict[str, Any]:
+    reality["minClientVer"] = REALITY_MIN_CLIENT_VER
+    reality["minClient"] = REALITY_MIN_CLIENT_VER
+    return reality
+
+
+def ensure_reality_min_client_ver(session: XuiSession, inbound_id: int) -> None:
+    listed = panel_request(session, "/panel/api/inbounds/list") or {}
+    inbound = next(
+        (
+            row
+            for row in listed.get("obj") or []
+            if isinstance(row, dict) and row.get("id") == inbound_id
+        ),
+        None,
+    )
+    if not inbound:
+        return
+    stream = as_json_obj(inbound.get("streamSettings"))
+    if (stream.get("security") or "").lower() != "reality":
+        return
+    reality = as_json_obj(stream.get("realitySettings"))
+    if not (reality.get("privateKey") or "").strip():
+        logger.warning("reality_private_key_missing inbound=%s", inbound_id)
+        return
+    if (reality.get("minClientVer") or "").strip() == REALITY_MIN_CLIENT_VER:
+        return
+    apply_reality_inbound_defaults(reality)
+    stream["realitySettings"] = reality
+    updated = dict(inbound)
+    updated["streamSettings"] = json.dumps(stream, separators=(",", ":"))
+    sniff = as_json_obj(inbound.get("sniffing"))
+    if sniff:
+        sniff["enabled"] = False
+        sniff["destOverride"] = []
+        updated["sniffing"] = json.dumps(sniff, separators=(",", ":"))
+    if isinstance(inbound.get("settings"), dict):
+        updated["settings"] = json.dumps(inbound["settings"], separators=(",", ":"))
+    panel_request(session, f"/panel/api/inbounds/update/{inbound_id}", method="POST", json_body=updated)
+
+
 def _client_fields(
     *,
     uuid: str,
@@ -217,6 +268,7 @@ def add_xui_client(
 ) -> None:
     listed = panel_request(session, "/panel/api/inbounds/list")
     inbound_id = _inbound_id_from(listed)
+    ensure_reality_min_client_ver(session, inbound_id)
     client = _client_fields(uuid=uuid, email=email, expires_at=expires_at, traffic_gb=traffic_gb)
 
     _try_panel_requests(

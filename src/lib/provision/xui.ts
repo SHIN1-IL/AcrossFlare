@@ -1,7 +1,7 @@
 import type { Node } from "@prisma/client";
 import { Agent } from "undici";
 import { xuiApiToken, xuiTlsInsecure } from "@/lib/provision/config";
-import { VLESS_CLIENT_FLOW } from "@/lib/provision/reality";
+import { applyRealityInboundDefaults, REALITY_MIN_CLIENT_VER, VLESS_CLIENT_FLOW } from "@/lib/provision/reality";
 
 export class XuiError extends Error {
   constructor(message: string) {
@@ -249,6 +249,65 @@ function inboundIdFrom(node: Node, obj: unknown, protocol = "vless") {
   return id;
 }
 
+function asJsonObj(value: unknown): Record<string, unknown> {
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value) as unknown;
+      return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+        ? (parsed as Record<string, unknown>)
+        : {};
+    } catch {
+      return {};
+    }
+  }
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
+async function ensureRealityMinClientVer(session: XuiSession, inboundId: number) {
+  const listed = await panelRequest(session, "/panel/api/inbounds/list");
+  const inbound = (Array.isArray(listed?.obj) ? listed.obj : []).find(
+    (item) => item && typeof item === "object" && (item as { id?: number }).id === inboundId
+  ) as Record<string, unknown> | undefined;
+  if (!inbound) {
+    return;
+  }
+
+  const stream = asJsonObj(inbound.streamSettings);
+  if (String(stream.security ?? "").toLowerCase() !== "reality") {
+    return;
+  }
+
+  const reality = asJsonObj(stream.realitySettings);
+  if (!String(reality.privateKey ?? "").trim()) {
+    return;
+  }
+  if (String(reality.minClientVer ?? "").trim() === REALITY_MIN_CLIENT_VER) {
+    return;
+  }
+
+  applyRealityInboundDefaults(reality);
+  stream.realitySettings = reality;
+  const sniff = asJsonObj(inbound.sniffing);
+  sniff.enabled = false;
+  sniff.destOverride = [];
+  const updated: Record<string, unknown> = {
+    ...inbound,
+    streamSettings: JSON.stringify(stream),
+    sniffing: JSON.stringify(sniff),
+  };
+  if (inbound.settings && typeof inbound.settings === "object") {
+    updated.settings = JSON.stringify(inbound.settings);
+  }
+
+  await panelRequest(session, `/panel/api/inbounds/update/${inboundId}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(updated),
+  });
+}
+
 function clientFields(input: XuiClientInput) {
   return {
     id: input.uuid,
@@ -347,6 +406,7 @@ export async function addXuiClient(node: Node, input: XuiClientInput) {
   const session = await login(node);
   const listed = await panelRequest(session, "/panel/api/inbounds/list");
   const inboundId = inboundIdFrom(node, listed?.obj);
+  await ensureRealityMinClientVer(session, inboundId);
   const jsonHeaders = { "Content-Type": "application/json" };
 
   await tryPanelRequests(session, [

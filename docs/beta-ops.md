@@ -19,6 +19,7 @@ See also: [infra.md](./infra.md) (origin deploy), [.env.example](../.env.example
 | `DATABASE_URL` | Production Postgres | Cron disabled |
 | `XUI_API_TOKEN` + per-node creds in Admin | Match panels | Traffic pull and Failover provision fail |
 | Node REALITY fields in Admin | `realityPublicKey`, `realityShortId`, `realityServerName` per node | Karing YAML missing `reality-opts`; live provision fails |
+| 3x-ui REALITY inbound | `minClientVer` / `minClient` = `1.0.0` (never empty) | Karing `reality verification failed` on Xray 26.7.11+ |
 | `WG_SERVER_PUBLIC_KEY` | Set | Marketing WireGuard fails in live mode |
 | `CLOUDFLARE_ZONE_ID` + `CLOUDFLARE_API_TOKEN` | Set on origin | No deploy/admin purge; edge stays cold after TTL |
 | `SLO_ALERT_WEBHOOK_URL` | Optional | No Slack/Discord on edge SLO breach |

@@ -8,13 +8,16 @@ from tests.fixtures import (
     FAILOVER_POOL_ROW,
     FAILOVER_ROW,
     GLOBAL_PRO_ROW,
+    decoded_sub,
 )
 
 
 def test_scenario_active_standard_under_limit():
     body, headers = resolve_subscription(ACTIVE_STANDARD_ROW)
-    assert "node-la-b.acrossflare.com" in body
-    assert "proxies: []" not in body
+    plain = decoded_sub(body)
+    assert "node-la-b.acrossflare.com" in plain
+    assert "reality-opts:" in plain
+    assert "proxies:" in plain
     assert "total=161061273600" in headers["subscription-userinfo"]
 
 
@@ -26,15 +29,17 @@ def test_scenario_exhausted_standard_returns_empty_proxies():
 
 def test_scenario_failover_serves_racknerd_only():
     body, headers = resolve_subscription(FAILOVER_ROW)
-    assert "node-la-rn.acrossflare.com" in body
-    assert "node-la-b.acrossflare.com" not in body
+    plain = decoded_sub(body)
+    assert "node-la-rn.acrossflare.com" in plain
+    assert "node-la-b.acrossflare.com" not in plain
     assert "; total=0;" in headers["subscription-userinfo"]
 
 
 def test_scenario_failover_uses_pool_when_racknerd_not_linked():
     body, _headers = resolve_subscription(FAILOVER_POOL_ROW)
-    assert "node-la-rn.acrossflare.com" in body
-    assert "node-la-b.acrossflare.com" not in body
+    plain = decoded_sub(body)
+    assert "node-la-rn.acrossflare.com" in plain
+    assert "node-la-b.acrossflare.com" not in plain
 
 
 def test_scenario_expired_subscription_is_blocked_with_headers():
@@ -48,5 +53,5 @@ def test_scenario_expired_subscription_is_blocked_with_headers():
 
 def test_scenario_global_pro_never_blocks_on_traffic():
     body, headers = resolve_subscription(GLOBAL_PRO_ROW)
-    assert "node-la-b.acrossflare.com" in body
+    assert "node-la-b.acrossflare.com" in decoded_sub(body)
     assert "; total=0;" in headers["subscription-userinfo"]

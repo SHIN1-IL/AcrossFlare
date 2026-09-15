@@ -1,5 +1,6 @@
 import { ServicePage } from "@/components/marketing/service-page";
-export const revalidate = 3600;
+import { STOREFRONT_REVALIDATE_SECONDS } from "@/lib/http-cache";
+export const revalidate = STOREFRONT_REVALIDATE_SECONDS;
 
 export default async function StandardRoute({
   params,

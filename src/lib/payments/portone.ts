@@ -39,9 +39,18 @@ export function portoneLocale(locale: string) {
   }
 }
 
-export function portoneCustomerName(email: string) {
-  const local = email.split("@")[0]?.trim();
-  return local && local.length > 0 ? local : "AcrossFlare";
+export function portoneCustomerName(email: string, koreanFallback = "구매자") {
+  const local = email.split("@")[0]?.trim() ?? "";
+  if (/[가-힣]/.test(local)) {
+    return local.slice(0, 20);
+  }
+
+  const fallback = koreanFallback.replace(/[^\p{L}\p{N}\s]/gu, "").trim();
+  if (/[가-힣]/.test(fallback)) {
+    return fallback.slice(0, 20);
+  }
+
+  return "구매자";
 }
 
 /** Inicis V2 checkout requires a Korean mobile number. */

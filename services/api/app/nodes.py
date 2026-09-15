@@ -1,16 +1,27 @@
+import re
 from typing import Any, TypedDict
 
 from app.config import DEFAULT_VLESS_PORT, VLESS_CLIENT_FLOW
 
+_IPV4 = re.compile(r"(?:https?://)?(\d{1,3}(?:\.\d{1,3}){3})")
+
 
 class NodeRow(TypedDict, total=False):
     ddns: str
+    host: str | None
     role: str
     vlessPort: int
     realityPublicKey: str | None
     realityShortId: str | None
     realityServerName: str | None
     realityFingerprint: str | None
+
+
+def vless_connect_host(node: NodeRow) -> str:
+    match = _IPV4.search((node.get("host") or "").strip())
+    if match:
+        return match.group(1)
+    return (node.get("ddns") or "").strip()
 
 
 def has_reality_config(node: NodeRow) -> bool:
@@ -52,6 +63,7 @@ def pick_hosts(
 def node_row_from_db(row: dict[str, Any]) -> NodeRow:
     return {
         "ddns": str(row.get("ddns") or ""),
+        "host": row.get("host"),
         "role": str(row.get("role") or ""),
         "vlessPort": int(row.get("vlessPort") or DEFAULT_VLESS_PORT),
         "realityPublicKey": row.get("realityPublicKey"),

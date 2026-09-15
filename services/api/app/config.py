@@ -8,6 +8,7 @@ KARING_REFRESH_ANNOUNCE = (
     "트래픽 초과·노드 전환 후 Karing [서브스크립션 수동 업데이트]를 눌러 주세요."
 )
 VLESS_CLIENT_FLOW = "xtls-rprx-vision"
+REALITY_MIN_CLIENT_VER = "1.0.0"
 DEFAULT_VLESS_PORT = 443
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
 

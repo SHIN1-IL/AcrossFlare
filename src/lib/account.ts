@@ -199,7 +199,7 @@ function buildGlobal(email: string, planId: string, scenario: ScenarioId): Globa
     (code) => `node-${code.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.acrossflare.com`
   );
   const failover = scenario === "exhausted-user";
-  const yamlUrl = `https://acrossflare.com/api/v1/subscription/${token}`;
+  const yamlUrl = `https://acrossflare.com/api/v1/subscription/${token}?flag=clash`;
 
   return {
     status: "active",

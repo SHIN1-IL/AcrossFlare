@@ -27,6 +27,7 @@ def fetch_subscription_by_token(token: str) -> dict[str, Any] | None:
                     json_agg(
                       json_build_object(
                         'ddns', n.ddns,
+                        'host', n.host,
                         'role', n.role::text,
                         'vlessPort', n."vlessPort",
                         'realityPublicKey', n."realityPublicKey",

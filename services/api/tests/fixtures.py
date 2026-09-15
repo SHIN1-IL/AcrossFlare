@@ -1,4 +1,13 @@
+from base64 import b64decode
 from datetime import datetime, timezone
+
+
+def decoded_sub(body: str) -> str:
+    raw = (body or "").strip()
+    if not raw or raw.startswith("vless://") or raw.startswith("proxies:") or raw.startswith("#"):
+        return raw
+    pad = "=" * (-len(raw) % 4)
+    return b64decode(raw + pad).decode("utf-8")
 
 REALITY_NODE = {
     "ddns": "node-la-b.acrossflare.com",

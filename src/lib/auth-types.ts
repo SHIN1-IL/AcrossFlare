@@ -1,5 +1,6 @@
 import type { AdminPermission } from "@/lib/admin-permissions";
 import { isAdminRole, isOwnerRole } from "@/lib/admin-permissions";
+import { stripLocalePrefix } from "@/i18n/path";
 
 export type UserRole = "USER" | "ADMIN" | "OWNER" | "STAFF";
 
@@ -33,8 +34,14 @@ function pathnameOf(path: string) {
   return path.split("?")[0] ?? path;
 }
 
+function unprefixedPath(path: string) {
+  const [pathname, search] = path.split("?");
+  const stripped = stripLocalePrefix(pathnameOf(pathname));
+  return search ? `${stripped}?${search}` : stripped;
+}
+
 function isConsoleReturnPath(path: string) {
-  const pathname = pathnameOf(path);
+  const pathname = stripLocalePrefix(pathnameOf(path));
   return (
     pathname === "/app" ||
     pathname.startsWith("/app/") ||
@@ -44,7 +51,7 @@ function isConsoleReturnPath(path: string) {
 }
 
 function isAdminReturnPath(path: string) {
-  const pathname = pathnameOf(path);
+  const pathname = stripLocalePrefix(pathnameOf(path));
   return pathname === "/admin" || pathname.startsWith("/admin/");
 }
 
@@ -52,13 +59,13 @@ function isAdminReturnPath(path: string) {
 export function loginRedirectHref(session: PublicSession, next?: string | null) {
   if (isAdminSession(session)) {
     if (isSafeNextPath(next) && isAdminReturnPath(next)) {
-      return next;
+      return unprefixedPath(next);
     }
     return "/admin";
   }
 
   if (isSafeNextPath(next) && !isConsoleReturnPath(next)) {
-    return next;
+    return unprefixedPath(next);
   }
 
   return "/";

@@ -21,7 +21,7 @@ describe("payments/start return url", () => {
         planId: "global-standard",
         paymentId: "pay_1",
       })
-    ).toBe("https://acrossflare.com/ko/checkout?product=global&plan=global-standard&paymentId=pay_1");
+    ).toBe("https://acrossflare.com/checkout?product=global&plan=global-standard&paymentId=pay_1");
   });
 });
 

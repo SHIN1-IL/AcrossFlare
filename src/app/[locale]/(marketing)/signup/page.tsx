@@ -3,7 +3,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AuthForm } from "@/components/marketing/auth-form";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { resolveLocale } from "@/i18n/locale";
-export const revalidate = 3600;
+import { STOREFRONT_REVALIDATE_SECONDS } from "@/lib/http-cache";
+export const revalidate = STOREFRONT_REVALIDATE_SECONDS;
 
 export default async function SignupPage({
   params,

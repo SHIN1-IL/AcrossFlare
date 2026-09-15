@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSession, materializeAuthUser, setSessionCookie } from "@/lib/auth";
+import { applyEnvLoginPassword } from "@/lib/bootstrap-logins";
 import { toPublicSession } from "@/lib/auth-types";
 import { prisma } from "@/lib/db";
 import { normalizeEmail } from "@/lib/email";
@@ -15,6 +16,8 @@ export async function POST(request: Request) {
   if (!email || !password) {
     return NextResponse.json({ error: "required" }, { status: 400 });
   }
+
+  await applyEnvLoginPassword(email, password);
 
   const user = await prisma.user.findUnique({ where: { email } });
   const valid = user ? await verifyPassword(password, user.passwordHash) : false;

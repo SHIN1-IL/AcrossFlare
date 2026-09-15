@@ -1,0 +1,16 @@
+---
+description: REALITY inbound and Karing subscription must stay compatible
+alwaysApply: true
+---
+
+# REALITY + Karing
+
+Xray 26.7.11+ treats empty `minClientVer` as `26.3.27`. Karing/mihomo then fail with `reality verification failed`.
+
+When creating or updating a 3x-ui REALITY inbound (`streamSettings.realitySettings`):
+
+- Set `minClientVer` and `minClient` to `1.0.0`. Never clear them.
+- Keep `privateKey` when rewriting `streamSettings`. Skip the update if private key is missing.
+- Leave sniffing off (`enabled: false`, empty `destOverride`).
+- Do not use Cloudflare as REALITY dest. Do not flip dest via API unless dest, `serverNames`, DB `realityServerName`, and the subscription `sni` stay identical.
+- Customer/Karing URLs must be Clash YAML (default or `?flag=clash`), not VLESS base64.

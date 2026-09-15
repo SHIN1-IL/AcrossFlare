@@ -1,7 +1,7 @@
-import { PrismaClient, Product, Role, SubscriptionStatus, type Node } from "@prisma/client";
+import { NodeHealth, PrismaClient, Product, Role, SubscriptionStatus, type Node } from "@prisma/client";
 import { exitHostFor, issueMarketingSecrets, nextWgAddress, regionFrom } from "../src/lib/marketing/secrets";
 import { hashPassword } from "../src/lib/password";
-import { REVIEW_USER_EMAIL, REVIEW_USER_PASSWORD } from "../src/lib/review-user";
+import { reviewUserEmail, reviewUserPassword } from "../src/lib/review-user";
 import { plans } from "../src/lib/plans";
 import { toPrismaProduct } from "../src/lib/product";
 import {
@@ -31,8 +31,8 @@ const DEMO_PASSWORD = "acrossflare";
 
 // Regular USER for PG review and merchant testing. No seeded subscription, so checkout still works.
 const REVIEW_USER = {
-  email: REVIEW_USER_EMAIL,
-  password: REVIEW_USER_PASSWORD,
+  email: reviewUserEmail(),
+  password: reviewUserPassword(),
   role: Role.USER,
 };
 
@@ -118,7 +118,7 @@ const SEED_NODES = [
     name: "US-East Bandwagon",
     ddns: "node-use.acrossflare.com",
     role: "BANDWAGON" as const,
-    status: "ONLINE" as const,
+    status: "OFFLINE" as const,
     host: "10.0.0.10",
     port: 2053,
     username: "admin",
@@ -131,7 +131,7 @@ const SEED_NODES = [
     name: "US-West Bandwagon",
     ddns: "node-usw.acrossflare.com",
     role: "BANDWAGON" as const,
-    status: "ONLINE" as const,
+    status: "OFFLINE" as const,
     host: "10.0.0.44",
     port: 2053,
     username: "admin",
@@ -233,6 +233,30 @@ async function main() {
   });
 
   await seedDemoSubscriptions();
+  await reconcileSeedMarketingTrafficSync();
+}
+
+/** Production: seed marketing demos must not poll placeholder 3x-ui panels every 5 minutes. */
+async function reconcileSeedMarketingTrafficSync() {
+  await prisma.subscription.updateMany({
+    where: {
+      id: { startsWith: "seed_m_" },
+      status: SubscriptionStatus.ACTIVE,
+    },
+    data: {
+      status: SubscriptionStatus.FAILED,
+      memo: "Seed marketing demo — disabled for traffic sync",
+    },
+  });
+
+  await prisma.node.updateMany({
+    where: {
+      id: { in: ["m-use-bw", "m-usw-bw"] },
+      host: { startsWith: "10.0.0." },
+      status: NodeHealth.ONLINE,
+    },
+    data: { status: NodeHealth.OFFLINE },
+  });
 }
 
 const DEMO_SUBSCRIPTIONS = [
@@ -275,16 +299,16 @@ const DEMO_SUBSCRIPTIONS = [
     product: Product.MARKETING,
     planId: "marketing-standard",
     nodeIds: ["m-use-bw"],
-    status: SubscriptionStatus.ACTIVE,
-    memo: "Seed demo",
+    status: SubscriptionStatus.UNPAID,
+    memo: "Seed demo (no traffic sync until provisioned)",
   },
   {
     email: "both-user@acrossflare.com",
     product: Product.MARKETING,
     planId: "marketing-standard",
     nodeIds: ["m-usw-bw"],
-    status: SubscriptionStatus.ACTIVE,
-    memo: "Holds both products",
+    status: SubscriptionStatus.UNPAID,
+    memo: "Holds both products (marketing unpaid demo)",
   },
   {
     email: "unpaid-user@acrossflare.com",

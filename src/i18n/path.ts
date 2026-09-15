@@ -1,3 +1,6 @@
+import { hasLocale } from "next-intl";
+import { routing, type AppLocale } from "@/i18n/routing";
+
 const CACHED_MARKETING_PATHS = new Set([
   "/",
   "/standard",
@@ -10,11 +13,36 @@ const CACHED_MARKETING_PATHS = new Set([
   "/signup",
 ]);
 
-/** Prefix a site-absolute path for `localePrefix: "always"`. */
+const PROTECTED_SUFFIX = /^\/(app|admin|checkout|support|dashboard)(\/|$)/;
+
+/** Prefix a site-absolute path for `localePrefix: "as-needed"`. */
 export function localePath(locale: string, href: string) {
   const [pathname, search] = href.split("?");
-  const prefixed = pathname === "/" ? `/${locale}` : `/${locale}${pathname}`;
+  const prefix = locale === routing.defaultLocale ? "" : `/${locale}`;
+  const prefixed =
+    pathname === "/" ? prefix || "/" : `${prefix}${pathname}`;
   return search ? `${prefixed}?${search}` : prefixed;
+}
+
+export function localeFromPathname(pathname: string): AppLocale {
+  const first = pathname.split("/")[1];
+  if (hasLocale(routing.locales, first)) {
+    return first;
+  }
+  return routing.defaultLocale;
+}
+
+export function stripLocalePrefix(pathname: string) {
+  const first = pathname.split("/")[1];
+  if (!hasLocale(routing.locales, first)) {
+    return pathname || "/";
+  }
+  const rest = pathname.slice(first.length + 1);
+  return rest === "" ? "/" : rest;
+}
+
+export function isProtectedPath(pathname: string) {
+  return PROTECTED_SUFFIX.test(stripLocalePrefix(pathname));
 }
 
 /** Full document URL so middleware 307s (login) are followed instead of RSC error UI. */

@@ -1,5 +1,8 @@
+from base64 import b64encode
+from urllib.parse import quote, urlencode
+
 from app.config import BACKUP_ANNOUNCE, BACKUP_DASHBOARD_URL, DEFAULT_VLESS_PORT, KARING_REFRESH_ANNOUNCE, VLESS_CLIENT_FLOW
-from app.nodes import NodeRow, has_reality_config
+from app.nodes import NodeRow, has_reality_config, vless_connect_host
 
 
 def with_backup_notice(yaml_body: str, *, refresh_hint: bool = False) -> str:
@@ -32,11 +35,11 @@ def _build_reality_proxy(node: NodeRow, uuid: str, index: int) -> str:
     lines = [
         f"  - name: {_proxy_name(node, index)}",
         "    type: vless",
-        f"    server: {node['ddns']}",
+        f"    server: {vless_connect_host(node)}",
         f"    port: {port}",
         f"    uuid: {uuid}",
         "    network: tcp",
-        "    tls: false",
+        "    tls: true",
         "    udp: true",
         f"    flow: {VLESS_CLIENT_FLOW}",
         f"    servername: {node.get('realityServerName')}",
@@ -46,10 +49,48 @@ def _build_reality_proxy(node: NodeRow, uuid: str, index: int) -> str:
     short_id = (node.get("realityShortId") or "").strip()
     if short_id:
         lines.append(f"      short-id: {short_id}")
-    fingerprint = (node.get("realityFingerprint") or "").strip()
-    if fingerprint:
-        lines.append(f"    client-fingerprint: {fingerprint}")
+    fingerprint = (node.get("realityFingerprint") or "").strip() or "chrome"
+    lines.append(f"    client-fingerprint: {fingerprint}")
     return "\n".join(lines)
+
+
+def _proxy_remark(node: NodeRow, index: int) -> str:
+    return _proxy_name(node, index)
+
+
+def _build_reality_uri(node: NodeRow, uuid: str, index: int) -> str:
+    port = int(node.get("vlessPort") or DEFAULT_VLESS_PORT)
+    query = urlencode(
+        {
+            "encryption": "none",
+            "flow": VLESS_CLIENT_FLOW,
+            "fp": (node.get("realityFingerprint") or "").strip() or "chrome",
+            "pbk": (node.get("realityPublicKey") or "").strip(),
+            "security": "reality",
+            "sid": (node.get("realityShortId") or "").strip(),
+            "sni": (node.get("realityServerName") or "").strip(),
+            "type": "tcp",
+        }
+    )
+    host = vless_connect_host(node)
+    name = quote(_proxy_remark(node, index))
+    return f"vless://{uuid}@{host}:{port}?{query}#{name}"
+
+
+def build_vless_uri_list(nodes: list[NodeRow], uuid: str) -> str:
+    links = [
+        _build_reality_uri(node, uuid, index)
+        for index, node in enumerate(nodes)
+        if has_reality_config(node)
+    ]
+    return "\n".join(links) + ("\n" if links else "")
+
+
+def build_vless_sub_base64(nodes: list[NodeRow], uuid: str) -> str:
+    text = build_vless_uri_list(nodes, uuid)
+    if not text:
+        return ""
+    return b64encode(text.encode("utf-8")).decode("ascii")
 
 
 def _build_ws_proxy(node: NodeRow, uuid: str, index: int) -> str:
@@ -58,7 +99,7 @@ def _build_ws_proxy(node: NodeRow, uuid: str, index: int) -> str:
         [
             f"  - name: {_proxy_name(node, index)}",
             "    type: vless",
-            f"    server: {node['ddns']}",
+            f"    server: {vless_connect_host(node)}",
             f"    port: {port}",
             f"    uuid: {uuid}",
             "    network: ws",

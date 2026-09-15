@@ -32,10 +32,10 @@ Target: keep steady origin containers under **~830MB RAM caps** on the **2GB Vul
 6. **Cache Rule** (marketing HTML only, Free/Pro — do not use `matches` regex): name `Marketing HTML`, custom expression editor (not the wildcard builder). Paste:
 
    ```
-   (http.host in {"acrossflare.com" "www.acrossflare.com"}) and (http.request.uri.path in {"/en" "/ko" "/zh" "/ja" "/en/standard" "/ko/standard" "/zh/standard" "/ja/standard" "/en/hybrid" "/ko/hybrid" "/zh/hybrid" "/ja/hybrid" "/en/workspace" "/ko/workspace" "/zh/workspace" "/ja/workspace" "/en/pricing" "/ko/pricing" "/zh/pricing" "/ja/pricing" "/en/terms" "/ko/terms" "/zh/terms" "/ja/terms" "/en/privacy" "/ko/privacy" "/zh/privacy" "/ja/privacy" "/en/login" "/ko/login" "/zh/login" "/ja/login" "/en/signup" "/ko/signup" "/zh/signup" "/ja/signup"})
+   (http.host in {"acrossflare.com" "www.acrossflare.com"}) and (http.request.uri.path in {"/" "/standard" "/hybrid" "/workspace" "/pricing" "/terms" "/privacy" "/login" "/signup" "/en" "/ko" "/zh" "/ja" "/en/standard" "/ko/standard" "/zh/standard" "/ja/standard" "/en/hybrid" "/ko/hybrid" "/zh/hybrid" "/ja/hybrid" "/en/workspace" "/ko/workspace" "/zh/workspace" "/ja/workspace" "/en/pricing" "/ko/pricing" "/zh/pricing" "/ja/pricing" "/en/terms" "/ko/terms" "/zh/terms" "/ja/terms" "/en/privacy" "/ko/privacy" "/zh/privacy" "/ja/privacy" "/en/login" "/ko/login" "/zh/login" "/ja/login" "/en/signup" "/ko/signup" "/zh/signup" "/ja/signup"})
    ```
 
-   Eligible for cache. Edge TTL: use origin Cache-Control, otherwise bypass. Origin already sends `CDN-Cache-Control` / `Cloudflare-CDN-Cache-Control` with `s-maxage=86400`. Deploy runs `infra/scripts/ensure-cloudflare-cache-rules.sh` to keep this rule (and Next static) in place. On Enterprise it omits cookies from the custom cache key; on Free/Pro Cloudflare’s default key is already host+path+query (no cookies) and Eligible for cache still applies with `af_session` present. Login/signup **shells** are anonymous (no session in HTML); `POST /api/auth/*` stays private. `/` is the locale redirect (`307` from `Accept-Language`); do **not** cache it or every visitor would get the same language. After changing this rule, purge `/` so a previous `/en` redirect is not reused. Do **not** cache `/support`, `/checkout`, `/app`, `/admin`, `/dashboard`, or `/api`. Do **not** use `https://acrossflare.com/*`.
+   Eligible for cache. Edge TTL: use origin Cache-Control, otherwise bypass. Origin already sends `CDN-Cache-Control` / `Cloudflare-CDN-Cache-Control` with `s-maxage=86400`. Deploy runs `infra/scripts/ensure-cloudflare-cache-rules.sh` to keep this rule (and Next static) in place. On Enterprise it omits cookies from the custom cache key; on Free/Pro Cloudflare’s default key is already host+path+query (no cookies) and Eligible for cache still applies with `af_session` present. Login/signup **shells** are anonymous (no session in HTML); `POST /api/auth/*` stays private. `/` is the Korean storefront (default locale, `as-needed` prefix). Cache it. `/ko` and `/ko/...` are aliases that redirect to the unprefixed path — purge them after deploy so old HTML is not reused. Do **not** cache `/support`, `/checkout`, `/app`, `/admin`, `/dashboard`, or `/api`. Do **not** use `https://acrossflare.com/*`.
 
    **Caching → Configuration → Browser Cache TTL:** Respect Existing Headers. Do not leave the zone default (often 4 hours). Origin marketing HTML uses `max-age=0` so browsers revalidate while the edge keeps `s-maxage=86400`.
 
@@ -64,7 +64,7 @@ Target: keep steady origin containers under **~830MB RAM caps** on the **2GB Vul
 4. `npm run origin:up`
 5. Confirm `https://acrossflare.com/api/health`, `https://acrossflare.com/dashboard`, `https://vault.acrossflare.com`, and `https://sync.acrossflare.com`.
 6. After deploy, verify traffic cron: `docker logs acrossflare-api-1 2>&1 | grep traffic_sync_scheduler_started`.
-7. Install edge cron: `npm run edge:cron:install`. Confirm `cf-cache-status: HIT` on `/en` `/ko` `/zh` `/ja`.
+7. Install edge cron: `npm run edge:cron:install`. Confirm `cf-cache-status: HIT` on `/` `/en` `/zh` `/ja`.
 
 For beta monitoring and launch checklist, see [beta-ops.md](./beta-ops.md).
 

@@ -139,6 +139,7 @@ def fetch_racknerd_pool(conn: psycopg.Connection, product: str) -> list[dict[str
             """
             SELECT
               ddns,
+              host,
               role::text,
               "vlessPort",
               "realityPublicKey",
@@ -158,12 +159,13 @@ def fetch_racknerd_pool(conn: psycopg.Connection, product: str) -> list[dict[str
     return [
         {
             "ddns": row[0],
-            "role": row[1],
-            "vlessPort": row[2],
-            "realityPublicKey": row[3],
-            "realityShortId": row[4],
-            "realityServerName": row[5],
-            "realityFingerprint": row[6],
+            "host": row[1],
+            "role": row[2],
+            "vlessPort": row[3],
+            "realityPublicKey": row[4],
+            "realityShortId": row[5],
+            "realityServerName": row[6],
+            "realityFingerprint": row[7],
         }
         for row in rows
     ]

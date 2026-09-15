@@ -7,17 +7,27 @@ import {
   type Plan,
   type Subscription,
   type Credential,
+  type NodeRole,
 } from "@prisma/client";
 import type { AccountSnapshot, GlobalAccount, MarketingAccount, Receipt } from "@/lib/account";
 import { scenarioFromEmail } from "@/lib/account";
 import { prisma } from "@/lib/db";
 import { toProductId } from "@/lib/product";
 import { appUrl } from "@/lib/provision/config";
-import { yamlUrlFor } from "@/lib/provision/build";
+import { prismaNodeToYamlNode, vlessRealityShareLink, yamlUrlFor } from "@/lib/provision/build";
 
 type SubscriptionRow = Subscription & {
   plan: Plan;
-  nodes: { ddns: string }[];
+  nodes: {
+    ddns: string;
+    host: string;
+    role: NodeRole;
+    vlessPort: number;
+    realityPublicKey: string | null;
+    realityShortId: string | null;
+    realityServerName: string | null;
+    realityFingerprint: string | null;
+  }[];
   credentials: Pick<
     Credential,
     | "uuid"
@@ -44,7 +54,18 @@ type SubscriptionRow = Subscription & {
 
 const subscriptionInclude = {
   plan: true,
-  nodes: { select: { ddns: true } },
+  nodes: {
+    select: {
+      ddns: true,
+      host: true,
+      role: true,
+      vlessPort: true,
+      realityPublicKey: true,
+      realityShortId: true,
+      realityServerName: true,
+      realityFingerprint: true,
+    },
+  },
   credentials: {
     select: {
       uuid: true,
@@ -132,6 +153,11 @@ function toGlobalAccount(subscription: SubscriptionRow | null): GlobalAccount | 
 
   const creds = subscription.credentials;
   const yamlUrl = creds?.yamlToken ? yamlUrlFor(creds.yamlToken, appUrl()) : "";
+  const shareLink = (creds?.uuid
+    ? subscription.nodes
+        .map((node) => vlessRealityShareLink(prismaNodeToYamlNode(node), creds.uuid!))
+        .find(Boolean)
+    : "") || creds?.deepLink || "";
 
   return {
     status,
@@ -143,7 +169,7 @@ function toGlobalAccount(subscription: SubscriptionRow | null): GlobalAccount | 
     failover: subscription.failover,
     nodes: subscription.nodes.map((node) => node.ddns),
     uuid: creds?.uuid ?? "",
-    deepLink: creds?.deepLink ?? "",
+    deepLink: shareLink,
     yamlUrl,
     yamlBody: "",
     vaultUrl: creds?.vaultUrl ?? "",

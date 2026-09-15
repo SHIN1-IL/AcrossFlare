@@ -7,7 +7,7 @@ from fastapi.responses import PlainTextResponse, Response
 
 from app.config import TRAFFIC_SYNC_INTERVAL, traffic_sync_enabled
 from app.db import fetch_subscription_by_token
-from app.subscription import resolve_subscription
+from app.subscription import is_vless_format, resolve_subscription
 from app.traffic_sync import run_traffic_sync
 
 logger = logging.getLogger(__name__)
@@ -55,15 +55,31 @@ def subscription(
     if not row:
         raise HTTPException(status_code=404, detail="not_found")
 
+    fmt = _subscription_format(request)
     try:
-        body, headers = resolve_subscription(row)
+        body, headers = resolve_subscription(row, fmt=fmt)
     except ValueError as exc:
         if str(exc) == "not_found":
             raise HTTPException(status_code=404, detail="not_found") from exc
         raise
 
-    headers = {**headers, "Content-Type": "text/yaml; charset=utf-8"}
+    media = "text/plain; charset=utf-8" if is_vless_format(fmt) else "text/yaml; charset=utf-8"
+    headers = {**headers, "Content-Type": media}
     if request.method == "HEAD":
         return Response(status_code=200, headers=headers)
 
-    return PlainTextResponse(content=body, headers=headers, media_type="text/yaml; charset=utf-8")
+    return PlainTextResponse(content=body, headers=headers, media_type=media)
+
+
+def _subscription_format(request: Request) -> str:
+    explicit = (request.query_params.get("flag") or request.query_params.get("format") or "").strip().lower()
+    if explicit in {"clash", "clash-meta", "yaml"}:
+        return "clash"
+    if explicit == "uri":
+        return "uri"
+    if explicit in {"vless", "v2ray", "xray"}:
+        return "vless"
+    ua = (request.headers.get("user-agent") or "").lower()
+    if "v2ray" in ua or "v2rayn" in ua or "nekobox" in ua:
+        return "vless"
+    return "clash"

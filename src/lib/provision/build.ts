@@ -4,6 +4,7 @@ import {
   DEFAULT_VLESS_PORT,
   hasRealityConfig,
   VLESS_CLIENT_FLOW,
+  vlessConnectHost,
   type RealityFields,
 } from "@/lib/provision/reality";
 import { withBackupNotice } from "@/lib/provision/subscription";
@@ -12,12 +13,14 @@ const EXIT_IPS = ["203.0.113.10", "203.0.113.44", "198.51.100.22", "198.51.100.8
 
 export type YamlNode = {
   ddns: string;
+  host?: string | null;
   role: NodeRole;
   vlessPort?: number | null;
 } & RealityFields;
 
 export function prismaNodeToYamlNode(node: {
   ddns: string;
+  host?: string | null;
   role: NodeRole;
   vlessPort?: number | null;
   realityPublicKey?: string | null;
@@ -27,6 +30,7 @@ export function prismaNodeToYamlNode(node: {
 }): YamlNode {
   return {
     ddns: node.ddns,
+    host: node.host,
     role: node.role,
     vlessPort: node.vlessPort ?? DEFAULT_VLESS_PORT,
     realityPublicKey: node.realityPublicKey,
@@ -37,11 +41,31 @@ export function prismaNodeToYamlNode(node: {
 }
 
 export function yamlUrlFor(token: string, origin: string) {
-  return `${origin.replace(/\/$/, "")}/api/v1/subscription/${token}`;
+  return `${origin.replace(/\/$/, "")}/api/v1/subscription/${token}?flag=clash`;
 }
 
 export function karingDeepLink(yamlUrl: string) {
   return `karing://install-config?url=${encodeURIComponent(yamlUrl)}`;
+}
+
+export function vlessRealityShareLink(node: YamlNode, uuid: string, remark?: string) {
+  if (!hasRealityConfig(node) || !uuid) {
+    return "";
+  }
+
+  const port = node.vlessPort ?? DEFAULT_VLESS_PORT;
+  const query = new URLSearchParams({
+    encryption: "none",
+    flow: VLESS_CLIENT_FLOW,
+    fp: node.realityFingerprint?.trim() || "chrome",
+    pbk: node.realityPublicKey!.trim(),
+    security: "reality",
+    sid: node.realityShortId?.trim() || "",
+    sni: node.realityServerName!.trim(),
+    type: "tcp",
+  });
+  const name = remark || node.ddns.split(".")[0] || "acrossflare";
+  return `vless://${uuid}@${vlessConnectHost(node)}:${port}?${query.toString()}#${encodeURIComponent(name)}`;
 }
 
 export function pickNodesForYaml(nodes: YamlNode[], failover: boolean) {
@@ -76,11 +100,11 @@ function buildRealityProxy(node: YamlNode, uuid: string, index: number) {
   const lines = [
     `  - name: ${proxyName(node, index)}`,
     `    type: vless`,
-    `    server: ${node.ddns}`,
+    `    server: ${vlessConnectHost(node)}`,
     `    port: ${port}`,
     `    uuid: ${uuid}`,
     `    network: tcp`,
-    `    tls: false`,
+    `    tls: true`,
     `    udp: true`,
     `    flow: ${VLESS_CLIENT_FLOW}`,
     `    servername: ${node.realityServerName}`,
@@ -91,9 +115,7 @@ function buildRealityProxy(node: YamlNode, uuid: string, index: number) {
   if (node.realityShortId?.trim()) {
     lines.push(`      short-id: ${node.realityShortId.trim()}`);
   }
-  if (node.realityFingerprint?.trim()) {
-    lines.push(`    client-fingerprint: ${node.realityFingerprint.trim()}`);
-  }
+  lines.push(`    client-fingerprint: ${node.realityFingerprint?.trim() || "chrome"}`);
 
   return lines.join("\n");
 }
@@ -103,7 +125,7 @@ function buildWsProxy(node: YamlNode, uuid: string, index: number) {
   return [
     `  - name: ${proxyName(node, index)}`,
     `    type: vless`,
-    `    server: ${node.ddns}`,
+    `    server: ${vlessConnectHost(node)}`,
     `    port: ${port}`,
     `    uuid: ${uuid}`,
     `    network: ws`,

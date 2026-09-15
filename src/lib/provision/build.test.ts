@@ -6,6 +6,7 @@ import {
   pickHostsForYaml,
   syncthingFolderId,
   vaultUserId,
+  vlessRealityShareLink,
   xuiClientEmail,
   yamlUrlFor,
   type YamlNode,
@@ -27,8 +28,15 @@ const realityNode = (ddns: string, role: NodeRole): YamlNode => ({
 describe("provision/build", () => {
   it("builds a subscription URL and Karing deeplink", () => {
     const url = yamlUrlFor("abc", "https://acrossflare.com/");
-    expect(url).toBe("https://acrossflare.com/api/v1/subscription/abc");
+    expect(url).toBe("https://acrossflare.com/api/v1/subscription/abc?flag=clash");
     expect(karingDeepLink(url)).toContain("karing://install-config?url=");
+    const share = vlessRealityShareLink(
+      { ...realityNode("node-tokyo.acrossflare.com", NodeRole.BANDWAGON), host: "https://74.82.221.67:2053" },
+      "uuid-1"
+    );
+    expect(share.startsWith("vless://uuid-1@74.82.221.67:443?")).toBe(true);
+    expect(share).toContain("security=reality");
+    expect(share).toContain("sni=www.microsoft.com");
   });
 
   it("emits REALITY VLESS yaml with the backup dashboard notice", () => {
@@ -37,6 +45,8 @@ describe("provision/build", () => {
     expect(yaml).toContain("server: node-tokyo.acrossflare.com");
     expect(yaml).toContain("uuid: uuid-1");
     expect(yaml).toContain("network: tcp");
+    expect(yaml).toContain("tls: true");
+    expect(yaml).not.toContain("tls: false");
     expect(yaml).toContain(`flow: ${VLESS_CLIENT_FLOW}`);
     expect(yaml).toContain("reality-opts:");
     expect(yaml).toContain("public-key:");

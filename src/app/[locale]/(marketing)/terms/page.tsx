@@ -1,7 +1,8 @@
 import { setRequestLocale } from "next-intl/server";
 import { LegalPage } from "@/components/marketing/legal-page";
 import { resolveLocale } from "@/i18n/locale";
-export const revalidate = 3600;
+import { STOREFRONT_REVALIDATE_SECONDS } from "@/lib/http-cache";
+export const revalidate = STOREFRONT_REVALIDATE_SECONDS;
 
 export default async function TermsRoute({
   params,

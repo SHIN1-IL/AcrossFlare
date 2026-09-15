@@ -3,6 +3,7 @@ from tests.fixtures import (
     EXHAUSTED_STANDARD_ROW,
     FAILOVER_ROW,
     INACTIVE_ROW,
+    decoded_sub,
 )
 
 
@@ -23,15 +24,36 @@ def test_subscription_unknown_token_returns_404(client, monkeypatch):
     assert response.status_code == 404
 
 
-def test_subscription_active_returns_yaml_and_userinfo(client, monkeypatch):
+def test_subscription_active_returns_clash_yaml(client, monkeypatch):
     monkeypatch.setattr("app.main.fetch_subscription_by_token", lambda token: ACTIVE_STANDARD_ROW)
     response = client.get("/api/v1/subscription/demo-token")
 
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("text/yaml")
     assert "subscription-userinfo" in response.headers
+    assert "AcrossFlare.yaml" in response.headers["content-disposition"]
+    assert "reality-opts:" in response.text
     assert "node-la-b.acrossflare.com" in response.text
     assert "profile-web-page-url" in response.headers
+
+
+def test_subscription_clash_flag_returns_yaml(client, monkeypatch):
+    monkeypatch.setattr("app.main.fetch_subscription_by_token", lambda token: ACTIVE_STANDARD_ROW)
+    response = client.get("/api/v1/subscription/demo-token?flag=clash")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/yaml")
+    assert "reality-opts:" in response.text
+
+
+def test_subscription_clash_ua_returns_yaml(client, monkeypatch):
+    monkeypatch.setattr("app.main.fetch_subscription_by_token", lambda token: ACTIVE_STANDARD_ROW)
+    response = client.get(
+        "/api/v1/subscription/demo-token",
+        headers={"User-Agent": "ClashMeta/1.18.0"},
+    )
+    assert response.status_code == 200
+    assert "reality-opts:" in response.text
 
 
 def test_subscription_head_returns_headers_only(client, monkeypatch):
@@ -46,7 +68,6 @@ def test_subscription_head_returns_headers_only(client, monkeypatch):
 def test_subscription_exhausted_returns_empty_proxies_not_403(client, monkeypatch):
     monkeypatch.setattr("app.main.fetch_subscription_by_token", lambda token: EXHAUSTED_STANDARD_ROW)
     response = client.get("/api/v1/subscription/demo-token")
-
     assert response.status_code == 200
     assert "proxies: []" in response.text
     assert "subscription-userinfo" in response.headers
@@ -59,7 +80,19 @@ def test_subscription_failover_returns_racknerd_yaml(client, monkeypatch):
     assert response.status_code == 200
     assert "node-la-rn.acrossflare.com" in response.text
     assert "node-la-b.acrossflare.com" not in response.text
+    assert "reality-opts:" in response.text
     assert "; total=0;" in response.headers["subscription-userinfo"]
+
+
+def test_subscription_vless_flag_returns_uris(client, monkeypatch):
+    monkeypatch.setattr("app.main.fetch_subscription_by_token", lambda token: ACTIVE_STANDARD_ROW)
+    response = client.get("/api/v1/subscription/demo-token?flag=vless")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/plain")
+    plain = decoded_sub(response.text)
+    assert plain.startswith("vless://")
+    assert "security=reality" in plain
 
 
 def test_subscription_query_token_alias(client, monkeypatch):

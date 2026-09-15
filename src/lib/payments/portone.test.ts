@@ -15,8 +15,13 @@ describe("portone currency and locale", () => {
     expect(portoneLocale("en")).toBe("EN_US");
   });
 
-  it("derives a customer name from the account email", () => {
-    expect(portoneCustomerName("shin@acrosstool.com")).toBe("shin");
+  it("uses a Korean buyer name for Inicis when the email local part is Latin", () => {
+    expect(portoneCustomerName("shin@acrosstool.com")).toBe("구매자");
+    expect(portoneCustomerName("shin@acrosstool.com", "신일")).toBe("신일");
+  });
+
+  it("keeps Hangul email locals", () => {
+    expect(portoneCustomerName("홍길동@example.com")).toBe("홍길동");
   });
 
   it("normalizes Korean mobiles for Inicis V2", () => {

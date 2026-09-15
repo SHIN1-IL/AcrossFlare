@@ -1,6 +1,6 @@
 import { PaymentProvider, PaymentStatus } from "@prisma/client";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { hmacSha256Hex, md5Hex } from "@/lib/payments/crypto";
+import { hmacSha256Base64, hmacSha256Hex, md5Hex, decodeStandardWebhookSecret } from "@/lib/payments/crypto";
 import { verifyPaymentWebhook, WebhookVerifyError } from "@/lib/payments/verify";
 
 const secret = "test-webhook-secret";
@@ -30,6 +30,21 @@ function stripeRequest(body: object, timestampSec = Math.floor(Date.now() / 1000
   });
 }
 
+function portoneRequest(body: object, timestampSec = Math.floor(Date.now() / 1000)) {
+  const raw = JSON.stringify(body);
+  const id = "wh_1";
+  const signature = hmacSha256Base64(decodeStandardWebhookSecret(secret), `${id}.${timestampSec}.${raw}`);
+  return new Request("http://localhost/api/v1/payments/webhook", {
+    method: "POST",
+    headers: {
+      "webhook-id": id,
+      "webhook-timestamp": String(timestampSec),
+      "webhook-signature": `v1,${signature}`,
+    },
+    body: raw,
+  });
+}
+
 function paymentwallRequest(params: Record<string, string>) {
   const entries = Object.entries(params)
     .filter(([key]) => key !== "sig")
@@ -46,7 +61,7 @@ describe("payments/verify", () => {
     process.env.PAYMENT_WEBHOOK_SECRET = secret;
     process.env.STRIPE_WEBHOOK_SECRET = secret;
     process.env.PAYMENTWALL_SECRET = secret;
-    delete process.env.PORTONE_WEBHOOK_SECRET;
+    process.env.PORTONE_WEBHOOK_SECRET = secret;
   });
 
   afterEach(() => {
@@ -187,6 +202,55 @@ describe("payments/verify", () => {
       paymentwallRequest({ uid: "user_1", goodsid: "pay_wall", ref: "ref_3", type: "2" })
     );
     expect(chargeback.status).toBe(PaymentStatus.FAILED);
+  });
+
+  it("treats PortOne Transaction.Paid as success and ignores Ready", async () => {
+    const paid = await verifyPaymentWebhook(
+      portoneRequest({
+        type: "Transaction.Paid",
+        data: { paymentId: "pay_portone", transactionId: "tx_1" },
+      })
+    );
+    expect(paid).toMatchObject({
+      paymentId: "pay_portone",
+      provider: PaymentProvider.PORTONE,
+      status: PaymentStatus.SUCCEEDED,
+    });
+
+    await expect(
+      verifyPaymentWebhook(
+        portoneRequest({
+          type: "Transaction.Ready",
+          data: { paymentId: "pay_portone", transactionId: "tx_ready" },
+        })
+      )
+    ).rejects.toMatchObject({ code: "ignored_event" } satisfies Partial<WebhookVerifyError>);
+  });
+
+  it("treats PortOne Transaction.Failed as failed", async () => {
+    const failed = await verifyPaymentWebhook(
+      portoneRequest({
+        type: "Transaction.Failed",
+        data: { paymentId: "pay_portone", transactionId: "tx_fail" },
+      })
+    );
+    expect(failed.status).toBe(PaymentStatus.FAILED);
+  });
+
+  it("accepts PortOne Paid webhooks with CURRENCY_ prefix", async () => {
+    const paid = await verifyPaymentWebhook(
+      portoneRequest({
+        type: "Transaction.Paid",
+        data: {
+          paymentId: "pay_portone",
+          transactionId: "tx_2",
+          currency: "CURRENCY_KRW",
+          amount: { total: 19900 },
+        },
+      })
+    );
+    expect(paid.currency).toBe("KRW");
+    expect(paid.amount).toBe(19900);
   });
 
   it("ignores other Paymentwall pingback types", async () => {
