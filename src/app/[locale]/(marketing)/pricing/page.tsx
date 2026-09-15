@@ -6,7 +6,7 @@ import { PricingView } from "@/components/marketing/pricing-view";
 import { loadAllStorefrontPlansByService } from "@/lib/storefront-plans";
 import { STOREFRONT_REVALIDATE_SECONDS } from "@/lib/http-cache";
 
-export const revalidate = STOREFRONT_REVALIDATE_SECONDS;
+export const revalidate = 86400;
 
 export default async function PricingPage({
   params,

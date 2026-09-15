@@ -5,7 +5,7 @@ import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { PlanStages } from "@/components/marketing/plan-stages";
 import { STOREFRONT_REVALIDATE_SECONDS } from "@/lib/http-cache";
 
-export const revalidate = STOREFRONT_REVALIDATE_SECONDS;
+export const revalidate = 86400;
 
 export default async function LandingPage({
   params,
