@@ -1,5 +1,4 @@
 import { ServicePage } from "@/components/marketing/service-page";
-import { STOREFRONT_REVALIDATE_SECONDS } from "@/lib/http-cache";
 export const revalidate = 86400;
 
 export default async function HybridRoute({

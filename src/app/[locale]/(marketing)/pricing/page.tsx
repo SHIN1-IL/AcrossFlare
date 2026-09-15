@@ -4,7 +4,6 @@ import { resolveLocale } from "@/i18n/locale";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { PricingView } from "@/components/marketing/pricing-view";
 import { loadAllStorefrontPlansByService } from "@/lib/storefront-plans";
-import { STOREFRONT_REVALIDATE_SECONDS } from "@/lib/http-cache";
 
 export const revalidate = 86400;
 

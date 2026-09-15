@@ -3,7 +3,6 @@ import { resolveLocale } from "@/i18n/locale";
 import { HeroAtmosphereLazy } from "@/components/marketing/hero-atmosphere-lazy";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { PlanStages } from "@/components/marketing/plan-stages";
-import { STOREFRONT_REVALIDATE_SECONDS } from "@/lib/http-cache";
 
 export const revalidate = 86400;
 
