@@ -1,0 +1,14 @@
+---
+description: Keep Next App Router segment config and ssr:false build-safe
+globs: src/app/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Next segment config + dynamic SSR
+
+`next build` fails on the origin if these are wrong (seen on Next 16.3.2 / Turbopack).
+
+- `export const revalidate` in `page`/`layout` must be a numeric literal or `false` (`86400`, not `STOREFRONT_REVALIDATE_SECONDS`). Use the imported constant only for `fetch` / `unstable_cache` options.
+- `export const dynamic` must be a string literal (`"force-static"`, `"force-dynamic"`).
+- Do not pass `{ ssr: false }` to `next/dynamic` from a Server Component under `src/app`. Put that import in a `"use client"` file under `src/components`.
+---
