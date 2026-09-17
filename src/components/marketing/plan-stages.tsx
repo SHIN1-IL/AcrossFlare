@@ -1,4 +1,4 @@
-import { getLocale, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 import { LazyStageBackdrop } from "@/components/marketing/plan-stage-bg";
 import { PlanPeriodCaption } from "@/components/marketing/plan-period-caption";
 import { PriceAmount, SecondaryPriceAmount } from "@/components/marketing/price-amount";
@@ -10,12 +10,28 @@ import { planPricePeriodKey, type Plan } from "@/lib/plans";
 import { cn } from "@/lib/utils";
 import type { AppLocale } from "@/i18n/routing";
 
-export async function PlanStages({ showAlipay }: { showAlipay: boolean }) {
-  const slides = await loadHomeSlidePlans();
-  const t = await getTranslations("pricing");
-  const tSlides = await getTranslations("planSlides");
-  const tWorkspace = await getTranslations("workspace");
-  const locale = (await getLocale()) as AppLocale;
+export function PlanStagesSkeleton() {
+  return (
+    <div
+      className="relative min-h-dvh overflow-hidden bg-[#07080c]"
+      aria-hidden="true"
+    />
+  );
+}
+
+export async function PlanStages({
+  locale,
+  showAlipay,
+}: {
+  locale: AppLocale;
+  showAlipay: boolean;
+}) {
+  const [slides, t, tSlides, tWorkspace] = await Promise.all([
+    loadHomeSlidePlans(),
+    getTranslations("pricing"),
+    getTranslations("planSlides"),
+    getTranslations("workspace"),
+  ]);
 
   return (
     <div>

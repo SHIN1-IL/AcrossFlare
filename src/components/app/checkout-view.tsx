@@ -7,7 +7,6 @@ import { PaymentTabs } from "@/components/app/payment-tabs";
 import { LegalFooterLinks } from "@/components/marketing/legal-footer-links";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { Logo } from "@/components/marketing/logo";
-import { PgReviewNotice } from "@/components/marketing/pg-review-notice";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useAccount, useHydrated } from "@/hooks/use-account";
 import { Link, useRouter } from "@/i18n/navigation";
@@ -20,13 +19,11 @@ import { PriceAmount, SecondaryPriceAmount } from "@/components/marketing/price-
 import { useLivePlan } from "@/hooks/use-admin";
 import { isPublicCheckoutProduct, planPricePeriodKey } from "@/lib/plans";
 import type { PortOneCheckout } from "@/lib/payments/portone";
-import { canStartPublicCheckout } from "@/lib/review-user";
 import { cn } from "@/lib/utils";
 
 const CHECKOUT_FAILURES = [
   "timeout",
   "invalid_code",
-  "review_only",
   "portone_not_configured",
   "stripe_not_configured",
   "stripe_checkout_failed",
@@ -190,11 +187,6 @@ export function CheckoutView({
       return;
     }
 
-    if (!canStartPublicCheckout(user.email)) {
-      setError("review_only");
-      return;
-    }
-
     if (validProduct === "workspace" && !activePromoCode) {
       setError("invalid_code");
       return;
@@ -229,7 +221,6 @@ export function CheckoutView({
       if (checkout.error) {
         throw new Error(
             checkout.error === "invalid_code" ||
-            checkout.error === "review_only" ||
             checkout.error === "portone_not_configured" ||
             checkout.error === "stripe_not_configured" ||
             checkout.error === "stripe_checkout_failed" ||
@@ -377,7 +368,6 @@ export function CheckoutView({
                 />
               </label>
             ) : null}
-            {canStartPublicCheckout(user.email) ? null : <PgReviewNotice />}
             {error ? (
               <div className="space-y-1">
                 <p className="text-sm text-destructive">
@@ -387,9 +377,7 @@ export function CheckoutView({
                       ? t("invalidCode")
                       : error === "agree"
                         ? t("agreeRequired")
-                        : error === "review_only"
-                          ? t("reviewOnly")
-                          : error === "phone_required"
+                        : error === "phone_required"
                             ? t("phoneRequired")
                             : error === "phone_invalid"
                               ? t("phoneInvalid")
@@ -436,7 +424,6 @@ export function CheckoutView({
             <Button
               type="button"
               className="h-10 w-full rounded-[10px]"
-              disabled={!canStartPublicCheckout(user.email)}
               onClick={() => {
                 void startPayment();
               }}

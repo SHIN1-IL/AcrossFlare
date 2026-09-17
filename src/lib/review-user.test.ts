@@ -13,17 +13,17 @@ describe("review-user", () => {
     delete process.env.REVIEW_USER_PASSWORD;
   });
 
-  it("treats the PG review account as the only public checkout identity", () => {
+  it("still identifies the PG review account", () => {
     expect(isReviewUserEmail(REVIEW_USER_EMAIL)).toBe(true);
     expect(isReviewUserEmail("Shin@Acrosstool.com")).toBe(true);
-    expect(canStartPublicCheckout(REVIEW_USER_EMAIL)).toBe(true);
   });
 
-  it("keeps general visitor accounts off public checkout", () => {
-    expect(isReviewUserEmail("visitor@example.com")).toBe(false);
-    expect(canStartPublicCheckout("visitor@example.com")).toBe(false);
-    expect(canStartPublicCheckout("global-user@acrossflare.com")).toBe(false);
+  it("lets any signed-in email start public checkout", () => {
+    expect(canStartPublicCheckout(REVIEW_USER_EMAIL)).toBe(true);
+    expect(canStartPublicCheckout("visitor@example.com")).toBe(true);
+    expect(canStartPublicCheckout("global-user@acrossflare.com")).toBe(true);
     expect(canStartPublicCheckout(null)).toBe(false);
+    expect(canStartPublicCheckout("")).toBe(false);
   });
 
   it("reads review credentials from env", () => {

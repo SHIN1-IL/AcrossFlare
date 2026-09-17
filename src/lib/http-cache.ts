@@ -14,8 +14,6 @@ const MARKETING_SUFFIXES = [
   "/pricing",
   "/terms",
   "/privacy",
-  "/login",
-  "/signup",
 ] as const;
 
 /** Paths whose HTML is identical for every visitor and safe to cache at the edge. */
@@ -27,6 +25,8 @@ export const MARKETING_CACHE_SOURCES = [
 ] as const;
 
 const PRIVATE_SUFFIXES = [
+  "/login",
+  "/signup",
   "/support",
   "/checkout",
   "/app",

@@ -18,5 +18,5 @@ export function isReviewUserEmail(email: string | null | undefined) {
 }
 
 export function canStartPublicCheckout(email: string | null | undefined) {
-  return isReviewUserEmail(email);
+  return Boolean(normalizeEmail(email ?? ""));
 }

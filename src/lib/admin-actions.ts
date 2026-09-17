@@ -448,6 +448,37 @@ export async function retryCustomerProvision(customerId: string): Promise<{ cust
   return { customer };
 }
 
+export async function expireCustomer(customerId: string): Promise<{ customer: AdminCustomer }> {
+  const subscription = await prisma.subscription.findUnique({
+    where: { id: customerId },
+    include: { nodes: true, credentials: true },
+  });
+  if (!subscription) {
+    throw new AdminActionError("not_found", 404);
+  }
+  if (subscription.status !== SubscriptionStatus.ACTIVE) {
+    throw new AdminActionError("inactive");
+  }
+
+  await destroyXuiClients(subscription.nodes, subscription.credentials);
+
+  await prisma.subscription.update({
+    where: { id: customerId },
+    data: {
+      status: SubscriptionStatus.UNPAID,
+      expiresAt: new Date(),
+      memo: "Expired after live card test",
+    },
+  });
+
+  const customer = await getAdminCustomer(customerId);
+  if (!customer) {
+    throw new AdminActionError("not_found", 404);
+  }
+
+  return { customer };
+}
+
 export async function changeCustomerPlan(input: {
   customerId: string;
   toPlanId: string;

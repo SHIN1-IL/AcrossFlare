@@ -22,6 +22,7 @@ import {
   loadCustomerDetail,
   recordRotate,
   retryProvision,
+  expireProvision,
   runPlanChange,
 } from "@/lib/admin-store";
 import { canRetryProvision, fulfillmentSteps } from "@/lib/admin-queue";
@@ -43,6 +44,8 @@ export function CustomerDetail({ service, id }: { service: AdminServiceId; id: s
   const [simulateFail, setSimulateFail] = useState(false);
   const [retrying, setRetrying] = useState(false);
   const [retryError, setRetryError] = useState("");
+  const [expiring, setExpiring] = useState(false);
+  const [expireError, setExpireError] = useState("");
   const canProvision = Boolean(session?.permissions?.includes("provision"));
 
   useEffect(() => {
@@ -111,6 +114,31 @@ export function CustomerDetail({ service, id }: { service: AdminServiceId; id: s
       <section className="space-y-4 rounded-2xl border border-border bg-card p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm">{t("step")}</p>
+          <div className="flex flex-wrap gap-2">
+          {canProvision && customer.status === "active" ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="rounded-[10px]"
+              disabled={expiring}
+              onClick={() => {
+                if (!window.confirm(t("expireConfirm"))) {
+                  return;
+                }
+                setExpireError("");
+                setExpiring(true);
+                void expireProvision(customer.id).then((result) => {
+                  setExpiring(false);
+                  if (!result.ok) {
+                    setExpireError(t("expireFailed"));
+                  }
+                });
+              }}
+            >
+              {t("expire")}
+            </Button>
+          ) : null}
           {canProvision && canRetryProvision(customer) ? (
             <Button
               type="button"
@@ -138,6 +166,7 @@ export function CustomerDetail({ service, id }: { service: AdminServiceId; id: s
               {t("retry")}
             </Button>
           ) : null}
+          </div>
         </div>
         <AdminSteps
           steps={fulfillmentSteps(customer)}
@@ -153,6 +182,7 @@ export function CustomerDetail({ service, id }: { service: AdminServiceId; id: s
           <p className="font-mono text-xs text-destructive">{customer.provisionError}</p>
         ) : null}
         {retryError ? <p className="text-sm text-destructive">{retryError}</p> : null}
+        {expireError ? <p className="text-sm text-destructive">{expireError}</p> : null}
       </section>
 
       <section className="rounded-2xl border border-border bg-card p-5">
@@ -252,7 +282,9 @@ export function CustomerDetail({ service, id }: { service: AdminServiceId; id: s
                 <span>
                   {entry.action === "provision"
                     ? t("auditProvision")
-                    : entry.action === "retry"
+                    : entry.action === "expire"
+                      ? t("auditExpire")
+                      : entry.action === "retry"
                       ? t("auditRetry")
                       : entry.action === "plan_change"
                         ? t("auditPlanChange")

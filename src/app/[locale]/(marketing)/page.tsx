@@ -1,8 +1,9 @@
-import { getLocale, setRequestLocale } from "next-intl/server";
+import { Suspense } from "react";
+import { setRequestLocale } from "next-intl/server";
 import { resolveLocale } from "@/i18n/locale";
 import { HeroAtmosphereLazy } from "@/components/marketing/hero-atmosphere-lazy";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
-import { PlanStages } from "@/components/marketing/plan-stages";
+import { PlanStages, PlanStagesSkeleton } from "@/components/marketing/plan-stages";
 
 export const revalidate = 86400;
 
@@ -13,7 +14,6 @@ export default async function LandingPage({
 }) {
   const locale = await resolveLocale(params);
   setRequestLocale(locale);
-  const currentLocale = await getLocale();
 
   return (
     <MarketingShell>
@@ -29,7 +29,9 @@ export default async function LandingPage({
           </p>
         </div>
       </section>
-      <PlanStages showAlipay={currentLocale === "zh"} />
+      <Suspense fallback={<PlanStagesSkeleton />}>
+        <PlanStages locale={locale} showAlipay={locale === "zh"} />
+      </Suspense>
     </MarketingShell>
   );
 }

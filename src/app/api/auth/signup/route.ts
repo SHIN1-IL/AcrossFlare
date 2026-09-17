@@ -9,7 +9,7 @@ import { hashPassword, isStrongPassword } from "@/lib/password";
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as
-    | { email?: string; password?: string }
+    | { email?: string; password?: string; ageConfirmed?: boolean; legalAgreed?: boolean }
     | null;
   const email = normalizeEmail(body?.email ?? "");
   const password = String(body?.password ?? "");
@@ -22,8 +22,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "weak_password" }, { status: 400 });
   }
 
-  if (!isOwnerEmail(email)) {
-    return NextResponse.json({ error: "review_only" }, { status: 403 });
+  if (!body?.ageConfirmed || !body?.legalAgreed) {
+    return NextResponse.json({ error: "consent_required" }, { status: 400 });
   }
 
   try {

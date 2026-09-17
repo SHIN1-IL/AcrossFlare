@@ -43,8 +43,8 @@ describe("isCachedMarketingPath", () => {
     expect(isCachedMarketingPath("/")).toBe(true);
     expect(isCachedMarketingPath("/standard")).toBe(true);
     expect(isCachedMarketingPath("/privacy")).toBe(true);
-    expect(isCachedMarketingPath("/login")).toBe(true);
-    expect(isCachedMarketingPath("/signup")).toBe(true);
+    expect(isCachedMarketingPath("/login")).toBe(false);
+    expect(isCachedMarketingPath("/signup")).toBe(false);
   });
 
   it("leaves console and checkout on client navigation", () => {

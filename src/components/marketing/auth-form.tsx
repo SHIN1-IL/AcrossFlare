@@ -8,12 +8,10 @@ import { localePath } from "@/i18n/path";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PgReviewNotice } from "@/components/marketing/pg-review-notice";
 import { useHydrated, useSignedInFlag } from "@/hooks/use-account";
 import { type PublicSession } from "@/lib/auth-types";
 import { signedInContinuePath } from "@/lib/checkout-path";
 import { isPublicCheckoutProduct } from "@/lib/plans";
-import { REVIEW_USER_EMAIL } from "@/lib/review-user";
 import { hydrateSession, refreshSession, setPreviewEmail } from "@/lib/session";
 
 export function AuthForm({
@@ -94,8 +92,8 @@ export function AuthForm({
           return;
         }
 
-        if (mode === "signup") {
-          setError(t("errorReviewOnly"));
+        if (mode === "signup" && (!ageConfirmed || !legalAgreed)) {
+          setError(t("errorConsent"));
           return;
         }
 
@@ -107,7 +105,11 @@ export function AuthForm({
             method: "POST",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password }),
+            body: JSON.stringify(
+              mode === "signup"
+                ? { email, password, ageConfirmed, legalAgreed }
+                : { email, password }
+            ),
           });
           const data = (await response.json()) as {
             user?: PublicSession;
@@ -124,9 +126,9 @@ export function AuthForm({
                     ? t("errorTaken")
                     : data.error === "weak_password"
                       ? t("errorWeak")
-                      : data.error === "review_only"
-                        ? t("errorReviewOnly")
-                        : t("errorGeneric");
+                    : data.error === "consent_required"
+                      ? t("errorConsent")
+                      : t("errorGeneric");
             setError(message);
             return;
           }
@@ -157,16 +159,13 @@ export function AuthForm({
         </p>
       ) : null}
 
-      <PgReviewNotice />
-
       <div className="space-y-2">
         <Label htmlFor="email">{t("email")}</Label>
         <Input
           id="email"
           name="email"
-          type="text"
+          type="email"
           autoComplete="username"
-          placeholder={REVIEW_USER_EMAIL}
           className="h-10 rounded-[10px]"
         />
       </div>
@@ -217,7 +216,7 @@ export function AuthForm({
 
       <Button
         type="submit"
-        disabled={pending || mode === "signup"}
+        disabled={pending || (mode === "signup" && (!ageConfirmed || !legalAgreed))}
         className="h-10 w-full rounded-[10px]"
       >
         {mode === "login" ? t("submitLogin") : t("submitSignup")}

@@ -94,6 +94,9 @@ export function HeroAtmosphere() {
 
     const schedule = () => {
       timeoutId = window.setTimeout(() => {
+        if (!active || document.hidden) {
+          return;
+        }
         spawn();
         schedule();
       }, randomBetween(1800, 4200));
@@ -107,6 +110,7 @@ export function HeroAtmosphere() {
         window.clearTimeout(timeoutId);
         setMeteors([]);
       } else if (active) {
+        window.clearTimeout(timeoutId);
         spawn();
         schedule();
       }

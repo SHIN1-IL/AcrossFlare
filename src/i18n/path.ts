@@ -9,8 +9,6 @@ const CACHED_MARKETING_PATHS = new Set([
   "/pricing",
   "/terms",
   "/privacy",
-  "/login",
-  "/signup",
 ]);
 
 const PROTECTED_SUFFIX = /^\/(app|admin|checkout|support|dashboard)(\/|$)/;

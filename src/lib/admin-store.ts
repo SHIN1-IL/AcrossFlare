@@ -660,6 +660,20 @@ export async function retryProvision(customerId: string) {
   return { ok: true as const, customer: data.customer };
 }
 
+export async function expireProvision(customerId: string) {
+  const response = await fetch(`/api/v1/admin/customers/${customerId}/expire`, {
+    method: "POST",
+    credentials: "include",
+  });
+  const data = await readJson<{ customer?: AdminCustomer; error?: string }>(response);
+  if (!response.ok || !data.customer) {
+    return { ok: false as const, error: data.error ?? "failed" };
+  }
+
+  patch({ customers: upsertCustomer(memory.customers, data.customer) });
+  return { ok: true as const, customer: data.customer };
+}
+
 export async function recordRotate(customerId: string) {
   const response = await fetch(`/api/v1/admin/customers/${customerId}/rotate`, {
     method: "POST",
