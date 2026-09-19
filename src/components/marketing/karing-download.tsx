@@ -1,7 +1,7 @@
 "use client";
 
 import { Download } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -15,6 +15,34 @@ import {
 } from "@/lib/karing-download";
 import { cn } from "@/lib/utils";
 
+const DEFAULT_OS: DetectedKaringOs = {
+  id: "other",
+  label: "other",
+  arch: "unknown",
+};
+
+function subscribeNavigator() {
+  return () => {};
+}
+
+export function useClientKaringOs(serverOs: DetectedKaringOs = DEFAULT_OS) {
+  const uaOs = useSyncExternalStore(
+    subscribeNavigator,
+    () => detectKaringOsFromNavigator(navigator as NavigatorLike),
+    () => serverOs
+  );
+  const [precise, setPrecise] = useState<DetectedKaringOs | null>(null);
+
+  useEffect(() => {
+    const nav = navigator as NavigatorLike;
+    void nav.userAgentData?.getHighEntropyValues?.(["architecture", "platform"]).then((hints) => {
+      setPrecise(detectKaringOsFromNavigator(nav, { architecture: hints.architecture }));
+    });
+  }, []);
+
+  return precise ?? uaOs;
+}
+
 export function KaringDownloadCta({
   assets,
   initialOs,
@@ -27,10 +55,11 @@ export function KaringDownloadCta({
   className?: string;
 }) {
   const t = useTranslations("support");
-  const [os, setOs] = useState(initialOs);
+  const os = useClientKaringOs(initialOs);
   const [releaseAssets, setReleaseAssets] = useState(assets);
   const [version, setVersion] = useState(tagName);
-  const [loading, setLoading] = useState(assets.length === 0 && initialOs.id !== "ios");
+  const [loadedRemote, setLoadedRemote] = useState(assets.length > 0);
+  const loading = os.id !== "ios" && !loadedRemote;
   const download = resolveKaringDownload(os, releaseAssets);
   const osName = t(`downloads.os.${os.label}`);
   const label = loading
@@ -41,18 +70,13 @@ export function KaringDownloadCta({
         ? t("downloads.ctaOsVersion", { os: osName, version })
         : t("downloads.ctaOs", { os: osName });
 
+  if (assets.length > 0 && !loadedRemote) {
+    setLoadedRemote(true);
+  }
+
   useEffect(() => {
     let cancelled = false;
-    const nav = navigator as NavigatorLike;
-    setOs(detectKaringOsFromNavigator(nav));
-
-    nav.userAgentData?.getHighEntropyValues?.(["architecture", "platform"]).then((hints) => {
-      if (cancelled) return;
-      setOs(detectKaringOsFromNavigator(nav, { architecture: hints.architecture }));
-    });
-
     if (assets.length > 0 && tagName) {
-      setLoading(false);
       return () => {
         cancelled = true;
       };
@@ -64,7 +88,7 @@ export function KaringDownloadCta({
         if (release.assets.length > 0) setReleaseAssets(release.assets);
         if (release.tagName) setVersion(release.tagName);
       }
-      setLoading(false);
+      setLoadedRemote(true);
     });
 
     return () => {

@@ -2,7 +2,7 @@
 
 import { AlertTriangle, Copy, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   dismissOpsBannerForToday,
@@ -67,19 +67,22 @@ function cursorPrompt(t: ReturnType<typeof useTranslations>, health: OpsHealth) 
   return t("ops.banner.cursorPrompt", { active, errorRate, lag });
 }
 
+function subscribeOpsBannerDismiss(onStoreChange: () => void) {
+  window.addEventListener("storage", onStoreChange);
+  return () => window.removeEventListener("storage", onStoreChange);
+}
+
 export function Phase2OpsBanner({ owner }: { owner: boolean }) {
   const t = useTranslations("admin");
   const health = useOpsHealth(owner);
-  const [hidden, setHidden] = useState(false);
+  const [sessionHidden, setSessionHidden] = useState(false);
   const [copied, setCopied] = useState(false);
-
-  useEffect(() => {
-    if (health?.overall === "warn") {
-      setHidden(isOpsBannerDismissedToday());
-    } else {
-      setHidden(false);
-    }
-  }, [health?.overall]);
+  const dismissedToday = useSyncExternalStore(
+    subscribeOpsBannerDismiss,
+    isOpsBannerDismissedToday,
+    () => false
+  );
+  const hidden = sessionHidden || (health?.overall === "warn" && dismissedToday);
 
   if (!owner || !health || health.overall === "ok" || hidden) {
     return null;
@@ -128,7 +131,7 @@ export function Phase2OpsBanner({ owner }: { owner: boolean }) {
               className="rounded-[10px]"
               onClick={() => {
                 dismissOpsBannerForToday();
-                setHidden(true);
+                setSessionHidden(true);
               }}
             >
               <X className="size-3.5" />

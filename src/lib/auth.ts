@@ -80,7 +80,8 @@ export async function destroySession(token?: string | null) {
 }
 
 export async function materializeAuthUser(row: UserAuthRow): Promise<AuthUser> {
-  let { id, email, role, staffPermissions } = row;
+  const { id, email } = row;
+  let { role, staffPermissions } = row;
 
   if (isOwnerEmail(email) && role !== "OWNER") {
     const updated = await prisma.user.update({

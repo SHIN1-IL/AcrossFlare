@@ -1,17 +1,12 @@
 "use client";
 
 import { BookOpen, CircleHelp, Download, HardDrive, LifeBuoy, type LucideIcon } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { BackupSetupGuide } from "@/components/marketing/backup-guide";
-import { KaringDownloadCta } from "@/components/marketing/karing-download";
+import { KaringDownloadCta, useClientKaringOs } from "@/components/marketing/karing-download";
 import { KaringHelpFaq, KaringSetupGuide } from "@/components/marketing/karing-guide";
 import { StageBackdrop } from "@/components/marketing/plan-stage-bg";
-import {
-  detectKaringOsFromNavigator,
-  type DetectedKaringOs,
-  type NavigatorLike,
-} from "@/lib/karing-download";
+import { type DetectedKaringOs } from "@/lib/karing-download";
 import {
   SUPPORT_SECTIONS,
   karingInstallPlatformFor,
@@ -33,15 +28,7 @@ const DEFAULT_OS: DetectedKaringOs = {
 
 export function SupportZone() {
   const t = useTranslations("support");
-  const [initialOs, setInitialOs] = useState(DEFAULT_OS);
-
-  useEffect(() => {
-    const nav = navigator as NavigatorLike;
-    setInitialOs(detectKaringOsFromNavigator(nav));
-    nav.userAgentData?.getHighEntropyValues?.(["architecture", "platform"]).then((hints) => {
-      setInitialOs(detectKaringOsFromNavigator(nav, { architecture: hints.architecture }));
-    });
-  }, []);
+  const initialOs = useClientKaringOs(DEFAULT_OS);
 
   return (
     <section className="relative isolate overflow-hidden">

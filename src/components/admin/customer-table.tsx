@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { AdminPlanLabel } from "@/components/admin/admin-plan-label";
 import { StatusPill } from "@/components/app/status-pill";
@@ -69,6 +69,7 @@ export function CustomerTable({
   const [retryingId, setRetryingId] = useState<string | null>(null);
   const [retryError, setRetryError] = useState("");
   const [page, setPage] = useState(1);
+  const [pageScope, setPageScope] = useState(`${filter}\0`);
 
   const stepLabels: Record<string, string> = {
     payment: t("stepPayment"),
@@ -78,21 +79,19 @@ export function CustomerTable({
     ready: t("stepReady"),
   };
 
-  const filtered = useMemo(() => {
+  const filtered = sortAdminQueue(customers).filter((customer) => {
     const needle = query.trim().toLowerCase();
-    return sortAdminQueue(customers).filter((customer) => {
-      if (needle && !customer.email.toLowerCase().includes(needle)) {
-        return false;
-      }
-      return matchesAdminQueueFilter(customer, filter);
-    });
-  }, [customers, filter, query]);
-
-  const paged = paginateItems(filtered, page);
-
-  useEffect(() => {
+    if (needle && !customer.email.toLowerCase().includes(needle)) {
+      return false;
+    }
+    return matchesAdminQueueFilter(customer, filter);
+  });
+  const scope = `${filter}\0${query}`;
+  if (pageScope !== scope) {
+    setPageScope(scope);
     setPage(1);
-  }, [filter, query]);
+  }
+  const paged = paginateItems(filtered, pageScope === scope ? page : 1);
 
   return (
     <div className="mx-auto max-w-6xl">

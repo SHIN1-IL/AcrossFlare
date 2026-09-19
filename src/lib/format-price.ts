@@ -22,6 +22,8 @@ export function formatPrimaryPrice(locale: AppLocale, prices: PlanPrices) {
 }
 
 export function splitSecondaryPrice(_locale: AppLocale, _prices: PlanPrices): PriceParts | null {
+  void _locale;
+  void _prices;
   return null;
 }
 

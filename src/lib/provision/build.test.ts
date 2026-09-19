@@ -13,7 +13,7 @@ import {
 } from "@/lib/provision/build";
 import { VLESS_CLIENT_FLOW } from "@/lib/provision/reality";
 import { NodeRole } from "@prisma/client";
-import { BACKUP_ANNOUNCE, backupAnnounce, karingSubscriptionHeaders, withBackupNotice } from "@/lib/provision/subscription";
+import { backupAnnounce, karingSubscriptionHeaders, withBackupNotice } from "@/lib/provision/subscription";
 
 const realityNode = (ddns: string, role: NodeRole): YamlNode => ({
   ddns,

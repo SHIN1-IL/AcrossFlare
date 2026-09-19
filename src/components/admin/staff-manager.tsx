@@ -50,8 +50,30 @@ export function StaffManager() {
   }, [t]);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    let cancelled = false;
+    fetch("/api/v1/admin/staff", { credentials: "include" })
+      .then(async (response) => {
+        const data = (await response.json().catch(() => ({}))) as {
+          ownerEmail?: string;
+          staff?: StaffUser[];
+        };
+        return { ok: response.ok, data };
+      })
+      .then(({ ok, data }) => {
+        if (cancelled) {
+          return;
+        }
+        if (!ok) {
+          setError(t("required"));
+          return;
+        }
+        setOwnerEmail(data.ownerEmail ?? "");
+        setStaff(data.staff ?? []);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [t]);
 
   async function save(id: string, role: "STAFF" | "USER", permissions?: AdminPermission[]) {
     setPending(id);

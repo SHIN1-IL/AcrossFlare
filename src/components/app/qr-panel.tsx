@@ -22,15 +22,19 @@ export function QrPanel({
   const [src, setSrc] = useState("");
   const [failed, setFailed] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [qrValue, setQrValue] = useState(value);
+
+  if (value !== qrValue) {
+    setQrValue(value);
+    setSrc("");
+    setFailed(false);
+  }
 
   useEffect(() => {
-    let cancelled = false;
     if (!value) {
-      setSrc("");
-      setFailed(false);
       return;
     }
-    setFailed(false);
+    let cancelled = false;
     QRCode.toDataURL(value, {
       width: 192,
       margin: 2,
