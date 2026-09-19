@@ -30,6 +30,7 @@ describe("provision/build", () => {
     const url = yamlUrlFor("abc", "https://acrossflare.com/");
     expect(url).toBe("https://acrossflare.com/api/v1/subscription/abc?flag=clash");
     expect(karingDeepLink(url)).toContain("karing://install-config?url=");
+    expect(url).not.toContain("vless://");
     const share = vlessRealityShareLink(
       { ...realityNode("node-tokyo.acrossflare.com", NodeRole.BANDWAGON), host: "https://74.82.221.67:2053" },
       "uuid-1"

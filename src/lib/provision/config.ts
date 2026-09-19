@@ -45,6 +45,10 @@ export function syncthingApiKey() {
   return process.env.SYNCTHING_API_KEY || "";
 }
 
+export function backupStorageRoot() {
+  return (process.env.BACKUP_STORAGE_ROOT || "/data/backups").replace(/\/$/, "");
+}
+
 export function xuiApiToken() {
   return process.env.XUI_API_TOKEN || "";
 }

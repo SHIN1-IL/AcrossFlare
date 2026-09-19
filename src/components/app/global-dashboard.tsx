@@ -1,17 +1,14 @@
 "use client";
 
-import { Download } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { CopyField } from "@/components/app/copy-field";
 import { IssuingSkeleton, ProductEmpty } from "@/components/app/product-empty";
-import { QrPanel } from "@/components/app/qr-panel";
+import { KaringConnectPanel } from "@/components/app/karing-connect-panel";
 import { StatusPill } from "@/components/app/status-pill";
 import { UsageMeter } from "@/components/app/usage-meter";
-import { Button } from "@/components/ui/button";
 import { useAccount } from "@/hooks/use-account";
 import { Link } from "@/i18n/navigation";
 import { DocumentLink } from "@/components/marketing/cached-marketing-link";
-import { downloadFromUrl } from "@/lib/download";
 import { formatDate } from "@/lib/format-date";
 import { publicServiceFromPlanId } from "@/lib/public-service";
 import { SUPPORT_HREF } from "@/lib/support-zone";
@@ -45,7 +42,6 @@ export function GlobalDashboard({ product = "global" }: { product?: "global" | "
     product === "workspace" ? t("workspaceTitle") : hybrid ? t("hybridTitle") : t("globalTitle");
   const description =
     product === "workspace" ? t("workspaceDesc") : hybrid ? t("hybridDesc") : t("globalDesc");
-  const hasAccess = Boolean(lane.deepLink || lane.yamlUrl);
   const hasBackup = Boolean(lane.vaultUrl || lane.syncthingUrl);
 
   return (
@@ -71,45 +67,19 @@ export function GlobalDashboard({ product = "global" }: { product?: "global" | "
         <MetaCard label={t("nodes")} value={lane.nodes.join(" · ") || "—"} mono />
       </section>
 
-      {hasAccess ? (
-        <>
-          <section className="rounded-2xl border border-border bg-card p-5">
-            <UsageMeter
-              label={lane.failover ? t("usageUnlimited") : t("usageTraffic")}
-              used={lane.trafficUsedGb}
-              limit={lane.trafficLimitGb}
-              unlimited={lane.failover}
-            />
-          </section>
+      <section className="rounded-2xl border border-border bg-card p-5">
+        <UsageMeter
+          label={lane.failover ? t("usageUnlimited") : t("usageTraffic")}
+          used={lane.trafficUsedGb}
+          limit={lane.trafficLimitGb}
+          unlimited={lane.failover}
+        />
+      </section>
 
-          <section className="grid gap-4 lg:grid-cols-[auto_1fr]">
-            <div className="rounded-2xl border border-border bg-card p-5">
-              <p className="text-sm">{t("karing")}</p>
-              <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("karingRefreshHint")}</p>
-              <div className="mt-4">
-                <QrPanel value={lane.deepLink} label={t("karingQr")} />
-              </div>
-            </div>
-            <div className="space-y-4 rounded-2xl border border-border bg-card p-5">
-              <CopyField label={t("deepLink")} value={lane.deepLink} />
-              <CopyField label={t("yamlUrl")} value={lane.yamlUrl} />
-              <Button
-                type="button"
-                variant="outline"
-                className="rounded-[10px]"
-                onClick={() => downloadFromUrl("acrossflare.yaml", lane.yamlUrl, "text/yaml")}
-              >
-                <Download />
-                {t("yamlDownload")}
-              </Button>
-            </div>
-          </section>
-        </>
-      ) : (
-        <section className="rounded-2xl border border-border bg-card p-5">
-          <p className="text-sm text-muted-foreground">{t("pendingCredentials")}</p>
-        </section>
-      )}
+      <section className="space-y-3">
+        <p className="text-xs leading-5 text-muted-foreground">{t("karingRefreshHint")}</p>
+        <KaringConnectPanel yamlUrl={lane.yamlUrl} showDownload />
+      </section>
 
       {hasBackup ? (
         <section className="rounded-2xl border border-border bg-card p-5">
@@ -122,8 +92,6 @@ export function GlobalDashboard({ product = "global" }: { product?: "global" | "
               limit={lane.backupLimitGb}
             />
             <CopyField label={t("vaultUrl")} value={lane.vaultUrl} />
-            <CopyField label={t("syncthingUrl")} value={lane.syncthingUrl} />
-            <CopyField label={t("syncthingFolder")} value={lane.syncthingFolderId} />
             <div className="flex flex-wrap gap-x-4 gap-y-2">
               <Link
                 href="/dashboard"

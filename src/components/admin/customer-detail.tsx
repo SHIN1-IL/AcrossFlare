@@ -6,7 +6,7 @@ import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { AdminSteps } from "@/components/admin/admin-steps";
 import { fieldClass } from "@/components/admin/admin-drawer";
 import { CopyField } from "@/components/app/copy-field";
-import { QrPanel } from "@/components/app/qr-panel";
+import { KaringConnectPanel } from "@/components/app/karing-connect-panel";
 import { StatusPill } from "@/components/app/status-pill";
 import { WireGuardSnippet } from "@/components/app/wireguard-snippet";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -195,16 +195,11 @@ export function CustomerDetail({ service, id }: { service: AdminServiceId; id: s
         <section className="space-y-4 rounded-2xl border border-border bg-card p-5">
           <p className="text-sm">{t("credentials")}</p>
           {customer.credentials.kind === "global" ? (
-            <div className="grid gap-4 lg:grid-cols-[auto_1fr]">
-              <QrPanel value={customer.credentials.deepLink} label={tApp("karingQr")} />
-              <div className="space-y-3">
-                <CopyField label={tApp("deepLink")} value={customer.credentials.deepLink} />
-                <CopyField label={tApp("yamlUrl")} value={customer.credentials.yamlUrl} />
-                <CopyField label={tApp("vaultUrl")} value={customer.credentials.vaultUrl} />
-                <CopyField label={tApp("syncthingUrl")} value={customer.credentials.syncthingUrl} />
-                <CopyField label={tApp("syncthingFolder")} value={customer.credentials.syncthingFolderId} />
-              </div>
-            </div>
+            <KaringConnectPanel yamlUrl={customer.credentials.yamlUrl}>
+              <CopyField label={tApp("vaultUrl")} value={customer.credentials.vaultUrl} />
+              <CopyField label={tApp("syncthingUrl")} value={customer.credentials.syncthingUrl} />
+              <CopyField label={tApp("syncthingFolder")} value={customer.credentials.syncthingFolderId} />
+            </KaringConnectPanel>
           ) : (
             <div className="space-y-3">
               <CopyField label={tApp("http")} value={customer.credentials.httpUrl} />

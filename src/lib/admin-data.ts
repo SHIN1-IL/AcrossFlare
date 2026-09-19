@@ -171,11 +171,12 @@ function toCredentials(row: CustomerRow): CustomerCredentials | null {
   }
 
   if ((row.product === Product.GLOBAL || row.product === Product.WORKSPACE) && creds.uuid) {
+    const yamlUrl = creds.yamlToken ? yamlUrlFor(creds.yamlToken, appUrl()) : "";
     return {
       kind: "global",
       uuid: creds.uuid,
-      deepLink: creds.deepLink ?? "",
-      yamlUrl: creds.yamlToken ? yamlUrlFor(creds.yamlToken, appUrl()) : "",
+      deepLink: yamlUrl,
+      yamlUrl,
       yamlBody: creds.yamlBody ?? "",
       vaultUrl: creds.vaultUrl ?? "",
       syncthingUrl: creds.syncthingUrl ?? "",

@@ -29,4 +29,12 @@ describe("scenarioFromEmail", () => {
     expect(resolveAccount("both-user@acrossflare.com").global).not.toBeNull();
     expect(resolveAccount("both-user@acrossflare.com").marketing).not.toBeNull();
   });
+
+  it("uses the Clash subscription URL for Karing QR and copy", () => {
+    const global = resolveAccount("global-user@acrossflare.com").global;
+    expect(global?.yamlUrl).toMatch(/^https:\/\/acrossflare\.com\/api\/v1\/subscription\/.+\?flag=clash$/);
+    expect(global?.deepLink).toBe(global?.yamlUrl);
+    expect(global?.yamlUrl).not.toContain("vless://");
+    expect(global?.yamlUrl).not.toContain("karing://");
+  });
 });

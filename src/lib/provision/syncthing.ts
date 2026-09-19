@@ -7,10 +7,13 @@ export class SyncthingError extends Error {
   }
 }
 
-export async function ensureSyncthingFolder(input: { folderId: string; label: string }) {
+export async function ensureSyncthingFolder(input: {
+  folderId: string;
+  label: string;
+}): Promise<boolean> {
   const apiKey = syncthingApiKey();
   if (!apiKey) {
-    return;
+    return false;
   }
 
   const response = await fetch(
@@ -35,6 +38,8 @@ export async function ensureSyncthingFolder(input: { folderId: string; label: st
   if (!response.ok && response.status !== 409) {
     throw new SyncthingError(await errorMessage(response, "syncthing_folder_failed"));
   }
+
+  return true;
 }
 
 async function errorMessage(response: Response, fallback: string) {

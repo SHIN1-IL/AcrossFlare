@@ -20,23 +20,34 @@ export function QrPanel({
   copiedImageLabel?: string;
 }) {
   const [src, setSrc] = useState("");
+  const [failed, setFailed] = useState(false);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     if (!value) {
       setSrc("");
+      setFailed(false);
       return;
     }
+    setFailed(false);
     QRCode.toDataURL(value, {
       width: 192,
-      margin: 1,
+      margin: 2,
+      errorCorrectionLevel: "M",
       color: { dark: "#090A0F", light: "#F4F4F5" },
-    }).then((url) => {
-      if (!cancelled) {
-        setSrc(url);
-      }
-    });
+    })
+      .then((url) => {
+        if (!cancelled) {
+          setSrc(url);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setSrc("");
+          setFailed(true);
+        }
+      });
 
     return () => {
       cancelled = true;
@@ -61,12 +72,20 @@ export function QrPanel({
   return (
     <div className={cn("space-y-2", className)}>
       <p className="text-xs text-muted-foreground">{label}</p>
-      <div className="inline-flex rounded-[12px] border border-border bg-[#f4f4f5] p-2">
+      <div className="inline-flex aspect-square size-48 shrink-0 items-center justify-center rounded-[12px] border border-border bg-[#f4f4f5] p-2">
         {src ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={src} alt={label} width={176} height={176} className="size-44" />
+          <img
+            src={src}
+            alt={label}
+            width={176}
+            height={176}
+            className="aspect-square size-44 shrink-0 object-contain"
+          />
         ) : (
-          <div className="size-44 animate-pulse rounded-md bg-zinc-300" />
+          <div
+            className={`aspect-square size-44 rounded-md ${failed ? "bg-zinc-200" : "animate-pulse bg-zinc-300"}`}
+          />
         )}
       </div>
       {copyImageLabel ? (

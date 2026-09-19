@@ -1,13 +1,13 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
+import { BackupFiles } from "@/components/app/backup-files";
 import { CopyField } from "@/components/app/copy-field";
 import { IssuingSkeleton, ProductEmpty } from "@/components/app/product-empty";
 import { StatusPill } from "@/components/app/status-pill";
 import { UsageMeter } from "@/components/app/usage-meter";
 import { buttonVariants } from "@/components/ui/button";
 import { useAccount } from "@/hooks/use-account";
-import { Link } from "@/i18n/navigation";
 import { DocumentLink } from "@/components/marketing/cached-marketing-link";
 import { formatDate } from "@/lib/format-date";
 import { SUPPORT_HREF } from "@/lib/support-zone";
@@ -82,22 +82,7 @@ export function BackupDashboard() {
           </a>
         </article>
 
-        <article className="rounded-2xl border border-border bg-card p-5">
-          <p className="text-sm">{t("syncthingTitle")}</p>
-          <p className="mt-2 text-sm text-muted-foreground">{t("syncthingDesc")}</p>
-          <div className="mt-4 space-y-3">
-            <CopyField label={t("syncthingUrl")} value={global.syncthingUrl} />
-            <CopyField label={t("syncthingFolder")} value={global.syncthingFolderId} />
-          </div>
-          <a
-            href={global.syncthingUrl || "https://sync.acrossflare.com"}
-            target="_blank"
-            rel="noreferrer"
-            className={cn(buttonVariants({ variant: "outline" }), "mt-4 rounded-[10px]")}
-          >
-            {t("openSync")}
-          </a>
-        </article>
+        {global.syncthingFolderId ? <BackupFiles /> : null}
       </section>
 
       <section className="rounded-2xl border border-border bg-card p-5">

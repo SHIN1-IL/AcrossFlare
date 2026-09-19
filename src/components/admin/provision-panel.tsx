@@ -6,7 +6,7 @@ import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { AdminSteps } from "@/components/admin/admin-steps";
 import { areaClass, fieldClass } from "@/components/admin/admin-drawer";
 import { CopyField } from "@/components/app/copy-field";
-import { QrPanel } from "@/components/app/qr-panel";
+import { KaringConnectPanel } from "@/components/app/karing-connect-panel";
 import { WireGuardSnippet } from "@/components/app/wireguard-snippet";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -131,16 +131,11 @@ export function ProvisionPanel({ service }: { service: AdminServiceId }) {
                 <CopyField label={t("tempPassword")} value={session.loginPassword} />
               ) : null}
               {issued.credentials.kind === "global" ? (
-                <div className="grid gap-4 lg:grid-cols-[auto_1fr]">
-                  <QrPanel value={issued.credentials.deepLink} label={tApp("karingQr")} />
-                  <div className="space-y-3">
-                    <CopyField label={tApp("deepLink")} value={issued.credentials.deepLink} />
-                    <CopyField label={tApp("yamlUrl")} value={issued.credentials.yamlUrl} />
-                    <CopyField label={tApp("vaultUrl")} value={issued.credentials.vaultUrl} />
-                    <CopyField label={tApp("syncthingUrl")} value={issued.credentials.syncthingUrl} />
-                    <CopyField label={tApp("syncthingFolder")} value={issued.credentials.syncthingFolderId} />
-                  </div>
-                </div>
+                <KaringConnectPanel yamlUrl={issued.credentials.yamlUrl}>
+                  <CopyField label={tApp("vaultUrl")} value={issued.credentials.vaultUrl} />
+                  <CopyField label={tApp("syncthingUrl")} value={issued.credentials.syncthingUrl} />
+                  <CopyField label={tApp("syncthingFolder")} value={issued.credentials.syncthingFolderId} />
+                </KaringConnectPanel>
               ) : (
                 <div className="space-y-3">
                   <CopyField label={tApp("http")} value={issued.credentials.httpUrl} />

@@ -23,7 +23,6 @@ import {
   newYamlToken,
   prismaNodeToYamlNode,
   syncthingFolderId,
-  vaultUserId,
   xuiClientEmail,
   yamlUrlFor,
 } from "@/lib/provision/build";
@@ -228,7 +227,6 @@ async function issueGlobal(subscription: LoadedSubscription, nodes: Node[]) {
   const yamlNodes = nodes.map(prismaNodeToYamlNode);
   const yamlBody = buildVlessYamlFromNodes(yamlNodes, uuid, false);
   const yamlUrl = yamlUrlFor(yamlToken, appUrl());
-  const vaultUser = vaultUserId(subscription.id);
   const folderId = syncthingFolderId(subscription.id);
 
   await addClients(nodes, {
@@ -243,14 +241,22 @@ async function issueGlobal(subscription: LoadedSubscription, nodes: Node[]) {
     data: { provisionStep: "backup" },
   });
 
-  if (isProvisionSimulate()) {
+  const simulated = isProvisionSimulate();
+  let vaultReady = simulated;
+  let syncthingReady = simulated;
+
+  if (simulated) {
     await wait(400);
   } else {
-    await inviteVaultwardenUser(subscription.user.email);
-    await ensureSyncthingFolder({
-      folderId,
-      label: subscription.user.email,
-    });
+    const [vaultResult, syncthingResult] = await Promise.allSettled([
+      inviteVaultwardenUser(subscription.user.email),
+      ensureSyncthingFolder({
+        folderId,
+        label: subscription.user.email,
+      }),
+    ]);
+    vaultReady = vaultResult.status === "fulfilled" && vaultResult.value;
+    syncthingReady = syncthingResult.status === "fulfilled" && syncthingResult.value;
   }
 
   return {
@@ -259,10 +265,10 @@ async function issueGlobal(subscription: LoadedSubscription, nodes: Node[]) {
     deepLink: karingDeepLink(yamlUrl),
     yamlToken,
     yamlBody,
-    vaultUrl: vaultwardenBaseUrl(),
-    vaultUser,
-    syncthingUrl: syncthingBaseUrl(),
-    syncthingFolderId: folderId,
+    vaultUrl: vaultReady ? vaultwardenBaseUrl() : null,
+    vaultUser: vaultReady ? subscription.user.email : null,
+    syncthingUrl: syncthingReady ? syncthingBaseUrl() : null,
+    syncthingFolderId: syncthingReady ? folderId : null,
     exitIp: null,
     region: null,
     httpUser: null,

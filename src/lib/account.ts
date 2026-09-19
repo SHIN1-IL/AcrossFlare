@@ -211,7 +211,7 @@ function buildGlobal(email: string, planId: string, scenario: ScenarioId): Globa
     failover,
     nodes,
     uuid,
-    deepLink: `karing://install-config?url=${encodeURIComponent(yamlUrl)}`,
+    deepLink: yamlUrl,
     yamlUrl,
     yamlBody: buildYaml(email, nodes, uuid),
     vaultUrl: "https://vault.acrossflare.com",

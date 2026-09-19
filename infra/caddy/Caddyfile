@@ -22,14 +22,3 @@ vault.acrossflare.com {
 	reverse_proxy vaultwarden:80
 }
 
-sync.acrossflare.com {
-	tls /etc/caddy/certs/origin.pem /etc/caddy/certs/origin.key
-	encode gzip zstd
-	reverse_proxy syncthing:8384 {
-		header_up Host {host}
-		header_up X-Forwarded-Host {host}
-		header_up X-Real-IP {remote_host}
-		header_up X-Forwarded-For {remote_host}
-		header_up X-Forwarded-Proto {scheme}
-	}
-}

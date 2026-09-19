@@ -55,7 +55,11 @@ describe("toAdminCustomer", () => {
 
   it("includes credentials and payments on detail rows", () => {
     const customer = toAdminCustomer(row, true);
-    expect(customer.credentials).toMatchObject({ kind: "global", deepLink: "vless://secret" });
+    expect(customer.credentials).toMatchObject({
+      kind: "global",
+      yamlUrl: expect.stringContaining("/api/v1/subscription/tok?flag=clash"),
+      deepLink: expect.stringContaining("/api/v1/subscription/tok?flag=clash"),
+    });
     expect(customer.rotateHistory).toHaveLength(1);
     expect(customer.payments).toEqual([
       {
@@ -68,6 +72,26 @@ describe("toAdminCustomer", () => {
         createdAt: "2026-08-01T00:00:00.000Z",
       },
     ]);
+  });
+
+  it("leaves the subscription URL empty when the yaml token is missing", () => {
+    const rowWithoutToken = {
+      ...(row as unknown as Record<string, unknown>),
+      credentials: {
+        uuid: "uuid-1",
+        deepLink: "vless://secret",
+        yamlToken: null,
+        yamlBody: "proxies:",
+        vaultUrl: "https://vault.example",
+        syncthingUrl: "https://sync.example",
+        syncthingFolderId: "folder",
+      },
+    } as never;
+    const customer = toAdminCustomer(
+      rowWithoutToken,
+      true
+    );
+    expect(customer.credentials).toMatchObject({ kind: "global", yamlUrl: "", deepLink: "" });
   });
 });
 

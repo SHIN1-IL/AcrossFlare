@@ -61,7 +61,7 @@
 * **동적 노드 관리:** 3x-ui API 접속 정보(IP, Port, Creds)를 통한 VPS 노드 추가/삭제 및 1클릭 전체 유저 노드 이관.
 
 ### F-4. 보안 및 예비 시스템
-* 오리진은 Caddy가 `acrossflare.com`(PWA/콘솔), `vault.acrossflare.com`(Vaultwarden), `sync.acrossflare.com`(Syncthing GUI)을 라우팅한다.
+* 오리진은 Caddy가 `acrossflare.com`(PWA/콘솔)과 `vault.acrossflare.com`(Vaultwarden)을 라우팅한다. Syncthing 관리 GUI는 외부에 공개하지 않고 내부 API/SSH 터널로만 운영한다.
 * 노드 차단 대비를 위해 모든 3x-ui 노드는 서브도메인(DDNS)으로 매핑하여 IP 변경 시 고객 설정 유지.
 
 ---
@@ -70,7 +70,7 @@
 
 1. 이메일 회원가입 ➔ 결제 또는 어드민 발급 ➔ **Karing VPN 구독 링크** 발급 (`/api/v1/subscription/{token}`).
 2. Karing 앱 연결 ➔ 프로필 웹페이지 또는 구독 공지의 **[보안 백업 공간 바로가기]** (`https://acrossflare.com/dashboard`)를 탭.
-3. 무설치 웹(PWA)에서 Vaultwarden(보안 메모/암호)과 Syncthing 기반 스토리지 백업을 이용.
+3. 무설치 웹(PWA)에서 Vaultwarden(보안 메모/암호)과 로그인 고객에게 격리된 Syncthing 기반 파일 스토리지를 이용.
 
 Karing 구독 응답은 YAML 본문과 함께 아래 메타데이터/헤더를 포함한다.
 
@@ -86,7 +86,7 @@ Karing 구독 응답은 YAML 본문과 함께 아래 메타데이터/헤더를 �
 |---|---|
 | `acrossflare.com` | Next.js PWA / 콘솔 / 결제 API. `/api/v1/subscription*` 는 FastAPI |
 | `vault.acrossflare.com` | Vaultwarden (`:80`) |
-| `sync.acrossflare.com` | Syncthing GUI (`:8384`) |
+| Syncthing 내부 서비스 | 관리 GUI/API (`syncthing:8384`, 외부 공개 금지) |
 | `node-*.acrossflare.com` | 3x-ui 노드 (DNS only, 오리진 Compose에 포함하지 않음) |
 
 ---

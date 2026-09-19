@@ -68,7 +68,7 @@ Target: keep steady origin containers under **~830MB RAM caps** on the **2GB Vul
 
 For beta monitoring and launch checklist, see [beta-ops.md](./beta-ops.md).
 
-Customers open the backup PWA at `https://acrossflare.com/dashboard` after connecting Karing. Vaultwarden is `https://vault.acrossflare.com`. Syncthing GUI is `https://sync.acrossflare.com`. On first Syncthing boot, set a GUI password and enable **Skip Host check** (or `insecureSkipHostcheck`) so Caddy can proxy `sync.acrossflare.com`. Copy the API key into `SYNCTHING_API_KEY` if live provisioning should create per-user folders.
+Customers open the backup PWA at `https://acrossflare.com/dashboard` after connecting Karing. Vaultwarden is `https://vault.acrossflare.com`. The PWA reads and writes only the signed-in customer's folder through authenticated Next.js APIs; the Syncthing management GUI is not publicly proxied. Administrators should reach port 8384 through an SSH tunnel when initial setup or maintenance is required, set a GUI password, and copy its API key into `SYNCTHING_API_KEY`. The `backup-init` service migrates legacy `/var/syncthing/users` data into the dedicated `backup_data` volume before web and Syncthing start.
 
 Local origin smoke test (self-signed, no Cloudflare):
 

@@ -7,10 +7,10 @@ export class VaultwardenError extends Error {
   }
 }
 
-export async function inviteVaultwardenUser(email: string) {
+export async function inviteVaultwardenUser(email: string): Promise<boolean> {
   const token = vaultwardenAdminToken();
   if (!token) {
-    return;
+    return false;
   }
 
   const response = await fetch(`${vaultwardenApiBaseUrl()}/admin/invite`, {
@@ -25,6 +25,8 @@ export async function inviteVaultwardenUser(email: string) {
   if (!response.ok && response.status !== 409) {
     throw new VaultwardenError(await errorMessage(response, "vaultwarden_invite_failed"));
   }
+
+  return true;
 }
 
 async function errorMessage(response: Response, fallback: string) {
