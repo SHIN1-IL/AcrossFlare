@@ -8,6 +8,7 @@ const PHONE = "(max-width: 767px)";
 export function HomePageSnap() {
   useEffect(() => {
     const media = window.matchMedia(PHONE);
+    const hasScrollEnd = "onscrollend" in window;
     let from = window.scrollY;
     let furthest = window.scrollY;
     let pending = false;
@@ -54,7 +55,7 @@ export function HomePageSnap() {
 
     const onTouchEnd = () => {
       window.clearTimeout(releaseTimer);
-      if ("onscrollend" in window) {
+      if (hasScrollEnd) {
         releaseTimer = window.setTimeout(() => {
           if (!moved) pending = false;
         }, 120);
