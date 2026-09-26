@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { setRequestLocale } from "next-intl/server";
 import { resolveLocale } from "@/i18n/locale";
-import { HeroAtmosphereLazy } from "@/components/marketing/hero-atmosphere-lazy";
+import { HeroIntro } from "@/components/marketing/hero-intro";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { PlanStages, PlanStagesSkeleton } from "@/components/marketing/plan-stages";
 
@@ -16,18 +16,10 @@ export default async function LandingPage({
   setRequestLocale(locale);
 
   return (
-    <MarketingShell>
-      <section className="relative -mt-14 flex h-dvh flex-col items-center justify-center overflow-hidden text-center">
-        <HeroAtmosphereLazy />
+    <MarketingShell deck>
+      <section className="relative -mt-14 h-dvh snap-center snap-always overflow-hidden">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-[480px] bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.12),transparent_55%)]" />
-        <div className="relative z-10 inline-block px-[clamp(1.25rem,4vw,2.5rem)]">
-          <h1 className="text-[clamp(3.5rem,14vw,9rem)] font-semibold tracking-[-0.04em] leading-[0.95]">
-            AcrossFlare
-          </h1>
-          <p className="mt-6 text-[clamp(0.8125rem,2.2vw,1.25rem)] whitespace-nowrap text-[#888888]">
-            Secure Cloud & Network Optimization
-          </p>
-        </div>
+        <HeroIntro />
       </section>
       <Suspense fallback={<PlanStagesSkeleton />}>
         <PlanStages locale={locale} showAlipay={locale === "zh"} />

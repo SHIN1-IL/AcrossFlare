@@ -16,7 +16,7 @@ export const KARING_SETUP_STEPS = [
 export const BACKUP_SETUP_STEPS = [
   { id: "open" },
   { id: "save" },
-  { id: "optional" },
+  { id: "phone" },
 ] as const;
 
 export const KARING_INSTALL_PLATFORMS = [

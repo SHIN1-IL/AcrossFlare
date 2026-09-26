@@ -1,0 +1,94 @@
+.stage {
+  contain: layout paint;
+}
+
+.vault,
+.file {
+  opacity: 0;
+}
+
+.stage[data-play] .press,
+.stage[data-play] .vault,
+.stage[data-play] .file {
+  animation-duration: 4s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.stage[data-play] .press {
+  animation-name: backup-press;
+}
+
+.stage[data-play] .vault {
+  animation-name: backup-vault;
+}
+
+.stage[data-play] .file {
+  animation-name: backup-file;
+}
+
+@keyframes backup-press {
+  0%,
+  6% {
+    transform: scale(1);
+  }
+  12% {
+    transform: scale(0.97);
+  }
+  20%,
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes backup-vault {
+  0%,
+  22% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  34%,
+  58% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  72%,
+  100% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@keyframes backup-file {
+  0%,
+  62% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  74%,
+  94% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage[data-play] .press,
+  .stage[data-play] .vault,
+  .stage[data-play] .file {
+    animation: none;
+  }
+
+  .vault {
+    opacity: 0;
+  }
+
+  .file {
+    opacity: 1;
+    transform: none;
+  }
+}

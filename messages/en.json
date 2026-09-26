@@ -204,6 +204,54 @@
     "featured": "Popular",
     "alipay": "Alipay"
   },
+  "heroDeck": {
+    "headline": "On a trip to China,",
+    "items": [
+      { "q": "Can you keep the messengers you already use?", "note": "KakaoTalk? LINE? ..." },
+      { "q": "Can you watch YouTube and Netflix?" },
+      { "q": "Can you back up your files safely?" },
+      { "q": "Will the connection stay fast?", "note": "Zoom, Teams, Webex..." },
+      { "q": "Is it secure?" }
+    ],
+    "closing": "Try AcrossFlare now.",
+    "kakao": "KakaoTalk",
+    "lineApp": "LINE",
+    "youtube": "YouTube",
+    "netflix": "Netflix",
+    "zoom": "Zoom",
+    "teams": "Teams",
+    "webex": "Webex",
+    "dropHint": "Drop a file here to back it up",
+    "fileName": "notes.pdf",
+    "memo": "Important note",
+    "connected": "Connected",
+    "noError": "No errors",
+    "playing": "Playing",
+    "inCall": "In a meeting",
+    "ping": "Ping",
+    "chats": ["Can you hear me?", "Yes, I can see it.", "Sending a photo.", "Got it."],
+    "copy": "Copy",
+    "copied": "Copied",
+    "pay": "Pay",
+    "consoleTitle": "Console",
+    "consoleSubtitle": "Products stay isolated. Open one lane.",
+    "overview": "Overview",
+    "backup": "Backup",
+    "billing": "Billing",
+    "settings": "Settings",
+    "open": "Open",
+    "active": "Active",
+    "plan": "Plan",
+    "planName": "Month",
+    "nodes": "Nodes",
+    "nodeList": "node-tokyo… · node-la-a…",
+    "traffic": "Bandwagon traffic",
+    "qr": "QR",
+    "url": "Subscription URL",
+    "urlSample": "https://acrossflare.com/api/v1/subscription/…",
+    "yaml": "Download .yaml",
+    "qrHint": "Scan this square QR in Karing, or copy the URL and paste it into Add Profile."
+  },
   "planSlides": {
     "global-lite": {
       "eyebrow": "Secure Cloud & Network Optimization",
@@ -391,7 +439,7 @@
     "backupRefresh": "Refresh",
     "backupDownload": "Download {name}",
     "backupDelete": "Delete {name}",
-    "backupDeleteConfirm": "Delete {name}? It may also be removed from synced devices.",
+    "backupDeleteConfirm": "Delete {name}?",
     "backupFilesEmpty": "No files have been saved.",
     "backupFilesLoading": "Loading files…",
     "backupFilesLoadError": "Could not load your files.",
@@ -402,8 +450,8 @@
     "openBackupPwa": "Open backup space",
     "backupHowToTitle": "How to use",
     "backupHowTo1": "Use Open vault for Vaultwarden, and upload or download small files under My files.",
-    "backupHowTo2": "Save passwords and notes in Vaultwarden, and small files in your Syncthing folder.",
-    "backupHowTo3": "Install Syncthing on a device only if you want that folder to sync automatically. You do not need it for web-only use.",
+    "backupHowTo2": "Save passwords and notes in Vaultwarden, and small files under My files.",
+    "backupHowTo3": "Phone folders do not sync automatically. After you sign in, open Backup in Console and upload only the files you need under My files.",
     "backupHowToMore": "Read the full guide",
     "backupUsage": "Backup usage",
     "exitIp": "Exit IP",
@@ -523,6 +571,13 @@
           "title": "Connect",
           "body": "After the profile is saved, turn on the main switch to connect. Open backup from the profile webpage or the announcement “Open backup space”."
         }
+      },
+      "preview": {
+        "copy": "Copy link",
+        "copied": "Copied",
+        "node": "Tokyo #1",
+        "latency": "32ms",
+        "connected": "CONNECTED"
       }
     },
     "backup": {
@@ -535,12 +590,18 @@
         },
         "save": {
           "title": "Save passwords, notes, and small files",
-          "body": "Store passwords and notes in Vaultwarden, and small files in your Syncthing folder."
+          "body": "Store passwords and notes in Vaultwarden, and small files under My files."
         },
-        "optional": {
-          "title": "Optional device folder sync",
-          "body": "To keep a phone or PC folder in sync automatically, install Syncthing on that device and connect it with the folder ID on screen. Skip that if you only upload and download small files in the browser."
+        "phone": {
+          "title": "Same steps on a phone",
+          "body": "On a phone, open backup in the browser and upload or download under My files. Folders do not sync automatically."
         }
+      },
+      "preview": {
+        "vault": "Open vault",
+        "files": "My files",
+        "vaultName": "Vaultwarden",
+        "file": "note.txt"
       }
     },
     "faq": {
@@ -571,7 +632,7 @@
         },
         "backupFromKaring": {
           "q": "How do I open backup from Karing?",
-          "a": "After you add the subscription, tap the profile webpage or the “Open backup space” announcement. It opens backup in the browser. You will need to sign in to AcrossFlare once."
+          "a": "After you add the subscription, tap the profile webpage or the “Open backup space” announcement. It opens backup in the browser. You will need to sign in to AcrossFlare once. If backup does not open after sign-in, open Backup from Console in the top right."
         },
         "vaultLogin": {
           "q": "How do I sign in to Vaultwarden?",
@@ -579,7 +640,7 @@
         },
         "deviceSync": {
           "q": "How do I keep files on my phone in sync?",
-          "a": "Install Syncthing on that device and connect it with the folder ID on screen. You do not need that if you only upload and download small files in the browser."
+          "a": "Phone folders do not sync automatically. Sign in to AcrossFlare, open Backup in Console, and upload only the files you need under My files. If you tap the Karing shortcut while signed out, you may land on the home page. You do not need the Syncthing app."
         }
       }
     }

@@ -5,11 +5,17 @@ import { Logo } from "@/components/marketing/logo";
 
 const COPYRIGHT_YEAR = new Date().getFullYear();
 
-export async function MarketingFooter() {
+export async function MarketingFooter({ snap = false }: { snap?: boolean }) {
   const t = await getTranslations("footer");
 
   return (
-    <footer className="border-t border-border">
+    <footer
+      className={
+        snap
+          ? "h-dvh snap-center snap-always overflow-y-auto border-t border-border pt-14"
+          : "border-t border-border"
+      }
+    >
       <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">

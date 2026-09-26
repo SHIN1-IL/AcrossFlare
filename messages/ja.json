@@ -204,6 +204,54 @@
     "featured": "人気",
     "alipay": "Alipay"
   },
+  "heroDeck": {
+    "headline": "中国への旅行や出張で、",
+    "items": [
+      { "q": "いつものメッセンジャーをそのまま使える？", "note": "カカオトーク？ LINE？ ..." },
+      { "q": "YouTube や Netflix を見られる？" },
+      { "q": "資料を安全にバックアップできる？" },
+      { "q": "インターネットの速度は出る？", "note": "Zoom、Teams、Webex..." },
+      { "q": "セキュリティ面で安全？" }
+    ],
+    "closing": "今すぐ、AcrossFlare を使ってみてください。",
+    "kakao": "カカオトーク",
+    "lineApp": "LINE",
+    "youtube": "YouTube",
+    "netflix": "Netflix",
+    "zoom": "Zoom",
+    "teams": "Teams",
+    "webex": "Webex",
+    "dropHint": "バックアップするファイルをここに置く",
+    "fileName": "資料.pdf",
+    "memo": "重要メモ",
+    "connected": "接続中",
+    "noError": "エラーなし",
+    "playing": "再生中",
+    "inCall": "会議中",
+    "ping": "ピング",
+    "chats": ["聞こえる？", "うん、見えてる。", "写真送るね。", "受け取った。"],
+    "copy": "コピー",
+    "copied": "コピーしました",
+    "pay": "支払う",
+    "consoleTitle": "コンソール",
+    "consoleSubtitle": "商品は分離される。レーンを一つ開く。",
+    "overview": "概要",
+    "backup": "バックアップ",
+    "billing": "請求",
+    "settings": "設定",
+    "open": "開く",
+    "active": "有効",
+    "plan": "プラン",
+    "planName": "Month",
+    "nodes": "ノード",
+    "nodeList": "node-tokyo… · node-la-a…",
+    "traffic": "Bandwagon トラフィック",
+    "qr": "QR",
+    "url": "購読 URL",
+    "urlSample": "https://acrossflare.com/api/v1/subscription/…",
+    "yaml": ".yaml をダウンロード",
+    "qrHint": "Karing でこの正方形 QR を読み取るか、URL をコピーして Add Profile に貼り付けてください。"
+  },
   "planSlides": {
     "global-lite": {
       "eyebrow": "セキュアクラウドおよびネットワーク最適化",
@@ -391,7 +439,7 @@
     "backupRefresh": "更新",
     "backupDownload": "{name} をダウンロード",
     "backupDelete": "{name} を削除",
-    "backupDeleteConfirm": "{name} を削除しますか？同期済み端末からも削除される場合があります。",
+    "backupDeleteConfirm": "{name} を削除しますか？",
     "backupFilesEmpty": "保存されたファイルはありません。",
     "backupFilesLoading": "ファイルを読み込み中…",
     "backupFilesLoadError": "ファイル一覧を読み込めませんでした。",
@@ -402,8 +450,8 @@
     "openBackupPwa": "バックアップ空間を開く",
     "backupHowToTitle": "使い方",
     "backupHowTo1": "Vaultwarden は保管庫を開くから利用し、小さなファイルはマイファイルで管理します。",
-    "backupHowTo2": "パスワードとメモは Vaultwarden に、小さなファイルは Syncthing フォルダに保存します。",
-    "backupHowTo3": "端末フォルダを自動同期するときだけ、その端末に Syncthing を入れてください。ウェブだけ使うときは不要です。",
+    "backupHowTo2": "パスワードとメモは Vaultwarden に、小さなファイルはマイファイルに保存します。",
+    "backupHowTo3": "端末フォルダの自動同期はありません。ログイン後、コンソールのバックアップで、必要なファイルだけマイファイルに追加してください。",
     "backupHowToMore": "詳しく見る",
     "backupUsage": "バックアップ使用量",
     "exitIp": "出口 IP",
@@ -523,6 +571,13 @@
           "title": "接続を開始（Connect）",
           "body": "プロファイルを保存したら、メイン画面のスイッチをオンにして接続します。バックアップ空間は、プロファイルのウェブページまたはお知らせ「セキュリティバックアップ空間」からブラウザで開けます。"
         }
+      },
+      "preview": {
+        "copy": "リンクをコピー",
+        "copied": "コピー完了",
+        "node": "Tokyo #1",
+        "latency": "32ms",
+        "connected": "CONNECTED"
       }
     },
     "backup": {
@@ -535,12 +590,18 @@
         },
         "save": {
           "title": "パスワード・メモと小さなファイルを保存",
-          "body": "パスワードとメモは Vaultwarden に、小さなファイルは Syncthing フォルダに保存してください。"
+          "body": "パスワードとメモは Vaultwarden に、小さなファイルはマイファイルに保存してください。"
         },
-        "optional": {
-          "title": "端末フォルダの自動同期（任意）",
-          "body": "スマホや PC のフォルダを自動で合わせる場合は、その端末に Syncthing を入れ、画面のフォルダ ID で接続してください。ウェブだけで小さなファイルを上げ下げするときはインストール不要です。"
+        "phone": {
+          "title": "スマホでも同じ手順で",
+          "body": "スマホでもブラウザでバックアップ空間を開き、マイファイルでアップロード・ダウンロードしてください。フォルダ全体を自動で合わせる機能はありません。"
         }
+      },
+      "preview": {
+        "vault": "保管庫を開く",
+        "files": "マイファイル",
+        "vaultName": "Vaultwarden",
+        "file": "メモ.txt"
       }
     },
     "faq": {
@@ -571,7 +632,7 @@
         },
         "backupFromKaring": {
           "q": "Karing からバックアップ空間を開くには？",
-          "a": "購読を追加したあと、プロファイルのウェブページまたはお知らせ「セキュリティバックアップ空間」をタップすると、ブラウザでバックアップ空間が開きます。AcrossFlare へのログインが一度必要です。"
+          "a": "購読を追加したあと、プロファイルのウェブページまたはお知らせ「セキュリティバックアップ空間」をタップすると、ブラウザでバックアップ空間が開きます。AcrossFlare へのログインが一度必要です。ログイン後にバックアップが開かないときは、右上のコンソールからバックアップを開いてください。"
         },
         "vaultLogin": {
           "q": "Vaultwarden へのログイン方法は？",
@@ -579,7 +640,7 @@
         },
         "deviceSync": {
           "q": "スマホのファイルを自動で合わせるには？",
-          "a": "その端末に Syncthing を入れ、画面のフォルダ ID で接続してください。ウェブだけで小さなファイルを上げ下げするときはインストール不要です。"
+          "a": "端末フォルダを自動で合わせる機能はありません。AcrossFlare にログインしたあと、コンソールのバックアップで、必要なファイルだけマイファイルに追加してください。ログアウト状態で Karing のショートカットだけを押すと、ホームに戻ることがあります。Syncthing アプリは不要です。"
         }
       }
     }

@@ -212,6 +212,10 @@
   }
 }
 
+html:has(.home-deck) {
+  scroll-snap-type: y mandatory;
+}
+
 @keyframes tunnel-ring {
   0% {
     transform: scale(0.12);

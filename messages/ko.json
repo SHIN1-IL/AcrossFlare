@@ -204,6 +204,54 @@
     "featured": "인기",
     "alipay": "Alipay"
   },
+  "heroDeck": {
+    "headline": "중국 여행이나 출장 시,",
+    "items": [
+      { "q": "사용하던 메신저를 그대로 사용할 수 있을까?", "note": "카톡? 라인? ..." },
+      { "q": "유튜브, 넷플릭스를 볼수 있을까?" },
+      { "q": "자료를 안전하게 백업할 수 있을까?" },
+      { "q": "인터넷 속도가 잘 나올까?", "note": "줌, 팀즈, 웨벡스..." },
+      { "q": "보안 면에서 안전할까?" }
+    ],
+    "closing": "바로, AcrossFlare 를 사용해 보세요!",
+    "kakao": "카카오톡",
+    "lineApp": "LINE",
+    "youtube": "YouTube",
+    "netflix": "Netflix",
+    "zoom": "Zoom",
+    "teams": "Teams",
+    "webex": "Webex",
+    "dropHint": "백업할 파일을 여기로 놓으세요",
+    "fileName": "자료.pdf",
+    "memo": "중요 메모",
+    "connected": "연결됨",
+    "noError": "오류 없음",
+    "playing": "재생 중",
+    "inCall": "회의 중",
+    "ping": "핑",
+    "chats": ["잘 들려?", "응, 보여.", "사진 보낼게.", "받았어."],
+    "copy": "복사",
+    "copied": "복사됨",
+    "pay": "결제하기",
+    "consoleTitle": "콘솔",
+    "consoleSubtitle": "상품은 분리됩니다. 레인을 하나 여세요.",
+    "overview": "개요",
+    "backup": "백업",
+    "billing": "결제",
+    "settings": "설정",
+    "open": "열기",
+    "active": "활성",
+    "plan": "요금제",
+    "planName": "Month",
+    "nodes": "노드",
+    "nodeList": "node-tokyo… · node-la-a…",
+    "traffic": "Bandwagon 트래픽",
+    "qr": "QR",
+    "url": "구독 URL",
+    "urlSample": "https://acrossflare.com/api/v1/subscription/…",
+    "yaml": ".yaml 다운로드",
+    "qrHint": "Karing에서 이 정사각 QR을 스캔하거나, URL을 복사해 Add Profile에 붙여넣으세요."
+  },
   "planSlides": {
     "global-lite": {
       "eyebrow": "보안 클라우드+네트워크 최적화",
@@ -391,7 +439,7 @@
     "backupRefresh": "새로고침",
     "backupDownload": "{name} 다운로드",
     "backupDelete": "{name} 삭제",
-    "backupDeleteConfirm": "{name} 파일을 삭제할까요? 동기화된 기기에서도 삭제될 수 있습니다.",
+    "backupDeleteConfirm": "{name} 파일을 삭제할까요?",
     "backupFilesEmpty": "저장된 파일이 없습니다.",
     "backupFilesLoading": "파일을 불러오는 중…",
     "backupFilesLoadError": "파일 목록을 불러오지 못했습니다.",
@@ -402,8 +450,8 @@
     "openBackupPwa": "백업 공간 열기",
     "backupHowToTitle": "이용 방법",
     "backupHowTo1": "금고 열기로 Vaultwarden을 이용하고, 내 파일에서 작은 파일을 올리고 받으세요.",
-    "backupHowTo2": "암호·메모는 Vaultwarden에, 작은 파일은 Syncthing 폴더에 저장하세요.",
-    "backupHowTo3": "기기 폴더를 자동 동기화할 때만 그 기기에 Syncthing을 설치하세요. 웹만 쓸 때는 필요 없습니다.",
+    "backupHowTo2": "암호·메모는 Vaultwarden에, 작은 파일은 내 파일에 저장하세요.",
+    "backupHowTo3": "폰 폴더 자동 맞춤은 없습니다. 로그인한 뒤 콘솔의 백업에서, 내 파일로 필요한 파일만 올리고 받으세요.",
     "backupHowToMore": "자세히 보기",
     "backupUsage": "백업 사용량",
     "exitIp": "출구 IP",
@@ -523,6 +571,13 @@
           "title": "연결 시작 (Connect)",
           "body": "프로필이 등록되면 메인 화면 스위치를 켜서 연결하세요. 백업 공간은 프로필의 웹페이지 또는 공지 ‘보안 백업 공간 바로가기’를 누르면 브라우저에서 열립니다."
         }
+      },
+      "preview": {
+        "copy": "구독 링크 복사",
+        "copied": "복사 완료",
+        "node": "Tokyo #1",
+        "latency": "32ms",
+        "connected": "CONNECTED"
       }
     },
     "backup": {
@@ -535,12 +590,18 @@
         },
         "save": {
           "title": "암호·메모와 작은 파일 저장",
-          "body": "암호·메모는 Vaultwarden에, 작은 파일은 Syncthing 폴더에 저장하세요."
+          "body": "암호·메모는 Vaultwarden에, 작은 파일은 내 파일에 저장하세요."
         },
-        "optional": {
-          "title": "기기 폴더 자동 동기화(선택)",
-          "body": "폰·PC 폴더를 자동으로 맞추려면 그 기기에 Syncthing을 설치하고, 화면에 있는 폴더 ID로 연결하세요. 웹에서만 작은 파일을 올리고 받을 때는 설치하지 않아도 됩니다."
+        "phone": {
+          "title": "폰에서도 같은 방법으로",
+          "body": "폰에서도 브라우저로 백업 공간을 열고, 내 파일에서 올리고 받으세요. 폴더 전체를 자동으로 맞추는 기능은 없습니다."
         }
+      },
+      "preview": {
+        "vault": "금고 열기",
+        "files": "내 파일",
+        "vaultName": "Vaultwarden",
+        "file": "메모.txt"
       }
     },
     "faq": {
@@ -571,7 +632,7 @@
         },
         "backupFromKaring": {
           "q": "Karing에서 백업 공간은 어떻게 여나요?",
-          "a": "구독을 연결한 뒤, 프로필의 웹페이지 또는 공지 ‘보안 백업 공간 바로가기’를 누르면 브라우저에서 백업 공간이 열립니다. AcrossFlare 로그인이 한 번 필요합니다."
+          "a": "구독을 연결한 뒤, 프로필의 웹페이지 또는 공지 ‘보안 백업 공간 바로가기’를 누르면 브라우저에서 백업 공간이 열립니다. AcrossFlare 로그인이 한 번 필요합니다. 로그인 후 백업이 바로 안 열리면 우측 상단 콘솔에서 백업을 여세요."
         },
         "vaultLogin": {
           "q": "Vaultwarden 로그인은 어떻게 하나요?",
@@ -579,7 +640,7 @@
         },
         "deviceSync": {
           "q": "폰의 파일을 자동으로 맞추려면 어떻게 하나요?",
-          "a": "그 기기에 Syncthing을 설치하고, 화면에 있는 폴더 ID로 연결하세요. 웹에서 작은 파일만 올리고 받을 때는 설치하지 않아도 됩니다."
+          "a": "폰 폴더를 자동으로 맞추는 기능은 없습니다. AcrossFlare에 로그인한 뒤 콘솔의 백업에서, 내 파일로 필요한 파일만 올리고 받으세요. 로그인 없이 Karing 바로가기만 누르면 홈으로 갈 수 있습니다. Syncthing 앱은 설치하지 않아도 됩니다."
         }
       }
     }

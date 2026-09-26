@@ -6,6 +6,7 @@ export const MARKETING_MESSAGE_KEYS = [
   "productNotice",
   "legal",
   "pricing",
+  "heroDeck",
   "planSlides",
   "workspace",
   "services",

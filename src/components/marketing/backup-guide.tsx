@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { BackupOpenPreview } from "@/components/marketing/backup-open-preview";
 import { BACKUP_SETUP_STEPS } from "@/lib/support-zone";
 
 export function BackupSetupGuide() {
@@ -25,6 +26,7 @@ export function BackupSetupGuide() {
               <p className="mt-1 text-sm leading-6 text-muted-foreground">
                 {t(`backup.steps.${step.id}.body`)}
               </p>
+              {step.id === "open" ? <BackupOpenPreview /> : null}
             </div>
           </li>
         ))}

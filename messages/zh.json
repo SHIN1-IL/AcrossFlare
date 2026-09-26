@@ -204,6 +204,54 @@
     "featured": "热门",
     "alipay": "支付宝"
   },
+  "heroDeck": {
+    "headline": "去中国旅行或出差时，",
+    "items": [
+      { "q": "还能继续用原来的聊天软件吗？", "note": "KakaoTalk？ LINE？ ..." },
+      { "q": "能看 YouTube 和 Netflix 吗？" },
+      { "q": "资料能安全备份吗？" },
+      { "q": "网速会够快吗？", "note": "Zoom、Teams、Webex..." },
+      { "q": "安全方面可靠吗？" }
+    ],
+    "closing": "现在就试试 AcrossFlare。",
+    "kakao": "KakaoTalk",
+    "lineApp": "LINE",
+    "youtube": "YouTube",
+    "netflix": "Netflix",
+    "zoom": "Zoom",
+    "teams": "Teams",
+    "webex": "Webex",
+    "dropHint": "把要备份的文件拖到这里",
+    "fileName": "资料.pdf",
+    "memo": "重要备忘",
+    "connected": "已连接",
+    "noError": "没有错误",
+    "playing": "播放中",
+    "inCall": "会议中",
+    "ping": "延迟",
+    "chats": ["听得到吗？", "能看到。", "发张照片。", "收到了。"],
+    "copy": "复制",
+    "copied": "已复制",
+    "pay": "支付",
+    "consoleTitle": "控制台",
+    "consoleSubtitle": "产品保持隔离。打开一条线。",
+    "overview": "总览",
+    "backup": "备份",
+    "billing": "账单",
+    "settings": "设置",
+    "open": "打开",
+    "active": "已开通",
+    "plan": "套餐",
+    "planName": "Month",
+    "nodes": "节点",
+    "nodeList": "node-tokyo… · node-la-a…",
+    "traffic": "Bandwagon 流量",
+    "qr": "二维码",
+    "url": "订阅地址",
+    "urlSample": "https://acrossflare.com/api/v1/subscription/…",
+    "yaml": "下载 .yaml",
+    "qrHint": "在 Karing 中扫描此方形二维码，或复制 URL 粘贴到 Add Profile。"
+  },
   "planSlides": {
     "global-lite": {
       "eyebrow": "安全云及网络优化",
@@ -391,7 +439,7 @@
     "backupRefresh": "刷新",
     "backupDownload": "下载 {name}",
     "backupDelete": "删除 {name}",
-    "backupDeleteConfirm": "确定删除 {name}？同步设备中的文件也可能被删除。",
+    "backupDeleteConfirm": "确定删除 {name}？",
     "backupFilesEmpty": "尚未保存文件。",
     "backupFilesLoading": "正在加载文件…",
     "backupFilesLoadError": "无法加载文件列表。",
@@ -402,8 +450,8 @@
     "openBackupPwa": "打开备份空间",
     "backupHowToTitle": "使用方法",
     "backupHowTo1": "通过打开保险库使用 Vaultwarden，并在我的文件中管理小文件。",
-    "backupHowTo2": "密码与备忘录保存在 Vaultwarden，小文件保存在 Syncthing 文件夹。",
-    "backupHowTo3": "仅在需要自动同步设备文件夹时，才在该设备安装 Syncthing。仅使用网页时不必安装。",
+    "backupHowTo2": "密码与备忘录保存在 Vaultwarden，小文件保存在我的文件。",
+    "backupHowTo3": "手机文件夹不会自动同步。登录后在控制台的备份中，于我的文件上传所需文件即可。",
     "backupHowToMore": "查看详细说明",
     "backupUsage": "备份用量",
     "exitIp": "出口 IP",
@@ -523,6 +571,13 @@
           "title": "开始连接（Connect）",
           "body": "配置保存后，打开主界面开关即可连接。备份空间可通过配置的网页或公告“安全备份空间快捷入口”在浏览器中打开。"
         }
+      },
+      "preview": {
+        "copy": "复制链接",
+        "copied": "已复制",
+        "node": "Tokyo #1",
+        "latency": "32ms",
+        "connected": "CONNECTED"
       }
     },
     "backup": {
@@ -535,12 +590,18 @@
         },
         "save": {
           "title": "保存密码、备忘录与小文件",
-          "body": "密码与备忘录保存在 Vaultwarden，小文件保存在 Syncthing 文件夹。"
+          "body": "密码与备忘录保存在 Vaultwarden，小文件保存在我的文件。"
         },
-        "optional": {
-          "title": "设备文件夹自动同步（可选）",
-          "body": "若要自动同步手机或电脑文件夹，请在该设备安装 Syncthing，并用页面上的文件夹 ID 连接。仅在浏览器上传下载小文件时不必安装。"
+        "phone": {
+          "title": "手机上也用同样方法",
+          "body": "在手机浏览器打开备份空间，于我的文件上传或下载即可。没有自动同步整个文件夹的功能。"
         }
+      },
+      "preview": {
+        "vault": "打开保险库",
+        "files": "我的文件",
+        "vaultName": "Vaultwarden",
+        "file": "备忘.txt"
       }
     },
     "faq": {
@@ -571,7 +632,7 @@
         },
         "backupFromKaring": {
           "q": "如何从 Karing 打开备份空间？",
-          "a": "添加订阅后，点击配置的网页或公告“安全备份空间快捷入口”，即可在浏览器打开备份空间。需要登录一次 AcrossFlare。"
+          "a": "添加订阅后，点击配置的网页或公告“安全备份空间快捷入口”，即可在浏览器打开备份空间。需要登录一次 AcrossFlare。登录后若未打开备份，请点击右上角控制台中的备份。"
         },
         "vaultLogin": {
           "q": "如何登录 Vaultwarden？",
@@ -579,7 +640,7 @@
         },
         "deviceSync": {
           "q": "如何自动同步手机上的文件？",
-          "a": "在该设备安装 Syncthing，并用页面上的文件夹 ID 连接。仅在浏览器上传下载小文件时不必安装。"
+          "a": "没有自动同步手机文件夹的功能。请登录 AcrossFlare，在控制台的备份中，于我的文件上传所需文件。未登录时点击 Karing 快捷入口可能会回到首页。不必安装 Syncthing 应用。"
         }
       }
     }

@@ -13,7 +13,7 @@ import type { AppLocale } from "@/i18n/routing";
 export function PlanStagesSkeleton() {
   return (
     <div
-      className="relative min-h-dvh overflow-hidden bg-[#07080c]"
+      className="relative h-dvh snap-center snap-always overflow-hidden bg-[#07080c]"
       aria-hidden="true"
     />
   );
@@ -98,7 +98,7 @@ function PlanStage({
   return (
     <section
       id={isFirst ? "plans" : undefined}
-      className="relative h-dvh overflow-hidden"
+      className="relative h-dvh snap-center snap-always overflow-hidden"
     >
       <LazyStageBackdrop variant={index} />
       <div className="relative z-10 mx-auto flex h-full w-full max-w-3xl flex-col items-center justify-end px-6 pb-[22vh] text-center">
@@ -149,7 +149,7 @@ function WorkspaceStage({
   t: Awaited<ReturnType<typeof getTranslations>>;
 }) {
   return (
-    <section className="relative h-dvh overflow-hidden">
+    <section className="relative h-dvh snap-center snap-always overflow-hidden">
       <LazyStageBackdrop variant={index} />
       <div className="relative z-10 mx-auto flex h-full w-full max-w-3xl flex-col items-center justify-end px-6 pb-[22vh] text-center">
         <p className="text-xs font-medium tracking-[0.22em] text-primary uppercase">

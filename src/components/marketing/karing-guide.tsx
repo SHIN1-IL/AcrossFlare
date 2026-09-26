@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { KaringImportPreview } from "@/components/marketing/karing-import-preview";
 import { buttonVariants } from "@/components/ui/button";
 import { getMerchant } from "@/lib/legal/merchant";
 import {
@@ -61,6 +62,7 @@ export function KaringSetupGuide({
                   })}
                 </ul>
               ) : null}
+              {step.id === "profile" ? <KaringImportPreview /> : null}
             </div>
           </li>
         ))}

@@ -1,0 +1,224 @@
+.stage {
+  contain: layout paint;
+}
+
+.check,
+.toast,
+.node,
+.track,
+.badge {
+  opacity: 0;
+}
+
+.mask {
+  transform: scaleX(1);
+  transform-origin: right center;
+}
+
+.knob {
+  transform: translateX(0);
+}
+
+.stage[data-play] .press,
+.stage[data-play] .check,
+.stage[data-play] .toast,
+.stage[data-play] .mask,
+.stage[data-play] .node,
+.stage[data-play] .track,
+.stage[data-play] .knob,
+.stage[data-play] .badge {
+  animation-duration: 4s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.stage[data-play] .mask {
+  animation-name: karing-mask;
+  animation-timing-function: steps(32, end);
+}
+
+.stage[data-play] .press {
+  animation-name: karing-press;
+}
+
+.stage[data-play] .check {
+  animation-name: karing-check;
+}
+
+.stage[data-play] .toast {
+  animation-name: karing-toast;
+}
+
+.stage[data-play] .node {
+  animation-name: karing-node;
+}
+
+.stage[data-play] .track {
+  animation-name: karing-track;
+}
+
+.stage[data-play] .knob {
+  animation-name: karing-knob;
+}
+
+.stage[data-play] .badge {
+  animation-name: karing-badge;
+}
+
+@keyframes karing-press {
+  0%,
+  6% {
+    transform: scale(1);
+  }
+  12% {
+    transform: scale(0.97);
+  }
+  20%,
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes karing-check {
+  0%,
+  8% {
+    opacity: 0;
+  }
+  16%,
+  24% {
+    opacity: 1;
+  }
+  32%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes karing-toast {
+  0%,
+  4% {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  10%,
+  22% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  30%,
+  100% {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes karing-mask {
+  0%,
+  25% {
+    transform: scaleX(1);
+  }
+  55%,
+  94% {
+    transform: scaleX(0);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes karing-node {
+  0%,
+  52% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  64%,
+  94% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@keyframes karing-track {
+  0%,
+  58% {
+    opacity: 0;
+  }
+  72%,
+  94% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes karing-knob {
+  0%,
+  58% {
+    transform: translateX(0);
+  }
+  72%,
+  94% {
+    transform: translateX(14px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes karing-badge {
+  0%,
+  86% {
+    opacity: 0;
+  }
+  90% {
+    opacity: 1;
+  }
+  93% {
+    opacity: 0.25;
+  }
+  96% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage[data-play] .press,
+  .stage[data-play] .check,
+  .stage[data-play] .toast,
+  .stage[data-play] .mask,
+  .stage[data-play] .node,
+  .stage[data-play] .track,
+  .stage[data-play] .knob,
+  .stage[data-play] .badge {
+    animation: none;
+  }
+
+  .press,
+  .check,
+  .node,
+  .track,
+  .badge {
+    opacity: 1;
+  }
+
+  .toast {
+    opacity: 0;
+  }
+
+  .mask {
+    transform: scaleX(0);
+  }
+
+  .knob {
+    transform: translateX(14px);
+  }
+}
