@@ -40,7 +40,7 @@ set script_path $env(AF_REMOTE_SCRIPT)
 
 log_user 1
 
-spawn bash -c "ssh -t -o StrictHostKeyChecking=accept-new -o PreferredAuthentications=password -o PubkeyAuthentication=no $host bash -s < $script_path"
+spawn bash -c "ssh -t -o StrictHostKeyChecking=accept-new -o PreferredAuthentications=password -o PubkeyAuthentication=no $host bash -s < '$script_path'"
 expect {
   -re "(?i)password:" {
     send "$password\r"
