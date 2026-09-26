@@ -74,16 +74,18 @@ describe("support zone", () => {
     expect(ko.support.backup.steps.phone.body).toContain("내 파일");
     expect(ko.support.backup.steps.phone.body).not.toContain("폴더 ID");
     expect(ko.app.backupHowTo3).toContain("내 파일");
-    expect(ko.app.backupHowTo3).not.toContain("Syncthing을 설치");
     expect(ko.services.standard.features).toContain(
       "Vaultwarden (암호·메모 백업) — 비밀번호, 카드, 보안 메모를 암호화해 보관"
     );
-    expect(ko.services.standard.features).toContain(
-      "Syncthing (작은 파일 보관) — 중요한 작은 파일을 암호화해 보관"
-    );
+    expect(ko.services.standard.features.join("\n")).not.toContain("Syncthing");
+    expect(ko.services.hybrid.features.join("\n")).not.toContain("Syncthing");
+    expect(ko.services.workspace.features.join("\n")).not.toContain("Syncthing");
+    expect(ko.app.backupDesc).not.toContain("Syncthing");
     expect(ko.app.backupDesc).not.toContain("홈 화면");
+    expect(ko.support.faq.items.backupApp.a).not.toContain("Syncthing");
+    expect(ko.support.faq.items.deviceSync.a).not.toContain("Syncthing");
+    expect(ko.pwa.body).not.toContain("Syncthing");
     expect(ko.app.vaultTitle).toBe("Vaultwarden (암호·메모 백업)");
-    expect(ko.app.syncthingTitle).toBe("Syncthing (작은 파일 보관)");
   });
 
   it("keeps the Karing import preview on the support guide and off the homepage", async () => {

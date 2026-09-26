@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { HeroAtmosphereLazy } from "@/components/marketing/hero-atmosphere-lazy";
 import { cn } from "@/lib/utils";
 
 const FRAMES = ["signup", "pay", "console", "copy", "scan"] as const;
@@ -70,7 +69,10 @@ export function HeroIntro() {
   const [typed, setTyped] = useState("");
   const [reduced, setReduced] = useState(false);
   const [previewMs, setPreviewMs] = useState(0);
+  const [previewArmed, setPreviewArmed] = useState(false);
   const [runId, setRunId] = useState(0);
+  const page1Ref = useRef<HTMLDivElement>(null);
+  const page2Ref = useRef<HTMLDivElement>(null);
   const [glide, setGlide] = useState(true);
   const [cut, setCut] = useState(false);
   const [aim, setAim] = useState<{ x: number; y: number } | null>(null);
@@ -136,6 +138,42 @@ export function HeroIntro() {
 
   useEffect(() => {
     if (!showPreview || reduced) return;
+    const phone = window.matchMedia("(max-width: 767px)").matches;
+    const page = page2Ref.current;
+    const first = page1Ref.current;
+    if (!phone || !page || !first) {
+      setPreviewArmed(true);
+      return;
+    }
+    const onFirst = Math.abs(first.getBoundingClientRect().top) < window.innerHeight * 0.35;
+    if (!onFirst) {
+      setPreviewArmed(true);
+      return;
+    }
+
+    let frame = 0;
+    frame = window.requestAnimationFrame(() => {
+      frame = window.requestAnimationFrame(() => {
+        const top = Math.round(page.getBoundingClientRect().top + window.scrollY);
+        window.scrollTo({ top, behavior: "smooth" });
+      });
+    });
+    const started = performance.now();
+    const timer = window.setInterval(() => {
+      const aligned = Math.abs(page.getBoundingClientRect().top) < 8;
+      if (aligned || performance.now() - started > 1600) {
+        setPreviewArmed(true);
+        window.clearInterval(timer);
+      }
+    }, 50);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearInterval(timer);
+    };
+  }, [reduced, runId, showPreview]);
+
+  useEffect(() => {
+    if (!previewArmed || reduced) return;
     const origin = performance.now();
     const timer = window.setInterval(() => {
       if (document.hidden) return;
@@ -148,7 +186,7 @@ export function HeroIntro() {
       setPreviewMs(elapsed);
     }, 50);
     return () => window.clearInterval(timer);
-  }, [reduced, showPreview]);
+  }, [previewArmed, reduced]);
 
   const frameIndex = Math.min(FRAMES.length - 1, Math.floor(Math.min(previewMs, FIRST_MS - 1) / FRAME_MS));
   const frame = FRAMES[frameIndex] ?? "signup";
@@ -169,7 +207,11 @@ export function HeroIntro() {
     setDone([]);
     setTyped("");
     setPreviewMs(0);
+    setPreviewArmed(false);
     setAim(null);
+    if (window.matchMedia("(max-width: 767px)").matches) {
+      page1Ref.current?.scrollIntoView({ behavior: "auto", block: "start" });
+    }
     setRunId((current) => current + 1);
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -224,8 +266,11 @@ export function HeroIntro() {
         dragStart.current = null;
       }}
     >
-      <div className="relative h-dvh max-md:snap-center max-md:snap-always md:absolute md:inset-0 md:h-auto">
-      {settled ? null : <HeroAtmosphereLazy />}
+      <div
+        ref={page1Ref}
+        data-home-page
+        className="relative h-dvh max-md:snap-start max-md:snap-always md:absolute md:inset-0 md:h-auto"
+      >
       <div
         className={cn(
           "absolute z-10 flex flex-col transition-all ease-[cubic-bezier(0.22,1,0.36,1)]",
@@ -286,10 +331,12 @@ export function HeroIntro() {
       </div>
 
       <div
+        ref={page2Ref}
+        data-home-page
         aria-hidden={showPreview ? undefined : true}
         className={cn(
           "absolute top-16 right-0 z-10 h-[calc(100%-4rem)] w-1/2 p-3 pl-1.5 md:p-4 md:pl-2",
-          "max-md:static max-md:flex max-md:h-dvh max-md:w-full max-md:snap-center max-md:snap-always max-md:flex-col max-md:px-3 max-md:pt-16 max-md:pb-3 max-md:pl-3",
+          "max-md:static max-md:flex max-md:h-dvh max-md:w-full max-md:snap-start max-md:snap-always max-md:flex-col max-md:px-3 max-md:pt-16 max-md:pb-3 max-md:pl-3",
           cut ? "opacity-0 duration-0" : "transition-opacity duration-700",
           showPreview && !cut ? "opacity-100" : "pointer-events-none opacity-0 max-md:hidden"
         )}
@@ -765,14 +812,16 @@ function Player({
   return (
     <div className="flex h-full flex-col px-3 py-3 sm:px-4">
       <p className={cn("text-sm font-semibold", youtube ? "text-[#ff0033]" : "text-[#e50914]")}>{name}</p>
-      <div className="relative mt-2 min-h-0 flex-1 overflow-hidden rounded-xl bg-black">
-        {loading ? (
-          <span className="absolute top-1/2 left-1/2 size-8 -translate-x-1/2 -translate-y-1/2 animate-spin rounded-full border-2 border-white/20 border-t-white" />
-        ) : youtube ? (
-          <MusicStage local={local} progress={progress} />
-        ) : (
-          <SpaceStage local={local} progress={progress} />
-        )}
+      <div className="mt-2 flex min-h-0 flex-1 items-center justify-center [container-type:size]">
+        <div className="relative aspect-video w-[min(100cqw,calc(100cqh*16/9))] overflow-hidden rounded-xl bg-black">
+          {loading ? (
+            <span className="absolute top-1/2 left-1/2 size-8 -translate-x-1/2 -translate-y-1/2 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+          ) : youtube ? (
+            <MusicStage local={local} progress={progress} />
+          ) : (
+            <SpaceStage local={local} progress={progress} />
+          )}
+        </div>
       </div>
       <p className="mt-3 text-xs text-muted-foreground">{loading ? "…" : caption}</p>
     </div>

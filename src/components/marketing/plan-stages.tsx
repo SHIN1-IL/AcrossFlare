@@ -13,7 +13,8 @@ import type { AppLocale } from "@/i18n/routing";
 export function PlanStagesSkeleton() {
   return (
     <div
-      className="relative h-dvh snap-center snap-always overflow-hidden bg-[#07080c]"
+      data-home-page
+      className="relative h-dvh snap-center snap-always overflow-hidden bg-[#07080c] max-md:snap-start"
       aria-hidden="true"
     />
   );
@@ -98,7 +99,8 @@ function PlanStage({
   return (
     <section
       id={isFirst ? "plans" : undefined}
-      className="relative h-dvh snap-center snap-always overflow-hidden"
+      data-home-page
+      className="relative h-dvh snap-center snap-always overflow-hidden max-md:snap-start"
     >
       <LazyStageBackdrop variant={index} />
       <div className="relative z-10 mx-auto flex h-full w-full max-w-3xl flex-col items-center justify-end px-6 pb-[22vh] text-center">
@@ -149,7 +151,7 @@ function WorkspaceStage({
   t: Awaited<ReturnType<typeof getTranslations>>;
 }) {
   return (
-    <section className="relative h-dvh snap-center snap-always overflow-hidden">
+    <section data-home-page className="relative h-dvh snap-center snap-always overflow-hidden max-md:snap-start">
       <LazyStageBackdrop variant={index} />
       <div className="relative z-10 mx-auto flex h-full w-full max-w-3xl flex-col items-center justify-end px-6 pb-[22vh] text-center">
         <p className="text-xs font-medium tracking-[0.22em] text-primary uppercase">

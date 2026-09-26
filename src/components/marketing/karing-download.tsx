@@ -9,6 +9,7 @@ import {
   detectKaringOsFromNavigator,
   fetchKaringLatestRelease,
   resolveKaringDownload,
+  retainDetectedOs,
   type DetectedKaringOs,
   type KaringReleaseAsset,
   type NavigatorLike,
@@ -25,12 +26,18 @@ function subscribeNavigator() {
   return () => {};
 }
 
-export function useClientKaringOs(serverOs: DetectedKaringOs = DEFAULT_OS) {
-  const uaOs = useSyncExternalStore(
-    subscribeNavigator,
-    () => detectKaringOsFromNavigator(navigator as NavigatorLike),
-    () => serverOs
+let navigatorOsSnapshot: DetectedKaringOs | null = null;
+
+function readNavigatorOs() {
+  navigatorOsSnapshot = retainDetectedOs(
+    navigatorOsSnapshot,
+    detectKaringOsFromNavigator(navigator as NavigatorLike)
   );
+  return navigatorOsSnapshot;
+}
+
+export function useClientKaringOs(serverOs: DetectedKaringOs = DEFAULT_OS) {
+  const uaOs = useSyncExternalStore(subscribeNavigator, readNavigatorOs, () => serverOs);
   const [precise, setPrecise] = useState<DetectedKaringOs | null>(null);
 
   useEffect(() => {

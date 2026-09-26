@@ -10,9 +10,10 @@ export async function MarketingFooter({ snap = false }: { snap?: boolean }) {
 
   return (
     <footer
+      data-home-page={snap ? "" : undefined}
       className={
         snap
-          ? "h-dvh snap-center snap-always overflow-y-auto border-t border-border pt-14"
+          ? "h-dvh snap-center snap-always overflow-y-auto border-t border-border pt-14 max-md:snap-start"
           : "border-t border-border"
       }
     >

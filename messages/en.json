@@ -67,7 +67,7 @@
     "workspaceTerms": "Team or custom encrypted network access and secure cloud backup. Plans A, B, and C are one-time purchases for a 1-month term at $150; they differ only in seats and monthly traffic. Plans require a promotional code. We do not offer recurring billing or auto-renewal.",
     "deliveryValue": "No physical shipment. After payment, access and backup details are issued immediately to the signed-in account.",
     "workspaceDeliveryValue": "No physical shipment. After the promotional code is confirmed, access and backup details are issued to the signed-in account.",
-    "requirementsValue": "A PC or phone with internet access. Use Vaultwarden (password & note backup) and Syncthing (small file storage) in a browser. No dedicated backup app is required.",
+    "requirementsValue": "A PC or phone with internet access. Use Vaultwarden (password & note backup) in a browser. No dedicated backup app is required.",
     "withdrawValue": "After access or backup details are issued, the right to withdraw may be limited under Korean e-commerce law article 17(2)(5). Full refund within 7 days if issuance failed or the charge was duplicated. We do not pro-rate unused time after issuance.",
     "withdrawLink": "Withdrawals & refunds",
     "vat": "Prices include VAT. All plans are one-time purchases; there is no auto-renewal or subscription billing."
@@ -205,15 +205,15 @@
     "alipay": "Alipay"
   },
   "heroDeck": {
-    "headline": "On a trip to China,",
+    "headline": "For travel and business in China",
     "items": [
-      { "q": "Can you keep the messengers you already use?", "note": "KakaoTalk? LINE? ..." },
-      { "q": "Can you watch YouTube and Netflix?" },
-      { "q": "Can you back up your files safely?" },
-      { "q": "Will the connection stay fast?", "note": "Zoom, Teams, Webex..." },
-      { "q": "Is it secure?" }
+      { "q": "Will your current messengers stay connected?", "note": "KakaoTalk · LINE" },
+      { "q": "Will YouTube and Netflix play without interruption?" },
+      { "q": "Will important files stay securely backed up?" },
+      { "q": "Will call quality hold through the meeting?", "note": "Zoom · Teams · Webex" },
+      { "q": "Will traffic stay protected on public Wi-Fi?" }
     ],
-    "closing": "Try AcrossFlare now.",
+    "closing": "Start on AcrossFlare, with your current setup.",
     "kakao": "KakaoTalk",
     "lineApp": "LINE",
     "youtube": "YouTube",
@@ -256,14 +256,14 @@
     "global-lite": {
       "eyebrow": "Secure Cloud & Network Optimization",
       "title": "Standard",
-      "description": "Right-sized speed for short trips and travel backups. Use Vaultwarden (password & note backup) and Syncthing (small file storage) in a browser.",
+      "description": "Right-sized speed for short trips and travel backups. Use Vaultwarden (password & note backup) in a browser.",
       "price": "₩9,900 · 1 month",
       "cta": "Learn more"
     },
     "global-pro": {
       "eyebrow": "Secure Cloud & Network Optimization",
       "title": "Hybrid",
-      "description": "Secure backup with faster network optimization. Use Vaultwarden (password & note backup) and Syncthing (small file storage) in a browser.",
+      "description": "Secure backup with faster network optimization. Use Vaultwarden (password & note backup) in a browser.",
       "price": "₩19,900 · 1 month",
       "cta": "Learn more"
     }
@@ -271,7 +271,7 @@
   "workspace": {
     "eyebrow": "Secure Cloud & Network Optimization",
     "title": "Workspace & Custom",
-    "description": "Custom orders for friends and teams. Use Vaultwarden (password & note backup) and Syncthing (small file storage) in a browser.",
+    "description": "Custom orders for friends and teams. Use Vaultwarden (password & note backup) in a browser.",
     "hint": "Plans A, B, and C by headcount",
     "learnMore": "Learn more",
     "cta": "Get started"
@@ -285,13 +285,12 @@
         "but still want YouTube without stutter"
       ],
       "title": "Standard",
-      "description": "Right-sized speed for short trips and travel backups. Encrypted network access plus Vaultwarden (password & note backup) and Syncthing (small file storage). You do not need a separate backup app.",
+      "description": "Right-sized speed for short trips and travel backups. Encrypted network access plus Vaultwarden (password & note backup). You do not need a separate backup app.",
       "cta": "Get started",
       "features": [
         "AcrossFlare base technology",
         "1 GB secure cloud backup",
         "Vaultwarden (password & note backup) — encrypted passwords, cards, and secure notes",
-        "Syncthing (small file storage) — encrypted storage for important small files",
         "Use in a browser with no dedicated app. Opens in your account after payment",
         "Online meetings on Zoom, Webex, Teams, and more",
         "Network optimization over a dedicated international line (LA)",
@@ -305,13 +304,12 @@
         "and want video calls without dropouts"
       ],
       "title": "Hybrid",
-      "description": "Secure backup plus faster network optimization. Encrypted network access plus Vaultwarden (password & note backup) and Syncthing (small file storage). You do not need a separate backup app.",
+      "description": "Secure backup plus faster network optimization. Encrypted network access plus Vaultwarden (password & note backup). You do not need a separate backup app.",
       "cta": "Get started",
       "features": [
         "AcrossFlare advanced technology",
         "1 GB secure cloud backup",
         "Vaultwarden (password & note backup) — encrypted passwords, cards, and secure notes",
-        "Syncthing (small file storage) — encrypted storage for important small files",
         "Use in a browser with no dedicated app. Opens in your account after payment",
         "Uninterrupted online meetings on Zoom, Webex, Teams, and more",
         "Faster network over Tokyo + LA lines",
@@ -321,7 +319,7 @@
     "workspace": {
       "eyebrow": "Secure Cloud & Network Optimization",
       "title": "Workspace & Custom",
-      "description": "Custom orders for friends and teams. Encrypted network access plus Vaultwarden (password & note backup) and Syncthing (small file storage). You do not need a separate backup app.",
+      "description": "Custom orders for friends and teams. Encrypted network access plus Vaultwarden (password & note backup). You do not need a separate backup app.",
       "cta": "Enter promotional code",
       "hint": "",
       "priceNote": "",
@@ -338,7 +336,6 @@
         "AcrossFlare advanced technology",
         "1 GB secure cloud backup",
         "Vaultwarden (password & note backup) — encrypted passwords, cards, and secure notes",
-        "Syncthing (small file storage) — encrypted storage for important small files",
         "Use in a browser with no dedicated app. Opens in your account after payment",
         "Uninterrupted online meetings on Zoom, Webex, Teams, and more",
         "Faster network over Tokyo + LA lines",
@@ -429,14 +426,14 @@
     "yamlDownload": "Download .yaml",
     "backup": "Backup",
     "backupTitle": "Security backup",
-    "backupDesc": "Use Vaultwarden (password & note backup) and Syncthing (small file storage) in your browser. You do not need a separate backup app.",
+    "backupDesc": "Use Vaultwarden (password & note backup) in your browser. You do not need a separate backup app.",
     "backupExpires": "Plan access until {date}",
     "vaultTitle": "Vaultwarden (password & note backup)",
     "vaultDesc": "Open vault goes straight to the login page. Use the same email and password as your AcrossFlare account. Save passwords, cards, and secure notes.",
     "vaultUrl": "Vault URL",
     "vaultUser": "Vault user",
     "openVault": "Open vault",
-    "syncthingTitle": "Syncthing (small file storage)",
+    "syncthingTitle": "Small file storage",
     "syncthingDesc": "Your private file space. Upload and download small files directly in the browser.",
     "syncthingUrl": "Sync URL",
     "syncthingFolder": "Folder ID",
@@ -637,7 +634,7 @@
         },
         "backupApp": {
           "q": "Do I have to install an app to use backup?",
-          "a": "No. Use Vaultwarden (password & note backup) and Syncthing (small file storage) in the browser. Only network access needs the Karing app."
+          "a": "No. Use Vaultwarden (password & note backup) in the browser. Only network access needs the Karing app."
         },
         "backupFromKaring": {
           "q": "How do I open backup from Karing?",
@@ -649,7 +646,7 @@
         },
         "deviceSync": {
           "q": "How do I keep files on my phone in sync?",
-          "a": "Phone folders do not sync automatically. Sign in to AcrossFlare, open Backup in Console, and upload only the files you need under My files. If you tap the Karing shortcut while signed out, you may land on the home page. You do not need the Syncthing app."
+          "a": "Phone folders do not sync automatically. Sign in to AcrossFlare, open Backup in Console, and upload only the files you need under My files. If you tap the Karing shortcut while signed out, you may land on the home page."
         }
       }
     }
@@ -919,7 +916,7 @@
   "pwa": {
     "eyebrow": "PWA",
     "title": "Add the backup app to your home screen",
-    "body": "Install AcrossFlare Backup to open Vaultwarden and Syncthing without a browser chrome.",
+    "body": "Install AcrossFlare Backup to open Vaultwarden without a browser chrome.",
     "iosBody": "Tap Share, then Add to Home Screen, to install the backup app.",
     "install": "Add backup app",
     "later": "Not now"

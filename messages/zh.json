@@ -67,7 +67,7 @@
     "workspaceTerms": "团队或定制的加密网络接入与安全云备份。A、B、C 套餐均为 1 个月单次付款（¥990），仅人数与每月流量不同。套餐需促销码申请。不提供定期扣款、自动续费或自动支付。",
     "deliveryValue": "无实物配送。付款完成后立即向已登录账户发放接入信息与备份使用信息。",
     "workspaceDeliveryValue": "无实物配送。促销码确认后，向已登录账户发放接入信息与备份使用信息。",
-    "requirementsValue": "可联网的电脑或手机。Vaultwarden（密码与备忘录备份）和 Syncthing（小文件存储）无需安装专用应用，通过浏览器使用。",
+    "requirementsValue": "可联网的电脑或手机。Vaultwarden（密码与备忘录备份）无需安装专用应用，通过浏览器使用。",
     "withdrawValue": "接入或备份信息发放后，依据韩国电子商务法第17条第2款第5项，撤回权可能受限。未发放或重复扣款的，7 日内全额退款。发放后中途退订原则上不按日折算。",
     "withdrawLink": "撤回与退款",
     "vat": "标示价格含增值税。所有套餐均为单次付款，无自动续费或定期扣款。"
@@ -205,15 +205,15 @@
     "alipay": "支付宝"
   },
   "heroDeck": {
-    "headline": "去中国旅行或出差时，",
+    "headline": "在中国出差或旅行时",
     "items": [
-      { "q": "还能继续用原来的聊天软件吗？", "note": "KakaoTalk？ LINE？ ..." },
-      { "q": "能看 YouTube 和 Netflix 吗？" },
-      { "q": "资料能安全备份吗？" },
-      { "q": "网速会够快吗？", "note": "Zoom、Teams、Webex..." },
-      { "q": "安全方面可靠吗？" }
+      { "q": "常用聊天软件能否保持连接？", "note": "KakaoTalk · LINE" },
+      { "q": "YouTube 与 Netflix 能否流畅播放？" },
+      { "q": "重要资料能否安全备份？" },
+      { "q": "会议期间的连接能否保持稳定？", "note": "Zoom · Teams · Webex" },
+      { "q": "公共 Wi-Fi 下通信是否受保护？" }
     ],
-    "closing": "现在就试试 AcrossFlare。",
+    "closing": "使用 AcrossFlare，沿用现在的工作环境。",
     "kakao": "KakaoTalk",
     "lineApp": "LINE",
     "youtube": "YouTube",
@@ -256,14 +256,14 @@
     "global-lite": {
       "eyebrow": "安全云及网络优化",
       "title": "Standard",
-      "description": "适合短期旅行或出差时的安全备份与合适速度。可在浏览器中使用 Vaultwarden（密码与备忘录备份）和 Syncthing（小文件存储）。",
+      "description": "适合短期旅行或出差时的安全备份与合适速度。可在浏览器中使用 Vaultwarden（密码与备忘录备份）。",
       "price": "₩9,900 · 1个月",
       "cta": "了解更多"
     },
     "global-pro": {
       "eyebrow": "安全云及网络优化",
       "title": "Hybrid",
-      "description": "提供安全备份与更快的网络优化。可在浏览器中使用 Vaultwarden（密码与备忘录备份）和 Syncthing（小文件存储）。",
+      "description": "提供安全备份与更快的网络优化。可在浏览器中使用 Vaultwarden（密码与备忘录备份）。",
       "price": "₩19,900 · 1个月",
       "cta": "了解更多"
     }
@@ -271,7 +271,7 @@
   "workspace": {
     "eyebrow": "安全云及网络优化",
     "title": "Workspace & Custom",
-    "description": "面向朋友和团队的定制服务。可在浏览器中使用 Vaultwarden（密码与备忘录备份）和 Syncthing（小文件存储）。",
+    "description": "面向朋友和团队的定制服务。可在浏览器中使用 Vaultwarden（密码与备忘录备份）。",
     "hint": "按人数的 A、B、C 套餐",
     "learnMore": "了解更多",
     "cta": "立即申请"
@@ -285,13 +285,12 @@
         "但还是想流畅看 YouTube"
       ],
       "title": "Standard",
-      "description": "适合短期旅行或出差时的安全备份与合适速度。提供网络连接，以及 Vaultwarden（密码与备忘录备份）和 Syncthing（小文件存储）。无需另行下载备份应用。",
+      "description": "适合短期旅行或出差时的安全备份与合适速度。提供网络连接，以及 Vaultwarden（密码与备忘录备份）。无需另行下载备份应用。",
       "cta": "立即申请",
       "features": [
         "应用 AcrossFlare 基础技术",
         "1GB 安全云备份",
         "Vaultwarden（密码与备忘录备份）— 加密保存密码、卡片与安全备忘录",
-        "Syncthing（小文件存储）— 加密保存重要的小文件",
         "无需专用应用，用浏览器即可。付款后可在账户中直接打开",
         "支持 Zoom、Webex、Teams 等在线会议",
         "通过国际专线（LA线路）优化网络",
@@ -305,13 +304,12 @@
         "并且希望视频会议不卡顿"
       ],
       "title": "Hybrid",
-      "description": "提供安全备份与更快的网络优化。提供网络连接，以及 Vaultwarden（密码与备忘录备份）和 Syncthing（小文件存储）。无需另行下载备份应用。",
+      "description": "提供安全备份与更快的网络优化。提供网络连接，以及 Vaultwarden（密码与备忘录备份）。无需另行下载备份应用。",
       "cta": "立即申请",
       "features": [
         "应用 AcrossFlare 高级技术",
         "1GB 安全云备份",
         "Vaultwarden（密码与备忘录备份）— 加密保存密码、卡片与安全备忘录",
-        "Syncthing（小文件存储）— 加密保存重要的小文件",
         "无需专用应用，用浏览器即可。付款后可在账户中直接打开",
         "Zoom、Webex、Teams 等流畅不中断的在线会议",
         "通过东京+LA线路实现更快网络",
@@ -321,7 +319,7 @@
     "workspace": {
       "eyebrow": "安全云及网络优化",
       "title": "Workspace & Custom",
-      "description": "面向朋友和团队的定制服务。提供网络连接，以及 Vaultwarden（密码与备忘录备份）和 Syncthing（小文件存储）。无需另行下载备份应用。",
+      "description": "面向朋友和团队的定制服务。提供网络连接，以及 Vaultwarden（密码与备忘录备份）。无需另行下载备份应用。",
       "cta": "输入优惠码",
       "hint": "",
       "priceNote": "",
@@ -338,7 +336,6 @@
         "应用 AcrossFlare 高级技术",
         "1GB 安全云备份",
         "Vaultwarden（密码与备忘录备份）— 加密保存密码、卡片与安全备忘录",
-        "Syncthing（小文件存储）— 加密保存重要的小文件",
         "无需专用应用，用浏览器即可。付款后可在账户中直接打开",
         "Zoom、Webex、Teams 等流畅不中断的在线会议",
         "通过东京+LA线路实现更快网络",
@@ -429,14 +426,14 @@
     "yamlDownload": "下载 .yaml",
     "backup": "备份",
     "backupTitle": "安全备份空间",
-    "backupDesc": "在浏览器中使用 Vaultwarden（密码与备忘录备份）和 Syncthing（小文件存储）。无需另行下载备份应用。",
+    "backupDesc": "在浏览器中使用 Vaultwarden（密码与备忘录备份）。无需另行下载备份应用。",
     "backupExpires": "可用至 {date}",
     "vaultTitle": "Vaultwarden（密码与备忘录备份）",
     "vaultDesc": "打开保险库会进入登录页。使用与主页相同的邮箱和密码即可进入。请保存密码、卡片与安全备忘录。",
     "vaultUrl": "Vault URL",
     "vaultUser": "Vault 用户",
     "openVault": "打开保险库",
-    "syncthingTitle": "Syncthing（小文件存储）",
+    "syncthingTitle": "小文件存储",
     "syncthingDesc": "您的专属文件空间，可直接在浏览器上传和下载小文件。",
     "syncthingUrl": "Sync URL",
     "syncthingFolder": "文件夹 ID",
@@ -637,7 +634,7 @@
         },
         "backupApp": {
           "q": "使用备份必须安装应用吗？",
-          "a": "备份不需要。请在浏览器中使用 Vaultwarden（密码与备忘录备份）和 Syncthing（小文件存储）。只有网络连接需要 Karing。"
+          "a": "备份不需要。请在浏览器中使用 Vaultwarden（密码与备忘录备份）。只有网络连接需要 Karing。"
         },
         "backupFromKaring": {
           "q": "如何从 Karing 打开备份空间？",
@@ -649,7 +646,7 @@
         },
         "deviceSync": {
           "q": "如何自动同步手机上的文件？",
-          "a": "没有自动同步手机文件夹的功能。请登录 AcrossFlare，在控制台的备份中，于我的文件上传所需文件。未登录时点击 Karing 快捷入口可能会回到首页。不必安装 Syncthing 应用。"
+          "a": "没有自动同步手机文件夹的功能。请登录 AcrossFlare，在控制台的备份中，于我的文件上传所需文件。未登录时点击 Karing 快捷入口可能会回到首页。"
         }
       }
     }
@@ -919,7 +916,7 @@
   "pwa": {
     "eyebrow": "PWA",
     "title": "将备份应用添加到主屏幕",
-    "body": "安装 AcrossFlare 备份应用，即可在无浏览器边框的情况下打开 Vaultwarden 与 Syncthing。",
+    "body": "安装 AcrossFlare 备份应用，即可在无浏览器边框的情况下打开 Vaultwarden。",
     "iosBody": "点按分享，然后选择“添加到主屏幕”即可安装备份应用。",
     "install": "添加备份应用",
     "later": "稍后再说"

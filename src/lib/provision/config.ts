@@ -25,9 +25,14 @@ export function vaultwardenBaseUrl() {
   return (process.env.VAULTWARDEN_URL || "https://vault.acrossflare.com").replace(/\/$/, "");
 }
 
-export function vaultLoginUrl(vaultUrl?: string | null) {
+export function vaultLoginUrl(vaultUrl?: string | null, email?: string | null) {
   const base = (vaultUrl || vaultwardenBaseUrl()).split("#")[0]?.replace(/\/$/, "") || vaultwardenBaseUrl();
-  return `${base}/#/login`;
+  const login = `${base}/#/login`;
+  const normalized = email?.trim().toLowerCase();
+  if (!normalized) {
+    return login;
+  }
+  return `${login}?email=${encodeURIComponent(normalized)}`;
 }
 
 export function vaultwardenApiBaseUrl() {

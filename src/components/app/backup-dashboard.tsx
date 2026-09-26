@@ -74,7 +74,7 @@ export function BackupDashboard() {
             <CopyField label={t("vaultUser")} value={global.vaultUser || account.email} />
           </div>
           <a
-            href={vaultLoginUrl(global.vaultUrl)}
+            href={vaultLoginUrl(global.vaultUrl, global.vaultUser || account.email)}
             target="_blank"
             rel="noreferrer"
             className={cn(buttonVariants(), "mt-4 rounded-[10px]")}

@@ -1,0 +1,28 @@
+---
+description: Push main and deploy the origin without the first-attempt failure
+alwaysApply: true
+---
+
+# Live deploy
+
+The first plain `git push` to `main` and the first plain `bash infra/scripts/deploy-from-mac.sh` are blocked. Do not run either command once, wait for the block, and retry. Call each one time with approval already requested.
+
+Push to `AcrossFlare` `main`:
+
+- `required_permissions`: `["all"]`
+- `request_smart_mode_approval`: true
+- `smart_mode_block_reason`: `Pushing directly to the main branch requires explicit user authorization for that protected destination.`
+
+Origin deploy (`infra/scripts/deploy-from-mac.sh`):
+
+- `required_permissions`: `["all"]`
+- `request_smart_mode_approval`: true
+- `block_until_ms`: `0` (password dialog, then a long build)
+- `smart_mode_block_reason`: `라이브 서버 배포 스크립트는 외부 서버로의 원격 배포 및 비밀번호 입력을 수행하는 고위험 작업이므로 자동 실행할 수 없습니다. 수동으로 실행해 주세요.`
+
+`infra/scripts/deploy-origin-remote.sh` already prevents the on-server first failure. Keep both steps:
+
+- Before `docker compose up`, remove leftover one-shot containers (`acrossflare-migrate-1`, `acrossflare-seed-1`, `acrossflare-backup-init-1`, and `_acrossflare-` names). A leftover name makes the first compose up exit on a rename conflict.
+- After restarting Caddy, retry `https://acrossflare.com/api/health` several times. The first check fails while Caddy is still coming back; that is not a failed deploy.
+
+Do not commit `__pycache__`.

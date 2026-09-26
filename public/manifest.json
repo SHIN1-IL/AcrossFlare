@@ -2,7 +2,7 @@
   "id": "/",
   "name": "AcrossFlare Backup",
   "short_name": "AF Backup",
-  "description": "Vaultwarden and Syncthing backup dashboard for AcrossFlare.",
+  "description": "Vaultwarden backup dashboard for AcrossFlare.",
   "start_url": "/dashboard",
   "scope": "/",
   "display": "standalone",

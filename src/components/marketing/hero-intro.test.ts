@@ -12,8 +12,10 @@ describe("hero intro", () => {
     expect(page).toContain("<PlanStages");
     expect(intro).toContain("AcrossFlare");
     expect(intro).toContain("Secure Cloud & Network Optimization");
-    expect(page).not.toContain("HeroAtmosphereLazy");
-    expect(intro).toContain("HeroAtmosphereLazy");
+    expect(page).toContain("<HeroGrain />");
+    expect(page).not.toContain("HeroAtmosphere");
+    expect(intro).not.toContain("HeroAtmosphere");
+    expect(intro).not.toContain("animate-code-flow");
     expect(intro).toContain("SHRINK_MS = 3000");
     expect(intro).toContain("duration-[3000ms]");
     expect(intro).toContain("onPointerDown");
@@ -27,6 +29,10 @@ describe("hero intro", () => {
     expect(intro).not.toContain("1400");
     expect(intro).toContain("across@");
     expect(intro).toContain("prefers-reduced-motion");
+    expect(intro).toContain("data-home-page");
+    expect(intro).toContain("setPreviewArmed");
+    expect(intro).toContain('scrollTo({ top, behavior: "smooth" })');
+    expect(page).toContain("<HomePageSnap />");
     expect(intro).toContain('labels("urlSample")');
     expect(intro).not.toContain("flag=clash");
     expect(intro).not.toContain("d0e744");

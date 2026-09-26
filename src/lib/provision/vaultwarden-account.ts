@@ -1,6 +1,6 @@
 import { createCipheriv, createDecipheriv, createHmac, pbkdf2Sync, randomBytes, generateKeyPairSync } from "node:crypto";
 import { vaultwardenAdminToken, vaultwardenApiBaseUrl } from "@/lib/provision/config";
-import { inviteVaultwardenUser } from "@/lib/provision/vaultwarden";
+import { deleteVaultwardenUser, inviteVaultwardenUser } from "@/lib/provision/vaultwarden";
 
 const KDF_ITERATIONS = 600_000;
 
@@ -83,28 +83,49 @@ export async function syncVaultwardenPassword(
   await inviteVaultwardenUser(normalized).catch(() => false);
 
   const body = buildVaultwardenRegisterBody(normalized, password);
+  if (await registerOrLogin(normalized, body)) {
+    return true;
+  }
+
+  if (previousPassword && previousPassword !== password) {
+    const changed = await changeVaultwardenPassword(normalized, previousPassword, password, body);
+    if (changed) {
+      return true;
+    }
+  }
+
+  const removed = await deleteVaultwardenUser(normalized);
+  if (!removed) {
+    return false;
+  }
+
+  await inviteVaultwardenUser(normalized).catch(() => false);
+  return registerOrLogin(normalized, buildVaultwardenRegisterBody(normalized, password));
+}
+
+async function registerOrLogin(email: string, body: VaultwardenRegisterBody) {
   const registered = await postJson("/api/accounts/register", body);
   if (registered.ok) {
     return true;
   }
+  return Boolean(await vaultwardenLogin(email, body.masterPasswordHash));
+}
 
-  if (await vaultwardenLogin(normalized, body.masterPasswordHash)) {
-    return true;
-  }
-
-  if (!previousPassword || previousPassword === password) {
-    return false;
-  }
-
-  const previousHash = vaultwardenMasterPasswordHash(normalized, previousPassword);
-  const session = await vaultwardenLogin(normalized, previousHash);
+async function changeVaultwardenPassword(
+  email: string,
+  previousPassword: string,
+  password: string,
+  body: VaultwardenRegisterBody
+) {
+  const previousHash = vaultwardenMasterPasswordHash(email, previousPassword);
+  const session = await vaultwardenLogin(email, previousHash);
   if (!session) {
     return false;
   }
 
-  const previousKey = pbkdf2Sync(previousPassword, normalized, KDF_ITERATIONS, 32, "sha256");
+  const previousKey = pbkdf2Sync(previousPassword, email, KDF_ITERATIONS, 32, "sha256");
   const userKey = decryptBitwarden(session.encryptedKey, stretchMasterKey(previousKey));
-  const nextKey = pbkdf2Sync(password, normalized, KDF_ITERATIONS, 32, "sha256");
+  const nextKey = pbkdf2Sync(password, email, KDF_ITERATIONS, 32, "sha256");
   const changed = await postJson(
     "/api/accounts/password",
     {

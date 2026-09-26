@@ -1,5 +1,7 @@
 import { createHmac, pbkdf2Sync } from "node:crypto";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { vaultLoginUrl } from "@/lib/provision/config";
+import { resetVaultwardenAdminSession } from "@/lib/provision/vaultwarden";
 import {
   buildVaultwardenRegisterBody,
   decryptBitwarden,
@@ -11,6 +13,7 @@ const originalToken = process.env.VAULTWARDEN_ADMIN_TOKEN;
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  resetVaultwardenAdminSession();
   if (originalToken === undefined) {
     delete process.env.VAULTWARDEN_ADMIN_TOKEN;
   } else {
@@ -71,6 +74,45 @@ describe("vaultwarden account password", () => {
     expect(registerBody.email).toBe("person@example.com");
     expect(registerBody.masterPasswordHash).toBe(
       vaultwardenMasterPasswordHash("person@example.com", "correct horse")
+    );
+  });
+
+  it("recreates a vault account when the homepage password does not match", async () => {
+    process.env.VAULTWARDEN_ADMIN_TOKEN = "vault-token";
+    let invites = 0;
+    let registers = 0;
+    const fetchMock = vi.fn(async (url: string) => {
+      const href = String(url);
+      if (href.endsWith("/admin/invite")) {
+        invites += 1;
+        return new Response(null, { status: invites === 1 ? 409 : 200 });
+      }
+      if (href.endsWith("/api/accounts/register")) {
+        registers += 1;
+        return new Response(registers === 1 ? "exists" : null, { status: registers === 1 ? 400 : 200 });
+      }
+      if (href.endsWith("/identity/connect/token")) {
+        return new Response("no", { status: 400 });
+      }
+      if (href.includes("/admin/users/by-mail/")) {
+        return Response.json({ Id: "user-1" });
+      }
+      if (href.endsWith("/admin/users/user-1/delete")) {
+        return new Response(null, { status: 200 });
+      }
+      return new Response("unexpected", { status: 500 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(syncVaultwardenPassword("person@example.com", "correct horse")).resolves.toBe(true);
+    const urls = fetchMock.mock.calls.map((call) => String(call[0]));
+    expect(urls.some((url) => url.endsWith("/admin/users/user-1/delete"))).toBe(true);
+    expect(urls.filter((url) => url.endsWith("/api/accounts/register"))).toHaveLength(2);
+  });
+
+  it("opens the vault on the homepage email", () => {
+    expect(vaultLoginUrl("https://vault.acrossflare.com/", "Person@Example.com")).toBe(
+      "https://vault.acrossflare.com/#/login?email=person%40example.com"
     );
   });
 });

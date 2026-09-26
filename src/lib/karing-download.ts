@@ -104,6 +104,19 @@ export function detectKaringOsFromNavigator(
   });
 }
 
+/** Keep the previous object when the detected OS did not change, so store snapshots stay stable. */
+export function retainDetectedOs(previous: DetectedKaringOs | null, next: DetectedKaringOs) {
+  if (
+    previous &&
+    previous.id === next.id &&
+    previous.label === next.label &&
+    previous.arch === next.arch
+  ) {
+    return previous;
+  }
+  return next;
+}
+
 export function pickKaringAsset(
   os: DetectedKaringOs,
   assets: readonly KaringReleaseAsset[]

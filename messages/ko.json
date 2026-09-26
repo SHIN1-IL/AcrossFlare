@@ -67,7 +67,7 @@
     "workspaceTerms": "팀 또는 맞춤형 암호화 네트워크 접속과 보안 클라우드 백업. A·B·C 플랜은 1개월 이용 단건결제(199,000원)이며, 인원과 월 트래픽만 다릅니다. 신청은 프로모션 코드로 합니다. 정기결제·자동 갱신·자동 결제는 제공하지 않습니다.",
     "deliveryValue": "실물 배송 없음. 결제 완료 후 로그인 계정으로 접속 정보와 백업 이용 정보를 즉시 제공합니다.",
     "workspaceDeliveryValue": "실물 배송 없음. 프로모션 코드 확인 후 로그인 계정으로 접속 정보와 백업 이용 정보를 제공합니다.",
-    "requirementsValue": "인터넷이 되는 PC 또는 모바일. Vaultwarden(암호·메모 백업)과 Syncthing(작은 파일 보관)은 전용 앱 설치 없이 브라우저로 이용합니다.",
+    "requirementsValue": "인터넷이 되는 PC 또는 모바일. Vaultwarden(암호·메모 백업)은 전용 앱 설치 없이 브라우저로 이용합니다.",
     "withdrawValue": "접속·백업 정보가 발급된 뒤에는 전자상거래법 제17조 제2항 제5호에 따라 청약철회가 제한될 수 있습니다. 미발급·중복결제는 7일 내 전액 환불합니다. 발급 후 중도 해지는 일할 환불을 원칙으로 하지 않습니다.",
     "withdrawLink": "청약철회·환불",
     "vat": "표시 가격은 부가세 포함입니다. 모든 상품은 단건결제이며 자동 갱신·정기결제는 없습니다."
@@ -205,15 +205,15 @@
     "alipay": "Alipay"
   },
   "heroDeck": {
-    "headline": "중국 여행이나 출장 시,",
+    "headline": "중국 출장과 여행에서",
     "items": [
-      { "q": "사용하던 메신저를 그대로 사용할 수 있을까?", "note": "카톡? 라인? ..." },
-      { "q": "유튜브, 넷플릭스를 볼수 있을까?" },
-      { "q": "자료를 안전하게 백업할 수 있을까?" },
-      { "q": "인터넷 속도가 잘 나올까?", "note": "줌, 팀즈, 웨벡스..." },
-      { "q": "보안 면에서 안전할까?" }
+      { "q": "쓰던 메신저를 그대로 연결할 수 있을까?", "note": "카카오톡 · LINE" },
+      { "q": "YouTube와 Netflix는 끊김 없이 재생될까?" },
+      { "q": "중요한 자료는 안전하게 백업될까?" },
+      { "q": "화상회의 품질은 유지될까?", "note": "Zoom · Teams · Webex" },
+      { "q": "공용 Wi-Fi에서도 통신은 보호될까?" }
     ],
-    "closing": "바로, AcrossFlare 를 사용해 보세요!",
+    "closing": "AcrossFlare로, 지금 환경 그대로 시작하세요.",
     "kakao": "카카오톡",
     "lineApp": "LINE",
     "youtube": "YouTube",
@@ -256,14 +256,14 @@
     "global-lite": {
       "eyebrow": "보안 클라우드+네트워크 최적화",
       "title": "Standard",
-      "description": "단기 여행이나 출장시 보안백업을 위한 적합한 속도를 제공. Vaultwarden(암호·메모 백업)과 Syncthing(작은 파일 보관)을 브라우저로 이용합니다.",
+      "description": "단기 여행이나 출장시 보안백업을 위한 적합한 속도를 제공. Vaultwarden(암호·메모 백업)을 브라우저로 이용합니다.",
       "price": "₩9,900 · 1개월",
       "cta": "더 알아보기"
     },
     "global-pro": {
       "eyebrow": "보안 클라우드+네트워크 최적화",
       "title": "Hybrid",
-      "description": "보안백업과 빠른 속도의 네트워크 최적화를 제공. Vaultwarden(암호·메모 백업)과 Syncthing(작은 파일 보관)을 브라우저로 이용합니다.",
+      "description": "보안백업과 빠른 속도의 네트워크 최적화를 제공. Vaultwarden(암호·메모 백업)을 브라우저로 이용합니다.",
       "price": "₩19,900 · 1개월",
       "cta": "더 알아보기"
     }
@@ -271,7 +271,7 @@
   "workspace": {
     "eyebrow": "보안 클라우드+네트워크 최적화",
     "title": "Workspace & Custom",
-    "description": "친구나 팀원을 위한 맞춤형 주문 서비스. Vaultwarden(암호·메모 백업)과 Syncthing(작은 파일 보관)을 브라우저로 이용합니다.",
+    "description": "친구나 팀원을 위한 맞춤형 주문 서비스. Vaultwarden(암호·메모 백업)을 브라우저로 이용합니다.",
     "hint": "인원수에 따른 A, B, C 플랜",
     "learnMore": "더 알아보기",
     "cta": "서비스 신청하기"
@@ -285,13 +285,12 @@
         "그래도 유튜브 정도는 끊김없이 보고 싶다면"
       ],
       "title": "Standard",
-      "description": "단기 여행이나 출장시 보안백업을 위한 적합한 속도를 제공. 네트워크 연결과 함께 Vaultwarden(암호·메모 백업)과 Syncthing(작은 파일 보관)을 제공합니다. 백업용 앱을 따로 받을 필요는 없습니다.",
+      "description": "단기 여행이나 출장시 보안백업을 위한 적합한 속도를 제공. 네트워크 연결과 함께 Vaultwarden(암호·메모 백업)을 제공합니다. 백업용 앱을 따로 받을 필요는 없습니다.",
       "cta": "신청하기",
       "features": [
         "AcrossFlare의 베이스 기술 적용",
         "보안 클라우드 백업 1GB",
         "Vaultwarden (암호·메모 백업) — 비밀번호, 카드, 보안 메모를 암호화해 보관",
-        "Syncthing (작은 파일 보관) — 중요한 작은 파일을 암호화해 보관",
         "전용 앱 설치 없이 브라우저로 이용. 결제 후 계정에서 바로 열림",
         "Zoom, Webex, Teams 등등 온라인 회의 가능",
         "국제 전용 회선(LA라인)으로 네트워크 최적화",
@@ -305,13 +304,12 @@
         "끊김없는 화상회의를 원한다면"
       ],
       "title": "Hybrid",
-      "description": "보안백업과 빠른 속도의 네트워크 최적화를 제공. 네트워크 연결과 함께 Vaultwarden(암호·메모 백업)과 Syncthing(작은 파일 보관)을 제공합니다. 백업용 앱을 따로 받을 필요는 없습니다.",
+      "description": "보안백업과 빠른 속도의 네트워크 최적화를 제공. 네트워크 연결과 함께 Vaultwarden(암호·메모 백업)을 제공합니다. 백업용 앱을 따로 받을 필요는 없습니다.",
       "cta": "신청하기",
       "features": [
         "AcrossFlare의 고급 기술 적용",
         "보안 클라우드 백업 1GB",
         "Vaultwarden (암호·메모 백업) — 비밀번호, 카드, 보안 메모를 암호화해 보관",
-        "Syncthing (작은 파일 보관) — 중요한 작은 파일을 암호화해 보관",
         "전용 앱 설치 없이 브라우저로 이용. 결제 후 계정에서 바로 열림",
         "Zoom, Webex, Teams 등등 끊김없는 온라인 회의",
         "도쿄+LA라인으로 빠른 네트워크",
@@ -321,7 +319,7 @@
     "workspace": {
       "eyebrow": "보안 클라우드+네트워크 최적화",
       "title": "Workspace & Custom",
-      "description": "친구나 팀원을 위한 맞춤형 주문 서비스. 네트워크 연결과 함께 Vaultwarden(암호·메모 백업)과 Syncthing(작은 파일 보관)을 제공합니다. 백업용 앱을 따로 받을 필요는 없습니다.",
+      "description": "친구나 팀원을 위한 맞춤형 주문 서비스. 네트워크 연결과 함께 Vaultwarden(암호·메모 백업)을 제공합니다. 백업용 앱을 따로 받을 필요는 없습니다.",
       "cta": "Promotional Code 입력하기",
       "hint": "",
       "priceNote": "",
@@ -338,7 +336,6 @@
         "AcrossFlare의 고급 기술 적용",
         "보안 클라우드 백업 1GB",
         "Vaultwarden (암호·메모 백업) — 비밀번호, 카드, 보안 메모를 암호화해 보관",
-        "Syncthing (작은 파일 보관) — 중요한 작은 파일을 암호화해 보관",
         "전용 앱 설치 없이 브라우저로 이용. 결제 후 계정에서 바로 열림",
         "Zoom, Webex, Teams 등등 끊김없는 온라인 회의",
         "도쿄+LA라인으로 빠른 네트워크",
@@ -429,14 +426,14 @@
     "yamlDownload": ".yaml 다운로드",
     "backup": "백업",
     "backupTitle": "보안 백업 공간",
-    "backupDesc": "Vaultwarden(암호·메모 백업)과 Syncthing(작은 파일 보관)을 브라우저에서 이용하세요. 백업용 앱을 따로 받을 필요는 없습니다.",
+    "backupDesc": "Vaultwarden(암호·메모 백업)을 브라우저에서 이용하세요. 백업용 앱을 따로 받을 필요는 없습니다.",
     "backupExpires": "{date}까지 이용",
     "vaultTitle": "Vaultwarden (암호·메모 백업)",
     "vaultDesc": "금고 열기를 누르면 로그인 화면으로 이동합니다. 홈페이지와 같은 이메일과 비밀번호로 바로 들어갑니다. 비밀번호, 카드, 보안 메모를 저장하세요.",
     "vaultUrl": "Vault URL",
     "vaultUser": "Vault 사용자",
     "openVault": "금고 열기",
-    "syncthingTitle": "Syncthing (작은 파일 보관)",
+    "syncthingTitle": "작은 파일 보관",
     "syncthingDesc": "내 전용 파일 공간입니다. 브라우저에서 작은 파일을 올리고 받을 수 있습니다.",
     "syncthingUrl": "Sync URL",
     "syncthingFolder": "폴더 ID",
@@ -637,7 +634,7 @@
         },
         "backupApp": {
           "q": "백업을 쓰려면 앱을 꼭 받아야 하나요?",
-          "a": "백업은 아닙니다. 브라우저로 Vaultwarden(암호·메모 백업)과 Syncthing(작은 파일 보관)을 이용합니다. 네트워크 연결만 Karing이 필요합니다."
+          "a": "백업은 아닙니다. 브라우저로 Vaultwarden(암호·메모 백업)을 이용합니다. 네트워크 연결만 Karing이 필요합니다."
         },
         "backupFromKaring": {
           "q": "Karing에서 백업 공간은 어떻게 여나요?",
@@ -649,7 +646,7 @@
         },
         "deviceSync": {
           "q": "폰의 파일을 자동으로 맞추려면 어떻게 하나요?",
-          "a": "폰 폴더를 자동으로 맞추는 기능은 없습니다. AcrossFlare에 로그인한 뒤 콘솔의 백업에서, 내 파일로 필요한 파일만 올리고 받으세요. 로그인 없이 Karing 바로가기만 누르면 홈으로 갈 수 있습니다. Syncthing 앱은 설치하지 않아도 됩니다."
+          "a": "폰 폴더를 자동으로 맞추는 기능은 없습니다. AcrossFlare에 로그인한 뒤 콘솔의 백업에서, 내 파일로 필요한 파일만 올리고 받으세요. 로그인 없이 Karing 바로가기만 누르면 홈으로 갈 수 있습니다."
         }
       }
     }
@@ -919,7 +916,7 @@
   "pwa": {
     "eyebrow": "PWA",
     "title": "홈 화면에 백업 앱 추가",
-    "body": "브라우저 없이 Vaultwarden과 Syncthing을 열려면 AcrossFlare 백업 앱을 설치하세요.",
+    "body": "브라우저 없이 Vaultwarden을 열려면 AcrossFlare 백업 앱을 설치하세요.",
     "iosBody": "공유 버튼을 누른 뒤 '홈 화면에 추가'를 선택하면 백업 앱이 설치됩니다.",
     "install": "백업 앱 추가",
     "later": "나중에"

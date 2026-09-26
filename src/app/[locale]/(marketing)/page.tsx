@@ -1,7 +1,9 @@
 import { Suspense } from "react";
 import { setRequestLocale } from "next-intl/server";
 import { resolveLocale } from "@/i18n/locale";
+import { HeroGrain } from "@/components/marketing/hero-grain";
 import { HeroIntro } from "@/components/marketing/hero-intro";
+import { HomePageSnap } from "@/components/marketing/home-page-snap";
 import { MarketingShell } from "@/components/marketing/marketing-shell";
 import { PlanStages, PlanStagesSkeleton } from "@/components/marketing/plan-stages";
 
@@ -17,8 +19,10 @@ export default async function LandingPage({
 
   return (
     <MarketingShell deck>
+      <HomePageSnap />
       <section className="relative -mt-14 h-dvh snap-center snap-always overflow-hidden max-md:h-auto max-md:snap-none max-md:overflow-visible">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-[480px] bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.12),transparent_55%)]" />
+        <HeroGrain />
         <HeroIntro />
       </section>
       <Suspense fallback={<PlanStagesSkeleton />}>

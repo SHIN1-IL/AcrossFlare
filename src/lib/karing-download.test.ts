@@ -4,6 +4,7 @@ import {
   KARING_DOWNLOAD_PAGE,
   detectKaringOs,
   detectKaringOsFromNavigator,
+  retainDetectedOs,
   fetchKaringLatestRelease,
   parseKaringLatestRelease,
   pickKaringAsset,
@@ -40,6 +41,20 @@ const RELEASE_ASSETS = [
     browser_download_url: "https://github.com/KaringX/karing/releases/download/v1/windows.zip",
   },
 ];
+
+describe("retainDetectedOs", () => {
+  it("returns the same object when the detected OS did not change", () => {
+    const current = detectKaringOs({
+      userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15",
+      architecture: "arm",
+    });
+    const again = retainDetectedOs(current, { ...current });
+    expect(again).toBe(current);
+    expect(
+      retainDetectedOs(current, { ...current, label: "macosIntel" })
+    ).not.toBe(current);
+  });
+});
 
 describe("detectKaringOs", () => {
   it("detects Windows, macOS, Android, and iOS from User-Agent", () => {

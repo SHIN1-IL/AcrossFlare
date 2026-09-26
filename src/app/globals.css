@@ -49,9 +49,6 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
-  --animate-meteor-fall: meteor-fall 2s ease-in forwards;
-  --animate-code-flow: code-flow 36s linear infinite;
-  --animate-code-flow-slow: code-flow 48s linear infinite reverse;
   --animate-slow-bounce: slow-bounce 48s linear infinite;
   --animate-hybrid-pulse: hybrid-pulse 10s ease-in-out infinite;
   --animate-hybrid-pulse-alt: hybrid-pulse 10s ease-in-out 5s infinite;
@@ -110,29 +107,6 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-  }
-}
-
-@keyframes meteor-fall {
-  0% {
-    transform: rotate(var(--angle, -45deg)) translateY(-120px);
-    opacity: 0;
-  }
-  8% {
-    opacity: 0.85;
-  }
-  100% {
-    transform: rotate(var(--angle, -45deg)) translateY(115vh);
-    opacity: 0;
-  }
-}
-
-@keyframes code-flow {
-  from {
-    transform: translateY(0);
-  }
-  to {
-    transform: translateY(-50%);
   }
 }
 
@@ -214,6 +188,23 @@
 
 html:has(.home-deck) {
   scroll-snap-type: y mandatory;
+}
+
+@media (max-width: 767px) {
+  html:has(.home-deck),
+  html:has(.home-deck) body {
+    scroll-snap-type: y mandatory;
+    scroll-padding-top: 0;
+    overscroll-behavior-y: none;
+  }
+
+  html:has(.home-deck) [data-home-page] {
+    height: 100dvh;
+    min-height: 100dvh;
+    max-height: 100dvh;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
 }
 
 @keyframes tunnel-ring {
