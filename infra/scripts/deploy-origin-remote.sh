@@ -43,13 +43,13 @@ echo "==> docker compose up --build (migrate runs via compose migrate service)"
 "${COMPOSE[@]}" up -d --build
 
 echo "==> seed plan defaults (idempotent upsert)"
-"${COMPOSE[@]}" run --rm seed
+"${COMPOSE[@]}" run --rm -T seed </dev/null
 
 echo "==> compose ps"
 "${COMPOSE[@]}" ps
 
 echo "==> reload caddy (a bind-mounted Caddyfile does not reload by itself)"
-if ! "${COMPOSE[@]}" exec -T caddy caddy reload --config /etc/caddy/Caddyfile; then
+if ! "${COMPOSE[@]}" exec -T caddy caddy reload --config /etc/caddy/Caddyfile </dev/null; then
   echo "WARN: caddy reload failed, restarting caddy"
   "${COMPOSE[@]}" restart caddy
 fi
