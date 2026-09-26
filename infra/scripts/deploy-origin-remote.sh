@@ -39,6 +39,10 @@ fi
 echo "==> stop stale one-off web run containers (seed/build leftovers)"
 docker ps -q --filter "name=acrossflare-web-run-" | xargs -r docker stop 2>/dev/null || true
 
+echo "==> drop one-shot containers so the first compose up does not hit a rename conflict"
+docker rm -f acrossflare-migrate-1 acrossflare-seed-1 acrossflare-backup-init-1 2>/dev/null || true
+docker ps -aq --filter "name=_acrossflare-" | xargs -r docker rm -f
+
 echo "==> docker compose up --build (migrate runs via compose migrate service)"
 "${COMPOSE[@]}" up -d --build
 
@@ -55,7 +59,17 @@ echo "==> traffic sync scheduler"
 docker logs acrossflare-api-1 2>&1 | grep traffic_sync_scheduler_started || echo "WARN: traffic_sync_scheduler_started not in logs yet"
 
 echo "==> health"
-curl -sf https://acrossflare.com/api/health && echo || echo "WARN: health check failed"
+health_ok=0
+for _ in 1 2 3 4 5 6 7 8 9 10; do
+  if curl -sf https://acrossflare.com/api/health && echo; then
+    health_ok=1
+    break
+  fi
+  sleep 3
+done
+if [[ "$health_ok" -ne 1 ]]; then
+  echo "WARN: health check failed"
+fi
 
 if [[ -f .env ]] && grep -q '^CLOUDFLARE_API_TOKEN=' .env 2>/dev/null && grep -q '^CLOUDFLARE_ZONE_ID=' .env 2>/dev/null; then
   echo "==> Cloudflare cache rules"
