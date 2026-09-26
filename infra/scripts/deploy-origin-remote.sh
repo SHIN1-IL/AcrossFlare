@@ -48,11 +48,8 @@ echo "==> seed plan defaults (idempotent upsert)"
 echo "==> compose ps"
 "${COMPOSE[@]}" ps
 
-echo "==> reload caddy (a bind-mounted Caddyfile does not reload by itself)"
-if ! "${COMPOSE[@]}" exec -T caddy caddy reload --config /etc/caddy/Caddyfile </dev/null; then
-  echo "WARN: caddy reload failed, restarting caddy"
-  "${COMPOSE[@]}" restart caddy
-fi
+echo "==> restart caddy (admin API is off, so caddy reload cannot reach :2019)"
+"${COMPOSE[@]}" restart caddy
 
 echo "==> traffic sync scheduler"
 docker logs acrossflare-api-1 2>&1 | grep traffic_sync_scheduler_started || echo "WARN: traffic_sync_scheduler_started not in logs yet"
