@@ -14,5 +14,5 @@ export default async function MarketingLayout({
   setRequestLocale(locale);
   const messages = pickMessages(await getMessages(), MARKETING_MESSAGE_KEYS);
 
-  return <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>;
+  return <NextIntlClientProvider locale={locale} messages={messages}>{children}</NextIntlClientProvider>;
 }

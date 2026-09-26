@@ -1,5 +1,6 @@
 "use client";
 
+import { Component, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { KaringImportPreview } from "@/components/marketing/karing-import-preview";
 import { buttonVariants } from "@/components/ui/button";
@@ -12,6 +13,18 @@ import {
   type KaringInstallPlatformId,
 } from "@/lib/support-zone";
 import { cn } from "@/lib/utils";
+
+class PreviewBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  render() {
+    return this.state.failed ? null : this.props.children;
+  }
+}
 
 export function KaringSetupGuide({
   activePlatform,
@@ -62,7 +75,11 @@ export function KaringSetupGuide({
                   })}
                 </ul>
               ) : null}
-              {step.id === "profile" ? <KaringImportPreview /> : null}
+              {step.id === "profile" ? (
+                <PreviewBoundary>
+                  <KaringImportPreview />
+                </PreviewBoundary>
+              ) : null}
             </div>
           </li>
         ))}

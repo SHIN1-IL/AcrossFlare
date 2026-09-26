@@ -280,6 +280,10 @@
     "trialPlan": "Short-term trial",
     "standard": {
       "eyebrow": "Secure Cloud & Network Optimization",
+      "lead": [
+        "If you don't need very fast speed",
+        "but still want YouTube without stutter"
+      ],
       "title": "Standard",
       "description": "Right-sized speed for short trips and travel backups. Encrypted network access plus Vaultwarden (password & note backup) and Syncthing (small file storage). You do not need a separate backup app.",
       "cta": "Get started",
@@ -296,6 +300,10 @@
     },
     "hybrid": {
       "eyebrow": "Secure Cloud & Network Optimization",
+      "lead": [
+        "If you need a little more speed",
+        "and want video calls without dropouts"
+      ],
       "title": "Hybrid",
       "description": "Secure backup plus faster network optimization. Encrypted network access plus Vaultwarden (password & note backup) and Syncthing (small file storage). You do not need a separate backup app.",
       "cta": "Get started",
@@ -424,7 +432,7 @@
     "backupDesc": "Use Vaultwarden (password & note backup) and Syncthing (small file storage) in your browser. You do not need a separate backup app.",
     "backupExpires": "Plan access until {date}",
     "vaultTitle": "Vaultwarden (password & note backup)",
-    "vaultDesc": "Click Open vault to use it in the browser. Sign in with the same email as your AcrossFlare account. Save passwords, cards, and secure notes. No extra app is required.",
+    "vaultDesc": "Open vault goes straight to the login page. Use the same email and password as your AcrossFlare account. Save passwords, cards, and secure notes.",
     "vaultUrl": "Vault URL",
     "vaultUser": "Vault user",
     "openVault": "Open vault",
@@ -434,7 +442,8 @@
     "syncthingFolder": "Folder ID",
     "openSync": "Open sync",
     "filesTitle": "My files",
-    "filesDesc": "Upload and download small files in your private backup space from the browser.",
+    "filesDesc": "Drop a file to save it, then download it again from this list.",
+    "backupDrop": "Drop a file here.",
     "backupUpload": "Upload file",
     "backupRefresh": "Refresh",
     "backupDownload": "Download {name}",

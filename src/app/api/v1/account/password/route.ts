@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { hashPassword, isStrongPassword, verifyPassword } from "@/lib/password";
+import { syncVaultwardenPassword } from "@/lib/provision/vaultwarden-account";
 
 export async function POST(request: Request) {
   const auth = await getAuthUser();
@@ -32,6 +33,7 @@ export async function POST(request: Request) {
     where: { id: user.id },
     data: { passwordHash: await hashPassword(next) },
   });
+  await syncVaultwardenPassword(user.email, next, current).catch(() => undefined);
 
   return NextResponse.json({ ok: true });
 }

@@ -17,7 +17,7 @@ export default async function ConsoleLayout({
   const messages = pickMessages(await getMessages(), CONSOLE_MESSAGE_KEYS);
 
   return (
-    <NextIntlClientProvider messages={messages}>
+    <NextIntlClientProvider locale={locale} messages={messages}>
       <SessionProvider>
         <PwaProvider />
         {children}

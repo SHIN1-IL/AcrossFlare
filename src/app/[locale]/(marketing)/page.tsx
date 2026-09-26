@@ -17,7 +17,7 @@ export default async function LandingPage({
 
   return (
     <MarketingShell deck>
-      <section className="relative -mt-14 h-dvh snap-center snap-always overflow-hidden">
+      <section className="relative -mt-14 h-dvh snap-center snap-always overflow-hidden max-md:h-auto max-md:snap-none max-md:overflow-visible">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-[480px] bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.12),transparent_55%)]" />
         <HeroIntro />
       </section>

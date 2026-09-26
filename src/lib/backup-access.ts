@@ -2,6 +2,7 @@ import { Product, SubscriptionStatus } from "@prisma/client";
 import { getAuthUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { BackupStorageError } from "@/lib/backup-storage";
+import { syncthingFolderId } from "@/lib/provision/build";
 
 export async function requireBackupAccess() {
   const user = await getAuthUser();
@@ -15,7 +16,6 @@ export async function requireBackupAccess() {
       product: Product.GLOBAL,
       status: SubscriptionStatus.ACTIVE,
       expiresAt: { gt: new Date() },
-      credentials: { is: { syncthingFolderId: { not: null } } },
     },
     orderBy: { createdAt: "desc" },
     select: {
@@ -26,7 +26,14 @@ export async function requireBackupAccess() {
     },
   });
 
-  const folderId = subscription?.credentials?.syncthingFolderId;
+  let folderId = subscription?.credentials?.syncthingFolderId ?? "";
+  if (subscription?.credentials && !folderId) {
+    folderId = syncthingFolderId(subscription.id);
+    await prisma.credential.update({
+      where: { subscriptionId: subscription.id },
+      data: { syncthingFolderId: folderId },
+    });
+  }
   const quotaGb = subscription?.plan.backupGb;
   if (!subscription || !folderId || !quotaGb || quotaGb <= 0) {
     throw new BackupStorageError("backup_unavailable", 403);

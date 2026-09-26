@@ -6,6 +6,7 @@ import { isOwnerEmail } from "@/lib/admin-permissions";
 import { prisma } from "@/lib/db";
 import { normalizeEmail } from "@/lib/email";
 import { hashPassword, isStrongPassword } from "@/lib/password";
+import { syncVaultwardenPassword } from "@/lib/provision/vaultwarden-account";
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as
@@ -34,6 +35,8 @@ export async function POST(request: Request) {
         role: isOwnerEmail(email) ? "OWNER" : "USER",
       },
     });
+
+    await syncVaultwardenPassword(email, password).catch(() => undefined);
 
     const token = await createSession(user.id);
     await setSessionCookie(token);

@@ -10,6 +10,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { useAccount } from "@/hooks/use-account";
 import { DocumentLink } from "@/components/marketing/cached-marketing-link";
 import { formatDate } from "@/lib/format-date";
+import { vaultLoginUrl } from "@/lib/provision/config";
 import { SUPPORT_HREF } from "@/lib/support-zone";
 import { cn } from "@/lib/utils";
 
@@ -73,7 +74,7 @@ export function BackupDashboard() {
             <CopyField label={t("vaultUser")} value={global.vaultUser || account.email} />
           </div>
           <a
-            href={global.vaultUrl || "https://vault.acrossflare.com"}
+            href={vaultLoginUrl(global.vaultUrl)}
             target="_blank"
             rel="noreferrer"
             className={cn(buttonVariants(), "mt-4 rounded-[10px]")}
@@ -82,7 +83,7 @@ export function BackupDashboard() {
           </a>
         </article>
 
-        {global.syncthingFolderId ? <BackupFiles /> : null}
+        <BackupFiles />
       </section>
 
       <section className="rounded-2xl border border-border bg-card p-5">

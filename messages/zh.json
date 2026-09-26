@@ -280,6 +280,10 @@
     "trialPlan": "短期体验套餐",
     "standard": {
       "eyebrow": "安全云及网络优化",
+      "lead": [
+        "如果不需要特别快的速度",
+        "但还是想流畅看 YouTube"
+      ],
       "title": "Standard",
       "description": "适合短期旅行或出差时的安全备份与合适速度。提供网络连接，以及 Vaultwarden（密码与备忘录备份）和 Syncthing（小文件存储）。无需另行下载备份应用。",
       "cta": "立即申请",
@@ -296,6 +300,10 @@
     },
     "hybrid": {
       "eyebrow": "安全云及网络优化",
+      "lead": [
+        "如果需要更快一点的速度",
+        "并且希望视频会议不卡顿"
+      ],
       "title": "Hybrid",
       "description": "提供安全备份与更快的网络优化。提供网络连接，以及 Vaultwarden（密码与备忘录备份）和 Syncthing（小文件存储）。无需另行下载备份应用。",
       "cta": "立即申请",
@@ -424,7 +432,7 @@
     "backupDesc": "在浏览器中使用 Vaultwarden（密码与备忘录备份）和 Syncthing（小文件存储）。无需另行下载备份应用。",
     "backupExpires": "可用至 {date}",
     "vaultTitle": "Vaultwarden（密码与备忘录备份）",
-    "vaultDesc": "点击打开保险库即可在浏览器中使用。账号与登录邮箱相同。请保存密码、卡片与安全备忘录。无需安装其他应用。",
+    "vaultDesc": "打开保险库会进入登录页。使用与主页相同的邮箱和密码即可进入。请保存密码、卡片与安全备忘录。",
     "vaultUrl": "Vault URL",
     "vaultUser": "Vault 用户",
     "openVault": "打开保险库",
@@ -434,7 +442,8 @@
     "syncthingFolder": "文件夹 ID",
     "openSync": "打开同步",
     "filesTitle": "我的文件",
-    "filesDesc": "通过浏览器在您的专属备份空间上传和下载小文件。",
+    "filesDesc": "把文件拖到这里即可保存，之后可在同一列表中再次下载。",
+    "backupDrop": "把文件拖到这里。",
     "backupUpload": "上传文件",
     "backupRefresh": "刷新",
     "backupDownload": "下载 {name}",

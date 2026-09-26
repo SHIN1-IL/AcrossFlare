@@ -15,6 +15,7 @@ export async function inviteVaultwardenUser(email: string): Promise<boolean> {
 
   const response = await fetch(`${vaultwardenApiBaseUrl()}/admin/invite`, {
     method: "POST",
+    signal: AbortSignal.timeout(4000),
     headers: {
       Authorization: token,
       "Content-Type": "application/json",

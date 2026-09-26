@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 const FRAMES = ["signup", "pay", "console", "copy", "scan"] as const;
 type Frame = (typeof FRAMES)[number];
 const ANSWER_STEPS = [
-  ["kakao", 3000],
+  ["kakao", 6000],
   ["line", 3000],
   ["youtube", 2000],
   ["netflix", 2000],
@@ -72,6 +72,7 @@ export function HeroIntro() {
   const [previewMs, setPreviewMs] = useState(0);
   const [runId, setRunId] = useState(0);
   const [glide, setGlide] = useState(true);
+  const [cut, setCut] = useState(false);
   const [aim, setAim] = useState<{ x: number; y: number } | null>(null);
   const dragStart = useRef<{ x: number; y: number } | null>(null);
 
@@ -99,7 +100,7 @@ export function HeroIntro() {
       window.clearTimeout(settleTimer);
       window.clearTimeout(adTimer);
     };
-  }, [reduced, t, runId]);
+  }, [reduced, runId]);
 
   useEffect(() => {
     if (!showAd || reduced || showPreview) return;
@@ -131,7 +132,7 @@ export function HeroIntro() {
     }, 40);
 
     return () => window.clearInterval(timer);
-  }, [reduced, showAd, showPreview, t]);
+  }, [reduced, showAd, showPreview, runId]);
 
   useEffect(() => {
     if (!showPreview || reduced) return;
@@ -155,11 +156,12 @@ export function HeroIntro() {
   const risen = reduced || previewMs >= FIRST_MS;
   const answerClock = reduced ? ANSWER_TOTAL : Math.max(0, previewMs - FIRST_MS);
   const answer = answerAt(answerClock);
-  const activeBeat = readBeats(t)[done.length];
+  const beats = readBeats(t);
   const finished = !reduced && previewMs >= PLAY_MS;
 
   function replay() {
     dragStart.current = null;
+    setCut(true);
     setGlide(false);
     setSettled(false);
     setShowAd(false);
@@ -170,13 +172,23 @@ export function HeroIntro() {
     setAim(null);
     setRunId((current) => current + 1);
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => setGlide(true));
+      requestAnimationFrame(() => {
+        setCut(false);
+        setGlide(true);
+      });
     });
   }
 
   function onPointerDown(event: React.PointerEvent<HTMLDivElement>) {
     if (!finished) return;
     dragStart.current = { x: event.clientX, y: event.clientY };
+  }
+
+  function onPointerUp(event: React.PointerEvent<HTMLDivElement>) {
+    const start = dragStart.current;
+    dragStart.current = null;
+    if (!start || !finished) return;
+    if (Math.hypot(event.clientX - start.x, event.clientY - start.y) < 36) replay();
   }
 
   function onPointerMove(event: React.PointerEvent<HTMLDivElement>) {
@@ -203,14 +215,23 @@ export function HeroIntro() {
   const glideClass = glide ? "duration-[3000ms]" : "duration-0";
 
   return (
-    <div className="absolute inset-0 touch-pan-y" onPointerDown={onPointerDown} onPointerMove={onPointerMove}>
+    <div
+      className="touch-pan-y max-md:relative md:absolute md:inset-0"
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={() => {
+        dragStart.current = null;
+      }}
+    >
+      <div className="relative h-dvh max-md:snap-center max-md:snap-always md:absolute md:inset-0 md:h-auto">
       {settled ? null : <HeroAtmosphereLazy />}
       <div
         className={cn(
           "absolute z-10 flex flex-col transition-all ease-[cubic-bezier(0.22,1,0.36,1)]",
           glideClass,
           settled
-            ? "top-16 left-0 h-[calc(50%-4rem)] w-1/2 items-center justify-center px-4 text-center md:px-[clamp(1.25rem,3vw,2rem)]"
+            ? "top-16 left-0 h-[calc(50%-4rem)] w-1/2 items-center justify-center px-4 text-center max-md:w-full md:px-[clamp(1.25rem,3vw,2rem)]"
             : "top-0 left-0 h-full w-full items-center justify-center px-[clamp(1.25rem,4vw,2.5rem)] text-center"
         )}
       >
@@ -218,7 +239,7 @@ export function HeroIntro() {
           className={cn(
             "font-semibold tracking-[-0.04em] leading-[0.95] transition-all ease-[cubic-bezier(0.22,1,0.36,1)]",
             glideClass,
-            settled ? "text-[clamp(1.45rem,6.5vw,2.15rem)] md:text-[clamp(2.5rem,6vw,4.75rem)]" : "text-[clamp(2.6rem,12vw,9rem)]"
+            settled ? "text-[clamp(1.45rem,6.5vw,2.15rem)] max-md:text-[clamp(2rem,10vw,2.75rem)] md:text-[clamp(2.5rem,6vw,4.75rem)]" : "text-[clamp(2.6rem,12vw,9rem)]"
           )}
         >
           AcrossFlare
@@ -228,7 +249,7 @@ export function HeroIntro() {
             "text-[#888888] transition-all ease-[cubic-bezier(0.22,1,0.36,1)]",
             glideClass,
             settled
-              ? "mt-2 text-[clamp(0.65rem,2.4vw,0.8rem)] leading-snug md:mt-3 md:text-[clamp(0.95rem,1.5vw,1.35rem)]"
+              ? "mt-2 text-[clamp(0.65rem,2.4vw,0.8rem)] leading-snug max-md:text-[clamp(0.8rem,3.2vw,1rem)] md:mt-3 md:text-[clamp(0.95rem,1.5vw,1.35rem)]"
               : "mt-4 text-[clamp(0.75rem,2.2vw,1.25rem)] whitespace-nowrap md:mt-6"
           )}
         >
@@ -238,56 +259,71 @@ export function HeroIntro() {
 
       <div
         className={cn(
-          "absolute bottom-0 left-0 z-10 flex h-1/2 w-1/2 items-stretch p-3 pr-1.5 transition-opacity duration-700 md:p-4 md:pr-2",
-          showAd ? "opacity-100" : "pointer-events-none opacity-0"
+          "absolute bottom-0 left-0 z-10 flex h-1/2 w-1/2 items-stretch p-3 pr-1.5 max-md:w-full max-md:pr-3 md:p-4 md:pr-2",
+          cut ? "opacity-0 duration-0" : "transition-opacity duration-700",
+          showAd && !cut ? "opacity-100" : "pointer-events-none opacity-0"
         )}
       >
-        <div className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-2xl border border-border bg-card/80 px-3 py-2.5 backdrop-blur-sm sm:px-4 sm:py-3">
-          <p className="shrink-0 text-center text-[clamp(0.95rem,2.2vw,1.25rem)] leading-tight font-semibold tracking-[-0.02em] text-foreground">
-            {t("headline")}
-          </p>
-          <div className="mt-1.5 flex min-h-0 flex-1 flex-col justify-evenly">
-            {done.map((beat) => (
-              <BeatLine key={`${beat.kind}-${beat.n ?? "x"}-${beat.text}`} beat={beat} text={beat.text} />
-            ))}
-            {typed && activeBeat ? <BeatLine beat={activeBeat} text={typed} caret /> : null}
+        {cut ? null : (
+          <div className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-2xl border border-border bg-card/80 px-3 py-2.5 backdrop-blur-sm sm:px-4 sm:py-3">
+            <p className="shrink-0 text-center text-[clamp(0.95rem,2.2vw,1.25rem)] leading-tight font-semibold tracking-[-0.02em] text-foreground">
+              {t("headline")}
+            </p>
+            <div className="mt-1.5 flex min-h-0 flex-1 flex-col justify-evenly">
+              {beats.map((beat, index) => {
+                const active = index === done.length && showAd && !showPreview;
+                const text = index < done.length ? beat.text : active ? typed : "";
+                return (
+                  <div key={index} className={text || active ? undefined : "invisible"} aria-hidden={text || active ? undefined : true}>
+                    <BeatLine beat={beat} text={text} caret={active} />
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
+      </div>
       </div>
 
       <div
         aria-hidden={showPreview ? undefined : true}
         className={cn(
-          "absolute top-16 right-0 z-10 h-[calc(100%-4rem)] w-1/2 p-3 pl-1.5 transition-opacity duration-700 md:p-4 md:pl-2",
-          showPreview ? "opacity-100" : "pointer-events-none opacity-0"
+          "absolute top-16 right-0 z-10 h-[calc(100%-4rem)] w-1/2 p-3 pl-1.5 md:p-4 md:pl-2",
+          "max-md:static max-md:flex max-md:h-dvh max-md:w-full max-md:snap-center max-md:snap-always max-md:flex-col max-md:px-3 max-md:pt-16 max-md:pb-3 max-md:pl-3",
+          cut ? "opacity-0 duration-0" : "transition-opacity duration-700",
+          showPreview && !cut ? "opacity-100" : "pointer-events-none opacity-0 max-md:hidden"
         )}
       >
-        <div className="relative h-full overflow-hidden">
-          <div data-preview-root className="relative h-full overflow-hidden rounded-2xl border border-border bg-[#0c0e14]">
-            <PreviewFrame
-              frame={frame}
-              local={reduced ? FRAME_MS : local}
-              emailLabel={tAuth("email")}
-              passwordLabel={tAuth("password")}
-              signup={tAuth("submitSignup")}
-              pay={t("pay")}
-              hybrid={tHybrid("title")}
-              hybridDesc={tHybrid("description")}
-              labels={t}
-            />
-            {risen ? null : <Cursor frame={frame} local={reduced ? 0 : local} aim={aim} />}
-          </div>
-          <div
-            className={cn(
-              "absolute inset-0 z-30 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]",
-              risen ? "translate-y-0" : "translate-y-full"
-            )}
-          >
-            <div className="h-full overflow-hidden rounded-2xl border border-border bg-[#0c0e14]">
-              <AnswerFrame answer={answer.id} local={answer.local} labels={t} />
+        {cut ? null : (
+          <div className="relative h-full min-h-0 flex-1 overflow-hidden">
+            <div data-preview-root className="relative h-full overflow-hidden rounded-2xl border border-border bg-[#0c0e14]">
+              <PreviewFrame
+                frame={frame}
+                local={reduced ? FRAME_MS : local}
+                emailLabel={tAuth("email")}
+                passwordLabel={tAuth("password")}
+                signup={tAuth("submitSignup")}
+                pay={t("pay")}
+                hybrid={tHybrid("title")}
+                hybridDesc={tHybrid("description")}
+                labels={t}
+              />
+              {risen ? null : <Cursor frame={frame} local={reduced ? 0 : local} aim={aim} />}
             </div>
+            {showPreview ? (
+              <div
+                className={cn(
+                  "absolute inset-0 z-30 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                  risen ? "translate-y-0" : "translate-y-full"
+                )}
+              >
+                <div className="h-full overflow-hidden rounded-2xl border border-border bg-[#0c0e14]">
+                  <AnswerFrame answer={answer.id} local={answer.local} labels={t} />
+                </div>
+              </div>
+            ) : null}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
@@ -650,37 +686,64 @@ function AnswerFrame({
 
 function ChatThread({ name, tone, local }: { name: string; tone: "kakao" | "line"; local: number }) {
   const kakao = tone === "kakao";
-  const shapes = [
-    { w: 26, h: 18 },
-    { w: 58, h: 34 },
-    { w: 38, h: 22 },
-    { w: 72, h: 46 },
+  const script = [
+    { lines: 1, wide: false, mine: true },
+    { lines: 1, wide: true, mine: false },
+    { lines: 3, wide: true, mine: true },
+    { lines: 5, wide: true, mine: false },
+    { lines: 1, wide: false, mine: true },
+    { lines: 1, wide: true, mine: false },
   ];
-  const shown = Math.min(shapes.length, Math.floor(local / 750) + 1);
+  const step = kakao ? 1000 : 700;
+  const shown = Math.min(script.length, Math.floor(local / step) + 1);
   return (
     <div className="flex h-full flex-col">
       <div className={cn("px-4 py-3 text-sm font-semibold", kakao ? "bg-[#fee500] text-[#191919]" : "bg-[#06c755] text-white")}>
         {name}
       </div>
-      <div className={cn("flex flex-1 flex-col justify-end gap-3 overflow-hidden p-4", kakao ? "bg-[#b2c7d9]/25" : "bg-[#8cabd9]/20")}>
-        {shapes.slice(0, shown).map((shape, index) => {
-          const mine = index % 2 === 1;
-          return (
-            <span
-              key={index}
-              className={cn(
-                "shrink-0 rounded-2xl",
-                mine
-                  ? kakao
-                    ? "self-end rounded-br-sm bg-[#fee500]"
-                    : "self-end rounded-br-sm bg-[#06c755]"
-                  : "self-start rounded-bl-sm bg-white"
-              )}
-              style={{ width: `${shape.w}%`, height: `${shape.h}px` }}
-            />
-          );
-        })}
+      <div className={cn("flex min-h-0 flex-1 flex-col justify-end gap-3 overflow-hidden px-4 py-4", kakao ? "bg-[#b2c7d9]/30" : "bg-[#8cabd9]/25")}>
+        {script.slice(0, shown).map((bubble, index) => (
+          <ComicBubble key={index} lines={bubble.lines} wide={bubble.wide} mine={bubble.mine} kakao={kakao} />
+        ))}
       </div>
+    </div>
+  );
+}
+
+function ComicBubble({
+  lines,
+  wide,
+  mine,
+  kakao,
+}: {
+  lines: number;
+  wide: boolean;
+  mine: boolean;
+  kakao: boolean;
+}) {
+  const fill = mine ? (kakao ? "bg-[#fee500]" : "bg-[#06c755]") : "bg-white";
+  return (
+    <div className={cn("relative shrink-0", mine ? "self-end" : "self-start", wide ? "w-[84%]" : "w-[38%]")}>
+      <div
+        className={cn(
+          "rounded-[1.15rem] border-2 border-[#161616] shadow-[3px_3px_0_#161616]",
+          fill,
+          lines === 1 ? "h-9" : lines === 3 ? "h-[4.25rem]" : "h-32"
+        )}
+      />
+      <span
+        className={cn(
+          "absolute -bottom-[13px] border-x-[10px] border-t-[14px] border-x-transparent border-t-[#161616]",
+          mine ? "right-[18px]" : "left-[18px]"
+        )}
+      />
+      <span
+        className={cn(
+          "absolute -bottom-[9px] border-x-8 border-t-[11px] border-x-transparent",
+          mine ? "right-5" : "left-5",
+          mine ? (kakao ? "border-t-[#fee500]" : "border-t-[#06c755]") : "border-t-white"
+        )}
+      />
     </div>
   );
 }
@@ -700,9 +763,9 @@ function Player({
   const loading = !youtube && local < 550;
   const progress = youtube ? Math.min(1, local / 2000) : Math.min(1, Math.max(0, (local - 550) / 1450));
   return (
-    <div className="flex h-full flex-col justify-center px-4 sm:px-6">
+    <div className="flex h-full flex-col px-3 py-3 sm:px-4">
       <p className={cn("text-sm font-semibold", youtube ? "text-[#ff0033]" : "text-[#e50914]")}>{name}</p>
-      <div className="relative mt-3 h-36 overflow-hidden rounded-xl bg-black sm:h-44">
+      <div className="relative mt-2 min-h-0 flex-1 overflow-hidden rounded-xl bg-black">
         {loading ? (
           <span className="absolute top-1/2 left-1/2 size-8 -translate-x-1/2 -translate-y-1/2 animate-spin rounded-full border-2 border-white/20 border-t-white" />
         ) : youtube ? (
@@ -720,7 +783,7 @@ function MusicStage({ local, progress }: { local: number; progress: number }) {
   return (
     <>
       <div className="absolute inset-0 bg-[#12080c]" />
-      <div className="absolute right-4 bottom-8 left-4 flex h-20 items-end gap-1">
+      <div className="absolute inset-x-4 top-[18%] bottom-8 flex items-end gap-1">
         {Array.from({ length: 16 }, (_, index) => (
           <span
             key={index}
@@ -761,7 +824,7 @@ function SpaceStage({ local, progress }: { local: number; progress: number }) {
         );
       })}
       <span
-        className="absolute size-14 rounded-full bg-[radial-gradient(circle_at_35%_35%,#fde68a,#b45309_55%,#1e1b4b)]"
+        className="absolute size-28 rounded-full bg-[radial-gradient(circle_at_35%_35%,#fde68a,#b45309_55%,#1e1b4b)] sm:size-36"
         style={{
           left: `${18 + progress * 28}%`,
           top: `${22 + progress * 8}%`,

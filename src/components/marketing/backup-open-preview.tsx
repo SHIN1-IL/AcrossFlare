@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import styles from "./backup-open-preview.module.css";
 
 export function BackupOpenPreview() {
-  const t = useTranslations("support.backup.preview");
+  const t = useTranslations("support");
   const stageRef = useRef<HTMLDivElement>(null);
   const [play, setPlay] = useState(false);
 
@@ -31,7 +31,7 @@ export function BackupOpenPreview() {
       ref={stageRef}
       aria-hidden="true"
       data-play={play ? "" : undefined}
-      className={cn(styles.stage, "pointer-events-none mt-4 w-[220px] select-none")}
+      className={cn(styles?.stage, "pointer-events-none mt-4 w-[220px] select-none")}
     >
       <div className="overflow-hidden rounded-[22px] border border-border bg-[#0c0e14]">
         <div className="flex items-center justify-between px-3 pt-2.5 text-[9px] leading-none text-muted-foreground">
@@ -48,32 +48,32 @@ export function BackupOpenPreview() {
         <div className="px-3 pt-1 pb-3">
           <div
             className={cn(
-              styles.press,
+              styles?.press,
               "flex h-7 items-center rounded-md bg-primary/15 px-2 text-[10px] text-primary"
             )}
           >
-            <span className="min-w-0 flex-1 truncate">{t("vault")}</span>
+            <span className="min-w-0 flex-1 truncate">{t("backup.preview.vault")}</span>
           </div>
           <div className="mt-2 flex h-7 items-center rounded-md border border-border/80 px-2 text-[10px] text-foreground">
-            <span className="min-w-0 flex-1 truncate">{t("files")}</span>
+            <span className="min-w-0 flex-1 truncate">{t("backup.preview.files")}</span>
           </div>
           <div className="relative mt-2 h-9">
             <div
               className={cn(
-                styles.vault,
+                styles?.vault,
                 "absolute inset-0 flex items-center rounded-md border border-primary/30 bg-primary/10 px-2 text-[10px] text-primary"
               )}
             >
-              <span className="truncate">{t("vaultName")}</span>
+              <span className="truncate">{t("backup.preview.vaultName")}</span>
             </div>
             <div
               className={cn(
-                styles.file,
+                styles?.file,
                 "absolute inset-0 flex items-center gap-1.5 rounded-md border border-border/70 px-2 text-[10px] text-foreground"
               )}
             >
               <span className="size-1.5 shrink-0 rounded-sm bg-primary" />
-              <span className="min-w-0 flex-1 truncate">{t("file")}</span>
+              <span className="min-w-0 flex-1 truncate">{t("backup.preview.file")}</span>
             </div>
           </div>
         </div>

@@ -10,6 +10,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PriceAmount, SecondaryPriceAmount } from "@/components/marketing/price-amount";
 import { PlanPeriodCaption } from "@/components/marketing/plan-period-caption";
+import { readServiceLead, TypingLead } from "@/components/marketing/typing-lead";
 import { getMarketingService, type MarketingServiceId } from "@/lib/marketing-services";
 import {
   planHasPrice,
@@ -35,14 +36,22 @@ export function ServiceDetail({
   const locale = useLocale() as AppLocale;
   const service = getMarketingService(serviceId);
   const banners = plans.map((plan) => ({ key: plan.id, plan }));
+  const lead =
+    service.id === "standard" || service.id === "hybrid"
+      ? readServiceLead(t.raw(`${service.id}.lead`))
+      : null;
 
   return (
     <section className="relative min-h-dvh">
       <StageBackdrop variant={service.backdrop} />
       <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-5xl flex-col items-center justify-end px-3 pt-24 pb-[12vh] text-center sm:px-6">
-        <p className="text-xs font-medium tracking-[0.22em] text-primary uppercase">
-          {t(`${service.id}.eyebrow`)}
-        </p>
+        {lead ? (
+          <TypingLead lines={lead} />
+        ) : (
+          <p className="text-xs font-medium tracking-[0.22em] text-primary uppercase">
+            {t(`${service.id}.eyebrow`)}
+          </p>
+        )}
         <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-6xl">
           {t(`${service.id}.title`)}
         </h1>

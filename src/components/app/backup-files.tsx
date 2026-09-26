@@ -24,6 +24,7 @@ export function BackupFiles() {
   const [data, setData] = useState<FilesResponse | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
 
   const refresh = useCallback(async () => {
     try {
@@ -152,7 +153,28 @@ export function BackupFiles() {
       ) : null}
       {error ? <p className="mt-4 text-sm text-destructive">{error}</p> : null}
 
-      <div className="mt-4 divide-y divide-border rounded-xl border border-border">
+      <div
+        className={`mt-4 divide-y divide-border rounded-xl border border-dashed ${
+          dragOver ? "border-primary bg-primary/10" : "border-border"
+        }`}
+        onDragEnter={(event) => {
+          event.preventDefault();
+          setDragOver(true);
+        }}
+        onDragOver={(event) => {
+          event.preventDefault();
+          setDragOver(true);
+        }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={(event) => {
+          event.preventDefault();
+          setDragOver(false);
+          const file = event.dataTransfer.files?.[0];
+          if (file) {
+            void upload(file);
+          }
+        }}
+      >
         {data?.files.length ? (
           data.files.map((file) => (
             <div key={file.name} className="flex items-center gap-3 px-3 py-3">
@@ -181,7 +203,7 @@ export function BackupFiles() {
           ))
         ) : (
           <p className="px-3 py-8 text-center text-sm text-muted-foreground">
-            {data ? t("backupFilesEmpty") : t("backupFilesLoading")}
+            {data ? t("backupDrop") : t("backupFilesLoading")}
           </p>
         )}
       </div>
