@@ -48,6 +48,12 @@ echo "==> seed plan defaults (idempotent upsert)"
 echo "==> compose ps"
 "${COMPOSE[@]}" ps
 
+echo "==> reload caddy (a bind-mounted Caddyfile does not reload by itself)"
+if ! "${COMPOSE[@]}" exec -T caddy caddy reload --config /etc/caddy/Caddyfile; then
+  echo "WARN: caddy reload failed, restarting caddy"
+  "${COMPOSE[@]}" restart caddy
+fi
+
 echo "==> traffic sync scheduler"
 docker logs acrossflare-api-1 2>&1 | grep traffic_sync_scheduler_started || echo "WARN: traffic_sync_scheduler_started not in logs yet"
 
@@ -57,6 +63,8 @@ curl -sf https://acrossflare.com/api/health && echo || echo "WARN: health check 
 if [[ -f .env ]] && grep -q '^CLOUDFLARE_API_TOKEN=' .env 2>/dev/null && grep -q '^CLOUDFLARE_ZONE_ID=' .env 2>/dev/null; then
   echo "==> Cloudflare cache rules"
   EDGE_ENV_FILE="$PROJECT_DIR/.env" bash "$PROJECT_DIR/infra/scripts/ensure-cloudflare-cache-rules.sh" || echo "WARN: cache rules update failed"
+  echo "==> Cloudflare www redirect"
+  EDGE_ENV_FILE="$PROJECT_DIR/.env" bash "$PROJECT_DIR/infra/scripts/ensure-cloudflare-www-redirect.sh" || echo "WARN: www redirect update failed"
   echo "==> Cloudflare marketing purge"
   EDGE_ENV_FILE="$PROJECT_DIR/.env" bash "$PROJECT_DIR/infra/scripts/purge-cloudflare-cache.sh" || echo "WARN: purge failed"
 else

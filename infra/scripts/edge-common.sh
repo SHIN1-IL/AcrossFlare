@@ -37,6 +37,20 @@ edge_marketing_urls() {
   done
 }
 
+# www mirrors of the storefront. Purge these when canonicalizing the host.
+# Do not warm them: a warm before the redirect is live would cache a second copy.
+edge_www_urls() {
+  local origin host
+  origin="$(edge_origin)"
+  host="${origin#https://}"
+  host="${host#http://}"
+  host="${host%%/*}"
+  if [[ "$host" == www.* ]]; then
+    return 0
+  fi
+  edge_marketing_urls | sed "s#://${host}#://www.${host}#"
+}
+
 # Load selected keys from a dotenv file without eval'ing the whole file.
 edge_load_dotenv() {
   local file="${1:-}"

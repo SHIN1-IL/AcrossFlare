@@ -14,6 +14,7 @@ if [[ -z "${CLOUDFLARE_ZONE_ID:-}" || -z "${CLOUDFLARE_API_TOKEN:-}" ]]; then
   exit 0
 fi
 
+# Public storefront only. Do not add /login, /signup, /app, /admin, /dashboard, /checkout, /support, or /api.
 MARKETING_EXPR='(http.host in {"acrossflare.com" "www.acrossflare.com"}) and (http.request.uri.path in {"/" "/standard" "/hybrid" "/workspace" "/pricing" "/terms" "/privacy" "/en" "/ko" "/zh" "/ja" "/en/standard" "/ko/standard" "/zh/standard" "/ja/standard" "/en/hybrid" "/ko/hybrid" "/zh/hybrid" "/ja/hybrid" "/en/workspace" "/ko/workspace" "/zh/workspace" "/ja/workspace" "/en/pricing" "/ko/pricing" "/zh/pricing" "/ja/pricing" "/en/terms" "/ko/terms" "/zh/terms" "/ja/terms" "/en/privacy" "/ko/privacy" "/zh/privacy" "/ja/privacy"})'
 STATIC_EXPR='(http.host in {"acrossflare.com" "www.acrossflare.com"}) and (starts_with(http.request.uri.path, "/_next/static/"))'
 

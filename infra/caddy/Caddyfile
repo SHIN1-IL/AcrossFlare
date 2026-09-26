@@ -3,9 +3,33 @@
 	admin off
 }
 
-acrossflare.com, www.acrossflare.com {
+# Canonical host is the apex. www must not serve a second copy of the storefront.
+# {uri} keeps the path and query. TLS stays on this block so the handshake
+# succeeds before the redirect (origin cert includes www).
+www.acrossflare.com {
+	tls /etc/caddy/certs/origin.pem /etc/caddy/certs/origin.key
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options nosniff
+		Cache-Control "public, max-age=3600"
+	}
+	redir https://acrossflare.com{uri} permanent
+}
+
+acrossflare.com {
 	tls /etc/caddy/certs/origin.pem /etc/caddy/certs/origin.key
 	encode gzip zstd
+
+	# Keep in sync with src/lib/security-headers.ts. No includeSubDomains:
+	# node-*.acrossflare.com panels are DNS-only and are not this origin.
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		X-Frame-Options SAMEORIGIN
+		Content-Security-Policy "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self' https:; script-src 'self' 'unsafe-inline' https://cdn.portone.io https://static.cloudflareinsights.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https:; frame-src 'self' https:; worker-src 'self' blob:"
+		-X-Powered-By
+	}
 
 	handle /api/v1/subscription* {
 		reverse_proxy api:8000
@@ -21,4 +45,3 @@ vault.acrossflare.com {
 	encode gzip zstd
 	reverse_proxy vaultwarden:80
 }
-

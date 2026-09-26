@@ -44,7 +44,7 @@ while IFS= read -r url; do
   if [[ "${#batch[@]}" -ge 30 ]]; then
     flush
   fi
-done < <(edge_marketing_urls)
+done < <(edge_marketing_urls; edge_www_urls)
 flush
 
 echo "==> purge done"

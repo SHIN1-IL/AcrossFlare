@@ -7,6 +7,7 @@ import {
   PRIVATE_CACHE_SOURCES,
   PRIVATE_NO_STORE,
 } from "./src/lib/http-cache";
+import { securityHeadersForRuntime } from "./src/lib/security-headers";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
@@ -15,6 +16,7 @@ const fastApiOrigin =
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  poweredByHeader: false,
   allowedDevOrigins: ["127.0.0.1", "localhost"],
   async rewrites() {
     return [
@@ -33,7 +35,13 @@ const nextConfig: NextConfig = {
   },
   serverExternalPackages: ["@prisma/client", "prisma", "undici"],
   async headers() {
+    const security = securityHeadersForRuntime(process.env.NODE_ENV);
     return [
+      {
+        // :path* is zero-or-more, so this includes "/".
+        source: "/:path*",
+        headers: [...security],
+      },
       {
         source: "/across-mark.svg",
         headers: [{ key: "Cache-Control", value: "no-store, must-revalidate" }],
