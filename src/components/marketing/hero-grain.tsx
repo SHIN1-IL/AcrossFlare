@@ -2,7 +2,7 @@ export function HeroGrain() {
   return (
     <svg
       aria-hidden="true"
-      className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.28] mix-blend-overlay"
+      className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.38] mix-blend-overlay"
     >
       <defs>
         <filter id="hero-grain" x="0" y="0" width="160" height="160" filterUnits="userSpaceOnUse">

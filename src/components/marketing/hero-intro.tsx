@@ -90,7 +90,7 @@ export function HeroIntro() {
     if (reduced) {
       setSettled(true);
       setShowAd(true);
-      setDone(readBeats(t));
+      setDone(scriptBeats(t));
       setTyped("");
       setShowPreview(true);
       return;
@@ -106,7 +106,7 @@ export function HeroIntro() {
 
   useEffect(() => {
     if (!showAd || reduced || showPreview) return;
-    const beats = readBeats(t);
+    const beats = scriptBeats(t);
     let line = 0;
     let start = performance.now();
 
@@ -138,7 +138,7 @@ export function HeroIntro() {
 
   useEffect(() => {
     if (!showPreview || reduced) return;
-    const phone = window.matchMedia("(max-width: 767px)").matches;
+    const phone = window.matchMedia("(max-width: 479px)").matches;
     const page = page2Ref.current;
     const first = page1Ref.current;
     if (!phone || !page || !first) {
@@ -194,7 +194,8 @@ export function HeroIntro() {
   const risen = reduced || previewMs >= FIRST_MS;
   const answerClock = reduced ? ANSWER_TOTAL : Math.max(0, previewMs - FIRST_MS);
   const answer = answerAt(answerClock);
-  const beats = readBeats(t);
+  const beats = scriptBeats(t);
+  const rows = groupRows(beats);
   const finished = !reduced && previewMs >= PLAY_MS;
 
   function replay() {
@@ -209,7 +210,7 @@ export function HeroIntro() {
     setPreviewMs(0);
     setPreviewArmed(false);
     setAim(null);
-    if (window.matchMedia("(max-width: 767px)").matches) {
+    if (window.matchMedia("(max-width: 479px)").matches) {
       page1Ref.current?.scrollIntoView({ behavior: "auto", block: "start" });
     }
     setRunId((current) => current + 1);
@@ -258,7 +259,7 @@ export function HeroIntro() {
 
   return (
     <div
-      className="touch-pan-y max-md:relative md:absolute md:inset-0"
+      className="touch-pan-y max-[479px]:relative min-[480px]:absolute min-[480px]:inset-0"
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
@@ -269,14 +270,14 @@ export function HeroIntro() {
       <div
         ref={page1Ref}
         data-home-page
-        className="relative h-dvh max-md:snap-start max-md:snap-always md:absolute md:inset-0 md:h-auto"
+        className="relative h-dvh max-[479px]:snap-start max-[479px]:snap-always min-[480px]:absolute min-[480px]:inset-0 min-[480px]:h-auto"
       >
       <div
         className={cn(
           "absolute z-10 flex flex-col transition-all ease-[cubic-bezier(0.22,1,0.36,1)]",
           glideClass,
           settled
-            ? "top-16 left-0 h-[calc(50%-4rem)] w-1/2 items-center justify-center px-4 text-center max-md:w-full md:px-[clamp(1.25rem,3vw,2rem)]"
+            ? "top-16 left-0 h-[calc(50%-4rem)] w-full items-center justify-center px-4 text-center md:px-[clamp(1.25rem,3vw,2rem)]"
             : "top-0 left-0 h-full w-full items-center justify-center px-[clamp(1.25rem,4vw,2.5rem)] text-center"
         )}
       >
@@ -304,27 +305,50 @@ export function HeroIntro() {
 
       <div
         className={cn(
-          "absolute bottom-0 left-0 z-10 flex h-1/2 w-1/2 items-stretch p-3 pr-1.5 max-md:w-full max-md:pr-3 md:p-4 md:pr-2",
+          "absolute bottom-0 left-0 z-10 flex h-1/2 w-1/2 items-stretch p-3 pr-1.5 max-[479px]:w-full max-[479px]:pr-3 min-[480px]:p-4 min-[480px]:pr-2",
           cut ? "opacity-0 duration-0" : "transition-opacity duration-700",
           showAd && !cut ? "opacity-100" : "pointer-events-none opacity-0"
         )}
       >
         {cut ? null : (
-          <div className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-2xl border border-border bg-card/80 px-3 py-2.5 backdrop-blur-sm sm:px-4 sm:py-3">
+          <div className="flex h-full min-h-0 w-full flex-col rounded-2xl border border-white/15 bg-[#12161c]/40 px-3 py-2.5 backdrop-blur-lg sm:px-4 sm:py-3">
             <p className="shrink-0 text-center text-[clamp(0.95rem,2.2vw,1.25rem)] leading-tight font-semibold tracking-[-0.02em] text-foreground">
               {t("headline")}
             </p>
             <div className="mt-1.5 flex min-h-0 flex-1 flex-col justify-evenly">
-              {beats.map((beat, index) => {
-                const active = index === done.length && showAd && !showPreview;
-                const text = index < done.length ? beat.text : active ? typed : "";
+              {rows.map((row) => {
+                const qActive = row.qIndex === done.length && showAd && !showPreview;
+                const noteActive = row.noteIndex === done.length && showAd && !showPreview;
+                const qShown = row.qIndex < done.length ? row.q.text : qActive ? typed : "";
+                const noteShown =
+                  row.note && row.noteIndex !== undefined && row.noteIndex < done.length
+                    ? row.note.text
+                    : noteActive
+                      ? typed
+                      : "";
                 return (
-                  <div key={index} className={text || active ? undefined : "invisible"} aria-hidden={text || active ? undefined : true}>
-                    <BeatLine beat={beat} text={text} caret={active} />
+                  <div
+                    key={row.qIndex}
+                    className="flex flex-col min-[480px]:flex-row min-[480px]:flex-wrap min-[480px]:items-baseline min-[480px]:gap-x-3"
+                  >
+                    <p className="text-[clamp(0.75rem,1.65vw,0.95rem)] leading-snug text-foreground/90">
+                      <span className={cn("mr-1.5 tabular-nums text-muted-foreground", qShown || qActive ? undefined : "invisible")}>
+                        {row.q.n}
+                      </span>
+                      <Held text={row.q.text} shown={qShown} caret={qActive} />
+                    </p>
+                    {row.note ? (
+                      <p className="pl-4 text-[clamp(0.68rem,1.45vw,0.8rem)] leading-tight text-muted-foreground min-[480px]:pl-0">
+                        <Held text={row.note.text} shown={noteShown} caret={noteActive} />
+                      </p>
+                    ) : null}
                   </div>
                 );
               })}
             </div>
+            <p className="shrink-0 pt-1 text-center text-[clamp(0.75rem,1.6vw,0.95rem)] leading-tight font-medium text-primary">
+              {t("closing")}
+            </p>
           </div>
         )}
       </div>
@@ -335,15 +359,15 @@ export function HeroIntro() {
         data-home-page
         aria-hidden={showPreview ? undefined : true}
         className={cn(
-          "absolute top-16 right-0 z-10 h-[calc(100%-4rem)] w-1/2 p-3 pl-1.5 md:p-4 md:pl-2",
-          "max-md:static max-md:flex max-md:h-dvh max-md:w-full max-md:snap-start max-md:snap-always max-md:flex-col max-md:px-3 max-md:pt-16 max-md:pb-3 max-md:pl-3",
+          "absolute right-0 bottom-0 z-10 h-1/2 w-1/2 p-3 pl-1.5 min-[480px]:p-4 min-[480px]:pl-2",
+          "max-[479px]:static max-[479px]:flex max-[479px]:h-dvh max-[479px]:w-full max-[479px]:snap-start max-[479px]:snap-always max-[479px]:flex-col max-[479px]:px-3 max-[479px]:pt-16 max-[479px]:pb-3 max-[479px]:pl-3",
           cut ? "opacity-0 duration-0" : "transition-opacity duration-700",
-          showPreview && !cut ? "opacity-100" : "pointer-events-none opacity-0 max-md:hidden"
+          showPreview && !cut ? "opacity-100" : "pointer-events-none opacity-0 max-[479px]:hidden"
         )}
       >
         {cut ? null : (
           <div className="relative h-full min-h-0 flex-1 overflow-hidden">
-            <div data-preview-root className="relative h-full overflow-hidden rounded-2xl border border-border bg-[#0c0e14]">
+            <div data-preview-root className="relative h-full overflow-hidden rounded-2xl border border-white/15 bg-[#12161c]/40 backdrop-blur-lg">
               <PreviewFrame
                 frame={frame}
                 local={reduced ? FRAME_MS : local}
@@ -364,7 +388,7 @@ export function HeroIntro() {
                   risen ? "translate-y-0" : "translate-y-full"
                 )}
               >
-                <div className="h-full overflow-hidden rounded-2xl border border-border bg-[#0c0e14]">
+                <div className="h-full overflow-hidden rounded-2xl border border-white/15 bg-[#12161c]/40 backdrop-blur-lg">
                   <AnswerFrame answer={answer.id} local={answer.local} labels={t} />
                 </div>
               </div>
@@ -373,6 +397,36 @@ export function HeroIntro() {
         )}
       </div>
     </div>
+  );
+}
+
+function scriptBeats(t: ReturnType<typeof useTranslations>) {
+  return readBeats(t).filter((beat) => beat.kind !== "closing");
+}
+
+function groupRows(beats: Beat[]) {
+  const rows: { q: Beat; qIndex: number; note?: Beat; noteIndex?: number }[] = [];
+  for (let index = 0; index < beats.length; index += 1) {
+    const beat = beats[index];
+    if (!beat || beat.kind !== "q") continue;
+    const next = beats[index + 1];
+    if (next?.kind === "note") {
+      rows.push({ q: beat, qIndex: index, note: next, noteIndex: index + 1 });
+      index += 1;
+    } else {
+      rows.push({ q: beat, qIndex: index });
+    }
+  }
+  return rows;
+}
+
+function Held({ text, shown, caret = false }: { text: string; shown: string; caret?: boolean }) {
+  return (
+    <>
+      <span>{shown}</span>
+      {caret ? <span className="ml-0.5 inline-block h-[1em] w-px translate-y-0.5 bg-primary align-middle" /> : null}
+      <span className="invisible">{text.slice(shown.length)}</span>
+    </>
   );
 }
 
@@ -401,35 +455,6 @@ function answerAt(ms: number) {
   }
   const last = ANSWER_STEPS[ANSWER_STEPS.length - 1];
   return { id: last?.[0] ?? "ping", local: last?.[1] ?? 0 };
-}
-
-function BeatLine({ beat, text, caret = false }: { beat: Beat; text: string; caret?: boolean }) {
-  const mark = caret ? (
-    <span className="ml-0.5 inline-block h-[1em] w-px translate-y-0.5 bg-primary align-middle" />
-  ) : null;
-  if (beat.kind === "note") {
-    return (
-      <p className="pl-4 text-[clamp(0.68rem,1.45vw,0.8rem)] leading-tight text-muted-foreground">
-        {text}
-        {mark}
-      </p>
-    );
-  }
-  if (beat.kind === "closing") {
-    return (
-      <p className="text-center text-[clamp(0.75rem,1.6vw,0.95rem)] leading-tight font-medium text-foreground">
-        {text}
-        {mark}
-      </p>
-    );
-  }
-  return (
-    <p className="text-[clamp(0.75rem,1.65vw,0.95rem)] leading-snug text-foreground/90">
-      <span className="mr-1.5 tabular-nums text-muted-foreground">{beat.n}</span>
-      {text}
-      {mark}
-    </p>
-  );
 }
 
 function PreviewFrame({

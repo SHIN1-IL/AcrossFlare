@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { nextHomePageTop } from "@/lib/home-page-snap";
 
-const PHONE = "(max-width: 767px)";
+const PHONE = "(max-width: 479px)";
 
 export function HomePageSnap() {
   useEffect(() => {

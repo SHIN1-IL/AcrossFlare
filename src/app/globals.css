@@ -190,7 +190,7 @@ html:has(.home-deck) {
   scroll-snap-type: y mandatory;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 479px) {
   html:has(.home-deck),
   html:has(.home-deck) body {
     scroll-snap-type: y mandatory;
