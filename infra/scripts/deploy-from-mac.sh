@@ -8,6 +8,14 @@ REMOTE_SCRIPT="$ROOT/infra/scripts/deploy-origin-remote.sh"
 
 echo "==> AcrossFlare origin deploy → $ORIGIN_HOST"
 
+# The origin image runs a fresh `next build` typecheck. Local tsc is incremental
+# and can miss the error that then fails docker compose on the VPS.
+echo "==> typecheck before origin build"
+if ! (cd "$ROOT" && npm run typecheck); then
+  echo "ERROR: 타입 검사가 실패했습니다. 오리진 빌드를 시작하지 않습니다."
+  exit 1
+fi
+
 if ! command -v expect >/dev/null 2>&1; then
   echo "ERROR: expect가 필요합니다. Xcode Command Line Tools를 설치하세요."
   exit 1

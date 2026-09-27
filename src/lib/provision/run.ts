@@ -2,6 +2,7 @@ import {
   NodeHealth,
   Product,
   SubscriptionStatus,
+  type Credential,
   type Node,
   type Plan,
   type Subscription,
@@ -31,11 +32,9 @@ import { addXuiClient, addWireGuardPeer, updateXuiClientExpiry } from "@/lib/pro
 type LoadedSubscription = Subscription & {
   plan: Plan;
   nodes: Node[];
-  credentials: {
-    uuid: string | null;
-    xuiEmail: string | null;
-    vaultUrl: string | null;
-  } | null;
+  // include: { credentials: true } returns the whole row. A hand-written subset
+  // drops new fields, and the origin image build is the first place that fails.
+  credentials: Credential | null;
   user: { email: string };
 };
 
