@@ -42,7 +42,7 @@ export function GlobalDashboard({ product = "global" }: { product?: "global" | "
     product === "workspace" ? t("workspaceTitle") : hybrid ? t("hybridTitle") : t("globalTitle");
   const description =
     product === "workspace" ? t("workspaceDesc") : hybrid ? t("hybridDesc") : t("globalDesc");
-  const hasBackup = Boolean(lane.vaultUrl || lane.syncthingUrl);
+  const hasBackup = Boolean(lane.vaultUrl);
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">

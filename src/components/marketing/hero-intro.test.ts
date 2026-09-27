@@ -20,7 +20,7 @@ describe("hero intro", () => {
     expect(intro).toContain("duration-[3000ms]");
     expect(intro).toContain("onPointerDown");
     expect(intro).toContain('labels("ping")');
-    expect(intro).toContain("LINE_MS = 2000");
+    expect(intro).toContain("LINE_MS = 1800");
     expect(intro).toContain('t("headline")');
     expect(intro).toContain("QrScan");
     expect(intro).toContain("translate-y-full");

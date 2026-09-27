@@ -5,7 +5,7 @@ import { toPublicSession } from "@/lib/auth-types";
 import { prisma } from "@/lib/db";
 import { normalizeEmail } from "@/lib/email";
 import { verifyPassword } from "@/lib/password";
-import { syncVaultwardenPassword } from "@/lib/provision/vaultwarden-account";
+import { attachVaultBackup, syncVaultwardenPassword } from "@/lib/provision/vaultwarden-account";
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as
@@ -27,7 +27,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });
   }
 
-  await syncVaultwardenPassword(email, password).catch(() => undefined);
+  if (await syncVaultwardenPassword(email, password).catch(() => false)) {
+    await attachVaultBackup(email).catch(() => undefined);
+  }
 
   const token = await createSession(user.id);
   await setSessionCookie(token);

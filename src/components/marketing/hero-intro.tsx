@@ -7,8 +7,7 @@ import { cn } from "@/lib/utils";
 const FRAMES = ["signup", "pay", "console", "copy", "scan"] as const;
 type Frame = (typeof FRAMES)[number];
 const ANSWER_STEPS = [
-  ["kakao", 6000],
-  ["line", 3000],
+  ["chats", 9000],
   ["youtube", 2000],
   ["netflix", 2000],
   ["zoom", 2000],
@@ -21,8 +20,8 @@ type Answer = (typeof ANSWER_STEPS)[number][0];
 type Beat = { kind: "q" | "note" | "closing"; text: string; n?: number };
 
 const SHRINK_MS = 3000;
-const LINE_MS = 2000;
-const NOTE_MS = 1000;
+const LINE_MS = 1800;
+const NOTE_MS = 900;
 const FRAME_MS = 2000;
 const FIRST_MS = FRAMES.length * FRAME_MS;
 const ANSWER_TOTAL = ANSWER_STEPS.reduce((sum, step) => sum + step[1], 0);
@@ -197,6 +196,15 @@ export function HeroIntro() {
   const beats = scriptBeats(t);
   const rows = groupRows(beats);
   const finished = !reduced && previewMs >= PLAY_MS;
+  const closingText = t("closing");
+  const closingIndex = beats.findIndex((beat) => beat.kind === "closing");
+  const closingActive = !reduced && showAd && !showPreview && closingIndex === done.length;
+  const closingShown =
+    reduced || showPreview || (closingIndex >= 0 && closingIndex < done.length)
+      ? closingText
+      : closingActive
+        ? typed
+        : "";
 
   function replay() {
     dragStart.current = null;
@@ -347,7 +355,7 @@ export function HeroIntro() {
               })}
             </div>
             <p className="shrink-0 pt-1 text-center text-[clamp(0.75rem,1.6vw,0.95rem)] leading-tight font-medium text-primary">
-              {t("closing")}
+              <Held text={closingText} shown={closingShown} caret={closingActive} caretClassName="bg-white" />
             </p>
           </div>
         )}
@@ -401,7 +409,7 @@ export function HeroIntro() {
 }
 
 function scriptBeats(t: ReturnType<typeof useTranslations>) {
-  return readBeats(t).filter((beat) => beat.kind !== "closing");
+  return readBeats(t);
 }
 
 function groupRows(beats: Beat[]) {
@@ -420,11 +428,23 @@ function groupRows(beats: Beat[]) {
   return rows;
 }
 
-function Held({ text, shown, caret = false }: { text: string; shown: string; caret?: boolean }) {
+function Held({
+  text,
+  shown,
+  caret = false,
+  caretClassName = "bg-primary",
+}: {
+  text: string;
+  shown: string;
+  caret?: boolean;
+  caretClassName?: string;
+}) {
   return (
     <>
       <span>{shown}</span>
-      {caret ? <span className="ml-0.5 inline-block h-[1em] w-px translate-y-0.5 bg-primary align-middle" /> : null}
+      {caret ? (
+        <span className={cn("ml-0.5 inline-block h-[1em] w-px translate-y-0.5 align-middle", caretClassName)} />
+      ) : null}
       <span className="invisible">{text.slice(shown.length)}</span>
     </>
   );
@@ -739,8 +759,7 @@ function AnswerFrame({
   local: number;
   labels: ReturnType<typeof useTranslations>;
 }) {
-  if (answer === "kakao") return <ChatThread name={labels("kakao")} tone="kakao" local={local} />;
-  if (answer === "line") return <ChatThread name={labels("lineApp")} tone="line" local={local} />;
+  if (answer === "chats") return <MessengerPhones local={local} labels={labels} />;
   if (answer === "youtube") return <Player name={labels("youtube")} tone="youtube" local={local} caption={labels("playing")} />;
   if (answer === "netflix") return <Player name={labels("netflix")} tone="netflix" local={local} caption={labels("playing")} />;
   if (answer === "zoom") return <ZoomLecture name={labels("zoom")} caption={labels("inCall")} local={local} />;
@@ -756,64 +775,97 @@ function AnswerFrame({
   return <PingMeter local={local} labels={labels} />;
 }
 
-function ChatThread({ name, tone, local }: { name: string; tone: "kakao" | "line"; local: number }) {
-  const kakao = tone === "kakao";
-  const script = [
-    { lines: 1, wide: false, mine: true },
-    { lines: 1, wide: true, mine: false },
-    { lines: 3, wide: true, mine: true },
-    { lines: 5, wide: true, mine: false },
-    { lines: 1, wide: false, mine: true },
-    { lines: 1, wide: true, mine: false },
-  ];
-  const step = kakao ? 1000 : 700;
-  const shown = Math.min(script.length, Math.floor(local / step) + 1);
+function MessengerPhones({
+  local,
+  labels,
+}: {
+  local: number;
+  labels: ReturnType<typeof useTranslations>;
+}) {
+  const messages = readChatLines(labels);
   return (
-    <div className="flex h-full flex-col">
-      <div className={cn("px-4 py-3 text-sm font-semibold", kakao ? "bg-[#fee500] text-[#191919]" : "bg-[#06c755] text-white")}>
+    <div className="flex h-full items-center justify-center gap-3 px-4 [container-type:size] sm:gap-5 sm:px-6">
+      <PhoneShell>
+        <ChatThread name={labels("kakao")} tone="kakao" local={local} messages={messages} />
+      </PhoneShell>
+      <PhoneShell>
+        <ChatThread name={labels("lineApp")} tone="line" local={local - 700} messages={messages} />
+      </PhoneShell>
+    </div>
+  );
+}
+
+function PhoneShell({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative w-[min(40cqw,calc(86cqh*9/19.5))] shrink-0">
+      <span className="absolute top-[22%] -left-[3px] h-8 w-[3px] rounded-l bg-[#d4d4d8]" />
+      <span className="absolute top-[16%] -right-[3px] h-12 w-[3px] rounded-r bg-[#d4d4d8]" />
+      <div className="relative flex aspect-[9/19.5] w-full flex-col overflow-hidden rounded-[1.45rem] border-[3px] border-[#f4f4f5] bg-[#111] shadow-[0_16px_36px_rgba(0,0,0,0.34)]">
+        <div className="pointer-events-none absolute top-[6px] left-1/2 z-20 h-[6px] w-[32%] -translate-x-1/2 rounded-full bg-[#111]" />
+        {children}
+        <span className="pointer-events-none absolute bottom-1.5 left-1/2 z-20 h-[3px] w-8 -translate-x-1/2 rounded-full bg-black/35" />
+      </div>
+    </div>
+  );
+}
+
+function readChatLines(labels: ReturnType<typeof useTranslations>) {
+  const value = labels.raw("chats");
+  if (!Array.isArray(value)) return [] as string[];
+  return value.filter((item): item is string => typeof item === "string" && item.length > 0);
+}
+
+function ChatThread({
+  name,
+  tone,
+  local,
+  messages,
+}: {
+  name: string;
+  tone: "kakao" | "line";
+  local: number;
+  messages: string[];
+}) {
+  const kakao = tone === "kakao";
+  const step = 1600;
+  const shown = local < 0 ? 0 : Math.min(messages.length, Math.floor(local / step) + 1);
+  return (
+    <div className="flex h-full min-h-0 flex-1 flex-col">
+      <div
+        className={cn(
+          "shrink-0 px-2 pt-4 pb-1.5 text-center text-[10px] leading-none font-semibold sm:text-[11px]",
+          kakao ? "bg-[#fee500] text-[#191919]" : "bg-[#06c755] text-white"
+        )}
+      >
         {name}
       </div>
-      <div className={cn("flex min-h-0 flex-1 flex-col justify-end gap-3 overflow-hidden px-4 py-4", kakao ? "bg-[#b2c7d9]/30" : "bg-[#8cabd9]/25")}>
-        {script.slice(0, shown).map((bubble, index) => (
-          <ComicBubble key={index} lines={bubble.lines} wide={bubble.wide} mine={bubble.mine} kakao={kakao} />
+      <div
+        className={cn(
+          "flex min-h-0 flex-1 flex-col justify-end gap-1.5 overflow-hidden px-1.5 pt-2 pb-3.5",
+          kakao ? "bg-[#b2c7d9]" : "bg-[#8cabd9]"
+        )}
+      >
+        {messages.slice(0, shown).map((text, index) => (
+          <SpeechBubble key={`${index}-${text}`} text={text} mine={index % 2 === 0} kakao={kakao} />
         ))}
       </div>
     </div>
   );
 }
 
-function ComicBubble({
-  lines,
-  wide,
-  mine,
-  kakao,
-}: {
-  lines: number;
-  wide: boolean;
-  mine: boolean;
-  kakao: boolean;
-}) {
-  const fill = mine ? (kakao ? "bg-[#fee500]" : "bg-[#06c755]") : "bg-white";
+function SpeechBubble({ text, mine, kakao }: { text: string; mine: boolean; kakao: boolean }) {
+  const fill = mine ? (kakao ? "bg-[#fee500] text-[#191919]" : "bg-[#06c755] text-white") : "bg-white text-[#191919]";
+  const tail = mine ? (kakao ? "border-t-[#fee500]" : "border-t-[#06c755]") : "border-t-white";
   return (
-    <div className={cn("relative shrink-0", mine ? "self-end" : "self-start", wide ? "w-[84%]" : "w-[38%]")}>
-      <div
-        className={cn(
-          "rounded-[1.15rem] border-2 border-[#161616] shadow-[3px_3px_0_#161616]",
-          fill,
-          lines === 1 ? "h-9" : lines === 3 ? "h-[4.25rem]" : "h-32"
-        )}
-      />
+    <div className={cn("relative max-w-[92%] shrink-0 pb-1", mine ? "self-end" : "self-start")}>
+      <p className={cn("rounded-2xl px-2 py-1 text-[10px] leading-snug sm:text-[11px]", fill, mine ? "rounded-br-sm" : "rounded-bl-sm")}>
+        {text}
+      </p>
       <span
         className={cn(
-          "absolute -bottom-[13px] border-x-[10px] border-t-[14px] border-x-transparent border-t-[#161616]",
-          mine ? "right-[18px]" : "left-[18px]"
-        )}
-      />
-      <span
-        className={cn(
-          "absolute -bottom-[9px] border-x-8 border-t-[11px] border-x-transparent",
-          mine ? "right-5" : "left-5",
-          mine ? (kakao ? "border-t-[#fee500]" : "border-t-[#06c755]") : "border-t-white"
+          "absolute bottom-0 border-x-[5px] border-t-[6px] border-x-transparent",
+          tail,
+          mine ? "right-2" : "left-2"
         )}
       />
     </div>

@@ -1,6 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { vaultwardenBaseUrl } from "@/lib/provision/config";
 import { ensureSyncthingFolder, SyncthingError } from "@/lib/provision/syncthing";
-import { inviteVaultwardenUser, resetVaultwardenAdminSession, VaultwardenError } from "@/lib/provision/vaultwarden";
+import {
+  inviteVaultwardenUser,
+  issueVaultwardenBackup,
+  resetVaultwardenAdminSession,
+  VaultwardenError,
+} from "@/lib/provision/vaultwarden";
 
 const originalVaultToken = process.env.VAULTWARDEN_ADMIN_TOKEN;
 const originalSyncthingKey = process.env.SYNCTHING_API_KEY;
@@ -60,6 +66,29 @@ describe("backup provisioning services", () => {
     expect(fetchMock.mock.calls[2]?.[1]?.headers?.get?.("Cookie") ?? fetchMock.mock.calls[2]?.[1]?.headers?.Cookie).toBe(
       "VW_ADMIN=admin-jwt"
     );
+  });
+
+  it("issues the vault backup for the homepage email", async () => {
+    process.env.VAULTWARDEN_ADMIN_TOKEN = "vault-token";
+    const fetchMock = vi.fn().mockResolvedValueOnce(new Response(null, { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(issueVaultwardenBackup("Person@Example.com")).resolves.toEqual({
+      vaultUrl: vaultwardenBaseUrl(),
+      vaultUser: "person@example.com",
+    });
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain("/admin/invite");
+  });
+
+  it("does not issue a vault backup when the admin token is missing", async () => {
+    delete process.env.VAULTWARDEN_ADMIN_TOKEN;
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(issueVaultwardenBackup("person@example.com")).rejects.toThrow(
+      "vaultwarden_not_configured"
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("throws service-specific errors for rejected provisioning requests", async () => {

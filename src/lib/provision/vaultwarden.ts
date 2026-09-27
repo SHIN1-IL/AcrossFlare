@@ -1,4 +1,4 @@
-import { vaultwardenAdminToken, vaultwardenApiBaseUrl } from "@/lib/provision/config";
+import { vaultwardenAdminToken, vaultwardenApiBaseUrl, vaultwardenBaseUrl } from "@/lib/provision/config";
 
 export class VaultwardenError extends Error {
   constructor(message: string) {
@@ -28,6 +28,24 @@ export async function inviteVaultwardenUser(email: string): Promise<boolean> {
   }
 
   return true;
+}
+
+/** Invites the homepage email so payment can open the same Vaultwarden login. */
+export async function issueVaultwardenBackup(email: string) {
+  const normalized = email.trim().toLowerCase();
+  if (!normalized || !vaultwardenAdminToken()) {
+    throw new VaultwardenError(normalized ? "vaultwarden_not_configured" : "vaultwarden_invite_failed");
+  }
+
+  const invited = await inviteVaultwardenUser(normalized);
+  if (!invited) {
+    throw new VaultwardenError("vaultwarden_invite_failed");
+  }
+
+  return {
+    vaultUrl: vaultwardenBaseUrl(),
+    vaultUser: normalized,
+  };
 }
 
 /** Removes a vault account so it can be registered again with the homepage password. */

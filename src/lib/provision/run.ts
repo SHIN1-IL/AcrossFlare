@@ -10,7 +10,6 @@ import { prisma } from "@/lib/db";
 import {
   appUrl,
   isProvisionSimulate,
-  syncthingBaseUrl,
   vaultwardenBaseUrl,
 } from "@/lib/provision/config";
 import { exitHostFor, issueMarketingSecrets, nextWgAddress, regionFrom } from "@/lib/marketing/secrets";
@@ -22,13 +21,11 @@ import {
   newClientUuid,
   newYamlToken,
   prismaNodeToYamlNode,
-  syncthingFolderId,
   xuiClientEmail,
   yamlUrlFor,
 } from "@/lib/provision/build";
 import { assertRealityConfigured } from "@/lib/provision/reality";
-import { ensureSyncthingFolder } from "@/lib/provision/syncthing";
-import { inviteVaultwardenUser } from "@/lib/provision/vaultwarden";
+import { issueVaultwardenBackup } from "@/lib/provision/vaultwarden";
 import { addXuiClient, addWireGuardPeer, updateXuiClientExpiry } from "@/lib/provision/xui";
 
 type LoadedSubscription = Subscription & {
@@ -68,6 +65,7 @@ export async function provisionSubscription(subscriptionId: string) {
 
   if (subscription.status === SubscriptionStatus.ACTIVE && subscription.credentials) {
     await renewIssuedSubscription(subscription);
+    await ensureVaultBackup(subscription);
     return subscription.id;
   }
 
@@ -189,13 +187,15 @@ async function issueCredentials(subscription: LoadedSubscription, nodes: Node[])
     return issueMarketing(subscription, nodes);
   }
 
-  return issueWorkspace();
+  return issueWorkspace(subscription);
 }
 
-async function issueWorkspace() {
+async function issueWorkspace(subscription: LoadedSubscription) {
   if (isProvisionSimulate()) {
     await wait(200);
   }
+
+  const vault = await issuedVaultBackup(subscription);
 
   return {
     uuid: null,
@@ -203,8 +203,8 @@ async function issueWorkspace() {
     deepLink: null,
     yamlToken: null,
     yamlBody: null,
-    vaultUrl: null,
-    vaultUser: null,
+    vaultUrl: vault.vaultUrl,
+    vaultUser: vault.vaultUser,
     syncthingUrl: null,
     syncthingFolderId: null,
     exitIp: null,
@@ -227,7 +227,6 @@ async function issueGlobal(subscription: LoadedSubscription, nodes: Node[]) {
   const yamlNodes = nodes.map(prismaNodeToYamlNode);
   const yamlBody = buildVlessYamlFromNodes(yamlNodes, uuid, false);
   const yamlUrl = yamlUrlFor(yamlToken, appUrl());
-  const folderId = syncthingFolderId(subscription.id);
 
   await addClients(nodes, {
     uuid,
@@ -241,23 +240,10 @@ async function issueGlobal(subscription: LoadedSubscription, nodes: Node[]) {
     data: { provisionStep: "backup" },
   });
 
-  const simulated = isProvisionSimulate();
-  let vaultReady = simulated;
-  let syncthingReady = simulated;
-
-  if (simulated) {
+  if (isProvisionSimulate()) {
     await wait(400);
-  } else {
-    const [vaultResult, syncthingResult] = await Promise.allSettled([
-      inviteVaultwardenUser(subscription.user.email),
-      ensureSyncthingFolder({
-        folderId,
-        label: subscription.user.email,
-      }),
-    ]);
-    vaultReady = vaultResult.status === "fulfilled" && vaultResult.value;
-    syncthingReady = syncthingResult.status === "fulfilled" && syncthingResult.value;
   }
+  const vault = await issuedVaultBackup(subscription);
 
   return {
     uuid,
@@ -265,10 +251,10 @@ async function issueGlobal(subscription: LoadedSubscription, nodes: Node[]) {
     deepLink: karingDeepLink(yamlUrl),
     yamlToken,
     yamlBody,
-    vaultUrl: vaultReady ? vaultwardenBaseUrl() : null,
-    vaultUser: vaultReady ? subscription.user.email : null,
-    syncthingUrl: syncthingReady ? syncthingBaseUrl() : null,
-    syncthingFolderId: syncthingReady ? folderId : null,
+    vaultUrl: vault.vaultUrl,
+    vaultUser: vault.vaultUser,
+    syncthingUrl: null,
+    syncthingFolderId: null,
     exitIp: null,
     region: null,
     httpUser: null,
@@ -333,6 +319,36 @@ async function issueMarketing(subscription: LoadedSubscription, nodes: Node[]) {
     wgAddress: secrets.wgAddress,
     wgEndpointPort: secrets.wgEndpointPort,
   };
+}
+
+async function issuedVaultBackup(subscription: LoadedSubscription) {
+  if (isProvisionSimulate()) {
+    return {
+      vaultUrl: vaultwardenBaseUrl(),
+      vaultUser: subscription.user.email.trim().toLowerCase(),
+    };
+  }
+
+  return issueVaultwardenBackup(subscription.user.email);
+}
+
+async function ensureVaultBackup(subscription: LoadedSubscription) {
+  if (subscription.product === Product.MARKETING || subscription.credentials?.vaultUrl) {
+    return;
+  }
+  if (!subscription.credentials) {
+    return;
+  }
+
+  try {
+    const vault = await issuedVaultBackup(subscription);
+    await prisma.credential.update({
+      where: { subscriptionId: subscription.id },
+      data: { vaultUrl: vault.vaultUrl, vaultUser: vault.vaultUser },
+    });
+  } catch (error) {
+    console.error("vault_backup_attach_failed", error);
+  }
 }
 
 async function addClients(

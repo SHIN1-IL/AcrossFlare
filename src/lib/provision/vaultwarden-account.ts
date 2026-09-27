@@ -1,5 +1,7 @@
 import { createCipheriv, createDecipheriv, createHmac, pbkdf2Sync, randomBytes, generateKeyPairSync } from "node:crypto";
-import { vaultwardenAdminToken, vaultwardenApiBaseUrl } from "@/lib/provision/config";
+import { Product, SubscriptionStatus } from "@prisma/client";
+import { prisma } from "@/lib/db";
+import { vaultwardenAdminToken, vaultwardenApiBaseUrl, vaultwardenBaseUrl } from "@/lib/provision/config";
 import { deleteVaultwardenUser, inviteVaultwardenUser } from "@/lib/provision/vaultwarden";
 
 const KDF_ITERATIONS = 600_000;
@@ -101,6 +103,34 @@ export async function syncVaultwardenPassword(
 
   await inviteVaultwardenUser(normalized).catch(() => false);
   return registerOrLogin(normalized, buildVaultwardenRegisterBody(normalized, password));
+}
+
+/** Fills a paid backup lane that was activated before the vault URL was saved. Does not replace an existing vault login. */
+export async function attachVaultBackup(email: string) {
+  const normalized = email.trim().toLowerCase();
+  if (!normalized) {
+    return;
+  }
+
+  const user = await prisma.user.findUnique({ where: { email: normalized } });
+  if (!user) {
+    return;
+  }
+
+  await prisma.credential.updateMany({
+    where: {
+      OR: [{ vaultUrl: null }, { vaultUrl: "" }],
+      subscription: {
+        userId: user.id,
+        product: { in: [Product.GLOBAL, Product.WORKSPACE] },
+        status: { in: [SubscriptionStatus.ACTIVE, SubscriptionStatus.PROVISIONING] },
+      },
+    },
+    data: {
+      vaultUrl: vaultwardenBaseUrl(),
+      vaultUser: normalized,
+    },
+  });
 }
 
 async function registerOrLogin(email: string, body: VaultwardenRegisterBody) {

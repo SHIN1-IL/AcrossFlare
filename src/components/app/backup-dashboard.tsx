@@ -38,7 +38,7 @@ export function BackupDashboard() {
     return <ProductEmpty product={product} status={lane.status} planId={lane.planId} />;
   }
 
-  if (!lane.vaultUrl && !lane.syncthingUrl) {
+  if (!lane.vaultUrl) {
     return (
       <div className="mx-auto max-w-4xl">
         <h1 className="text-3xl tracking-tight">{t("backupTitle")}</h1>
