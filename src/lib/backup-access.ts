@@ -3,6 +3,7 @@ import { getAuthUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { BackupStorageError } from "@/lib/backup-storage";
 import { syncthingFolderId } from "@/lib/provision/build";
+import { appUrl } from "@/lib/provision/config";
 
 export async function requireBackupAccess() {
   const user = await getAuthUser();
@@ -58,7 +59,13 @@ export function assertSameOrigin(request: Request) {
   if (!origin) {
     return;
   }
-  if (origin !== new URL(request.url).origin) {
+
+  const allowed = new Set<string>([new URL(request.url).origin]);
+  const configured = appUrl();
+  if (configured) {
+    allowed.add(new URL(configured).origin);
+  }
+  if (!allowed.has(origin)) {
     throw new BackupStorageError("origin_forbidden", 403);
   }
 }
