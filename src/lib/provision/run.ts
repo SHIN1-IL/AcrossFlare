@@ -34,6 +34,7 @@ type LoadedSubscription = Subscription & {
   credentials: {
     uuid: string | null;
     xuiEmail: string | null;
+    vaultUrl: string | null;
   } | null;
   user: { email: string };
 };
