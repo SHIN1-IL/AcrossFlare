@@ -9,14 +9,12 @@ import { Logo } from "@/components/marketing/logo";
 import { buttonVariants } from "@/components/ui/button";
 import { useAccount, useHydrated, useSessionProbeDone } from "@/hooks/use-account";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
-import { publicServiceFromPlanId } from "@/lib/public-service";
 import { clearSession } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
 const BASE_NAV = [
   { href: "/app", key: "overview", icon: LayoutGrid },
   { href: "/dashboard", key: "backup", icon: HardDrive },
-  { href: "/app/global", key: "network", icon: Globe },
   { href: "/app/workspace", key: "workspace", icon: Layers },
   { href: "/app/billing", key: "billing", icon: CreditCard },
   { href: "/app/settings", key: "settings", icon: Settings2 },
@@ -30,13 +28,20 @@ function NavLinks({
   const t = useTranslations("app");
   const pathname = usePathname();
   const { account } = useAccount();
-  const networkKey = publicServiceFromPlanId(account?.global?.planId) === "hybrid" ? "hybrid" : "standard";
+  const network = [
+    ...(account?.global || !account?.hybrid
+      ? ([{ href: "/app/global", key: "standard", icon: Globe }] as const)
+      : []),
+    ...(account?.hybrid ? ([{ href: "/app/hybrid", key: "hybrid", icon: Globe }] as const) : []),
+  ];
   const items = [
-    ...BASE_NAV.slice(0, 4),
+    ...BASE_NAV.slice(0, 2),
+    ...network,
+    BASE_NAV[2],
     ...(account?.marketing
       ? ([{ href: "/app/marketing", key: "marketing", icon: Waypoints }] as const)
       : []),
-    ...BASE_NAV.slice(4),
+    ...BASE_NAV.slice(3),
   ];
 
   return (
@@ -45,7 +50,7 @@ function NavLinks({
         const active =
           item.href === "/app" ? pathname === "/app" : pathname.startsWith(item.href);
         const Icon = item.icon;
-        const label = item.key === "network" ? t(networkKey) : t(item.key);
+        const label = t(item.key);
 
         return (
           <Link

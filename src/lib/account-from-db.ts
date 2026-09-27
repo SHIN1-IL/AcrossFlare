@@ -1,7 +1,6 @@
 import {
   PaymentMethod as PrismaPaymentMethod,
   PaymentStatus,
-  Product,
   SubscriptionStatus,
   type Payment,
   type Plan,
@@ -13,6 +12,7 @@ import type { AccountSnapshot, GlobalAccount, MarketingAccount, Receipt } from "
 import { scenarioFromEmail } from "@/lib/account";
 import { prisma } from "@/lib/db";
 import { toProductId } from "@/lib/product";
+import { publicServiceFromPlanId, type PublicServiceId } from "@/lib/public-service";
 import { appUrl } from "@/lib/provision/config";
 import { yamlUrlFor } from "@/lib/provision/build";
 
@@ -92,10 +92,12 @@ const subscriptionInclude = {
 const RECEIPT_LIMIT = 12;
 
 export async function loadAccountSnapshot(email: string, userId: string): Promise<AccountSnapshot> {
-  const [globalSub, marketingSub, workspaceSub, payments] = await Promise.all([
-    latestSubscription(userId, Product.GLOBAL),
-    latestSubscription(userId, Product.MARKETING),
-    latestSubscription(userId, Product.WORKSPACE),
+  const [subscriptions, payments] = await Promise.all([
+    prisma.subscription.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      include: subscriptionInclude,
+    }),
     prisma.payment.findMany({
       where: { userId, status: PaymentStatus.SUCCEEDED },
       orderBy: { createdAt: "desc" },
@@ -107,20 +109,17 @@ export async function loadAccountSnapshot(email: string, userId: string): Promis
   return {
     email,
     scenario: scenarioFromEmail(email),
-    global: toGlobalAccount(globalSub),
-    marketing: toMarketingAccount(marketingSub),
-    workspace: toGlobalAccount(workspaceSub),
+    global: toGlobalAccount(latestFor(subscriptions, "standard")),
+    hybrid: toGlobalAccount(latestFor(subscriptions, "hybrid")),
+    marketing: toMarketingAccount(latestFor(subscriptions, "marketing")),
+    workspace: toGlobalAccount(latestFor(subscriptions, "workspace")),
     method: latestMethod === PrismaPaymentMethod.ALIPAY ? "alipay" : "card",
     receipts: payments.map(toReceipt),
   };
 }
 
-async function latestSubscription(userId: string, product: Product) {
-  return prisma.subscription.findFirst({
-    where: { userId, product },
-    orderBy: { createdAt: "desc" },
-    include: subscriptionInclude,
-  });
+function latestFor(subscriptions: SubscriptionRow[], service: PublicServiceId) {
+  return subscriptions.find((row) => publicServiceFromPlanId(row.planId) === service) ?? null;
 }
 
 export function toUiStatus(status: SubscriptionStatus): GlobalAccount["status"] | null {

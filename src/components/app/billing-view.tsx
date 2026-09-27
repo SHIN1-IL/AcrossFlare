@@ -19,7 +19,10 @@ export function BillingView() {
   }
 
   const serviceExpires =
-    account.global?.expiresAt ?? account.workspace?.expiresAt ?? account.marketing?.expiresAt;
+    account.global?.expiresAt ??
+    account.hybrid?.expiresAt ??
+    account.workspace?.expiresAt ??
+    account.marketing?.expiresAt;
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">

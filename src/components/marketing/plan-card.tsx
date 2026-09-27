@@ -1,12 +1,10 @@
 import { useLocale, useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import {
-  CachedMarketingLink,
-  DocumentLink,
-} from "@/components/marketing/cached-marketing-link";
+import { CachedMarketingLink } from "@/components/marketing/cached-marketing-link";
 import { PriceAmount, SecondaryPriceAmount } from "@/components/marketing/price-amount";
 import { PlanPeriodCaption } from "@/components/marketing/plan-period-caption";
+import { PurchaseLink } from "@/components/marketing/purchase-link";
 import { checkoutReturnPath } from "@/lib/checkout-path";
 import { publicServiceFromPlanId, publicServiceHref } from "@/lib/public-service";
 import { planHasPrice, planPricePeriodKey, planTrafficQuota, type Plan } from "@/lib/plans";
@@ -96,12 +94,13 @@ export function PlanCard({
           {t("viewService")}
         </CachedMarketingLink>
       ) : (
-        <DocumentLink
+        <PurchaseLink
+          planId={plan.id}
           href={checkoutReturnPath({ product: plan.product, plan: plan.id })}
           className={cn(buttonVariants({ size: "lg" }), "mt-6 w-full rounded-[10px]")}
         >
           {t("cta")}
-        </DocumentLink>
+        </PurchaseLink>
       )}
     </article>
   );

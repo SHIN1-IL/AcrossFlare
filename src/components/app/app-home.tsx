@@ -5,7 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import { StatusPill } from "@/components/app/status-pill";
 import { useAccount } from "@/hooks/use-account";
-import { publicServiceFromPlanId, publicServiceHref } from "@/lib/public-service";
+import type { GlobalAccount } from "@/lib/account";
 import { cn } from "@/lib/utils";
 
 export function AppHome() {
@@ -16,10 +16,7 @@ export function AppHome() {
     return null;
   }
 
-  const empty = !account.global && !account.marketing && !account.workspace;
-  const network = publicServiceFromPlanId(account.global?.planId);
-  const networkHref = publicServiceHref(network);
-  const hybrid = network === "hybrid";
+  const empty = !account.global && !account.hybrid && !account.marketing && !account.workspace;
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -46,32 +43,30 @@ export function AppHome() {
         <div className="mt-8 grid gap-4 md:grid-cols-2">
           {account.global ? (
             <ProductLane
-              title={hybrid ? t("hybridTitle") : t("globalTitle")}
-              description={hybrid ? t("hybridDesc") : t("globalDesc")}
+              title={t("globalTitle")}
+              description={t("globalDesc")}
               href="/app/global"
-              browseHref={networkHref}
+              browseHref="/standard"
               active={account.global.status === "active"}
               unpaid={account.global.status === "unpaid"}
               openLabel={t("open")}
               addLabel={t("addGlobal")}
-              statusLabel={
-                account.global.failover
-                  ? t("statusFailover")
-                  : account.global.status === "provisioning"
-                    ? t("statusProvisioning")
-                    : account.global.status === "failed"
-                      ? t("statusFailed")
-                      : account.global.status === "active"
-                        ? t("statusActive")
-                        : t("statusUnpaid")
-              }
-              tone={
-                account.global.failover || account.global.status === "failed"
-                  ? "warn"
-                  : account.global.status === "active"
-                    ? "ok"
-                    : "neutral"
-              }
+              statusLabel={laneStatusLabel(account.global, t)}
+              tone={laneTone(account.global)}
+            />
+          ) : null}
+          {account.hybrid ? (
+            <ProductLane
+              title={t("hybridTitle")}
+              description={t("hybridDesc")}
+              href="/app/hybrid"
+              browseHref="/hybrid"
+              active={account.hybrid.status === "active"}
+              unpaid={account.hybrid.status === "unpaid"}
+              openLabel={t("open")}
+              addLabel={t("hybrid")}
+              statusLabel={laneStatusLabel(account.hybrid, t)}
+              tone={laneTone(account.hybrid)}
             />
           ) : null}
           {account.workspace ? (
@@ -137,6 +132,23 @@ export function AppHome() {
   );
 }
 
+function laneStatusLabel(
+  lane: GlobalAccount,
+  t: (key: "statusFailover" | "statusProvisioning" | "statusFailed" | "statusActive" | "statusUnpaid") => string
+) {
+  if (lane.failover) return t("statusFailover");
+  if (lane.status === "provisioning") return t("statusProvisioning");
+  if (lane.status === "failed") return t("statusFailed");
+  if (lane.status === "active") return t("statusActive");
+  return t("statusUnpaid");
+}
+
+function laneTone(lane: GlobalAccount): "ok" | "warn" | "neutral" {
+  if (lane.failover || lane.status === "failed") return "warn";
+  if (lane.status === "active") return "ok";
+  return "neutral";
+}
+
 function ProductLane({
   title,
   description,
@@ -152,7 +164,7 @@ function ProductLane({
 }: {
   title: string;
   description: string;
-  href: "/app/global" | "/app/marketing" | "/app/workspace";
+  href: "/app/global" | "/app/hybrid" | "/app/marketing" | "/app/workspace";
   browseHref: "/standard" | "/hybrid" | "/workspace";
   active: boolean;
   unpaid: boolean;

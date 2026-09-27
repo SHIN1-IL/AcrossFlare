@@ -13,7 +13,7 @@ import { formatDate } from "@/lib/format-date";
 import { publicServiceFromPlanId } from "@/lib/public-service";
 import { SUPPORT_HREF } from "@/lib/support-zone";
 
-export function GlobalDashboard({ product = "global" }: { product?: "global" | "workspace" }) {
+export function GlobalDashboard({ product = "global" }: { product?: "global" | "hybrid" | "workspace" }) {
   const t = useTranslations("app");
   const locale = useLocale();
   const { account } = useAccount();
@@ -22,10 +22,16 @@ export function GlobalDashboard({ product = "global" }: { product?: "global" | "
     return null;
   }
 
-  const lane = product === "workspace" ? account.workspace : account.global;
+  const lane =
+    product === "workspace" ? account.workspace : product === "hybrid" ? account.hybrid : account.global;
 
   if (!lane) {
-    return <ProductEmpty product={product} />;
+    return (
+      <ProductEmpty
+        product={product === "workspace" ? "workspace" : "global"}
+        planId={product === "hybrid" ? "hybrid-lite" : undefined}
+      />
+    );
   }
 
   if (lane.status === "provisioning") {
@@ -33,10 +39,16 @@ export function GlobalDashboard({ product = "global" }: { product?: "global" | "
   }
 
   if (lane.status === "unpaid" || lane.status === "failed") {
-    return <ProductEmpty product={product} status={lane.status} planId={lane.planId} />;
+    return (
+      <ProductEmpty
+        product={product === "workspace" ? "workspace" : "global"}
+        status={lane.status}
+        planId={lane.planId}
+      />
+    );
   }
 
-  const hybrid = product === "global" && publicServiceFromPlanId(lane.planId) === "hybrid";
+  const hybrid = product === "hybrid" || publicServiceFromPlanId(lane.planId) === "hybrid";
   const statusLabel = lane.failover ? t("statusFailover") : t("statusActive");
   const title =
     product === "workspace" ? t("workspaceTitle") : hybrid ? t("hybridTitle") : t("globalTitle");

@@ -500,6 +500,7 @@
     "openingWindow": "결제창을 여는 중입니다. PortOne 창에서 결제를 완료해 주세요.",
     "redirecting": "결제 페이지로 이동 중입니다.",
     "payFailed": "결제가 완료되지 않았습니다. 다시 시도하세요.",
+    "alreadyOwned": "이미 이용 중인 상품입니다. Standard, Hybrid, Workspace는 종류별로 하나씩만 구매할 수 있습니다.",
     "payNotConfigured": "결제창을 열 수 없습니다. PortOne 상점 설정을 확인하세요.",
     "payTimeout": "결제가 아직 확인되지 않았습니다. 잠시 후 다시 시도하세요.",
     "card": "카드",

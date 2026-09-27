@@ -500,6 +500,7 @@
     "openingWindow": "Opening the payment window. Complete checkout in the PortOne window.",
     "redirecting": "Taking you to the payment page.",
     "payFailed": "Payment did not go through. Try again.",
+    "alreadyOwned": "You already have this product. Standard, Hybrid, and Workspace can each be purchased once.",
     "payNotConfigured": "The payment window could not be opened. Check the PortOne store settings.",
     "payTimeout": "Payment is still pending. Try again in a moment.",
     "card": "Card",

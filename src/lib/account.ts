@@ -1,4 +1,5 @@
 import { getPlanById, type ProductId } from "@/lib/plans";
+import { publicServiceFromPlanId } from "@/lib/public-service";
 
 export type ScenarioId =
   | "global-user"
@@ -79,6 +80,7 @@ export type AccountSnapshot = {
   email: string;
   scenario: ScenarioId;
   global: GlobalAccount | null;
+  hybrid: GlobalAccount | null;
   marketing: MarketingAccount | null;
   workspace: GlobalAccount | null;
   method: PaymentMethod;
@@ -303,6 +305,11 @@ export function resolveAccount(email: string, overlay: AccountOverlay = {}): Acc
   let global: GlobalAccount | null = products.has("global")
     ? buildGlobal(email, globalPlanId, scenario)
     : null;
+  let hybrid: GlobalAccount | null = null;
+  if (global && publicServiceFromPlanId(global.planId) === "hybrid") {
+    hybrid = global;
+    global = null;
+  }
   let marketing: MarketingAccount | null = products.has("marketing")
     ? buildMarketing(email, marketingPlanId, overlay.marketing)
     : null;
@@ -329,6 +336,14 @@ export function resolveAccount(email: string, overlay: AccountOverlay = {}): Acc
       planId: global.planId,
     });
   }
+  if (hybrid && hybrid.status === "active") {
+    receipts.push({
+      id: `rcpt_${tokenFrom(`${email}:h`, 6)}`,
+      date: "2026-07-22T00:00:00.000Z",
+      product: "global",
+      planId: hybrid.planId,
+    });
+  }
   if (marketing && marketing.status === "active") {
     receipts.push({
       id: `rcpt_${tokenFrom(`${email}:m`, 6)}`,
@@ -350,6 +365,7 @@ export function resolveAccount(email: string, overlay: AccountOverlay = {}): Acc
     email,
     scenario,
     global,
+    hybrid,
     marketing,
     workspace,
     method: overlay.method ?? "card",
@@ -362,6 +378,7 @@ export function emptyAccount(email: string): AccountSnapshot {
     email,
     scenario: scenarioFromEmail(email),
     global: null,
+    hybrid: null,
     marketing: null,
     workspace: null,
     method: "card",

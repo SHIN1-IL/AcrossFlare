@@ -500,6 +500,7 @@
     "openingWindow": "正在打开支付窗口。请在 PortOne 窗口完成支付。",
     "redirecting": "正在前往支付页面。",
     "payFailed": "支付未完成，请重试。",
+    "alreadyOwned": "您已在使用该商品。Standard、Hybrid、Workspace 每种只能购买一个。",
     "payNotConfigured": "无法打开支付窗口。请检查 PortOne 商店设置。",
     "payTimeout": "支付仍在确认中，请稍后再试。",
     "card": "卡片",

@@ -18,6 +18,8 @@ import { PlanPeriodCaption } from "@/components/marketing/plan-period-caption";
 import { PriceAmount, SecondaryPriceAmount } from "@/components/marketing/price-amount";
 import { useLivePlan } from "@/hooks/use-admin";
 import { isPublicCheckoutProduct, planPricePeriodKey } from "@/lib/plans";
+import { accountServiceRows, hasActiveService } from "@/lib/owned-service";
+import { publicServiceFromPlanId } from "@/lib/public-service";
 import type { PortOneCheckout } from "@/lib/payments/portone";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +32,7 @@ const CHECKOUT_FAILURES = [
   "paymentwall_not_configured",
   "phone_required",
   "phone_invalid",
+  "already_owned",
 ] as const;
 
 type CheckoutFailure = (typeof CHECKOUT_FAILURES)[number] | "failed" | "agree";
@@ -76,7 +79,7 @@ export function CheckoutView({
   const locale = useLocale() as AppLocale;
   const router = useRouter();
   const hydrated = useHydrated();
-  const { session } = useAccount();
+  const { session, account } = useAccount();
   const user = session ?? initialSession;
   const plan = useLivePlan(planId);
   const validProduct = isPublicCheckoutProduct(product) && plan?.product === product ? product : null;
@@ -167,7 +170,10 @@ export function CheckoutView({
       }
       await refreshRemoteAccount(user.email);
       provisionProduct(user.email, validProduct, plan.id, method);
-      router.push(validProduct === "workspace" ? "/app/workspace" : "/app/global");
+      const service = publicServiceFromPlanId(plan.id);
+      router.push(
+        service === "workspace" ? "/app/workspace" : service === "hybrid" ? "/app/hybrid" : "/app/global"
+      );
     },
     [method, plan, router, steps, user, validProduct]
   );
@@ -189,6 +195,12 @@ export function CheckoutView({
 
     if (validProduct === "workspace" && !activePromoCode) {
       setError("invalid_code");
+      return;
+    }
+
+    if (account && hasActiveService(accountServiceRows(account), plan.id)) {
+      window.alert(t("alreadyOwned"));
+      setError("already_owned");
       return;
     }
 
@@ -226,7 +238,8 @@ export function CheckoutView({
             checkout.error === "stripe_checkout_failed" ||
             checkout.error === "paymentwall_not_configured" ||
             checkout.error === "phone_required" ||
-            checkout.error === "phone_invalid"
+            checkout.error === "phone_invalid" ||
+            checkout.error === "already_owned"
             ? checkout.error
             : "failed"
         );
@@ -277,7 +290,11 @@ export function CheckoutView({
       throw new Error("failed");
     } catch (cause) {
       setPhase("form");
-      setError(checkoutFailure(cause));
+      const failure = checkoutFailure(cause);
+      if (failure === "already_owned") {
+        window.alert(t("alreadyOwned"));
+      }
+      setError(failure);
       setErrorDetail(portoneErrorDetail(cause));
     }
   }
@@ -381,6 +398,8 @@ export function CheckoutView({
                             ? t("phoneRequired")
                             : error === "phone_invalid"
                               ? t("phoneInvalid")
+                              : error === "already_owned"
+                                ? t("alreadyOwned")
                               : error === "portone_not_configured" ||
                                   error === "stripe_not_configured" ||
                                   error === "paymentwall_not_configured" ||

@@ -23,8 +23,17 @@ export function BackupDashboard() {
     return null;
   }
 
-  const lane = account.global ?? account.workspace;
-  const product = account.global ? "global" : "workspace";
+  const candidates = [
+    account.global ? { lane: account.global, product: "global" as const } : null,
+    account.hybrid ? { lane: account.hybrid, product: "global" as const } : null,
+    account.workspace ? { lane: account.workspace, product: "workspace" as const } : null,
+  ].flatMap((item) => (item ? [item] : []));
+  const picked =
+    candidates.find((item) => item.lane.status === "active" && item.lane.vaultUrl) ??
+    candidates.find((item) => item.lane.status === "active") ??
+    candidates[0];
+  const lane = picked?.lane;
+  const product = picked?.product ?? "global";
 
   if (!lane) {
     return <ProductEmpty product="global" />;

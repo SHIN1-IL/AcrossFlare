@@ -6,6 +6,7 @@ import { isSimulateEnabled } from "@/lib/payments/config";
 import { portoneCustomerPhone } from "@/lib/payments/portone";
 import { defaultPaymentMethod, parseAppLocale, parsePaymentMethod, quotePayment } from "@/lib/payments/quote";
 import { CheckoutStartError, startProviderCheckout } from "@/lib/payments/start";
+import { hasActiveService } from "@/lib/owned-service";
 import { isPublicCheckoutProduct } from "@/lib/plans";
 import { lookupPromoCode } from "@/lib/promo";
 import { toPrismaProduct } from "@/lib/product";
@@ -38,6 +39,14 @@ export async function POST(request: Request) {
   const plan = await prisma.plan.findUnique({ where: { id: body.planId } });
   if (!plan || !plan.visible || plan.product !== toPrismaProduct(product)) {
     return NextResponse.json({ error: "invalid_plan" }, { status: 400 });
+  }
+
+  const owned = await prisma.subscription.findMany({
+    where: { userId: user.id },
+    select: { planId: true, status: true, expiresAt: true },
+  });
+  if (hasActiveService(owned, plan.id)) {
+    return NextResponse.json({ error: "already_owned" }, { status: 409 });
   }
 
   let promoId: string | null = null;

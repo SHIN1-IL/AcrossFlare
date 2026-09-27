@@ -7,6 +7,7 @@ import {
   type Payment,
 } from "@prisma/client";
 import { prisma } from "@/lib/db";
+import { pickSameService } from "@/lib/owned-service";
 import { planPeriodMs } from "@/lib/plans";
 
 export class PaymentFulfillError extends Error {
@@ -106,10 +107,11 @@ async function applyFulfillment(tx: Prisma.TransactionClient, input: FulfillInpu
 }
 
 async function upsertPaidSubscription(tx: Prisma.TransactionClient, payment: Payment) {
-  const existing = await tx.subscription.findFirst({
+  const sameProduct = await tx.subscription.findMany({
     where: { userId: payment.userId, product: payment.product },
     orderBy: { createdAt: "desc" },
   });
+  const existing = pickSameService(sameProduct, payment.planId);
 
   const now = new Date();
   const base =
