@@ -1,0 +1,24 @@
+---
+description: Marketing landing "원본" baseline — restore when user asks
+alwaysApply: true
+---
+
+# Marketing landing 원본 (baseline)
+
+When the user says **원본**, **원본으로 돌려줘**, **원상복구**, or similar for the homepage spider-web / UI-story work, restore from these snapshots (do not invent an older version):
+
+| Live file | Baseline snapshot |
+| --- | --- |
+| `src/components/marketing/spider-web-landing.tsx` | `.cursor/baselines/spider-web-landing.original.tsx` |
+| `src/components/marketing/why-buy-ui-story-preview.tsx` | `.cursor/baselines/why-buy-ui-story-preview.original.tsx` |
+| `src/app/[locale]/(marketing)/dev/web-landing/page.tsx` | `.cursor/baselines/web-landing-page.original.tsx` |
+| `src/app/[locale]/(marketing)/dev/comic-landing/page.tsx` | `.cursor/baselines/comic-landing-page.original.tsx` |
+
+## 원본 contents (this frozen moment)
+
+- **1페이지**: circular orb web (`/marketing/semiconductor-web.jpg`), soft bg darken `bg-black/[0.07]` when web shows (texture kept, no solid fill), radial ellipse mask, sparks, no cursor-following square glow / no pointer-capture blob, transform origin fixed at center
+- **2페이지 preview**: Fold-like dual UI story in `why-buy-ui-story-preview.tsx` (auto-loop +5s after full run)
+- **Dev harness**: `/dev/web-landing` = page1 + page2; `/dev/comic-landing` = page2 only
+- Home live page 2 is `WhyBuyUiStoryPreview live` (Fold UI story); console→Karing follows after it
+
+Restore by copying snapshot → live path. Only overwrite files the user asked to revert. If they update what "원본" means later, replace the matching snapshot and this rule.

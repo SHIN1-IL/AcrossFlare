@@ -3,16 +3,19 @@ import { describe, expect, it } from "vitest";
 
 describe("hero intro", () => {
   it("keeps the first screen copy and uses timed static previews", async () => {
-    const [page, intro] = await Promise.all([
+    const [page, intro, uiStory] = await Promise.all([
       readFile("src/app/[locale]/(marketing)/page.tsx", "utf8"),
       readFile("src/components/marketing/hero-intro.tsx", "utf8"),
+      readFile("src/components/marketing/why-buy-ui-story-preview.tsx", "utf8"),
     ]);
 
-    expect(page).toContain("<HeroIntro />");
+    expect(page).toContain("<SpiderWebLanding />");
+    expect(page).toContain("<WhyBuyUiStoryPreview live />");
+    expect(page).toContain("<ConsoleKaringStory />");
     expect(page).toContain("<PlanStages");
     expect(intro).toContain("AcrossFlare");
     expect(intro).toContain("Secure Cloud & Network Optimization");
-    expect(page).toContain("<HeroGrain />");
+    expect(uiStory).toContain("<HeroGrain />");
     expect(page).not.toContain("HeroAtmosphere");
     expect(intro).not.toContain("HeroAtmosphere");
     expect(intro).not.toContain("animate-code-flow");
