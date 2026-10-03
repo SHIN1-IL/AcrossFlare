@@ -31,6 +31,13 @@ const eslintConfig = defineConfig([
       ],
     },
   },
+  {
+    // Scroll/timer marketing stories sync UI from media queries and playback clocks.
+    files: ["src/components/marketing/**/*.{js,jsx,ts,tsx}"],
+    rules: {
+      "react-hooks/set-state-in-effect": "off",
+    },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
@@ -38,6 +45,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Frozen restore snapshots — not runtime code.
+    ".cursor/**",
   ]),
 ]);
 

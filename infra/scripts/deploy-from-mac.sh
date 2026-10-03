@@ -10,6 +10,12 @@ echo "==> AcrossFlare origin deploy → $ORIGIN_HOST"
 
 # The origin image runs a fresh `next build` typecheck. Local tsc is incremental
 # and can miss the error that then fails docker compose on the VPS.
+echo "==> lint before origin build (same gate as GitHub CI web job)"
+if ! (cd "$ROOT" && npm run lint); then
+  echo "ERROR: lint가 실패했습니다. CI/web과 동일하게 막습니다. 오리진 빌드를 시작하지 않습니다."
+  exit 1
+fi
+
 echo "==> typecheck before origin build"
 if ! (cd "$ROOT" && npm run typecheck); then
   echo "ERROR: 타입 검사가 실패했습니다. 오리진 빌드를 시작하지 않습니다."

@@ -43,7 +43,7 @@ export function WhyBuyUiStoryPreview({
   const items = readHeroItems(t);
   const sectionRef = useRef<HTMLElement>(null);
   const [runId, setRunId] = useState(0);
-  const [step, setStep] = useState(0);
+  const [timedStep, setTimedStep] = useState(0);
   const [reduced, setReduced] = useState(false);
   const [progress, setProgress] = useState(0);
   const [armed, setArmed] = useState(!live);
@@ -84,23 +84,14 @@ export function WhyBuyUiStoryPreview({
   }, [live]);
 
   useEffect(() => {
-    if (live) {
-      if (reduced) {
-        setStep(STEPS.length - 1);
-        return;
-      }
-      const next = Math.min(STEPS.length - 1, Math.floor(progress * STEPS.length + 0.001));
-      setStep(next);
-      return;
-    }
-
-    setStep(0);
+    if (live) return;
     if (reduced) {
-      setStep(STEPS.length - 1);
-      return;
+      const id = window.setTimeout(() => setTimedStep(STEPS.length - 1), 0);
+      return () => window.clearTimeout(id);
     }
+    setTimedStep(0);
     const timers = STEPS.map((_, i) =>
-      i === 0 ? null : window.setTimeout(() => setStep(i), STEP_MS * i)
+      i === 0 ? null : window.setTimeout(() => setTimedStep(i), STEP_MS * i)
     );
     const loopTimer = window.setTimeout(
       () => setRunId((n) => n + 1),
@@ -110,8 +101,13 @@ export function WhyBuyUiStoryPreview({
       timers.forEach((id) => id && window.clearTimeout(id));
       window.clearTimeout(loopTimer);
     };
-  }, [live, reduced, runId, progress]);
+  }, [live, reduced, runId]);
 
+  const step = live
+    ? reduced
+      ? STEPS.length - 1
+      : Math.min(STEPS.length - 1, Math.floor(progress * STEPS.length + 0.001))
+    : timedStep;
   const stepId = STEPS[step] ?? "apps-blocked";
   const closing = step >= STEPS.length - 1;
   const animate = !reduced && armed;
