@@ -2,7 +2,10 @@
 
 import { Component, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
+import { KaringAddProfilePreview } from "@/components/marketing/karing-add-profile-preview";
+import { KaringConnectPreview } from "@/components/marketing/karing-connect-preview";
 import { KaringImportPreview } from "@/components/marketing/karing-import-preview";
+import { KaringPingPreview } from "@/components/marketing/karing-ping-preview";
 import { buttonVariants } from "@/components/ui/button";
 import { getMerchant } from "@/lib/legal/merchant";
 import {
@@ -75,10 +78,29 @@ export function KaringSetupGuide({
                   })}
                 </ul>
               ) : null}
+              {step.id === "addProfile" ? (
+                <PreviewBoundary>
+                  <KaringAddProfilePreview />
+                </PreviewBoundary>
+              ) : null}
               {step.id === "profile" ? (
                 <PreviewBoundary>
                   <KaringImportPreview />
                 </PreviewBoundary>
+              ) : null}
+              {step.id === "connect" ? (
+                <div className="mt-4 grid w-full max-w-[460px] grid-cols-2 items-stretch gap-3">
+                  <div className="flex h-full min-h-0 flex-col">
+                    <PreviewBoundary>
+                      <KaringConnectPreview />
+                    </PreviewBoundary>
+                  </div>
+                  <div className="flex h-full min-h-0 flex-col">
+                    <PreviewBoundary>
+                      <KaringPingPreview />
+                    </PreviewBoundary>
+                  </div>
+                </div>
               ) : null}
             </div>
           </li>

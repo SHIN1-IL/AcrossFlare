@@ -94,7 +94,12 @@ export type AdminCustomer = {
   memo: string;
   status: CustomerStatus;
   nodeIds: string[];
+  /** Subscription start (or account createdAt for signup-only rows). */
   createdAt: string;
+  /** Account signup time from User.createdAt. */
+  signedUpAt: string;
+  /** True when the row is a User with no subscription yet. */
+  signupOnly?: boolean;
   credentials: CustomerCredentials | null;
   rotateHistory: RotateEvent[];
   planChange: PlanChangeJob | null;

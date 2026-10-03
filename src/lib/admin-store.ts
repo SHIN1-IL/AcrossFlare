@@ -219,7 +219,13 @@ export function listCustomers(product: ProductId) {
 
 export function listCustomersForService(service: AdminServiceId) {
   return memory.customers
-    .filter((customer) => adminServiceFromPlanId(customer.planId) === service)
+    .filter((customer) => {
+      if (customer.signupOnly) {
+        // Signup-only accounts are not tied to a plan; surface them on Standard.
+        return service === "standard";
+      }
+      return adminServiceFromPlanId(customer.planId) === service;
+    })
     .slice()
     .sort((a, b) => a.email.localeCompare(b.email));
 }

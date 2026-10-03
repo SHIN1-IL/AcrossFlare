@@ -2,12 +2,10 @@
   contain: layout paint;
 }
 
-.check,
-.toast,
-.node,
-.track,
-.badge {
+.checkTap,
+.scanCheck {
   opacity: 0;
+  transform: scale(0.35);
 }
 
 .mask {
@@ -15,110 +13,71 @@
   transform-origin: right center;
 }
 
-.knob {
-  transform: translateX(0);
+.placeholder {
+  opacity: 1;
 }
 
-.stage[data-play] .press,
-.stage[data-play] .check,
-.stage[data-play] .toast,
+.urlText {
+  opacity: 0;
+}
+
+.scanLine {
+  opacity: 0;
+}
+
+.qrCard {
+  opacity: 0;
+  transform: scale(0.92);
+}
+
 .stage[data-play] .mask,
-.stage[data-play] .node,
-.stage[data-play] .track,
-.stage[data-play] .knob,
-.stage[data-play] .badge {
-  animation-duration: 4s;
-  animation-timing-function: linear;
+.stage[data-play] .placeholder,
+.stage[data-play] .urlText,
+.stage[data-play] .checkTap,
+.stage[data-play] .scanLine,
+.stage[data-play] .qrCard,
+.stage[data-play] .scanCheck {
+  animation-duration: 4.8s;
+  animation-timing-function: ease-in-out;
   animation-iteration-count: infinite;
 }
 
 .stage[data-play] .mask {
   animation-name: karing-mask;
-  animation-timing-function: steps(32, end);
+  animation-timing-function: steps(28, end);
 }
 
-.stage[data-play] .press {
-  animation-name: karing-press;
+.stage[data-play] .placeholder {
+  animation-name: karing-placeholder;
 }
 
-.stage[data-play] .check {
-  animation-name: karing-check;
+.stage[data-play] .urlText {
+  animation-name: karing-url;
 }
 
-.stage[data-play] .toast {
-  animation-name: karing-toast;
+.stage[data-play] .checkTap {
+  animation-name: karing-check-tap;
 }
 
-.stage[data-play] .node {
-  animation-name: karing-node;
+.stage[data-play] .scanLine {
+  animation-name: karing-scan;
 }
 
-.stage[data-play] .track {
-  animation-name: karing-track;
+.stage[data-play] .qrCard {
+  animation-name: karing-qr-in;
 }
 
-.stage[data-play] .knob {
-  animation-name: karing-knob;
-}
-
-.stage[data-play] .badge {
-  animation-name: karing-badge;
-}
-
-@keyframes karing-press {
-  0%,
-  6% {
-    transform: scale(1);
-  }
-  12% {
-    transform: scale(0.97);
-  }
-  20%,
-  100% {
-    transform: scale(1);
-  }
-}
-
-@keyframes karing-check {
-  0%,
-  8% {
-    opacity: 0;
-  }
-  16%,
-  24% {
-    opacity: 1;
-  }
-  32%,
-  100% {
-    opacity: 0;
-  }
-}
-
-@keyframes karing-toast {
-  0%,
-  4% {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  10%,
-  22% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  30%,
-  100% {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
+.stage[data-play] .scanCheck {
+  animation-name: karing-scan-check;
 }
 
 @keyframes karing-mask {
   0%,
-  25% {
+  18% {
     transform: scaleX(1);
   }
-  55%,
-  94% {
+  42%,
+  88% {
     transform: scaleX(0);
   }
   100% {
@@ -126,99 +85,126 @@
   }
 }
 
-@keyframes karing-node {
+@keyframes karing-placeholder {
   0%,
-  52% {
+  18% {
+    opacity: 1;
+  }
+  28%,
+  88% {
     opacity: 0;
-    transform: translateY(4px);
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes karing-url {
+  0%,
+  18% {
+    opacity: 0;
+  }
+  28%,
+  88% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes karing-check-tap {
+  0%,
+  48% {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+  54% {
+    opacity: 0.9;
+    transform: scale(1);
   }
   64%,
-  94% {
-    opacity: 1;
-    transform: translateY(0);
-  }
   100% {
     opacity: 0;
-    transform: translateY(4px);
+    transform: scale(1.35);
   }
 }
 
-@keyframes karing-track {
+@keyframes karing-scan {
   0%,
-  58% {
-    opacity: 0;
-  }
-  72%,
-  94% {
-    opacity: 1;
-  }
   100% {
-    opacity: 0;
-  }
-}
-
-@keyframes karing-knob {
-  0%,
-  58% {
-    transform: translateX(0);
-  }
-  72%,
-  94% {
-    transform: translateX(14px);
-  }
-  100% {
-    transform: translateX(0);
-  }
-}
-
-@keyframes karing-badge {
-  0%,
-  86% {
-    opacity: 0;
-  }
-  90% {
-    opacity: 1;
-  }
-  93% {
+    transform: translateY(-22px);
     opacity: 0.25;
   }
-  96% {
-    opacity: 1;
+  50% {
+    transform: translateY(22px);
+    opacity: 0.95;
   }
+}
+
+@keyframes karing-qr-in {
+  0%,
+  12% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  22%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes karing-scan-check {
+  0%,
+  62% {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+  70% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  82%,
   100% {
     opacity: 0;
+    transform: scale(1.35);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .stage[data-play] .press,
-  .stage[data-play] .check,
-  .stage[data-play] .toast,
   .stage[data-play] .mask,
-  .stage[data-play] .node,
-  .stage[data-play] .track,
-  .stage[data-play] .knob,
-  .stage[data-play] .badge {
+  .stage[data-play] .placeholder,
+  .stage[data-play] .urlText,
+  .stage[data-play] .checkTap,
+  .stage[data-play] .scanLine,
+  .stage[data-play] .qrCard,
+  .stage[data-play] .scanCheck {
     animation: none;
-  }
-
-  .press,
-  .check,
-  .node,
-  .track,
-  .badge {
-    opacity: 1;
-  }
-
-  .toast {
-    opacity: 0;
   }
 
   .mask {
     transform: scaleX(0);
   }
 
-  .knob {
-    transform: translateX(14px);
+  .placeholder {
+    opacity: 0;
+  }
+
+  .urlText,
+  .qrCard {
+    opacity: 1;
+    transform: none;
+  }
+
+  .scanLine {
+    opacity: 0.7;
+    transform: none;
+  }
+
+  .checkTap,
+  .scanCheck {
+    opacity: 0.45;
+    transform: scale(1);
   }
 }

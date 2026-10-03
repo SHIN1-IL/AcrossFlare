@@ -9,8 +9,10 @@ export const SUPPORT_SECTIONS = [
 
 export const KARING_SETUP_STEPS = [
   { id: "install" },
+  { id: "addProfile" },
   { id: "profile" },
   { id: "connect" },
+  { id: "done" },
 ] as const;
 
 export const BACKUP_SETUP_STEPS = [

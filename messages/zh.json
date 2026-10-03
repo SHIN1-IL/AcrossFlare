@@ -560,7 +560,7 @@
     },
     "setup": {
       "title": "设置方法",
-      "heading": "三步完成初始设置",
+      "heading": "五步完成初始设置",
       "install": {
         "windows": "运行 .exe 安装包。如出现 SmartScreen，请选择“更多信息”→“仍要运行”。",
         "macos": "打开 .dmg，将 Karing 拖到“应用程序”。如提示未识别的开发者，请到系统设置 → 隐私与安全性选择“仍要打开”。",
@@ -573,21 +573,55 @@
           "title": "运行 Karing 安装文件",
           "body": "打开已下载的文件并按提示完成安装。请参考下方对应系统说明。"
         },
+        "addProfile": {
+          "title": "在 Add Profile 选择添加方式",
+          "body": "在 Karing 主界面点击 Add Profile，然后选择 Add Profile Link 或 Scan QR Code。"
+        },
         "profile": {
           "title": "绑定已发放的订阅二维码或链接",
           "body": "付款完成后，点击屏幕右上角的控制台，即可看到已生成的二维码和连接链接。在 Karing 中扫描该二维码，或复制 URL 粘贴到 Add Profile。也可以复制二维码图片。"
         },
         "connect": {
-          "title": "开始连接（Connect）",
-          "body": "配置保存后，打开主界面开关即可连接。备份空间可通过配置的网页或公告“安全备份空间快捷入口”在浏览器中打开。"
+          "title": "开始连接与延迟测试",
+          "body": "在主界面开启连接后，点击 Select Server 右上角闪电图标进行延迟测试。node-tokyo 与 node-la-a 的延迟会刷新并以绿色显示。备份空间可通过配置网页或公告入口打开。"
+        },
+        "done": {
+          "title": "完成",
+          "body": "连接成功即完成设置。若遇问题，请查看下方 FAQ 或联系支持。"
         }
       },
       "preview": {
         "copy": "复制链接",
         "copied": "已复制",
-        "node": "Tokyo #1",
-        "latency": "32ms",
-        "connected": "CONNECTED"
+        "addProfile": "Add Profile",
+        "pasteHint": "将复制的 URL 粘贴到这里",
+        "linkTitle": "Add Profile Link",
+        "scanTitle": "扫描二维码",
+        "scanHint": "将控制台方型二维码对准取景框",
+        "link": {
+          "placeholder": "Profile Link/Content",
+          "keepRules": "Keep Diversion Rules",
+          "autoRemove": "Automatically remove servers that fail latency tests"
+        },
+        "menu": {
+          "link": "Add Profile Link",
+          "clipboard": "Import From Clipboard",
+          "file": "Import Profile File",
+          "scan": "Scan QR Code",
+          "custom": "Custom"
+        },
+        "connect": {
+          "time": "时长",
+          "peers": "连接",
+          "traffic": "流量",
+          "speed": "速度",
+          "node": "node-tokyo",
+          "latency": "43 ms ›"
+        },
+        "ping": {
+          "selectServer": "Select Server",
+          "recent": "Recently Used"
+        }
       }
     },
     "backup": {
@@ -595,23 +629,63 @@
       "heading": "在浏览器中保管密码与小文件。无需另行下载备份应用。",
       "steps": {
         "open": {
-          "title": "打开保险库与我的文件",
-          "body": "在备份空间中，通过打开保险库使用 Vaultwarden，并直接在我的文件中管理小文件。"
+          "title": "在控制台打开保险库",
+          "body": "在控制台的备份中点击“打开保险库”进入 Vaultwarden 登录页。请使用与首页相同的账号。"
         },
         "save": {
-          "title": "保存密码、备忘录与小文件",
+          "title": "打开保险库，登录 Vaultwarden 后保存密码、备忘录与小文件",
           "body": "密码与备忘录保存在 Vaultwarden，小文件保存在我的文件。"
         },
         "phone": {
-          "title": "手机上也用同样方法",
-          "body": "在手机浏览器打开备份空间，于我的文件上传或下载即可。没有自动同步整个文件夹的功能。"
+          "title": "在控制台保存小文件",
+          "body": "在备份页面的“我的文件”虚线区域内，从桌面拖入文件即可保存。没有自动同步整个文件夹的功能。"
         }
       },
       "preview": {
         "vault": "打开保险库",
         "files": "我的文件",
         "vaultName": "Vaultwarden",
-        "file": "备忘.txt"
+        "file": "备忘.txt",
+        "console": "控制台",
+        "consoleSub": "产品保持隔离。打开一条线。",
+        "overview": "总览",
+        "nav": "备份",
+        "billing": "账单",
+        "settings": "设置",
+        "active": "有效",
+        "open": "打开",
+        "planDesc": "加密网络接入与安全云备份。",
+        "backupTitle": "安全备份空间",
+        "backupDesc": "在浏览器中使用 Vaultwarden（密码·备忘备份）。",
+        "usage": "备份用量",
+        "vaultDesc": "点击打开保险库进入登录页。",
+        "filesDesc": "拖放文件即可保存。",
+        "upload": "上传文件",
+        "drop": "将文件拖放到此处",
+        "vw": {
+          "login": "登录",
+          "email": "电子邮箱 (required)",
+          "remember": "记住邮箱",
+          "continue": "继续",
+          "password": "主密码",
+          "submit": "登录",
+          "navVault": "保险库",
+          "navTools": "工具",
+          "navReports": "报告",
+          "navSettings": "设置",
+          "allVaults": "全部保险库",
+          "newItem": "新建项目",
+          "filter": "筛选",
+          "search": "搜索保险库",
+          "myVault": "我的保险库",
+          "types": "类型",
+          "logins": "登录信息",
+          "notes": "安全备忘",
+          "getStarted": "将密码与备忘录保存在 Vaultwarden。",
+          "name": "名称",
+          "owner": "所有者",
+          "me": "我"
+        }
       }
     },
     "faq": {
@@ -749,9 +823,15 @@
     "filterFailed": "失败",
     "filterProvisioning": "开通中",
     "filterUnpaid": "未支付",
+    "filterSignupOnly": "仅注册",
+    "filterExpired": "已过期",
     "filterExpiring": "即将到期",
     "emptyFiltered": "没有符合条件的客户。",
     "period": "期限",
+    "signedUpAt": "注册日",
+    "startsAt": "开始日",
+    "endsAt": "结束日",
+    "price": "金额",
     "step": "步骤",
     "needsAttention": "待处理",
     "retryFailed": "无法重新开通。请查看步骤错误。",
@@ -782,6 +862,7 @@
     "statusActive": "已开通",
     "statusProvisioning": "开通中",
     "statusUnpaid": "未支付",
+    "statusSignupOnly": "仅注册",
     "statusFailed": "失败",
     "emptyCustomers": "此产品暂无客户。",
     "detailTitle": "客户",

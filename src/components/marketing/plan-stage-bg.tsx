@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 const BOARD_SRC = "/marketing/circuit-preview.jpg?v=22";
 
 /** Page-1 motherboard plate — base only; plan SVG/motion previews stay on top. */
-function MotherboardBase() {
+export function MotherboardBase() {
   return (
     <>
       <div className="absolute inset-0 bg-[#0e1014]" />

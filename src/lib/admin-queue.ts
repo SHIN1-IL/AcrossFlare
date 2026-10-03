@@ -1,7 +1,15 @@
 import type { AdminCustomer, JobStep, JobStepStatus } from "@/lib/admin";
 import { stepsFromProvision, provisionSteps } from "@/lib/admin";
 
-export const ADMIN_QUEUE_FILTERS = ["all", "failed", "provisioning", "unpaid", "expiring"] as const;
+export const ADMIN_QUEUE_FILTERS = [
+  "all",
+  "failed",
+  "provisioning",
+  "unpaid",
+  "signup_only",
+  "expired",
+  "expiring",
+] as const;
 
 export type AdminQueueFilter = (typeof ADMIN_QUEUE_FILTERS)[number];
 
@@ -22,6 +30,14 @@ export function isExpiringSoon(expiresAt: string, now = Date.now()) {
   return expires >= now && expires <= now + EXPIRING_WITHIN_MS;
 }
 
+export function isExpired(expiresAt: string, now = Date.now()) {
+  const expires = new Date(expiresAt).getTime();
+  if (Number.isNaN(expires) || !expiresAt) {
+    return false;
+  }
+  return expires < now;
+}
+
 export function matchesAdminQueueFilter(
   customer: AdminCustomer,
   filter: AdminQueueFilter,
@@ -33,7 +49,11 @@ export function matchesAdminQueueFilter(
     case "provisioning":
       return customer.status === "provisioning";
     case "unpaid":
-      return customer.status === "unpaid";
+      return customer.status === "unpaid" && !customer.signupOnly;
+    case "signup_only":
+      return Boolean(customer.signupOnly);
+    case "expired":
+      return !customer.signupOnly && isExpired(customer.expiresAt, now);
     case "expiring":
       return customer.status === "active" && isExpiringSoon(customer.expiresAt, now);
     default:
@@ -55,7 +75,9 @@ export function adminQueueCounts(customers: AdminCustomer[], now = Date.now()) {
   return {
     failed: customers.filter((customer) => customer.status === "failed").length,
     provisioning: customers.filter((customer) => customer.status === "provisioning").length,
-    unpaid: customers.filter((customer) => customer.status === "unpaid").length,
+    unpaid: customers.filter((customer) => customer.status === "unpaid" && !customer.signupOnly).length,
+    signup_only: customers.filter((customer) => customer.signupOnly).length,
+    expired: customers.filter((customer) => !customer.signupOnly && isExpired(customer.expiresAt, now)).length,
     expiring: customers.filter((customer) => customer.status === "active" && isExpiringSoon(customer.expiresAt, now))
       .length,
   };

@@ -1,0 +1,210 @@
+.stage {
+  contain: layout paint;
+}
+
+.boltRipple {
+  opacity: 0;
+  transform: scale(0.35);
+}
+
+.pingTokyo,
+.pingLa {
+  color: #8b8b93;
+}
+
+.pingTokyo .final,
+.pingLa .final {
+  opacity: 0;
+}
+
+.pingTokyo .spin,
+.pingLa .spin {
+  opacity: 1;
+}
+
+.spinTrack {
+  transform: translateY(0);
+}
+
+.tokyoSel {
+  background: transparent;
+}
+
+.stage[data-play] .boltRipple,
+.stage[data-play] .pingTokyo,
+.stage[data-play] .pingLa,
+.stage[data-play] .tokyoSel,
+.stage[data-play] .pingTokyo .spin,
+.stage[data-play] .pingLa .spin,
+.stage[data-play] .pingTokyo .final,
+.stage[data-play] .pingLa .final,
+.stage[data-play] .spinTrack {
+  animation-duration: 4.8s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.stage[data-play] .boltRipple {
+  animation-name: karing-ping-bolt;
+}
+
+.stage[data-play] .tokyoSel {
+  animation-name: karing-ping-sel;
+}
+
+.stage[data-play] .pingTokyo {
+  animation-name: karing-ping-color-tokyo;
+}
+
+.stage[data-play] .pingLa {
+  animation-name: karing-ping-color-la;
+}
+
+.stage[data-play] .pingTokyo .spin,
+.stage[data-play] .pingLa .spin {
+  animation-name: karing-ping-spin;
+}
+
+.stage[data-play] .spinTrack {
+  animation-name: karing-ping-track;
+  animation-timing-function: steps(5, end);
+}
+
+.stage[data-play] .pingTokyo .final,
+.stage[data-play] .pingLa .final {
+  animation-name: karing-ping-final;
+}
+
+@keyframes karing-ping-bolt {
+  0%,
+  8% {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+  14% {
+    opacity: 0.95;
+    transform: scale(1);
+  }
+  24%,
+  100% {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}
+
+@keyframes karing-ping-sel {
+  0%,
+  55% {
+    background: transparent;
+    color: inherit;
+  }
+  62%,
+  100% {
+    background: #1a73e8;
+    color: #ffffff;
+  }
+}
+
+@keyframes karing-ping-color-tokyo {
+  0%,
+  18% {
+    color: #8b8b93;
+  }
+  22%,
+  58% {
+    color: #5b5b63;
+  }
+  66%,
+  100% {
+    color: #16a34a;
+  }
+}
+
+@keyframes karing-ping-color-la {
+  0%,
+  18% {
+    color: #8b8b93;
+  }
+  22%,
+  58% {
+    color: #5b5b63;
+  }
+  66%,
+  100% {
+    color: #16a34a;
+  }
+}
+
+@keyframes karing-ping-spin {
+  0%,
+  18% {
+    opacity: 0;
+  }
+  22%,
+  58% {
+    opacity: 1;
+  }
+  64%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes karing-ping-track {
+  0%,
+  20% {
+    transform: translateY(0);
+  }
+  58%,
+  100% {
+    transform: translateY(-60px);
+  }
+}
+
+@keyframes karing-ping-final {
+  0%,
+  60% {
+    opacity: 0;
+  }
+  66%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage[data-play] .boltRipple,
+  .stage[data-play] .pingTokyo,
+  .stage[data-play] .pingLa,
+  .stage[data-play] .tokyoSel,
+  .stage[data-play] .pingTokyo .spin,
+  .stage[data-play] .pingLa .spin,
+  .stage[data-play] .pingTokyo .final,
+  .stage[data-play] .pingLa .final,
+  .stage[data-play] .spinTrack {
+    animation: none;
+  }
+
+  .boltRipple {
+    opacity: 0;
+  }
+
+  .tokyoSel {
+    background: #1a73e8;
+  }
+
+  .pingTokyo,
+  .pingLa {
+    color: #16a34a;
+  }
+
+  .pingTokyo .spin,
+  .pingLa .spin {
+    opacity: 0;
+  }
+
+  .pingTokyo .final,
+  .pingLa .final {
+    opacity: 1;
+  }
+}

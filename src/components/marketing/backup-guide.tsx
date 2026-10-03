@@ -2,7 +2,9 @@
 
 import { Component, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
+import { BackupFilesPreview } from "@/components/marketing/backup-files-preview";
 import { BackupOpenPreview } from "@/components/marketing/backup-open-preview";
+import { BackupVaultPreview } from "@/components/marketing/backup-vault-preview";
 import { BACKUP_SETUP_STEPS } from "@/lib/support-zone";
 
 class PreviewBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
@@ -42,6 +44,16 @@ export function BackupSetupGuide() {
               {step.id === "open" ? (
                 <PreviewBoundary>
                   <BackupOpenPreview />
+                </PreviewBoundary>
+              ) : null}
+              {step.id === "save" ? (
+                <PreviewBoundary>
+                  <BackupVaultPreview />
+                </PreviewBoundary>
+              ) : null}
+              {step.id === "phone" ? (
+                <PreviewBoundary>
+                  <BackupFilesPreview />
                 </PreviewBoundary>
               ) : null}
             </div>

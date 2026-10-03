@@ -1,0 +1,166 @@
+.stage {
+  contain: layout paint;
+}
+
+.main,
+.menu {
+  position: absolute;
+  inset: 0;
+}
+
+.main {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.menu {
+  opacity: 0;
+  transform: translateX(12px);
+}
+
+.ripple,
+.rippleLink,
+.rippleScan {
+  opacity: 0;
+  transform: scale(0.35);
+}
+
+.stage[data-play] .main,
+.stage[data-play] .menu,
+.stage[data-play] .ripple,
+.stage[data-play] .rippleLink,
+.stage[data-play] .rippleScan {
+  animation-duration: 5.2s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.stage[data-play] .main {
+  animation-name: karing-add-main;
+}
+
+.stage[data-play] .menu {
+  animation-name: karing-add-menu;
+}
+
+.stage[data-play] .ripple {
+  animation-name: karing-add-ripple;
+}
+
+.stage[data-play] .rippleLink {
+  animation-name: karing-add-ripple-link;
+}
+
+.stage[data-play] .rippleScan {
+  animation-name: karing-add-ripple-scan;
+}
+
+@keyframes karing-add-main {
+  0%,
+  28% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  34%,
+  92% {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes karing-add-menu {
+  0%,
+  28% {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  34%,
+  92% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+}
+
+@keyframes karing-add-ripple {
+  0%,
+  8% {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+  14% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  24%,
+  100% {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+}
+
+@keyframes karing-add-ripple-link {
+  0%,
+  42% {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  60%,
+  100% {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+}
+
+@keyframes karing-add-ripple-scan {
+  0%,
+  42% {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  60%,
+  100% {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage[data-play] .main,
+  .stage[data-play] .menu,
+  .stage[data-play] .ripple,
+  .stage[data-play] .rippleLink,
+  .stage[data-play] .rippleScan {
+    animation: none;
+  }
+
+  .main {
+    opacity: 0;
+  }
+
+  .menu {
+    opacity: 1;
+    transform: none;
+  }
+
+  .rippleLink,
+  .rippleScan {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+}

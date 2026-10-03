@@ -24,6 +24,8 @@ function customer(overrides: Partial<AdminCustomer> = {}): AdminCustomer {
     status: "active",
     nodeIds: [],
     createdAt: "2026-08-01T00:00:00.000Z",
+    signedUpAt: "2026-07-15T00:00:00.000Z",
+    signupOnly: false,
     credentials: null,
     rotateHistory: [],
     planChange: null,
@@ -72,6 +74,14 @@ describe("admin-queue", () => {
       customer({ id: "fail", status: "failed" }),
       customer({ id: "run", status: "provisioning" }),
       customer({ id: "pay", status: "unpaid" }),
+      customer({
+        id: "signup",
+        status: "unpaid",
+        signupOnly: true,
+        planId: "",
+        expiresAt: "",
+      }),
+      customer({ id: "old", status: "active", expiresAt: "2026-08-01T00:00:00.000Z" }),
       customer({ id: "soon", status: "active", expiresAt: "2026-08-30T00:00:00.000Z" }),
       customer({ id: "ok", status: "active", expiresAt: "2026-12-01T00:00:00.000Z" }),
     ];
@@ -80,9 +90,15 @@ describe("admin-queue", () => {
       failed: 1,
       provisioning: 1,
       unpaid: 1,
+      signup_only: 1,
+      expired: 1,
       expiring: 1,
     });
     expect(rows.filter((row) => matchesAdminQueueFilter(row, "unpaid", now)).map((row) => row.id)).toEqual(["pay"]);
+    expect(rows.filter((row) => matchesAdminQueueFilter(row, "signup_only", now)).map((row) => row.id)).toEqual([
+      "signup",
+    ]);
+    expect(rows.filter((row) => matchesAdminQueueFilter(row, "expired", now)).map((row) => row.id)).toEqual(["old"]);
     expect(rows.filter((row) => matchesAdminQueueFilter(row, "expiring", now)).map((row) => row.id)).toEqual(["soon"]);
   });
 

@@ -7,6 +7,7 @@ import {
   type Payment,
 } from "@prisma/client";
 import { prisma } from "@/lib/db";
+import { notifyOpsPayment } from "@/lib/ops-notify";
 import { pickSameService } from "@/lib/owned-service";
 import { planPeriodMs } from "@/lib/plans";
 
@@ -31,8 +32,9 @@ export type FulfillInput = {
 };
 
 export async function fulfillVerifiedPayment(input: FulfillInput) {
+  let result: { payment: Payment; newlySucceeded: boolean };
   try {
-    return await prisma.$transaction((tx) => applyFulfillment(tx, input));
+    result = await prisma.$transaction((tx) => applyFulfillment(tx, input));
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       const existing = await prisma.payment.findUnique({ where: { id: input.paymentId } });
@@ -43,9 +45,30 @@ export async function fulfillVerifiedPayment(input: FulfillInput) {
 
     throw error;
   }
+
+  if (result.newlySucceeded) {
+    const email =
+      (
+        await prisma.user.findUnique({
+          where: { id: result.payment.userId },
+          select: { email: true },
+        })
+      )?.email ?? "";
+    void notifyOpsPayment({
+      email,
+      planId: result.payment.planId,
+      amount: result.payment.amount,
+      currency: result.payment.currency,
+    }).catch((error) => console.error("ops_notify_payment_failed", error));
+  }
+
+  return result.payment;
 }
 
-async function applyFulfillment(tx: Prisma.TransactionClient, input: FulfillInput) {
+async function applyFulfillment(
+  tx: Prisma.TransactionClient,
+  input: FulfillInput
+): Promise<{ payment: Payment; newlySucceeded: boolean }> {
   await tx.webhookEvent.create({
     data: {
       id: input.eventId,
@@ -72,7 +95,7 @@ async function applyFulfillment(tx: Prisma.TransactionClient, input: FulfillInpu
   }
 
   if (payment.status === PaymentStatus.SUCCEEDED) {
-    return payment;
+    return { payment, newlySucceeded: false };
   }
 
   if (input.status === PaymentStatus.FAILED) {
@@ -80,13 +103,14 @@ async function applyFulfillment(tx: Prisma.TransactionClient, input: FulfillInpu
       where: { paymentId: payment.id, status: PromoCodeStatus.UNUSED },
       data: { paymentId: null },
     });
-    return tx.payment.update({
+    const failed = await tx.payment.update({
       where: { id: payment.id },
       data: {
         status: PaymentStatus.FAILED,
         externalId: input.externalId,
       },
     });
+    return { payment: failed, newlySucceeded: false };
   }
 
   const subscription = await upsertPaidSubscription(tx, payment);
@@ -96,7 +120,7 @@ async function applyFulfillment(tx: Prisma.TransactionClient, input: FulfillInpu
     data: { status: PromoCodeStatus.REDEEMED, redeemedAt: new Date() },
   });
 
-  return tx.payment.update({
+  const succeeded = await tx.payment.update({
     where: { id: payment.id },
     data: {
       status: PaymentStatus.SUCCEEDED,
@@ -104,6 +128,7 @@ async function applyFulfillment(tx: Prisma.TransactionClient, input: FulfillInpu
       subscriptionId: subscription.id,
     },
   });
+  return { payment: succeeded, newlySucceeded: true };
 }
 
 async function upsertPaidSubscription(tx: Prisma.TransactionClient, payment: Payment) {

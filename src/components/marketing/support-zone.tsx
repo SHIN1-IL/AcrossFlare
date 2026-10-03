@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { BackupSetupGuide } from "@/components/marketing/backup-guide";
 import { KaringDownloadCta, useClientKaringOs } from "@/components/marketing/karing-download";
 import { KaringHelpFaq, KaringSetupGuide } from "@/components/marketing/karing-guide";
-import { StageBackdrop } from "@/components/marketing/plan-stage-bg";
+import { MotherboardEdgeBackdrop } from "@/components/marketing/motherboard-edge-backdrop";
 import { type DetectedKaringOs } from "@/lib/karing-download";
 import {
   SUPPORT_SECTIONS,
@@ -31,8 +31,12 @@ export function SupportZone() {
   const initialOs = useClientKaringOs(DEFAULT_OS);
 
   return (
-    <section className="relative isolate overflow-hidden">
-      <StageBackdrop variant={4} />
+    <section className="relative isolate min-h-dvh overflow-hidden bg-[#14181e]">
+      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+        <div className="sticky top-0 h-dvh w-full">
+          <MotherboardEdgeBackdrop />
+        </div>
+      </div>
       <div className="relative z-10 mx-auto max-w-4xl px-4 py-16 md:py-24">
         <p className="text-xs font-medium tracking-[0.22em] text-primary uppercase">
           AcrossFlare

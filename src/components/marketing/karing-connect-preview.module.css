@@ -1,0 +1,137 @@
+.stage {
+  contain: layout paint;
+}
+
+.shieldOn,
+.statOn {
+  opacity: 0;
+}
+
+.shieldOff {
+  opacity: 1;
+}
+
+.latency {
+  color: #8b8b93;
+}
+
+.shield {
+  border-color: #e11d48;
+}
+
+.stage[data-play] .shield,
+.stage[data-play] .shieldOff,
+.stage[data-play] .shieldOn,
+.stage[data-play] .statOn,
+.stage[data-play] .latency {
+  animation-duration: 3.6s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.stage[data-play] .shield {
+  animation-name: karing-connect-border;
+}
+
+.stage[data-play] .shieldOff {
+  animation-name: karing-connect-off;
+}
+
+.stage[data-play] .shieldOn {
+  animation-name: karing-connect-on;
+}
+
+.stage[data-play] .statOn {
+  animation-name: karing-connect-stat;
+}
+
+.stage[data-play] .latency {
+  animation-name: karing-connect-latency;
+}
+
+@keyframes karing-connect-border {
+  0%,
+  35% {
+    border-color: #e11d48;
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(0.92);
+  }
+  50%,
+  100% {
+    border-color: #28c840;
+    transform: scale(1);
+  }
+}
+
+@keyframes karing-connect-off {
+  0%,
+  42% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes karing-connect-on {
+  0%,
+  42% {
+    opacity: 0;
+  }
+  50%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes karing-connect-stat {
+  0%,
+  42% {
+    opacity: 0;
+  }
+  55%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes karing-connect-latency {
+  0%,
+  42% {
+    color: #8b8b93;
+  }
+  55%,
+  100% {
+    color: #059669;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage[data-play] .shield,
+  .stage[data-play] .shieldOff,
+  .stage[data-play] .shieldOn,
+  .stage[data-play] .statOn,
+  .stage[data-play] .latency {
+    animation: none;
+  }
+
+  .shield {
+    border-color: #28c840;
+  }
+
+  .shieldOff {
+    opacity: 0;
+  }
+
+  .shieldOn,
+  .statOn {
+    opacity: 1;
+  }
+
+  .latency {
+    color: #059669;
+  }
+}

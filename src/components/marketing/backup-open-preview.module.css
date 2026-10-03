@@ -2,93 +2,161 @@
   contain: layout paint;
 }
 
-.vault,
-.file {
+.console,
+.backup {
+  position: absolute;
+  inset: 0;
+}
+
+.console {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.backup {
+  opacity: 0;
+  transform: translateX(10px);
+}
+
+.navRipple,
+.vaultRipple {
+  opacity: 0;
+  transform: scale(0.35);
+}
+
+.navActive {
   opacity: 0;
 }
 
-.stage[data-play] .press,
-.stage[data-play] .vault,
-.stage[data-play] .file {
-  animation-duration: 4s;
-  animation-timing-function: linear;
+.stage[data-play] .console,
+.stage[data-play] .backup,
+.stage[data-play] .navRipple,
+.stage[data-play] .vaultRipple,
+.stage[data-play] .navActive {
+  animation-duration: 5.4s;
+  animation-timing-function: ease-in-out;
   animation-iteration-count: infinite;
 }
 
-.stage[data-play] .press {
-  animation-name: backup-press;
+.stage[data-play] .console {
+  animation-name: backup-console;
 }
 
-.stage[data-play] .vault {
-  animation-name: backup-vault;
+.stage[data-play] .backup {
+  animation-name: backup-screen;
 }
 
-.stage[data-play] .file {
-  animation-name: backup-file;
+.stage[data-play] .navRipple {
+  animation-name: backup-nav-ripple;
 }
 
-@keyframes backup-press {
+.stage[data-play] .vaultRipple {
+  animation-name: backup-vault-ripple;
+}
+
+.stage[data-play] .navActive {
+  animation-name: backup-nav-active;
+}
+
+@keyframes backup-console {
   0%,
-  6% {
+  28% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  36%,
+  92% {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes backup-screen {
+  0%,
+  28% {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  36%,
+  92% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+}
+
+@keyframes backup-nav-ripple {
+  0%,
+  8% {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+  14% {
+    opacity: 0.95;
     transform: scale(1);
   }
+  24%,
+  100% {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}
+
+@keyframes backup-vault-ripple {
+  0%,
+  48% {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+  56% {
+    opacity: 0.95;
+    transform: scale(1);
+  }
+  68%,
+  100% {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}
+
+@keyframes backup-nav-active {
+  0%,
   12% {
-    transform: scale(0.97);
-  }
-  20%,
-  100% {
-    transform: scale(1);
-  }
-}
-
-@keyframes backup-vault {
-  0%,
-  22% {
     opacity: 0;
-    transform: translateY(4px);
   }
-  34%,
-  58% {
+  18%,
+  100% {
     opacity: 1;
-    transform: translateY(0);
-  }
-  72%,
-  100% {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-}
-
-@keyframes backup-file {
-  0%,
-  62% {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  74%,
-  94% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(4px);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .stage[data-play] .press,
-  .stage[data-play] .vault,
-  .stage[data-play] .file {
+  .stage[data-play] .console,
+  .stage[data-play] .backup,
+  .stage[data-play] .navRipple,
+  .stage[data-play] .vaultRipple,
+  .stage[data-play] .navActive {
     animation: none;
   }
 
-  .vault {
+  .console {
     opacity: 0;
   }
 
-  .file {
+  .backup {
     opacity: 1;
     transform: none;
+  }
+
+  .vaultRipple {
+    opacity: 0.5;
+    transform: scale(1);
   }
 }

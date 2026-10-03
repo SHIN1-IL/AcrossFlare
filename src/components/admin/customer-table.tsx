@@ -40,14 +40,24 @@ function toneFor(status: CustomerStatus) {
   return "neutral" as const;
 }
 
-const FILTER_LABEL: Record<AdminQueueFilter, "filterAll" | "filterFailed" | "filterProvisioning" | "filterUnpaid" | "filterExpiring"> =
-  {
-    all: "filterAll",
-    failed: "filterFailed",
-    provisioning: "filterProvisioning",
-    unpaid: "filterUnpaid",
-    expiring: "filterExpiring",
-  };
+const FILTER_LABEL: Record<
+  AdminQueueFilter,
+  | "filterAll"
+  | "filterFailed"
+  | "filterProvisioning"
+  | "filterUnpaid"
+  | "filterSignupOnly"
+  | "filterExpired"
+  | "filterExpiring"
+> = {
+  all: "filterAll",
+  failed: "filterFailed",
+  provisioning: "filterProvisioning",
+  unpaid: "filterUnpaid",
+  signup_only: "filterSignupOnly",
+  expired: "filterExpired",
+  expiring: "filterExpiring",
+};
 
 export function CustomerTable({
   service,
@@ -154,26 +164,32 @@ export function CustomerTable({
             </p>
           ) : (
             <div className="max-h-[min(70vh,720px)] overflow-auto rounded-2xl border border-border">
-              <table className="w-full min-w-[960px] text-left text-sm">
+              <table className="w-full min-w-[1100px] text-left text-sm">
                 <thead className="sticky top-0 z-10 border-b border-border bg-surface text-xs text-muted-foreground">
                   <tr>
                     <th scope="col" className="px-4 py-3 font-medium">
                       {t("email")}
                     </th>
                     <th scope="col" className="px-4 py-3 font-medium">
+                      {t("signedUpAt")}
+                    </th>
+                    <th scope="col" className="px-4 py-3 font-medium">
                       {t("plan")}
                     </th>
                     <th scope="col" className="px-4 py-3 font-medium">
-                      {t("period")}
+                      {t("price")}
+                    </th>
+                    <th scope="col" className="px-4 py-3 font-medium">
+                      {t("startsAt")}
+                    </th>
+                    <th scope="col" className="px-4 py-3 font-medium">
+                      {t("endsAt")}
                     </th>
                     <th scope="col" className="px-4 py-3 font-medium">
                       {t("status")}
                     </th>
                     <th scope="col" className="px-4 py-3 font-medium">
                       {t("step")}
-                    </th>
-                    <th scope="col" className="px-4 py-3 font-medium">
-                      {t("memo")}
                     </th>
                     <th scope="col" className="px-4 py-3 font-medium" />
                   </tr>
@@ -183,56 +199,76 @@ export function CustomerTable({
                     const ddns = customer.nodeIds
                       .map((id) => nodes.find((node) => node.id === id)?.ddns)
                       .filter(Boolean);
-                    const plan = getLivePlan(customer.planId);
+                    const plan = customer.planId ? getLivePlan(customer.planId) : null;
                     const step = currentFulfillmentStep(customer);
                     const retrying = retryingId === customer.id;
+                    const statusLabel = customer.signupOnly
+                      ? t("statusSignupOnly")
+                      : t(
+                          customer.status === "active"
+                            ? "statusActive"
+                            : customer.status === "provisioning"
+                              ? "statusProvisioning"
+                              : customer.status === "unpaid"
+                                ? "statusUnpaid"
+                                : "statusFailed"
+                        );
 
                     return (
                       <tr key={customer.id} className="border-b border-border last:border-0">
                         <td className="px-4 py-3 font-mono text-xs">{customer.email}</td>
+                        <td className="px-4 py-3 font-mono text-xs">
+                          {formatDate(locale, customer.signedUpAt || customer.createdAt)}
+                        </td>
                         <td className="px-4 py-3">
-                          <AdminPlanLabel planId={customer.planId} fallback={customer.planName} />
+                          {customer.signupOnly || !customer.planId ? (
+                            <span className="text-muted-foreground">—</span>
+                          ) : (
+                            <AdminPlanLabel planId={customer.planId} fallback={customer.planName} />
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-xs text-muted-foreground">
                           {plan ? (
-                            <p className="mt-0.5 text-xs text-muted-foreground">
-                              <PriceAmount locale={locale as AppLocale} prices={plan.prices} compact className="text-xs" />
-                            </p>
-                          ) : null}
+                            <PriceAmount locale={locale as AppLocale} prices={plan.prices} compact className="text-xs" />
+                          ) : (
+                            "—"
+                          )}
                         </td>
                         <td className="px-4 py-3 font-mono text-xs">
-                          {formatDate(locale, customer.createdAt)}
-                          <span className="text-muted-foreground"> → </span>
-                          {formatDate(locale, customer.expiresAt)}
+                          {customer.signupOnly ? "—" : formatDate(locale, customer.createdAt)}
+                        </td>
+                        <td className="px-4 py-3 font-mono text-xs">
+                          {customer.signupOnly || !customer.expiresAt
+                            ? "—"
+                            : formatDate(locale, customer.expiresAt)}
                         </td>
                         <td className="px-4 py-3">
-                          <StatusPill
-                            label={t(
-                              customer.status === "active"
-                                ? "statusActive"
-                                : customer.status === "provisioning"
-                                  ? "statusProvisioning"
-                                  : customer.status === "unpaid"
-                                    ? "statusUnpaid"
-                                    : "statusFailed"
-                            )}
-                            tone={toneFor(customer.status)}
-                          />
+                          <StatusPill label={statusLabel} tone={toneFor(customer.status)} />
                         </td>
                         <td className="px-4 py-3">
-                          <StatusPill label={stepLabels[step.id] ?? step.id} tone={stepTone(step.status)} />
-                          {customer.provisionError ? (
-                            <p className="mt-1 max-w-[180px] truncate font-mono text-[11px] text-destructive" title={customer.provisionError}>
-                              {customer.provisionError}
-                            </p>
-                          ) : ddns.length ? (
-                            <p className="mt-1 max-w-[180px] truncate font-mono text-[11px] text-muted-foreground">
-                              {ddns.join(" · ")}
-                            </p>
-                          ) : null}
+                          {customer.signupOnly ? (
+                            <span className="text-muted-foreground">—</span>
+                          ) : (
+                            <>
+                              <StatusPill label={stepLabels[step.id] ?? step.id} tone={stepTone(step.status)} />
+                              {customer.provisionError ? (
+                                <p
+                                  className="mt-1 max-w-[180px] truncate font-mono text-[11px] text-destructive"
+                                  title={customer.provisionError}
+                                >
+                                  {customer.provisionError}
+                                </p>
+                              ) : ddns.length ? (
+                                <p className="mt-1 max-w-[180px] truncate font-mono text-[11px] text-muted-foreground">
+                                  {ddns.join(" · ")}
+                                </p>
+                              ) : null}
+                            </>
+                          )}
                         </td>
-                        <td className="max-w-[160px] truncate px-4 py-3 text-muted-foreground">{customer.memo || "—"}</td>
                         <td className="px-4 py-3">
                           <div className="flex justify-end gap-1">
-                            {canProvision && canRetryProvision(customer) ? (
+                            {canProvision && canRetryProvision(customer) && !customer.signupOnly ? (
                               <Button
                                 type="button"
                                 variant="outline"
@@ -259,12 +295,14 @@ export function CustomerTable({
                                 {t("retry")}
                               </Button>
                             ) : null}
-                            <Link
-                              href={`/admin/${service}/customers/${customer.id}`}
-                              className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "rounded-[10px]")}
-                            >
-                              {t("open")}
-                            </Link>
+                            {!customer.signupOnly ? (
+                              <Link
+                                href={`/admin/${service}/customers/${customer.id}`}
+                                className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "rounded-[10px]")}
+                              >
+                                {t("open")}
+                              </Link>
+                            ) : null}
                           </div>
                         </td>
                       </tr>

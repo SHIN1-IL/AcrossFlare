@@ -1,6 +1,6 @@
 import { NodeHealth, NodeRole, Product, SubscriptionStatus, type Node } from "@prisma/client";
 import { describe, expect, it } from "vitest";
-import { toAdminCustomer, toAdminNode } from "@/lib/admin-data";
+import { toAdminCustomer, toAdminNode, toSignupOnlyCustomer } from "@/lib/admin-data";
 
 const row = {
   id: "sub1",
@@ -17,7 +17,7 @@ const row = {
   failover: false,
   createdAt: new Date("2026-08-01T00:00:00.000Z"),
   updatedAt: new Date("2026-08-01T00:00:00.000Z"),
-  user: { email: "a@example.com" },
+  user: { email: "a@example.com", createdAt: new Date("2026-07-15T00:00:00.000Z") },
   plan: { name: "Month", nodeCodes: ["LA"] },
   nodes: [{ id: "n1", ddns: "node.example.com" }],
   credentials: {
@@ -51,6 +51,24 @@ describe("toAdminCustomer", () => {
     expect(customer.payments).toEqual([]);
     expect(customer.email).toBe("a@example.com");
     expect(customer.provisionStep).toBe("ready");
+    expect(customer.signedUpAt).toBe("2026-07-15T00:00:00.000Z");
+    expect(customer.signupOnly).toBe(false);
+  });
+
+  it("maps signup-only users without a subscription", () => {
+    const customer = toSignupOnlyCustomer({
+      id: "u9",
+      email: "solo@example.com",
+      createdAt: new Date("2026-08-10T00:00:00.000Z"),
+    });
+    expect(customer).toMatchObject({
+      id: "signup:u9",
+      email: "solo@example.com",
+      signupOnly: true,
+      status: "unpaid",
+      planId: "",
+      signedUpAt: "2026-08-10T00:00:00.000Z",
+    });
   });
 
   it("includes credentials and payments on detail rows", () => {

@@ -560,7 +560,7 @@
     },
     "setup": {
       "title": "Setup Guide",
-      "heading": "Finish setup in three steps",
+      "heading": "Finish setup in five steps",
       "install": {
         "windows": "Run the .exe installer. If SmartScreen appears, choose More info → Run anyway.",
         "macos": "Open the .dmg and drag Karing to Applications. If macOS warns about an unidentified developer, go to System Settings → Privacy & Security and choose Open Anyway.",
@@ -573,21 +573,55 @@
           "title": "Run the Karing installer",
           "body": "Open the downloaded file and follow the installer. Use the OS notes below for your device."
         },
+        "addProfile": {
+          "title": "Choose how to add a profile",
+          "body": "On the Karing home screen, tap Add Profile, then choose Add Profile Link or Scan QR Code."
+        },
         "profile": {
           "title": "Add the issued QR code or subscription link",
           "body": "After payment, click Console in the top right of the screen. Your QR code and connection link are generated there. Scan that QR in Karing, or copy the URL and paste it into Add Profile. You can also copy the QR image."
         },
         "connect": {
-          "title": "Connect",
-          "body": "After the profile is saved, turn on the main switch to connect. Open backup from the profile webpage or the announcement “Open backup space”."
+          "title": "Connect and ping test",
+          "body": "Turn on the connection on the home screen, then tap the lightning icon on Select Server to run a ping test. node-tokyo and node-la-a update to green latency values. Open backup from the profile webpage or the announcement “Open backup space”."
+        },
+        "done": {
+          "title": "Done",
+          "body": "Once connected, setup is complete. If something fails, check the FAQ below or contact support."
         }
       },
       "preview": {
         "copy": "Copy link",
         "copied": "Copied",
-        "node": "Tokyo #1",
-        "latency": "32ms",
-        "connected": "CONNECTED"
+        "addProfile": "Add Profile",
+        "pasteHint": "Paste the copied URL here",
+        "linkTitle": "Add Profile Link",
+        "scanTitle": "Scan QR code",
+        "scanHint": "Fit the console QR inside the frame",
+        "link": {
+          "placeholder": "Profile Link/Content",
+          "keepRules": "Keep Diversion Rules",
+          "autoRemove": "Automatically remove servers that fail latency tests"
+        },
+        "menu": {
+          "link": "Add Profile Link",
+          "clipboard": "Import From Clipboard",
+          "file": "Import Profile File",
+          "scan": "Scan QR Code",
+          "custom": "Custom"
+        },
+        "connect": {
+          "time": "Time",
+          "peers": "Peers",
+          "traffic": "Traffic",
+          "speed": "Speed",
+          "node": "node-tokyo",
+          "latency": "43 ms ›"
+        },
+        "ping": {
+          "selectServer": "Select Server",
+          "recent": "Recently Used"
+        }
       }
     },
     "backup": {
@@ -595,23 +629,63 @@
       "heading": "Keep passwords and small files in the browser. You do not need a separate backup app.",
       "steps": {
         "open": {
-          "title": "Open your vault and files",
-          "body": "In Backup, use Open vault for Vaultwarden and manage small files directly under My files."
+          "title": "Open vault from the console",
+          "body": "In Console → Backup, tap Open vault to reach the Vaultwarden login. Use the same account as the homepage."
         },
         "save": {
-          "title": "Save passwords, notes, and small files",
+          "title": "Open vault, sign in to Vaultwarden, then save passwords, notes, and small files",
           "body": "Store passwords and notes in Vaultwarden, and small files under My files."
         },
         "phone": {
-          "title": "Same steps on a phone",
-          "body": "On a phone, open backup in the browser and upload or download under My files. Folders do not sync automatically."
+          "title": "Save small files in the console",
+          "body": "On the Backup screen, drag a desktop file into the dashed My files area to store it. Folders do not sync automatically."
         }
       },
       "preview": {
         "vault": "Open vault",
         "files": "My files",
         "vaultName": "Vaultwarden",
-        "file": "note.txt"
+        "file": "note.txt",
+        "console": "Console",
+        "consoleSub": "Products stay isolated. Open one lane.",
+        "overview": "Overview",
+        "nav": "Backup",
+        "billing": "Billing",
+        "settings": "Settings",
+        "active": "Active",
+        "open": "Open",
+        "planDesc": "Encrypted network access and secure cloud backup.",
+        "backupTitle": "Secure backup space",
+        "backupDesc": "Use Vaultwarden (password/memo backup) in the browser.",
+        "usage": "Backup usage",
+        "vaultDesc": "Open vault takes you to the login screen.",
+        "filesDesc": "Drag and drop files to store them.",
+        "upload": "Upload file",
+        "drop": "Drag and drop files here.",
+        "vw": {
+          "login": "Log in",
+          "email": "Email address (required)",
+          "remember": "Remember email",
+          "continue": "Continue",
+          "password": "Master password",
+          "submit": "Log in",
+          "navVault": "Vaults",
+          "navTools": "Tools",
+          "navReports": "Reports",
+          "navSettings": "Settings",
+          "allVaults": "All vaults",
+          "newItem": "New item",
+          "filter": "Filters",
+          "search": "Search vault",
+          "myVault": "My vault",
+          "types": "Types",
+          "logins": "Logins",
+          "notes": "Secure notes",
+          "getStarted": "Store passwords and notes in Vaultwarden.",
+          "name": "Name",
+          "owner": "Owner",
+          "me": "Me"
+        }
       }
     },
     "faq": {
@@ -749,9 +823,15 @@
     "filterFailed": "Failed",
     "filterProvisioning": "Issuing",
     "filterUnpaid": "Unpaid",
+    "filterSignupOnly": "Signup only",
+    "filterExpired": "Expired",
     "filterExpiring": "Expiring",
     "emptyFiltered": "No customers match this filter.",
     "period": "Period",
+    "signedUpAt": "Signed up",
+    "startsAt": "Starts",
+    "endsAt": "Ends",
+    "price": "Price",
     "step": "Step",
     "needsAttention": "Needs attention",
     "retryFailed": "Could not issue again. Check the step error.",
@@ -782,6 +862,7 @@
     "statusActive": "Active",
     "statusProvisioning": "Issuing",
     "statusUnpaid": "Unpaid",
+    "statusSignupOnly": "Signup only",
     "statusFailed": "Failed",
     "emptyCustomers": "No customers on this product.",
     "detailTitle": "Customer",

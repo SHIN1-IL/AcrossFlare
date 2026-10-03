@@ -35,7 +35,7 @@ import { yamlUrlFor } from "@/lib/provision/build";
 import { nodeWiring } from "@/lib/provision/node-wiring";
 
 type CustomerRow = Subscription & {
-  user: { email: string };
+  user: { email: string; createdAt: Date };
   plan: Plan;
   nodes: Pick<Node, "id" | "ddns">[] | Node[];
   credentials?: Credential | null;
@@ -116,6 +116,8 @@ export function toAdminCustomer(row: CustomerRow, includeSecrets = false): Admin
     status: toCustomerStatus(row.status),
     nodeIds: row.nodes.map((node) => node.id),
     createdAt: row.createdAt.toISOString(),
+    signedUpAt: row.user.createdAt.toISOString(),
+    signupOnly: false,
     credentials: includeSecrets ? toCredentials(row) : null,
     rotateHistory: includeSecrets
       ? (row.rotateEvents ?? []).map((event) => ({
@@ -129,6 +131,35 @@ export function toAdminCustomer(row: CustomerRow, includeSecrets = false): Admin
     provisionStep: row.provisionStep,
     provisionError: row.provisionError,
     payments: includeSecrets ? (row.payments ?? []).map(toAdminPayment) : [],
+    auditLogs: [],
+  };
+}
+
+export function toSignupOnlyCustomer(user: {
+  id: string;
+  email: string;
+  createdAt: Date;
+}): AdminCustomer {
+  const at = user.createdAt.toISOString();
+  return {
+    id: `signup:${user.id}`,
+    product: "global",
+    email: user.email,
+    planId: "",
+    planName: "",
+    expiresAt: "",
+    memo: "",
+    status: "unpaid",
+    nodeIds: [],
+    createdAt: at,
+    signedUpAt: at,
+    signupOnly: true,
+    credentials: null,
+    rotateHistory: [],
+    planChange: null,
+    provisionStep: "",
+    provisionError: "",
+    payments: [],
     auditLogs: [],
   };
 }
@@ -231,7 +262,7 @@ function toUiHealth(status: NodeHealth): UiNodeHealth {
 
 export function customerListInclude() {
   return {
-    user: { select: { email: true } },
+    user: { select: { email: true, createdAt: true } },
     plan: true,
     nodes: { select: { id: true, ddns: true } },
   };
@@ -239,7 +270,7 @@ export function customerListInclude() {
 
 export function customerInclude() {
   return {
-    user: { select: { email: true } },
+    user: { select: { email: true, createdAt: true } },
     plan: true,
     nodes: true,
     credentials: true,
@@ -266,7 +297,7 @@ export function toAdminPromoCode(
 }
 
 export async function listAdminState() {
-  const [plans, nodes, subscriptions, promoCodes] = await Promise.all([
+  const [plans, nodes, subscriptions, promoCodes, signupOnlyUsers] = await Promise.all([
     prisma.plan.findMany({ orderBy: { name: "asc" } }),
     prisma.node.findMany({ orderBy: { createdAt: "asc" } }),
     prisma.subscription.findMany({
@@ -277,12 +308,23 @@ export async function listAdminState() {
       include: { plan: { select: { name: true, product: true } } },
       orderBy: { createdAt: "desc" },
     }),
+    prisma.user.findMany({
+      where: {
+        role: "USER",
+        subscriptions: { none: {} },
+      },
+      select: { id: true, email: true, createdAt: true },
+      orderBy: { createdAt: "desc" },
+    }),
   ]);
 
   return {
     plans: plans.map(toAdminPlan),
     nodes: nodes.map(toAdminNode),
-    customers: subscriptions.map((row) => toAdminCustomer(row, false)),
+    customers: [
+      ...subscriptions.map((row) => toAdminCustomer(row, false)),
+      ...signupOnlyUsers.map(toSignupOnlyCustomer),
+    ],
     promoCodes: promoCodes.map(toAdminPromoCode),
     provisionSimulate: isProvisionSimulate(),
   };

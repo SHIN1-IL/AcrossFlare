@@ -1,0 +1,231 @@
+.stage {
+  contain: layout paint;
+}
+
+.login,
+.vault {
+  position: absolute;
+  inset: 0;
+}
+
+.login {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.vault {
+  opacity: 0;
+  transform: translateX(10px);
+}
+
+.emailStep {
+  opacity: 1;
+}
+
+.passStep {
+  opacity: 0;
+}
+
+.emailMask,
+.passMask {
+  transform: scaleX(1);
+  transform-origin: right center;
+}
+
+.continueRipple,
+.loginRipple {
+  opacity: 0;
+  transform: scale(0.35);
+}
+
+.stage[data-play] .login,
+.stage[data-play] .vault,
+.stage[data-play] .emailStep,
+.stage[data-play] .passStep,
+.stage[data-play] .emailMask,
+.stage[data-play] .passMask,
+.stage[data-play] .continueRipple,
+.stage[data-play] .loginRipple {
+  animation-duration: 6s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.stage[data-play] .login {
+  animation-name: vw-login-out;
+}
+
+.stage[data-play] .vault {
+  animation-name: vw-vault-in;
+}
+
+.stage[data-play] .emailStep {
+  animation-name: vw-email-step;
+}
+
+.stage[data-play] .passStep {
+  animation-name: vw-pass-step;
+}
+
+.stage[data-play] .emailMask {
+  animation-name: vw-type-mask;
+  animation-timing-function: steps(22, end);
+}
+
+.stage[data-play] .passMask {
+  animation-name: vw-pass-mask;
+  animation-timing-function: steps(16, end);
+}
+
+.stage[data-play] .continueRipple {
+  animation-name: vw-continue-ripple;
+}
+
+.stage[data-play] .loginRipple {
+  animation-name: vw-login-ripple;
+}
+
+@keyframes vw-login-out {
+  0%,
+  62% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  70%,
+  94% {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes vw-vault-in {
+  0%,
+  62% {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  70%,
+  94% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+}
+
+@keyframes vw-email-step {
+  0%,
+  30% {
+    opacity: 1;
+  }
+  36%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes vw-pass-step {
+  0%,
+  30% {
+    opacity: 0;
+  }
+  36%,
+  62% {
+    opacity: 1;
+  }
+  70%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes vw-type-mask {
+  0%,
+  8% {
+    transform: scaleX(1);
+  }
+  22%,
+  100% {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes vw-pass-mask {
+  0%,
+  38% {
+    transform: scaleX(1);
+  }
+  52%,
+  100% {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes vw-continue-ripple {
+  0%,
+  22% {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+  28% {
+    opacity: 0.95;
+    transform: scale(1);
+  }
+  36%,
+  100% {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}
+
+@keyframes vw-login-ripple {
+  0%,
+  52% {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+  58% {
+    opacity: 0.95;
+    transform: scale(1);
+  }
+  66%,
+  100% {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage[data-play] .login,
+  .stage[data-play] .vault,
+  .stage[data-play] .emailStep,
+  .stage[data-play] .passStep,
+  .stage[data-play] .emailMask,
+  .stage[data-play] .passMask,
+  .stage[data-play] .continueRipple,
+  .stage[data-play] .loginRipple {
+    animation: none;
+  }
+
+  .login,
+  .emailStep,
+  .passStep {
+    opacity: 0;
+  }
+
+  .vault {
+    opacity: 1;
+    transform: none;
+  }
+
+  .emailMask,
+  .passMask {
+    transform: scaleX(0);
+  }
+}

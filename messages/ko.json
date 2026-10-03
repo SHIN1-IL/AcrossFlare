@@ -560,7 +560,7 @@
     },
     "setup": {
       "title": "설정방법",
-      "heading": "3단계로 끝내는 초기 설정",
+      "heading": "5단계로 끝내는 초기 설정",
       "install": {
         "windows": ".exe 설치 파일을 실행하세요. SmartScreen 경고가 뜨면 추가 정보 → 실행을 선택합니다.",
         "macos": ".dmg를 열고 Karing을 응용 프로그램으로 끌어다 놓으세요. 확인되지 않은 개발자 경고가 뜨면 시스템 설정 → 개인정보 보호 및 보안에서 확인 없이 열기를 누릅니다.",
@@ -573,21 +573,55 @@
           "title": "Karing 설치 파일 실행",
           "body": "다운로드된 파일을 실행하고 안내에 따라 설치를 완료하세요. 사용 중인 OS 안내는 아래를 참고하세요."
         },
+        "addProfile": {
+          "title": "Add Profile에서 연동 방식 선택",
+          "body": "Karing 메인에서 Add Profile을 누른 뒤, Add Profile Link 또는 Scan QR Code를 선택하세요."
+        },
         "profile": {
           "title": "발급받은 구독 QR코드 또는 링크 연동",
           "body": "결제 완료 후에 화면 우측 상단 콘솔을 클릭하시면, QR코드와 연결링크가 생성되어 있습니다. 이 QR을 Karing에서 스캔하거나, URL을 복사해 Add Profile에 붙여넣으세요. QR 코드 복사로 이미지를 복사할 수도 있습니다."
         },
         "connect": {
-          "title": "연결 시작 (Connect)",
-          "body": "프로필이 등록되면 메인 화면 스위치를 켜서 연결하세요. 백업 공간은 프로필의 웹페이지 또는 공지 ‘보안 백업 공간 바로가기’를 누르면 브라우저에서 열립니다."
+          "title": "연결 시작 및 핑 테스트",
+          "body": "메인 화면에서 연결을 켠 뒤, Select Server 오른쪽 위 번개 아이콘으로 핑 테스트를 하면 node-tokyo·node-la-a 지연이 갱신되어 녹색으로 표시됩니다. 백업 공간은 프로필 웹페이지 또는 공지 ‘보안 백업 공간 바로가기’에서 열 수 있습니다."
+        },
+        "done": {
+          "title": "완료",
+          "body": "연결이 되면 설정이 끝났습니다. 문제가 있으면 아래 FAQ를 확인하거나 서포트에 문의해 주세요."
         }
       },
       "preview": {
         "copy": "구독 링크 복사",
         "copied": "복사 완료",
-        "node": "Tokyo #1",
-        "latency": "32ms",
-        "connected": "CONNECTED"
+        "addProfile": "Add Profile",
+        "pasteHint": "복사한 URL을 여기에 붙여넣기",
+        "linkTitle": "Add Profile Link",
+        "scanTitle": "QR 코드 스캔",
+        "scanHint": "콘솔의 정사각 QR을 프레임에 맞춰 주세요",
+        "link": {
+          "placeholder": "Profile Link/Content",
+          "keepRules": "Keep Diversion Rules",
+          "autoRemove": "Automatically remove servers that fail latency tests"
+        },
+        "menu": {
+          "link": "Add Profile Link",
+          "clipboard": "Import From Clipboard",
+          "file": "Import Profile File",
+          "scan": "Scan QR Code",
+          "custom": "Custom"
+        },
+        "connect": {
+          "time": "시간",
+          "peers": "연결",
+          "traffic": "트래픽",
+          "speed": "속도",
+          "node": "node-tokyo",
+          "latency": "43 ms ›"
+        },
+        "ping": {
+          "selectServer": "Select Server",
+          "recent": "Recently Used"
+        }
       }
     },
     "backup": {
@@ -595,23 +629,63 @@
       "heading": "브라우저에서 암호와 작은 파일을 보관합니다. 백업용 앱을 따로 받을 필요는 없습니다.",
       "steps": {
         "open": {
-          "title": "금고와 내 파일 열기",
-          "body": "백업 공간에서 Vaultwarden은 금고 열기를 누르고, 작은 파일은 내 파일 영역에서 바로 올리고 받으세요."
+          "title": "콘솔에서 금고 열기",
+          "body": "콘솔의 백업에서 금고 열기를 누르면 Vaultwarden 로그인 화면으로 이동합니다. 홈페이지와 같은 계정으로 들어가세요."
         },
         "save": {
-          "title": "암호·메모와 작은 파일 저장",
+          "title": "금고 열고, Vaultwarden에서 로그인 후, 암호·메모·작은파일 저장",
           "body": "암호·메모는 Vaultwarden에, 작은 파일은 내 파일에 저장하세요."
         },
         "phone": {
-          "title": "폰에서도 같은 방법으로",
-          "body": "폰에서도 브라우저로 백업 공간을 열고, 내 파일에서 올리고 받으세요. 폴더 전체를 자동으로 맞추는 기능은 없습니다."
+          "title": "콘솔에서 작은 파일 저장",
+          "body": "백업 화면의 내 파일 점선 영역에 바탕화면 파일을 끌어다 놓으면 바로 저장됩니다. 폴더 전체를 자동으로 맞추는 기능은 없습니다."
         }
       },
       "preview": {
         "vault": "금고 열기",
         "files": "내 파일",
         "vaultName": "Vaultwarden",
-        "file": "메모.txt"
+        "file": "메모.txt",
+        "console": "콘솔",
+        "consoleSub": "상품은 분리됩니다. 레인을 하나 여세요.",
+        "overview": "개요",
+        "nav": "백업",
+        "billing": "결제",
+        "settings": "설정",
+        "active": "활성",
+        "open": "열기",
+        "planDesc": "암호화 네트워크 접속과 보안 클라우드 백업.",
+        "backupTitle": "보안 백업 공간",
+        "backupDesc": "Vaultwarden(암호·메모 백업)을 브라우저에서 이용하세요.",
+        "usage": "백업 사용량",
+        "vaultDesc": "금고 열기를 누르면 로그인 화면으로 이동합니다.",
+        "filesDesc": "파일을 끌어다 놓으면 바로 저장됩니다.",
+        "upload": "파일 올리기",
+        "drop": "파일을 여기에 끌어다 놓으세요.",
+        "vw": {
+          "login": "로그인",
+          "email": "이메일 주소 (required)",
+          "remember": "이메일 기억하기",
+          "continue": "계속",
+          "password": "마스터 비밀번호",
+          "submit": "로그인",
+          "navVault": "보관함",
+          "navTools": "도구",
+          "navReports": "보고서",
+          "navSettings": "설정",
+          "allVaults": "모든 보관함",
+          "newItem": "새 항목",
+          "filter": "필터",
+          "search": "보관함 검색",
+          "myVault": "내 보관함",
+          "types": "유형",
+          "logins": "로그인",
+          "notes": "보안 메모",
+          "getStarted": "암호·메모를 Vaultwarden에 저장하세요.",
+          "name": "이름",
+          "owner": "소유자",
+          "me": "나"
+        }
       }
     },
     "faq": {
@@ -749,9 +823,15 @@
     "filterFailed": "실패",
     "filterProvisioning": "발급 중",
     "filterUnpaid": "미결제",
+    "filterSignupOnly": "가입만",
+    "filterExpired": "만료·미갱신",
     "filterExpiring": "만료 임박",
     "emptyFiltered": "조건에 맞는 고객이 없습니다.",
     "period": "기간",
+    "signedUpAt": "가입일",
+    "startsAt": "시작일",
+    "endsAt": "종료일",
+    "price": "금액",
     "step": "단계",
     "needsAttention": "손볼 것",
     "retryFailed": "다시 발급하지 못했습니다. 단계 오류를 확인하세요.",
@@ -782,6 +862,7 @@
     "statusActive": "활성",
     "statusProvisioning": "발급 중",
     "statusUnpaid": "미결제",
+    "statusSignupOnly": "가입만",
     "statusFailed": "실패",
     "emptyCustomers": "이 상품에 고객이 없습니다.",
     "detailTitle": "고객",

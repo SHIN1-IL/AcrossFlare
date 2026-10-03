@@ -560,7 +560,7 @@
     },
     "setup": {
       "title": "設定方法",
-      "heading": "3ステップで初期設定",
+      "heading": "5ステップで初期設定",
       "install": {
         "windows": ".exe インストーラーを実行します。SmartScreen が出たら「詳細情報」→「実行」を選びます。",
         "macos": ".dmg を開き、Karing をアプリケーションにドラッグします。「確認されていない開発元」と出たら、システム設定 → プライバシーとセキュリティで「このまま開く」を選びます。",
@@ -573,21 +573,55 @@
           "title": "Karing のインストール",
           "body": "ダウンロードしたファイルを実行し、案内に従って入れてください。OS ごとの注意は下を見てください。"
         },
+        "addProfile": {
+          "title": "Add Profile で追加方法を選ぶ",
+          "body": "Karing メインで Add Profile を押し、Add Profile Link または Scan QR Code を選んでください。"
+        },
         "profile": {
           "title": "発行済みの購読 QR またはリンクを追加",
           "body": "お支払い後、画面右上のコンソールをクリックすると、QRコードと接続リンクが発行されています。その QR を Karing で読み取るか、URL をコピーして Add Profile に貼り付けてください。QR 画像のコピーもできます。"
         },
         "connect": {
-          "title": "接続を開始（Connect）",
-          "body": "プロファイルを保存したら、メイン画面のスイッチをオンにして接続します。バックアップ空間は、プロファイルのウェブページまたはお知らせ「セキュリティバックアップ空間」からブラウザで開けます。"
+          "title": "接続開始とピングテスト",
+          "body": "メイン画面で接続をオンにしたあと、Select Server 右上の稲妻でピングテストを実行します。node-tokyo と node-la-a の遅延が緑で表示されます。バックアップはプロファイルのウェブページまたはお知らせから開けます。"
+        },
+        "done": {
+          "title": "完了",
+          "body": "接続できれば設定は完了です。うまくいかない場合は下の FAQ を見るか、サポートへ連絡してください。"
         }
       },
       "preview": {
         "copy": "リンクをコピー",
         "copied": "コピー完了",
-        "node": "Tokyo #1",
-        "latency": "32ms",
-        "connected": "CONNECTED"
+        "addProfile": "Add Profile",
+        "pasteHint": "コピーした URL をここに貼り付け",
+        "linkTitle": "Add Profile Link",
+        "scanTitle": "QRコードをスキャン",
+        "scanHint": "コンソールの正方形 QR を枠に合わせてください",
+        "link": {
+          "placeholder": "Profile Link/Content",
+          "keepRules": "Keep Diversion Rules",
+          "autoRemove": "Automatically remove servers that fail latency tests"
+        },
+        "menu": {
+          "link": "Add Profile Link",
+          "clipboard": "Import From Clipboard",
+          "file": "Import Profile File",
+          "scan": "Scan QR Code",
+          "custom": "Custom"
+        },
+        "connect": {
+          "time": "時間",
+          "peers": "接続",
+          "traffic": "トラフィック",
+          "speed": "速度",
+          "node": "node-tokyo",
+          "latency": "43 ms ›"
+        },
+        "ping": {
+          "selectServer": "Select Server",
+          "recent": "Recently Used"
+        }
       }
     },
     "backup": {
@@ -595,23 +629,63 @@
       "heading": "ブラウザでパスワードと小さなファイルを保管します。バックアップ用アプリを別途入手する必要はありません。",
       "steps": {
         "open": {
-          "title": "保管庫とマイファイルを開く",
-          "body": "バックアップ空間で Vaultwarden は保管庫を開くから利用し、小さなファイルはマイファイルで直接管理します。"
+          "title": "コンソールで保管庫を開く",
+          "body": "コンソールのバックアップで「保管庫を開く」を押すと Vaultwarden のログイン画面に進みます。ホームページと同じアカウントで入ってください。"
         },
         "save": {
-          "title": "パスワード・メモと小さなファイルを保存",
+          "title": "保管庫を開き、Vaultwarden にログイン後、パスワード・メモ・小さなファイルを保存",
           "body": "パスワードとメモは Vaultwarden に、小さなファイルはマイファイルに保存してください。"
         },
         "phone": {
-          "title": "スマホでも同じ手順で",
-          "body": "スマホでもブラウザでバックアップ空間を開き、マイファイルでアップロード・ダウンロードしてください。フォルダ全体を自動で合わせる機能はありません。"
+          "title": "コンソールで小さなファイルを保存",
+          "body": "バックアップ画面のマイファイル点線エリアにデスクトップのファイルをドラッグ＆ドロップすると保存されます。フォルダ全体を自動で合わせる機能はありません。"
         }
       },
       "preview": {
         "vault": "保管庫を開く",
         "files": "マイファイル",
         "vaultName": "Vaultwarden",
-        "file": "メモ.txt"
+        "file": "メモ.txt",
+        "console": "コンソール",
+        "consoleSub": "商品は分離される。レーンを一つ開く。",
+        "overview": "概要",
+        "nav": "バックアップ",
+        "billing": "請求",
+        "settings": "設定",
+        "active": "有効",
+        "open": "開く",
+        "planDesc": "暗号化ネットワークとセキュアクラウドバックアップ。",
+        "backupTitle": "セキュアバックアップ空間",
+        "backupDesc": "Vaultwarden（パスワード・メモ）をブラウザで使います。",
+        "usage": "バックアップ使用量",
+        "vaultDesc": "保管庫を開くとログイン画面に進みます。",
+        "filesDesc": "ファイルをドラッグ＆ドロップで保存できます。",
+        "upload": "ファイルをアップロード",
+        "drop": "ここにファイルをドロップ",
+        "vw": {
+          "login": "ログイン",
+          "email": "メールアドレス (required)",
+          "remember": "メールを記憶する",
+          "continue": "続行",
+          "password": "マスターパスワード",
+          "submit": "ログイン",
+          "navVault": "保管庫",
+          "navTools": "ツール",
+          "navReports": "レポート",
+          "navSettings": "設定",
+          "allVaults": "すべての保管庫",
+          "newItem": "新規項目",
+          "filter": "フィルター",
+          "search": "保管庫を検索",
+          "myVault": "マイ保管庫",
+          "types": "種類",
+          "logins": "ログイン",
+          "notes": "セキュアメモ",
+          "getStarted": "パスワードとメモを Vaultwarden に保存します。",
+          "name": "名前",
+          "owner": "所有者",
+          "me": "自分"
+        }
       }
     },
     "faq": {
@@ -749,9 +823,15 @@
     "filterFailed": "失敗",
     "filterProvisioning": "発行中",
     "filterUnpaid": "未払い",
+    "filterSignupOnly": "登録のみ",
+    "filterExpired": "期限切れ",
     "filterExpiring": "期限間近",
     "emptyFiltered": "条件に合う顧客はいません。",
     "period": "期間",
+    "signedUpAt": "登録日",
+    "startsAt": "開始日",
+    "endsAt": "終了日",
+    "price": "金額",
     "step": "ステップ",
     "needsAttention": "要対応",
     "retryFailed": "再発行できませんでした。ステップのエラーを確認してください。",
@@ -782,6 +862,7 @@
     "statusActive": "有効",
     "statusProvisioning": "発行中",
     "statusUnpaid": "未払い",
+    "statusSignupOnly": "登録のみ",
     "statusFailed": "失敗",
     "emptyCustomers": "この商品に顧客はいません。",
     "detailTitle": "顧客",

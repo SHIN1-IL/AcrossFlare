@@ -5,6 +5,7 @@ import { toPublicSession } from "@/lib/auth-types";
 import { isOwnerEmail } from "@/lib/admin-permissions";
 import { prisma } from "@/lib/db";
 import { normalizeEmail } from "@/lib/email";
+import { notifyOpsSignup } from "@/lib/ops-notify";
 import { hashPassword, isStrongPassword } from "@/lib/password";
 import { attachVaultBackup, syncVaultwardenPassword } from "@/lib/provision/vaultwarden-account";
 
@@ -43,6 +44,8 @@ export async function POST(request: Request) {
     const token = await createSession(user.id);
     await setSessionCookie(token);
     const session = await materializeAuthUser(user);
+
+    void notifyOpsSignup(email).catch((error) => console.error("ops_notify_signup_failed", error));
 
     return NextResponse.json({
       user: toPublicSession(session),

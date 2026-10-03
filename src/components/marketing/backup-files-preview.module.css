@@ -1,0 +1,138 @@
+.stage {
+  contain: layout paint;
+}
+
+/* Anchored at drop-zone center; starts offset on the desktop. */
+.dragFile {
+  opacity: 1;
+  transform: translate(calc(-50% + 96px), calc(-50% + 82px)) scale(1);
+}
+
+.dropHint {
+  opacity: 1;
+}
+
+.dropGlow {
+  opacity: 0;
+  transform: scale(1);
+}
+
+.dropped {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.stage[data-play] .dragFile,
+.stage[data-play] .dropHint,
+.stage[data-play] .dropGlow,
+.stage[data-play] .dropped {
+  animation-duration: 5s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.stage[data-play] .dragFile {
+  animation-name: backup-drag-file;
+}
+
+.stage[data-play] .dropHint {
+  animation-name: backup-drop-hint;
+}
+
+.stage[data-play] .dropGlow {
+  animation-name: backup-drop-glow;
+}
+
+.stage[data-play] .dropped {
+  animation-name: backup-dropped-in;
+}
+
+@keyframes backup-drag-file {
+  0%,
+  12% {
+    opacity: 1;
+    transform: translate(calc(-50% + 96px), calc(-50% + 82px)) scale(1);
+  }
+  42% {
+    opacity: 1;
+    transform: translate(calc(-50% + 36px), calc(-50% + 28px)) scale(0.96);
+  }
+  66% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.88);
+  }
+  74%,
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+}
+
+@keyframes backup-drop-hint {
+  0%,
+  52% {
+    opacity: 1;
+  }
+  66%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes backup-drop-glow {
+  0%,
+  45% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  58%,
+  76% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+  88%,
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+
+@keyframes backup-dropped-in {
+  0%,
+  70% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  78%,
+  94% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage[data-play] .dragFile,
+  .stage[data-play] .dropHint,
+  .stage[data-play] .dropGlow,
+  .stage[data-play] .dropped {
+    animation: none;
+  }
+
+  .dragFile,
+  .dropHint {
+    opacity: 0;
+  }
+
+  .dropped {
+    opacity: 1;
+    transform: none;
+  }
+
+  .dropGlow {
+    opacity: 0.45;
+  }
+}
