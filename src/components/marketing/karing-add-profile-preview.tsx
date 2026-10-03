@@ -7,7 +7,6 @@ import styles from "./karing-add-profile-preview.module.css";
 
 /** Step 2: both phones main → Add Profile → menu; left taps Link, right taps Scan QR. */
 export function KaringAddProfilePreview() {
-  const t = useTranslations("support");
   const stageRef = useRef<HTMLDivElement>(null);
   const [play, setPlay] = useState(false);
 
@@ -36,7 +35,6 @@ export function KaringAddProfilePreview() {
     >
       <PhoneShell>
         <MainScreen
-          t={t}
           addRipple={
             <span
               className={cn(
@@ -47,7 +45,6 @@ export function KaringAddProfilePreview() {
           }
         />
         <MenuScreen
-          t={t}
           highlight="link"
           menuRipple={
             <span
@@ -62,7 +59,6 @@ export function KaringAddProfilePreview() {
 
       <PhoneShell>
         <MainScreen
-          t={t}
           addRipple={
             <span
               className={cn(
@@ -73,7 +69,6 @@ export function KaringAddProfilePreview() {
           }
         />
         <MenuScreen
-          t={t}
           highlight="scan"
           menuRipple={
             <span
@@ -97,13 +92,8 @@ function PhoneShell({ children }: { children: ReactNode }) {
   );
 }
 
-function MainScreen({
-  t,
-  addRipple,
-}: {
-  t: (key: string) => string;
-  addRipple: ReactNode;
-}) {
+function MainScreen({ addRipple }: { addRipple: ReactNode }) {
+  const t = useTranslations("support");
   return (
     <div className={cn(styles?.main, "flex flex-col")}>
       <StatusBar />
@@ -167,14 +157,13 @@ function MainScreen({
 }
 
 function MenuScreen({
-  t,
   highlight,
   menuRipple,
 }: {
-  t: (key: string) => string;
   highlight: "link" | "scan";
   menuRipple: ReactNode;
 }) {
+  const t = useTranslations("support");
   const rows = [
     ["link", t("setup.preview.menu.link")],
     ["clip", t("setup.preview.menu.clipboard")],

@@ -26,8 +26,11 @@ describe("ops-notify", () => {
   });
 
   it("sends signup and payment emails through Resend", async () => {
-    const fetchMock = vi.fn(async () => new Response("{}", { status: 200 }));
-    globalThis.fetch = fetchMock as typeof fetch;
+    const bodies: string[] = [];
+    globalThis.fetch = (async (_input: RequestInfo | URL, init?: RequestInit) => {
+      bodies.push(String(init?.body ?? ""));
+      return new Response("{}", { status: 200 });
+    }) as typeof fetch;
 
     await expect(notifyOpsSignup("new@example.com")).resolves.toEqual({ ok: true });
     await expect(
@@ -39,11 +42,11 @@ describe("ops-notify", () => {
       })
     ).resolves.toEqual({ ok: true });
 
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-    const first = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body));
+    expect(bodies).toHaveLength(2);
+    const first = JSON.parse(bodies[0] ?? "{}");
     expect(first.to).toEqual(["ops@acrossflare.com"]);
     expect(first.subject).toContain("new@example.com");
-    const second = JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body));
+    const second = JSON.parse(bodies[1] ?? "{}");
     expect(second.text).toContain("global-standard");
     expect(second.text).toContain("9900");
   });
