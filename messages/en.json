@@ -257,14 +257,16 @@
     "global-lite": {
       "eyebrow": "Secure Cloud & Network Optimization",
       "title": "Standard",
-      "description": "Right-sized speed for short trips and travel backups. Use Vaultwarden (password & note backup) in a browser.",
+      "description": "Use Vaultwarden (password & note backup) in a browser.",
+      "line2": "Right-sized speed for secure backup on short trips and business travel.",
       "price": "₩9,900 · 1 month",
       "cta": "Learn more"
     },
     "global-pro": {
       "eyebrow": "Secure Cloud & Network Optimization",
       "title": "Hybrid",
-      "description": "Secure backup with faster network optimization. Use Vaultwarden (password & note backup) in a browser.",
+      "description": "Use Vaultwarden (password & note backup) in a browser.",
+      "line2": "Secure backup with faster network optimization.",
       "price": "₩19,900 · 1 month",
       "cta": "Learn more"
     }
@@ -272,8 +274,8 @@
   "workspace": {
     "eyebrow": "Secure Cloud & Network Optimization",
     "title": "Workspace & Custom",
-    "description": "Custom orders for friends and teams. Use Vaultwarden (password & note backup) in a browser.",
-    "hint": "Plans A, B, and C by headcount",
+    "description": "Use Vaultwarden (password & note backup) in a browser.",
+    "hint": "Build a custom service for friends and teammates.",
     "learnMore": "Learn more",
     "cta": "Get started"
   },

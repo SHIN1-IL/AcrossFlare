@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { HeroGrain } from "@/components/marketing/hero-grain";
+import { MotherboardEdgeBackdrop } from "@/components/marketing/motherboard-edge-backdrop";
 import { StoryDeviceFrame, StoryDevicePanes } from "@/components/marketing/story-device-frame";
 
 type StepId =
@@ -105,9 +106,34 @@ export function ConsoleKaringStory({ className }: { className?: string }) {
       data-home-page
       className={cn("relative h-[520vh] snap-start bg-[#14181e] max-md:snap-start", className)}
     >
-      <div className="sticky top-0 h-dvh overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(226,232,240,0.06),transparent_32%,rgba(0,0,0,0.28)),repeating-linear-gradient(90deg,rgba(255,255,255,0.04)_0px,rgba(255,255,255,0.04)_1px,transparent_1px,transparent_5px)]" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-[360px] bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.1),transparent_55%)]" />
+      <div
+        className="sticky top-0 flex h-dvh cursor-pointer flex-col overflow-hidden"
+        onPointerDown={(e) => {
+          pointerStart.current = { x: e.clientX, y: e.clientY };
+        }}
+        onClick={(e) => {
+          const start = pointerStart.current;
+          pointerStart.current = null;
+          if (
+            start &&
+            (Math.abs(e.clientX - start.x) > 12 || Math.abs(e.clientY - start.y) > 12)
+          ) {
+            return;
+          }
+          onStageActivate();
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onStageActivate();
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        aria-label="다음 프리뷰로 이동"
+      >
+        <MotherboardEdgeBackdrop />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(226,232,240,0.04),transparent_32%,rgba(0,0,0,0.18)),repeating-linear-gradient(90deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_1px,transparent_1px,transparent_5px)]" />
         <HeroGrain />
 
         <style>{`
@@ -141,47 +167,22 @@ export function ConsoleKaringStory({ className }: { className?: string }) {
           }
         `}</style>
 
-        <div className="absolute inset-x-0 top-9 z-20 flex flex-col items-center px-4 text-center max-[479px]:top-5 sm:top-11">
-          <h1 className="text-[clamp(1.85rem,5.5vw,3rem)] leading-[0.95] font-semibold tracking-[-0.04em] text-[#f4f4f5] max-[479px]:text-[1.45rem]">
+        <div className="relative z-20 flex shrink-0 flex-col items-center px-4 pt-8 text-center max-[479px]:pt-5 sm:pt-10">
+          <h1 className="text-[clamp(1.55rem,4.5vw,2.5rem)] leading-[0.95] font-semibold tracking-[-0.04em] text-[#f4f4f5] max-[479px]:text-[1.35rem]">
             AcrossFlare
           </h1>
-          <p className="mt-2 text-[clamp(0.72rem,1.8vw,1rem)] whitespace-nowrap text-[#888888] max-[479px]:hidden">
+          <p className="mt-1.5 text-[clamp(0.68rem,1.6vw,0.9rem)] whitespace-nowrap text-[#888888] max-[479px]:hidden">
             Secure Cloud & Network Optimization
           </p>
-          <p className="mt-3 text-[clamp(0.8rem,1.6vw,1rem)] font-medium text-emerald-300/90 max-[479px]:mt-1 max-[479px]:text-[0.78rem]">
+          <p className="mt-2 text-[clamp(0.75rem,1.5vw,0.95rem)] font-medium text-emerald-300/90 max-[479px]:mt-1 max-[479px]:text-[0.75rem]">
             {HEADLINES[stepId]}
           </p>
         </div>
 
-        <div
-          className="absolute inset-x-0 top-[8.5rem] bottom-16 z-[5] flex cursor-pointer flex-col items-center justify-center px-4 max-[479px]:top-[4.5rem] max-[479px]:bottom-10 sm:top-[9.25rem]"
-          onPointerDown={(e) => {
-            pointerStart.current = { x: e.clientX, y: e.clientY };
-          }}
-          onClick={(e) => {
-            const start = pointerStart.current;
-            pointerStart.current = null;
-            if (
-              start &&
-              (Math.abs(e.clientX - start.x) > 12 || Math.abs(e.clientY - start.y) > 12)
-            ) {
-              return;
-            }
-            onStageActivate();
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              onStageActivate();
-            }
-          }}
-          role="button"
-          tabIndex={0}
-          aria-label="다음 프리뷰로 이동"
-        >
+        <div className="relative z-[5] mx-auto mt-3 min-h-0 w-full max-w-2xl flex-1 px-3 max-[479px]:mt-2 max-[479px]:max-w-none">
           <div
             key={`${stepId}-${armed ? "on" : "off"}`}
-            className="relative w-full max-w-xl max-[479px]:max-w-none"
+            className="h-full w-full"
             style={animate ? { animation: "af-ck-fade-in 0.45s ease-out both" } : undefined}
           >
             <StoryDeviceFrame>
@@ -193,12 +194,13 @@ export function ConsoleKaringStory({ className }: { className?: string }) {
               {stepId === "vault-backup" && <VaultBackupContent animate={animate} />}
             </StoryDeviceFrame>
           </div>
+        </div>
 
-          <p className="mt-5 max-w-xl text-center text-[clamp(0.78rem,1.5vw,0.95rem)] leading-snug text-[#c8c8c8] max-[479px]:mt-3 max-[479px]:text-[0.78rem]">
+        <div className="relative z-20 flex shrink-0 flex-col items-center px-4 pt-3 pb-5 max-[479px]:pt-2 max-[479px]:pb-4">
+          <p className="max-w-xl text-center text-[clamp(0.78rem,1.5vw,0.95rem)] leading-snug text-[#c8c8c8] max-[479px]:text-[0.78rem]">
             {CAPTIONS[stepId]}
           </p>
-
-          <div className="mt-4 flex gap-2 max-[479px]:mt-2.5">
+          <div className="mt-3 flex gap-2 max-[479px]:mt-2">
             {STEPS.map((id, i) => (
               <span
                 key={id}

@@ -257,14 +257,16 @@
     "global-lite": {
       "eyebrow": "보안 클라우드+네트워크 최적화",
       "title": "Standard",
-      "description": "단기 여행이나 출장시 보안백업을 위한 적합한 속도를 제공. Vaultwarden(암호·메모 백업)을 브라우저로 이용합니다.",
+      "description": "Vaultwarden(암호·메모 백업)을 브라우저로 이용합니다.",
+      "line2": "단기 여행이나 출장시 보안백업을 위한 적합한 속도를 제공합니다",
       "price": "₩9,900 · 1개월",
       "cta": "더 알아보기"
     },
     "global-pro": {
       "eyebrow": "보안 클라우드+네트워크 최적화",
       "title": "Hybrid",
-      "description": "보안백업과 빠른 속도의 네트워크 최적화를 제공. Vaultwarden(암호·메모 백업)을 브라우저로 이용합니다.",
+      "description": "Vaultwarden(암호·메모 백업)을 브라우저로 이용합니다.",
+      "line2": "보안백업과 빠른 속도의 네트워크 최적화를 제공합니다",
       "price": "₩19,900 · 1개월",
       "cta": "더 알아보기"
     }
@@ -272,8 +274,8 @@
   "workspace": {
     "eyebrow": "보안 클라우드+네트워크 최적화",
     "title": "Workspace & Custom",
-    "description": "친구나 팀원을 위한 맞춤형 주문 서비스. Vaultwarden(암호·메모 백업)을 브라우저로 이용합니다.",
-    "hint": "인원수에 따른 A, B, C 플랜",
+    "description": "Vaultwarden(암호·메모 백업)을 브라우저로 이용합니다.",
+    "hint": "친구나 팀원을 위한 맞춤형 서비스를 구축할수 있습니다",
     "learnMore": "더 알아보기",
     "cta": "서비스 신청하기"
   },

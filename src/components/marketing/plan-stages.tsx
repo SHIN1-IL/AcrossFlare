@@ -14,7 +14,7 @@ export function PlanStagesSkeleton() {
   return (
     <div
       data-home-page
-      className="relative h-dvh snap-center snap-always overflow-hidden bg-[#07080c] max-md:snap-start"
+      className="relative h-dvh snap-center snap-always overflow-hidden bg-[#0e1014] max-md:snap-start"
       aria-hidden="true"
     />
   );
@@ -81,6 +81,7 @@ function PlanStage({
           eyebrow: tSlides("global-lite.eyebrow"),
           title: tSlides("global-lite.title"),
           description: tSlides("global-lite.description"),
+          line2: tSlides("global-lite.line2"),
           cta: tSlides("global-lite.cta"),
         }
       : plan.id === "global-pro"
@@ -88,6 +89,7 @@ function PlanStage({
             eyebrow: tSlides("global-pro.eyebrow"),
             title: tSlides("global-pro.title"),
             description: tSlides("global-pro.description"),
+            line2: tSlides("global-pro.line2"),
             cta: tSlides("global-pro.cta"),
           }
         : null;
@@ -116,6 +118,9 @@ function PlanStage({
               plan.backupGb !== null ? ` · ${t("backup")} ${plan.backupGb} GB` : ""
             }`}
         </p>
+        {custom?.line2 ? (
+          <p className="mt-2 text-sm text-muted-foreground md:text-base">{custom.line2}</p>
+        ) : null}
         <div className="mt-6 w-full max-w-md">
           <p className="font-mono text-3xl tracking-tight md:text-4xl">
             <PriceAmount locale={locale} prices={prices} compact />

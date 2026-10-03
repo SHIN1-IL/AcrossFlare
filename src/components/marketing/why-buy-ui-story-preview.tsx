@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { HeroGrain } from "@/components/marketing/hero-grain";
+import { MotherboardEdgeBackdrop } from "@/components/marketing/motherboard-edge-backdrop";
 import { StoryDeviceFrame, StoryDevicePanes } from "@/components/marketing/story-device-frame";
 
 const STEP_MS = 5800;
@@ -113,9 +114,14 @@ export function WhyBuyUiStoryPreview({
   const animate = !reduced && armed;
 
   const stage = (
-    <div className={cn("relative w-full overflow-hidden bg-[#14181e]", live ? "h-full" : "h-[min(86dvh,680px)]")}>
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(226,232,240,0.07),transparent_34%,rgba(0,0,0,0.2)),repeating-linear-gradient(90deg,rgba(255,255,255,0.045)_0px,rgba(255,255,255,0.045)_1px,transparent_1px,transparent_5px)]" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.1),transparent_55%)]" />
+    <div
+      className={cn(
+        "relative flex w-full flex-col overflow-hidden bg-[#14181e]",
+        live ? "h-full" : "h-[min(86dvh,680px)]"
+      )}
+    >
+      <MotherboardEdgeBackdrop />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(226,232,240,0.04),transparent_34%,rgba(0,0,0,0.16)),repeating-linear-gradient(90deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_1px,transparent_1px,transparent_5px)]" />
       <HeroGrain />
 
       <style>{`
@@ -133,32 +139,33 @@ export function WhyBuyUiStoryPreview({
         }
       `}</style>
 
-      <div className="absolute inset-x-0 top-9 z-10 flex flex-col items-center px-4 text-center max-[479px]:top-5 sm:top-11">
-        <h1 className="text-[clamp(1.85rem,5.5vw,3rem)] leading-[0.95] font-semibold tracking-[-0.04em] text-[#f4f4f5] max-[479px]:text-[1.45rem]">
+      <div className="relative z-10 flex shrink-0 flex-col items-center px-4 pt-8 text-center max-[479px]:pt-5 sm:pt-10">
+        <h1 className="text-[clamp(1.55rem,4.5vw,2.5rem)] leading-[0.95] font-semibold tracking-[-0.04em] text-[#f4f4f5] max-[479px]:text-[1.35rem]">
           AcrossFlare
         </h1>
-        <p className="mt-2 text-[clamp(0.72rem,1.8vw,1rem)] whitespace-nowrap text-[#888888] max-[479px]:hidden">
+        <p className="mt-1.5 text-[clamp(0.68rem,1.6vw,0.9rem)] whitespace-nowrap text-[#888888] max-[479px]:hidden">
           Secure Cloud & Network Optimization
         </p>
-        <p className="mt-3 text-[clamp(0.8rem,1.6vw,1rem)] font-medium text-emerald-300/90 max-[479px]:mt-1 max-[479px]:text-[0.78rem]">
+        <p className="mt-2 text-[clamp(0.75rem,1.5vw,0.95rem)] font-medium text-emerald-300/90 max-[479px]:mt-1 max-[479px]:text-[0.75rem]">
           {t("headline")}
         </p>
       </div>
 
-      <div className="absolute inset-x-0 top-[8.5rem] bottom-16 z-10 flex flex-col items-center justify-center px-4 max-[479px]:top-[4.5rem] max-[479px]:bottom-10 sm:top-[9.25rem]">
+      <div className="relative z-10 mx-auto mt-3 min-h-0 w-full max-w-2xl flex-1 px-3 max-[479px]:mt-2 max-[479px]:max-w-none">
         <div
           key={`${runId}-${stepId}-${armed ? "on" : "off"}`}
-          className="w-full max-w-xl max-[479px]:max-w-none"
+          className="h-full w-full"
           style={animate ? { animation: "af-ui-fade-in 0.55s ease-out both" } : undefined}
         >
           <DeviceMock step={stepId} t={t} items={items} animate={animate} />
         </div>
+      </div>
 
-        <p className="mt-5 max-w-xl text-center text-[clamp(0.78rem,1.5vw,0.95rem)] leading-snug text-[#c8c8c8] max-[479px]:mt-3 max-[479px]:text-[0.78rem]">
+      <div className="relative z-10 flex shrink-0 flex-col items-center px-4 pt-3 pb-5 max-[479px]:pt-2 max-[479px]:pb-4">
+        <p className="max-w-xl text-center text-[clamp(0.78rem,1.5vw,0.95rem)] leading-snug text-[#c8c8c8] max-[479px]:text-[0.78rem]">
           {captions[stepId]}
         </p>
-
-        <div className="mt-4 flex gap-2 max-[479px]:mt-2.5">
+        <div className="mt-3 flex gap-2 max-[479px]:mt-2">
           {STEPS.map((id, i) => (
             <span
               key={id}
@@ -169,16 +176,15 @@ export function WhyBuyUiStoryPreview({
             />
           ))}
         </div>
+        <p
+          className={cn(
+            "mt-2 text-center text-[clamp(0.75rem,1.4vw,0.9rem)] font-medium text-emerald-300 transition-all duration-500 max-[479px]:text-[0.75rem]",
+            closing ? "translate-y-0 opacity-100" : "h-0 overflow-hidden opacity-0"
+          )}
+        >
+          {t("closing")}
+        </p>
       </div>
-
-      <p
-        className={cn(
-          "absolute inset-x-0 bottom-5 z-10 text-center text-[clamp(0.8rem,1.6vw,1rem)] font-medium text-emerald-300 transition-all duration-500 max-[479px]:bottom-3 max-[479px]:text-[0.78rem]",
-          closing ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
-        )}
-      >
-        {t("closing")}
-      </p>
     </div>
   );
 

@@ -2,19 +2,47 @@
 
 import { useEffect, useRef, useState } from "react";
 
+const BOARD_SRC = "/marketing/circuit-preview.jpg?v=22";
+
+/** Page-1 motherboard plate — base only; plan SVG/motion previews stay on top. */
+function MotherboardBase() {
+  return (
+    <>
+      <div className="absolute inset-0 bg-[#0e1014]" />
+      <img
+        src={BOARD_SRC}
+        alt=""
+        draggable={false}
+        className="pointer-events-none absolute inset-0 size-full object-cover opacity-[0.32] select-none"
+        style={{ filter: "brightness(0.58) contrast(0.88) saturate(0.4)" }}
+      />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(226,232,240,0.04),transparent_34%,rgba(0,0,0,0.22))]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.07),transparent_55%)]" />
+      <div
+        className="pointer-events-none absolute -top-[12%] -right-[8%] h-[50%] w-[48%]"
+        style={{
+          background:
+            "radial-gradient(ellipse 72% 58% at 70% 32%, rgba(52,211,153,0.16) 0%, rgba(16,185,129,0.07) 38%, transparent 72%)",
+          filter: "blur(28px)",
+        }}
+      />
+    </>
+  );
+}
+
 function StageBackdrop({ variant }: { variant: number }) {
   const index = variant % 6;
 
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-      <div className="absolute inset-0 bg-[#07080c]" />
+      <MotherboardBase />
       {index === 0 ? <DotsField /> : null}
       {index === 1 ? <LineGrid /> : null}
       {index === 2 ? <RingField /> : null}
       {index === 3 ? <DiagonalHatch /> : null}
       {index === 4 ? <OrbField /> : null}
       {index === 5 ? <HorizonGlow /> : null}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#07080c] via-[#07080c]/35 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0e1014] via-[#0e1014]/45 to-transparent" />
     </div>
   );
 }
@@ -256,7 +284,7 @@ export function LazyStageBackdrop({ variant }: { variant: number }) {
 
   return (
     <div ref={ref} className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-      {active ? <StageBackdrop variant={variant} /> : <div className="absolute inset-0 bg-[#07080c]" />}
+      {active ? <StageBackdrop variant={variant} /> : <MotherboardBase />}
     </div>
   );
 }

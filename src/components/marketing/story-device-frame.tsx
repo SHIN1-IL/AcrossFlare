@@ -19,16 +19,18 @@ export function StoryDeviceFrame({
   return (
     <div
       className={cn(
-        "mx-auto w-[min(96vw,400px)] max-[479px]:w-[min(98vw,440px)] min-[480px]:max-md:w-[min(72vw,340px)] md:w-[min(100%,520px)]",
+        "mx-auto flex h-full max-h-full w-full max-w-[min(98vw,460px)] items-center justify-center max-[479px]:max-w-[min(99vw,480px)] min-[480px]:max-md:max-w-[min(84vw,400px)] md:max-w-[min(100%,620px)]",
         className
       )}
     >
       <div
         className={cn(
-          "relative border-[#f4f4f5]/90 bg-[#0c0e14] shadow-[0_22px_56px_rgba(0,0,0,0.5)]",
+          "relative h-full max-h-full w-auto max-w-full border-[#f4f4f5]/90 bg-[#0c0e14] shadow-[0_22px_56px_rgba(0,0,0,0.5)]",
           "rounded-[2rem] border-[5px] p-[3px] max-[479px]:rounded-[1.85rem]",
           "min-[480px]:max-md:rounded-[2.1rem] min-[480px]:max-md:border-[6px]",
-          "md:rounded-[1.15rem] md:border-[3px]"
+          "md:rounded-[1.15rem] md:border-[3px]",
+          // Height-first fit so captions below the frame never get clipped.
+          "aspect-[9/19.5] md:aspect-[5/4]"
         )}
       >
         {/* Phone side buttons */}
@@ -42,10 +44,10 @@ export function StoryDeviceFrame({
 
         <div
           className={cn(
-            "relative overflow-hidden bg-[#0c0e14]",
-            "aspect-[9/19.5] rounded-[1.55rem] max-[479px]:aspect-auto max-[479px]:h-[min(86dvh,820px)] max-[479px]:rounded-[1.4rem]",
+            "relative h-full w-full overflow-hidden bg-[#0c0e14]",
+            "rounded-[1.55rem] max-[479px]:rounded-[1.4rem]",
             "min-[480px]:max-md:rounded-[1.65rem]",
-            "md:aspect-[5/4] md:h-auto md:rounded-[0.85rem]"
+            "md:rounded-[0.85rem]"
           )}
         >
           <div

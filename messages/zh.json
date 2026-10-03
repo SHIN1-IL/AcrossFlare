@@ -257,14 +257,16 @@
     "global-lite": {
       "eyebrow": "安全云及网络优化",
       "title": "Standard",
-      "description": "适合短期旅行或出差时的安全备份与合适速度。可在浏览器中使用 Vaultwarden（密码与备忘录备份）。",
+      "description": "可在浏览器中使用 Vaultwarden（密码与备忘录备份）。",
+      "line2": "为短期旅行或出差提供适合安全备份的速度。",
       "price": "₩9,900 · 1个月",
       "cta": "了解更多"
     },
     "global-pro": {
       "eyebrow": "安全云及网络优化",
       "title": "Hybrid",
-      "description": "提供安全备份与更快的网络优化。可在浏览器中使用 Vaultwarden（密码与备忘录备份）。",
+      "description": "可在浏览器中使用 Vaultwarden（密码与备忘录备份）。",
+      "line2": "提供安全备份与更快的网络优化。",
       "price": "₩19,900 · 1个月",
       "cta": "了解更多"
     }
@@ -272,8 +274,8 @@
   "workspace": {
     "eyebrow": "安全云及网络优化",
     "title": "Workspace & Custom",
-    "description": "面向朋友和团队的定制服务。可在浏览器中使用 Vaultwarden（密码与备忘录备份）。",
-    "hint": "按人数的 A、B、C 套餐",
+    "description": "可在浏览器中使用 Vaultwarden（密码与备忘录备份）。",
+    "hint": "可为朋友和团队构建定制服务。",
     "learnMore": "了解更多",
     "cta": "立即申请"
   },
