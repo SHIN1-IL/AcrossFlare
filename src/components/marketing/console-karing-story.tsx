@@ -1,17 +1,64 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { HeroGrain } from "@/components/marketing/hero-grain";
+import { StoryDeviceFrame, StoryDevicePanes } from "@/components/marketing/story-device-frame";
+
+type StepId =
+  | "console-click"
+  | "qr-scan"
+  | "karing-tap"
+  | "karing-on"
+  | "vault-login"
+  | "vault-backup";
+
+const STEPS: StepId[] = [
+  "console-click",
+  "qr-scan",
+  "karing-tap",
+  "karing-on",
+  "vault-login",
+  "vault-backup",
+];
+
+const HEADLINES: Record<StepId, string> = {
+  "console-click": "홈에서 콘솔로 이동",
+  "qr-scan": "카메라로 QR을 스캔해 연결",
+  "karing-tap": "한 번의 탭으로 Karing 가동",
+  "karing-on": "암호화 네트워크 가동 완료",
+  "vault-login": "Vaultwarden에 로그인",
+  "vault-backup": "암호·자료를 안전하게 백업",
+};
+
+const CAPTIONS: Record<StepId, string> = {
+  "console-click": "메인 화면 오른쪽 상단의 콘솔을 탭하면 구독 화면으로 이어집니다.",
+  "qr-scan": "홈페이지 콘솔의 정사각 QR을 카메라에 맞추면 구독이 바로 반영됩니다.",
+  "karing-tap": "하단 적색 버튼을 누르면 AcrossFlare 프로파일이 활성화됩니다.",
+  "karing-on": "적색 → 녹색. 암호화 네트워크가 가동됩니다.",
+  "vault-login": "계정 이메일과 비밀번호를 입력하면 Vaultwarden에 로그인됩니다.",
+  "vault-backup": "로그인 후 보관함에서 데이터 가져오기·백업을 바로 이용할 수 있습니다.",
+};
 
 /**
- * Scroll story in the same Fold device as page 2:
- * console + QR scan → zoom → Karing red→green.
- * Personal details masked as OO.
+ * Sticky scroll story (same device frame as page 2):
+ * console tap → QR scan → Karing red→green → Vaultwarden login → backup vault.
+ * Personal details masked as OO. Scroll or tap advances steps.
  */
 export function ConsoleKaringStory({ className }: { className?: string }) {
   const sectionRef = useRef<HTMLElement>(null);
+  const pointerStart = useRef<{ x: number; y: number } | null>(null);
   const [progress, setProgress] = useState(0);
+  const [armed, setArmed] = useState(false);
+  const [reduced, setReduced] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const apply = () => setReduced(media.matches);
+    apply();
+    media.addEventListener("change", apply);
+    return () => media.removeEventListener("change", apply);
+  }, []);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -19,6 +66,7 @@ export function ConsoleKaringStory({ className }: { className?: string }) {
     const onScroll = () => {
       const rect = section.getBoundingClientRect();
       const total = section.offsetHeight - window.innerHeight;
+      if (rect.top < window.innerHeight * 0.55) setArmed(true);
       if (total <= 0) {
         setProgress(1);
         return;
@@ -30,66 +78,136 @@ export function ConsoleKaringStory({ className }: { className?: string }) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // 0–0.40 console+QR · 0.40–0.60 zoom · 0.60–0.76 cursor · 0.76–1 green
-  const phase1 = progress < 0.4;
-  const zoomT = smoothstep((progress - 0.36) / 0.28);
-  const showKaring = progress >= 0.4 && zoomT >= 0.4;
-  const clicked = progress >= 0.72;
-  const greenT = smoothstep((progress - 0.72) / 0.2);
-  const press = clicked && greenT < 0.18;
+  const step = reduced
+    ? STEPS.length - 1
+    : Math.min(STEPS.length - 1, Math.floor(progress * STEPS.length + 0.001));
+  const stepId = STEPS[step] ?? "console-click";
+  const animate = !reduced && armed;
+
+  function goToStep(next: number) {
+    const section = sectionRef.current;
+    if (!section) return;
+    const clamped = Math.max(0, Math.min(STEPS.length - 1, next));
+    const total = section.offsetHeight - window.innerHeight;
+    if (total <= 0) return;
+    const target = section.offsetTop + (total * (clamped + 0.08)) / STEPS.length;
+    window.scrollTo({ top: target, behavior: "smooth" });
+  }
+
+  function onStageActivate() {
+    if (step >= STEPS.length - 1) return;
+    goToStep(step + 1);
+  }
 
   return (
     <section
       ref={sectionRef}
       data-home-page
-      className={cn("relative h-[240vh] snap-start bg-[#14181e] max-md:snap-start", className)}
+      className={cn("relative h-[520vh] snap-start bg-[#14181e] max-md:snap-start", className)}
     >
       <div className="sticky top-0 h-dvh overflow-hidden">
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(226,232,240,0.06),transparent_32%,rgba(0,0,0,0.28)),repeating-linear-gradient(90deg,rgba(255,255,255,0.04)_0px,rgba(255,255,255,0.04)_1px,transparent_1px,transparent_5px)]" />
         <div className="pointer-events-none absolute inset-x-0 top-0 h-[360px] bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.1),transparent_55%)]" />
         <HeroGrain />
 
-        <div className="absolute inset-x-0 top-9 z-20 flex flex-col items-center px-4 text-center sm:top-11">
-          <h1 className="text-[clamp(1.85rem,5.5vw,3rem)] leading-[0.95] font-semibold tracking-[-0.04em] text-[#f4f4f5]">
+        <style>{`
+          @keyframes af-ck-fade-in {
+            0% { opacity: 0; transform: translateY(8px); }
+            100% { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes af-ck-tap {
+            0%, 100% { transform: translate(-40%, -40%) scale(1); opacity: 0.9; }
+            45% { transform: translate(-40%, -40%) scale(0.86); opacity: 1; }
+          }
+          @keyframes af-ck-press {
+            0%, 100% { transform: scale(1); }
+            45% { transform: scale(0.9); }
+          }
+          @keyframes af-ck-scan {
+            0%, 100% { transform: translateY(-22px); opacity: 0.35; }
+            50% { transform: translateY(22px); opacity: 1; }
+          }
+          @keyframes af-ck-type {
+            0% { width: 0; }
+            100% { width: 100%; }
+          }
+          @keyframes af-ck-pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.35); }
+            50% { transform: scale(1.02); box-shadow: 0 0 0 8px rgba(37, 99, 235, 0); }
+          }
+          @keyframes af-ck-glow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.25); }
+            50% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+          }
+        `}</style>
+
+        <div className="absolute inset-x-0 top-9 z-20 flex flex-col items-center px-4 text-center max-[479px]:top-5 sm:top-11">
+          <h1 className="text-[clamp(1.85rem,5.5vw,3rem)] leading-[0.95] font-semibold tracking-[-0.04em] text-[#f4f4f5] max-[479px]:text-[1.45rem]">
             AcrossFlare
           </h1>
-          <p className="mt-2 text-[clamp(0.72rem,1.8vw,1rem)] whitespace-nowrap text-[#888888]">
+          <p className="mt-2 text-[clamp(0.72rem,1.8vw,1rem)] whitespace-nowrap text-[#888888] max-[479px]:hidden">
             Secure Cloud & Network Optimization
           </p>
-          <p className="mt-3 text-[clamp(0.8rem,1.6vw,1rem)] font-medium text-emerald-300/90">
-            {phase1 ? "콘솔 QR을 스캔해 구독 연결" : "한 번의 탭으로 Karing 가동"}
+          <p className="mt-3 text-[clamp(0.8rem,1.6vw,1rem)] font-medium text-emerald-300/90 max-[479px]:mt-1 max-[479px]:text-[0.78rem]">
+            {HEADLINES[stepId]}
           </p>
         </div>
 
-        <div className="absolute inset-x-0 top-[8.5rem] bottom-16 z-[5] flex flex-col items-center justify-center px-4 sm:top-[9.25rem]">
+        <div
+          className="absolute inset-x-0 top-[8.5rem] bottom-16 z-[5] flex cursor-pointer flex-col items-center justify-center px-4 max-[479px]:top-[4.5rem] max-[479px]:bottom-10 sm:top-[9.25rem]"
+          onPointerDown={(e) => {
+            pointerStart.current = { x: e.clientX, y: e.clientY };
+          }}
+          onClick={(e) => {
+            const start = pointerStart.current;
+            pointerStart.current = null;
+            if (
+              start &&
+              (Math.abs(e.clientX - start.x) > 12 || Math.abs(e.clientY - start.y) > 12)
+            ) {
+              return;
+            }
+            onStageActivate();
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              onStageActivate();
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label="다음 프리뷰로 이동"
+        >
           <div
-            className="relative w-full max-w-xl"
-            style={{
-              transform: `scale(${0.96 + zoomT * 0.12})`,
-              opacity: progress < 0.03 ? Math.min(1, progress / 0.03) : 1,
-            }}
+            key={`${stepId}-${armed ? "on" : "off"}`}
+            className="relative w-full max-w-xl max-[479px]:max-w-none"
+            style={animate ? { animation: "af-ck-fade-in 0.45s ease-out both" } : undefined}
           >
-            <FoldDevice>
-              {showKaring ? (
-                <KaringFoldContent active={clicked} greenMix={greenT} pressed={press} />
-              ) : (
-                <QrScanFoldContent />
-              )}
-            </FoldDevice>
+            <StoryDeviceFrame>
+              {stepId === "console-click" && <ConsoleClickContent animate={animate} />}
+              {stepId === "qr-scan" && <QrScanFoldContent />}
+              {stepId === "karing-tap" && <KaringFoldContent active={false} pressed={animate} />}
+              {stepId === "karing-on" && <KaringFoldContent active pressed={false} />}
+              {stepId === "vault-login" && <VaultLoginContent animate={animate} />}
+              {stepId === "vault-backup" && <VaultBackupContent animate={animate} />}
+            </StoryDeviceFrame>
           </div>
 
-          <p className="mt-5 max-w-xl text-center text-[clamp(0.78rem,1.5vw,0.95rem)] leading-snug text-[#c8c8c8]">
-            {phase1
-              ? "홈페이지 콘솔의 정사각 QR을 카메라에 맞추면 구독이 바로 반영됩니다."
-              : clicked
-                ? "적색 → 녹색. 암호화 네트워크가 가동됩니다."
-                : "하단 적색 버튼을 누르면 AcrossFlare 프로파일이 활성화됩니다."}
+          <p className="mt-5 max-w-xl text-center text-[clamp(0.78rem,1.5vw,0.95rem)] leading-snug text-[#c8c8c8] max-[479px]:mt-3 max-[479px]:text-[0.78rem]">
+            {CAPTIONS[stepId]}
           </p>
-        </div>
 
-        <div className="absolute inset-x-0 bottom-5 z-20 flex justify-center">
-          <div className="h-1 w-36 overflow-hidden rounded-full bg-white/10">
-            <div className="h-full rounded-full bg-emerald-400" style={{ width: `${Math.round(progress * 100)}%` }} />
+          <div className="mt-4 flex gap-2 max-[479px]:mt-2.5">
+            {STEPS.map((id, i) => (
+              <span
+                key={id}
+                className={cn(
+                  "h-1.5 rounded-full transition-all duration-500",
+                  i === step ? "w-8 bg-emerald-400" : i < step ? "w-3 bg-emerald-400/50" : "w-3 bg-white/15"
+                )}
+              />
+            ))}
           </div>
         </div>
       </div>
@@ -97,72 +215,58 @@ export function ConsoleKaringStory({ className }: { className?: string }) {
   );
 }
 
-function smoothstep(t: number) {
-  const x = Math.min(1, Math.max(0, t));
-  return x * x * (3 - 2 * x);
-}
-
-/** Same Fold frame as why-buy-ui-story page 2. */
-function FoldDevice({ children }: { children: ReactNode }) {
+/** Home main (motherboard) with tap cue on top-left Console */
+function ConsoleClickContent({ animate }: { animate: boolean }) {
   return (
-    <div className="mx-auto w-[min(100%,520px)]">
-      <div className="relative rounded-[1.15rem] border-[3px] border-[#f4f4f5]/90 bg-[#0c0e14] p-[3px] shadow-[0_22px_56px_rgba(0,0,0,0.5)]">
-        <div className="pointer-events-none absolute top-1/2 left-0 z-30 h-7 w-[2px] -translate-y-[120%] rounded-r-sm bg-[#c8c8c8]/40" />
-        <div className="pointer-events-none absolute top-1/2 right-0 z-30 h-7 w-[2px] -translate-y-[120%] rounded-l-sm bg-[#c8c8c8]/40" />
+    <div className="relative h-full overflow-hidden bg-[#0e1014]">
+      {/* Soft homepage atmosphere */}
+      <div
+        className="absolute inset-0 bg-cover bg-center opacity-90"
+        style={{ backgroundImage: "url(/marketing/circuit-preview.jpg?v=22)" }}
+        aria-hidden="true"
+      />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(14,16,20,0.55),rgba(14,16,20,0.2)_40%,rgba(14,16,20,0.72))]" />
+      <div className="pointer-events-none absolute -top-[10%] -right-[12%] h-[48%] w-[55%] rounded-full bg-emerald-400/15 blur-2xl" />
 
-        <div className="relative aspect-[5/4] overflow-hidden rounded-[0.85rem] bg-[#0c0e14]">
-          <div
-            className="pointer-events-none absolute inset-y-0 left-1/2 z-20 w-10 -translate-x-1/2"
-            aria-hidden="true"
-            style={{
-              background:
-                "radial-gradient(ellipse 70% 100% at 50% 50%, rgba(255,255,255,0.04) 0%, transparent 55%), linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.04) 30%, rgba(255,255,255,0.035) 45%, rgba(255,255,255,0.05) 50%, rgba(0,0,0,0.03) 55%, rgba(0,0,0,0.04) 70%, transparent 100%)",
-            }}
-          />
+      {/* Mini marketing header — console only, top-right */}
+      <div className="relative z-10 flex items-center justify-end px-2.5 pt-1.5 pb-1">
+        <span
+          className={cn(
+            "relative rounded-[8px] bg-emerald-500 px-2 py-1 text-[9px] font-semibold text-black shadow-[0_0_0_1px_rgba(52,211,153,0.35)]",
+            animate && "animate-[af-ck-glow_1.5s_ease-in-out_infinite]"
+          )}
+        >
+          콘솔
+          {animate ? (
+            <span
+              className="pointer-events-none absolute top-1/2 left-1/2 z-20 size-6 rounded-full border-2 border-white/85 bg-emerald-300/40"
+              style={{ animation: "af-ck-tap 1.35s ease-in-out infinite" }}
+              aria-hidden="true"
+            />
+          ) : null}
+        </span>
+      </div>
 
-          <StatusBar />
-          <div className="relative z-10 h-[calc(100%-1.75rem)]">{children}</div>
-        </div>
+      {/* Hero brand — same signal as live page 1 */}
+      <div className="relative z-10 flex h-[calc(100%-2.25rem)] flex-col items-center justify-center px-4 text-center">
+        <h2 className="text-[clamp(1.35rem,5.5vw,1.85rem)] leading-[0.95] font-semibold tracking-[-0.04em] text-[#f4f4f5]">
+          AcrossFlare
+        </h2>
+        <p className="mt-1.5 text-[9px] whitespace-nowrap text-[#888888]">
+          Secure Cloud & Network Optimization
+        </p>
+        <p className="mt-3 max-w-[16rem] text-[10px] leading-snug text-emerald-300/90">
+          중국 출장과 여행에서
+        </p>
       </div>
     </div>
   );
 }
 
-function StatusBar() {
-  return (
-    <div className="relative z-10 flex h-7 items-end justify-between px-3.5 pb-0.5 text-[10px] text-[#c8c8c8]">
-      <span className="font-medium">9:41</span>
-      <span className="flex items-center gap-1.5">
-        <span className="flex items-end gap-[1.5px]" aria-hidden="true">
-          <span className="h-[3px] w-[2px] rounded-[0.5px] bg-[#c8c8c8]" />
-          <span className="h-[5px] w-[2px] rounded-[0.5px] bg-[#c8c8c8]" />
-          <span className="h-[7px] w-[2px] rounded-[0.5px] bg-[#c8c8c8]" />
-          <span className="h-[9px] w-[2px] rounded-[0.5px] bg-[#c8c8c8]" />
-        </span>
-        <span className="text-[9px] font-semibold tracking-wide text-[#c8c8c8]">CMCC</span>
-        <svg viewBox="0 0 16 12" className="h-[9px] w-3" fill="currentColor" aria-hidden="true">
-          <path
-            d="M1.5 3.5A1.5 1.5 0 0 1 3 2h8a1.5 1.5 0 0 1 1.5 1.5v.5H14a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1.5v.5A1.5 1.5 0 0 1 11 11H3A1.5 1.5 0 0 1 1.5 9.5v-6Z"
-            opacity="0.35"
-          />
-          <path d="M8.5 5.5a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm2.5-1.2c.7.6 1.15 1.5 1.15 2.5s-.45 1.9-1.15 2.5l-.9-.85c.45-.4.75-1 .75-1.65s-.3-1.25-.75-1.65l.9-.85Zm1.85-1.75c1.15 1 1.9 2.45 1.9 4.1s-.75 3.1-1.9 4.1l-.9-.9c.9-.8 1.45-1.9 1.45-3.2S12.35 4.35 11.45 3.55l.9-.9Z" />
-        </svg>
-        <span className="flex items-center" aria-label="Battery 100%">
-          <span className="relative flex h-[9px] w-[18px] items-center rounded-[2px] border border-[#c8c8c8]/90 px-[1px]">
-            <span className="h-[5px] w-full rounded-[1px] bg-emerald-400" />
-          </span>
-          <span className="ml-[1px] h-[4px] w-[1.5px] rounded-r-[1px] bg-[#c8c8c8]/90" />
-        </span>
-      </span>
-    </div>
-  );
-}
-
-/** Left: console Standard/QR · Right: camera scan */
 function QrScanFoldContent() {
   return (
-    <div className="flex h-full gap-3 px-3 pb-3 pt-1">
-      <div className="flex min-w-0 flex-1 flex-col rounded-xl border border-white/10 bg-[#090b0f] p-2.5">
+    <StoryDevicePanes className="h-full md:h-full">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col rounded-xl border border-white/10 bg-[#090b0f] p-2.5">
         <div className="mb-1.5 flex items-center justify-between gap-1">
           <div className="flex items-center gap-1">
             <span className="flex size-4 items-center justify-center rounded bg-emerald-500 text-[8px] font-bold text-black">
@@ -185,20 +289,20 @@ function QrScanFoldContent() {
           </div>
         </div>
         <p className="mb-1 text-[9px] font-semibold text-[#f4f4f5]">Karing QR</p>
-        <div className="mx-auto w-[72%] flex-1">
+        <div className="mx-auto w-[72%] min-h-0 flex-1">
           <FakeQr />
         </div>
         <p className="mt-1 truncate text-[7px] text-[#6b6b73]">…/subscription/OOOO?flag=clash</p>
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col rounded-xl border border-white/10 bg-[#12161c] p-2.5">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col rounded-xl border border-white/10 bg-[#12161c] p-2.5">
         <div className="mb-1.5 flex items-center justify-between">
           <p className="text-[11px] font-medium text-[#f4f4f5]">카메라</p>
           <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[9px] font-semibold text-emerald-300">
             Scan
           </span>
         </div>
-        <div className="relative flex flex-1 items-center justify-center overflow-hidden rounded-lg bg-[#1c1c1e]">
+        <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-lg bg-[#1c1c1e]">
           <div className="w-[58%]">
             <FakeQr />
           </div>
@@ -209,35 +313,18 @@ function QrScanFoldContent() {
           />
         </div>
         <p className="mt-1.5 text-center text-[8px] text-[#8b8b93]">콘솔 QR을 프레임에 맞춰 주세요</p>
-        <style>{`
-          @keyframes af-ck-scan {
-            0%, 100% { transform: translateY(-22px); opacity: 0.35; }
-            50% { transform: translateY(22px); opacity: 1; }
-          }
-        `}</style>
       </div>
-    </div>
+    </StoryDevicePanes>
   );
 }
 
-/** Full-width Karing main inside the same Fold screen */
-function KaringFoldContent({
-  active,
-  greenMix,
-  pressed,
-}: {
-  active: boolean;
-  greenMix: number;
-  pressed: boolean;
-}) {
-  const on = active || greenMix > 0.45;
-
+function KaringFoldContent({ active, pressed }: { active: boolean; pressed: boolean }) {
   return (
     <div className="flex h-full flex-col bg-[#e9e9ee] text-[#1c1c1e]">
       <div className="flex items-center gap-2 px-3 pt-1 pb-1">
         <span className="relative text-[#3a3a3c]">
           <GearIcon />
-          <span className="absolute -top-0.5 -left-0.5 size-1.5 rounded-full bg-red-500" />
+          {!active ? <span className="absolute -top-0.5 -left-0.5 size-1.5 rounded-full bg-red-500" /> : null}
         </span>
         <PencilIcon />
         <span className="ml-auto text-[10px] font-medium text-[#6b6b70]">Karing</span>
@@ -246,9 +333,9 @@ function KaringFoldContent({
       <div className="grid grid-cols-4 gap-1.5 px-2.5">
         {(
           [
-            [<ClockIcon key="c" />, on ? "0:00:17" : "0:00:00"],
-            [<MonitorIcon key="m" />, on ? "10" : "—"],
-            [<TrafficIcon key="t" />, on ? "↑OO\n↓OO" : "↑0\n↓0"],
+            [<ClockIcon key="c" />, active ? "0:00:17" : "0:00:00"],
+            [<MonitorIcon key="m" />, active ? "10" : "—"],
+            [<TrafficIcon key="t" />, active ? "↑OO\n↓OO" : "↑0\n↓0"],
             [<SpeedIcon key="s" />, "0 B/s"],
           ] as const
         ).map(([icon, v], i) => (
@@ -292,23 +379,226 @@ function KaringFoldContent({
           <div
             className="flex size-[58px] items-center justify-center rounded-full border-[4px] bg-[#e9e9ee] shadow-[0_6px_16px_rgba(0,0,0,0.12)]"
             style={{
-              borderColor: on ? "#28c840" : "#e11d48",
-              transform: `scale(${pressed ? 0.92 : 1 + greenMix * 0.03})`,
-              transition: "border-color 220ms ease, transform 120ms ease",
+              borderColor: active ? "#28c840" : "#e11d48",
+              transition: "border-color 220ms ease",
+              animation: pressed && !active ? "af-ck-press 1.2s ease-in-out infinite" : undefined,
             }}
           >
-            {on ? <ShieldCheck /> : <ShieldX />}
+            {active ? <ShieldCheck /> : <ShieldX />}
           </div>
         </div>
         <div className="flex w-full items-end justify-between bg-white px-3 pt-4 pb-2 text-[9px] shadow-[0_-4px_16px_rgba(0,0,0,0.04)]">
           <span className="w-10" />
           <span className="font-medium text-[#3a3a3c]">node-OO</span>
-          <span className={cn("font-semibold", on ? "text-emerald-600" : "text-[#8b8b93]")}>
-            {on ? "43 ms ›" : "— ›"}
+          <span className={cn("font-semibold", active ? "text-emerald-600" : "text-[#8b8b93]")}>
+            {active ? "43 ms ›" : "— ›"}
           </span>
         </div>
       </div>
     </div>
+  );
+}
+
+/** Vaultwarden login — email then password auto-fill (OO masked) */
+function VaultLoginContent({ animate }: { animate: boolean }) {
+  return (
+    <div className="flex h-full flex-col bg-[#f0f0f0] text-[#1c1c1e]">
+      <div className="flex items-center gap-1.5 px-3 pt-2">
+        <VaultGear className="size-4" />
+        <span className="text-[10px] font-medium tracking-tight text-[#3a3a3c]">vaultwarden</span>
+      </div>
+
+      <div className="flex flex-1 flex-col items-center justify-center px-4 pb-4">
+        <VaultGear className="size-10" />
+        <p className="mt-2 text-[15px] font-semibold">로그인</p>
+
+        <div className="mt-3 w-full max-w-[260px] rounded-lg border border-[#d8d8d8] bg-white px-3 py-3 shadow-sm">
+          <label className="block text-[9px] font-medium text-[#5a5a5a]">
+            이메일 주소 <span className="text-[#175ddc]">(required)</span>
+          </label>
+          <div className="mt-1 overflow-hidden rounded-md border-2 border-[#175ddc] bg-white px-2 py-1.5 font-mono text-[11px] text-[#1c1c1e]">
+            <span
+              className="inline-block overflow-hidden whitespace-nowrap align-bottom"
+              style={
+                animate
+                  ? { animation: "af-ck-type 1.1s steps(18, end) 0.2s both", maxWidth: "100%" }
+                  : undefined
+              }
+            >
+              oo@acrossflare.com
+            </span>
+          </div>
+
+          <label className="mt-2.5 block text-[9px] font-medium text-[#5a5a5a]">
+            마스터 비밀번호 <span className="text-[#175ddc]">(required)</span>
+          </label>
+          <div className="mt-1 overflow-hidden rounded-md border border-[#c8c8c8] bg-white px-2 py-1.5 font-mono text-[11px] tracking-[0.18em] text-[#1c1c1e]">
+            <span
+              className="inline-block overflow-hidden whitespace-nowrap align-bottom"
+              style={
+                animate
+                  ? { animation: "af-ck-type 0.9s steps(10, end) 1.4s both", maxWidth: "100%" }
+                  : undefined
+              }
+            >
+              ••••••••
+            </span>
+          </div>
+
+          <label className="mt-2.5 flex items-center gap-1.5 text-[9px] text-[#3a3a3c]">
+            <span className="flex size-3 items-center justify-center rounded-[2px] border border-[#8b8b93] bg-white">
+              <span className="size-1.5 rounded-[1px] bg-[#175ddc]" />
+            </span>
+            이메일 기억하기
+          </label>
+
+          <div
+            className="mt-3 rounded-full bg-[#175ddc] py-2 text-center text-[11px] font-semibold text-white"
+            style={animate ? { animation: "af-ck-pulse 1.4s ease-in-out 2.4s infinite" } : undefined}
+          >
+            로그인
+          </div>
+        </div>
+      </div>
+
+      <p className="pb-2 text-center text-[7px] text-[#8b8b93]">Vaultwarden Web · Version 2025.1.1</p>
+    </div>
+  );
+}
+
+/** Vaultwarden vault — highlight import / backup capability */
+function VaultBackupContent({ animate }: { animate: boolean }) {
+  return (
+    <div className="flex h-full bg-white text-[#1c1c1e]">
+      {/* Compact sidebar */}
+      <div className="flex w-[72px] shrink-0 flex-col bg-[#1a1d21] px-1.5 py-2 text-[7px] text-[#c8c8c8] md:w-[96px]">
+        <div className="mb-2 flex items-center gap-1 px-0.5">
+          <VaultGear className="size-3.5 shrink-0 invert" />
+          <span className="truncate font-medium leading-tight text-white md:text-[8px]">Vaultwarden</span>
+        </div>
+        {(
+          [
+            ["보관함", true],
+            ["Send", false],
+            ["도구", false],
+            ["보고서", false],
+            ["설정", false],
+          ] as const
+        ).map(([label, on]) => (
+          <div
+            key={label}
+            className={cn(
+              "mb-0.5 rounded-md px-1.5 py-1",
+              on ? "bg-white/12 font-semibold text-white" : "text-[#9a9a9a]"
+            )}
+          >
+            {label}
+          </div>
+        ))}
+        <div className="mt-auto px-1 pt-2 text-[6px] text-[#7a7a7a]">Password Manager</div>
+      </div>
+
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="flex items-center justify-between border-b border-[#e5e5e5] px-2.5 py-1.5">
+          <p className="text-[12px] font-semibold">모든 보관함</p>
+          <div className="flex items-center gap-1.5">
+            <span className="rounded-md bg-[#175ddc] px-2 py-1 text-[8px] font-semibold text-white">새 항목</span>
+            <span className="flex size-5 items-center justify-center rounded-full bg-[#c4a574] text-[7px] font-bold text-white">
+              OO
+            </span>
+          </div>
+        </div>
+
+        <div className="min-h-0 flex-1 space-y-2 overflow-hidden p-2">
+          <div
+            className={cn(
+              "rounded-lg border border-[#d8d8d8] bg-[#f7f7f7] p-2",
+              animate && "ring-2 ring-emerald-400/70"
+            )}
+            style={animate ? { animation: "af-ck-glow 1.8s ease-in-out infinite" } : undefined}
+          >
+            <div className="mb-1.5 flex items-center justify-between">
+              <p className="text-[9px] font-semibold">Get Started</p>
+              <p className="text-[8px] font-medium text-[#175ddc]">2/3 Complete</p>
+            </div>
+            <div className="mb-2 h-1 overflow-hidden rounded-full bg-[#d8d8d8]">
+              <div className="h-full w-2/3 rounded-full bg-[#175ddc]" />
+            </div>
+            <ul className="space-y-1 text-[8px]">
+              <li className="flex items-start gap-1.5 text-[#3a3a3c]">
+                <span className="mt-px text-emerald-600">✓</span>
+                <span>Create an account</span>
+              </li>
+              <li className="flex items-start gap-1.5">
+                <span className="mt-px text-emerald-600">✓</span>
+                <div>
+                  <p className="font-semibold text-emerald-700">데이터 가져오기</p>
+                  <p className="text-[7px] leading-snug text-[#6b6b73]">
+                    가져오기할 데이터가 없으면, 대신 새 항목을 생성할 수 있습니다.
+                  </p>
+                </div>
+              </li>
+              <li className="flex items-start gap-1.5 text-[#8b8b93]">
+                <span className="mt-px">○</span>
+                <span>Install browser extension</span>
+              </li>
+            </ul>
+          </div>
+
+          <div className="rounded-lg border border-[#e5e5e5]">
+            <div className="flex items-center justify-between border-b border-[#e5e5e5] px-2 py-1 text-[8px] text-[#6b6b73]">
+              <span>이름</span>
+              <span>소유자</span>
+            </div>
+            <div className="flex items-center gap-2 px-2 py-1.5">
+              <span className="flex size-5 items-center justify-center rounded bg-[#ececec]">
+                <svg viewBox="0 0 16 16" className="size-3 text-[#6b6b73]" fill="currentColor" aria-hidden="true">
+                  <path d="M3 1.5h6l4 4V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V2.5a1 1 0 0 1 1-1Zm6 0v4h4" />
+                </svg>
+              </span>
+              <span className="min-w-0 flex-1 truncate text-[10px] font-medium">사용자</span>
+              <span className="rounded-full bg-[#c4a574]/25 px-1.5 py-0.5 text-[7px] font-semibold text-[#8a6a3a]">
+                나
+              </span>
+            </div>
+          </div>
+
+          <div
+            className={cn(
+              "rounded-lg border border-emerald-400/50 bg-emerald-50 px-2.5 py-2 text-center",
+              animate && "animate-[af-ck-glow_1.6s_ease-in-out_infinite]"
+            )}
+          >
+            <p className="text-[10px] font-semibold text-emerald-800">보안 백업 준비 완료</p>
+            <p className="mt-0.5 text-[8px] text-emerald-700/90">암호·메모·자료를 Vaultwarden에 안전하게 보관</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VaultGear({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 32 32" className={className} aria-hidden="true">
+      <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" strokeWidth="2.2" />
+      <path
+        d="M16 8.5c-2.2 0-3.6 1.5-3.6 3.4 0 1.3.6 2.3 1.7 3l-2.4 5.2h2.2l1.5-3.4h1.2l1.5 3.4h2.2l-2.4-5.2c1.1-.7 1.7-1.7 1.7-3 0-1.9-1.4-3.4-3.6-3.4Zm0 2c1 0 1.6.7 1.6 1.5S17 13.5 16 13.5 14.4 12.8 14.4 12 15 10.5 16 10.5Z"
+        fill="currentColor"
+      />
+      {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
+        <rect
+          key={deg}
+          x="14.5"
+          y="2"
+          width="3"
+          height="4"
+          rx="0.6"
+          fill="currentColor"
+          transform={`rotate(${deg} 16 16)`}
+        />
+      ))}
+    </svg>
   );
 }
 

@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
-import { ConsoleKaringStory } from "@/components/marketing/console-karing-story";
+import { CircuitPreview } from "@/components/marketing/circuit-preview";
 import { resolveLocale } from "@/i18n/locale";
 
 export const dynamic = "force-dynamic";
 
-export default async function ConsoleKaringTestPage({
+export default async function CircuitPreviewPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
@@ -18,16 +18,15 @@ export default async function ConsoleKaringTestPage({
   setRequestLocale(locale);
 
   return (
-    <main className="min-h-dvh bg-[#14181e]">
-      <div className="mx-auto max-w-5xl px-4 py-6">
+    <main className="min-h-dvh bg-black">
+      <div className="mx-auto max-w-5xl px-4 pt-8">
         <p className="text-xs font-medium tracking-[0.16em] text-primary uppercase">Local only</p>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight">콘솔 → Karing → Vaultwarden 스토리</h1>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight">1페이지 메인보드 프리뷰</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          진입 시 큰 폰 + 콘솔 탭 프리뷰. 스크롤/터치: QR 스캔 → Karing 적색→녹색 → Vaultwarden 로그인 →
-          백업 보관함. 개인정보는 OO 마스킹.
+          새 planar 기판 + 녹색 LED 인디케이터. 커서 리빌 홈 1페이지에 붙이기 전 확인용.
         </p>
       </div>
-      <ConsoleKaringStory className="!snap-none" />
+      <CircuitPreview />
     </main>
   );
 }

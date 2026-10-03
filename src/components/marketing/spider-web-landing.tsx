@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { HeroGrain } from "@/components/marketing/hero-grain";
 
 const IDLE_HIDE_MS = 1400;
 const SPARK_GAP_MS = 36;
-const BOARD_SRC = "/marketing/motherboard-surface-flat.jpg";
-const XRAY_SRC = "/marketing/motherboard-xray-flat.jpg";
+const BOARD_SRC = "/marketing/circuit-preview.jpg?v=22";
 
 type Spark = {
   id: number;
@@ -19,20 +18,70 @@ type Spark = {
   life: number;
 };
 
+/** Soft green aurora — top-right. Shared by home + `/dev/web-landing`. */
+export function SpiderWebAurora() {
+  return (
+    <>
+      <div
+        className="pointer-events-none absolute -top-[12%] -right-[8%] z-[1] h-[58%] w-[52%]"
+        style={{
+          background:
+            "radial-gradient(ellipse 72% 58% at 70% 32%, rgba(52,211,153,0.22) 0%, rgba(16,185,129,0.1) 38%, transparent 72%)",
+          filter: "blur(32px)",
+          animation: "af-mb-aurora 12s ease-in-out infinite",
+        }}
+        aria-hidden="true"
+      />
+      <div
+        className="pointer-events-none absolute top-[2%] right-[4%] z-[1] h-[26%] w-[28%]"
+        style={{
+          background:
+            "radial-gradient(ellipse 55% 48% at 62% 38%, rgba(167,243,208,0.16) 0%, rgba(52,211,153,0.07) 48%, transparent 74%)",
+          filter: "blur(20px)",
+          animation: "af-mb-aurora 16s ease-in-out infinite reverse",
+        }}
+        aria-hidden="true"
+      />
+      <style>{`
+        @keyframes af-mb-aurora {
+          0%, 100% { opacity: 0.14; transform: translate3d(0, 0, 0) scale(1); }
+          50% { opacity: 0.28; transform: translate3d(-1%, 0.8%, 0) scale(1.025); }
+        }
+      `}</style>
+    </>
+  );
+}
+
 export function SpiderWebLanding({ className }: { className?: string }) {
   return (
     <section
       data-home-page
       className={cn(
-        "relative -mt-14 h-dvh snap-center snap-always overflow-hidden bg-[#14181e] max-md:snap-start",
+        "relative -mt-14 h-dvh snap-center snap-always overflow-hidden bg-[#0e1014] max-md:snap-start",
         className
       )}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(226,232,240,0.07),transparent_34%,rgba(0,0,0,0.2)),repeating-linear-gradient(90deg,rgba(255,255,255,0.045)_0px,rgba(255,255,255,0.045)_1px,transparent_1px,transparent_5px)]" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[480px] bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.1),transparent_55%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(226,232,240,0.05),transparent_34%,rgba(0,0,0,0.28)),repeating-linear-gradient(90deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_1px,transparent_1px,transparent_5px)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[480px] bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.07),transparent_55%)]" />
+      <SpiderWebAurora />
       <HeroGrain />
       <SpiderWebStage className="absolute inset-0" />
     </section>
+  );
+}
+
+/** object-cover sized 16:9 plane so artwork % matches the board image. */
+function BoardCoverPlane({ children }: { children: ReactNode }) {
+  return (
+    <div
+      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+      style={{
+        width: "max(100cqw, calc(100cqh * 16 / 9))",
+        height: "max(100cqh, calc(100cqw * 9 / 16))",
+      }}
+    >
+      {children}
+    </div>
   );
 }
 
@@ -70,22 +119,22 @@ export function SpiderWebStage({ className }: { className?: string }) {
     const now = performance.now();
     if (now - lastSparkAt.current < SPARK_GAP_MS) return;
     lastSparkAt.current = now;
-    const count = 4 + Math.floor(Math.random() * 3);
+    const count = 3 + Math.floor(Math.random() * 3);
     const next: Spark[] = [];
     for (let i = 0; i < count; i += 1) {
       const angle = Math.random() * Math.PI * 2;
-      const dist = 8 + Math.random() * 26;
+      const dist = 6 + Math.random() * 20;
       next.push({
         id: sparkId.current++,
         x: xPct + (Math.random() - 0.5) * 1.2,
         y: yPct + (Math.random() - 0.5) * 1.2,
         dx: Math.cos(angle) * dist,
         dy: Math.sin(angle) * dist - Math.random() * 6,
-        size: 1.2 + Math.random() * 2.2,
-        life: 240 + Math.random() * 260,
+        size: 1 + Math.random() * 1.8,
+        life: 220 + Math.random() * 220,
       });
     }
-    setSparks((prev) => [...prev.slice(-36), ...next]);
+    setSparks((prev) => [...prev.slice(-28), ...next]);
   }
 
   function onPointerActivity(clientX: number, clientY: number) {
@@ -113,7 +162,7 @@ export function SpiderWebStage({ className }: { className?: string }) {
   }
 
   const reveal = probe
-    ? `radial-gradient(circle 12vmin at ${probe.x}% ${probe.y}%, #000 0%, #000 52%, transparent 82%)`
+    ? `radial-gradient(circle 13vmin at ${probe.x}% ${probe.y}%, #000 0%, #000 52%, transparent 82%)`
     : "radial-gradient(circle, transparent 0%, transparent 100%)";
 
   return (
@@ -131,50 +180,33 @@ export function SpiderWebStage({ className }: { className?: string }) {
     >
       <style>{`
         @keyframes af-mb-spark {
-          0% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
-          100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.15); }
-        }
-        @keyframes af-mb-alive {
-          0%, 100% { filter: contrast(1.08) saturate(1.05) brightness(1.02); }
-          50% { filter: contrast(1.12) saturate(1.12) brightness(1.08); }
-        }
-        @keyframes af-mb-sweep {
-          0% { transform: translateX(-30%) rotate(12deg); opacity: 0; }
-          20% { opacity: 0.35; }
-          50% { opacity: 0.2; }
-          100% { transform: translateX(130%) rotate(12deg); opacity: 0; }
-        }
-        @keyframes af-mb-fan {
-          to { transform: rotate(360deg); }
+          0% { opacity: 0.85; transform: translate(-50%, -50%) scale(1.1); }
+          100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.12); }
         }
       `}</style>
 
       <div
         className={cn(
-          "pointer-events-none absolute inset-0 z-[1] bg-black/[0.06] transition-opacity duration-400",
+          "pointer-events-none absolute inset-0 z-[1] bg-black/12 transition-opacity duration-400",
           probe ? "opacity-100" : "opacity-0"
         )}
         aria-hidden="true"
       />
 
-      <div ref={boardRef} className="pointer-events-none absolute inset-0 z-[2]" aria-hidden="true">
-        <div
-          className="absolute inset-0"
-          style={{
-            opacity: probe ? 0.55 : 0,
-            transition: "opacity 140ms ease-out",
-            WebkitMaskImage: reveal,
-            maskImage: reveal,
-          }}
-        >
+      <div
+        ref={boardRef}
+        className="pointer-events-none absolute inset-0 z-[2] overflow-hidden [container-type:size]"
+        aria-hidden="true"
+      >
+        <BoardCoverPlane>
           <img
-            src={`${BOARD_SRC}?v=15`}
+            src={BOARD_SRC}
             alt=""
             draggable={false}
-            className="absolute inset-0 size-full object-cover"
-            style={{ filter: "contrast(1.04) saturate(0.85) brightness(0.88)" }}
+            className="pointer-events-none absolute inset-0 size-full object-fill opacity-[0.3] select-none"
+            style={{ filter: "brightness(0.6) contrast(0.88) saturate(0.4)" }}
           />
-        </div>
+        </BoardCoverPlane>
 
         <div
           className="absolute inset-0"
@@ -185,50 +217,17 @@ export function SpiderWebStage({ className }: { className?: string }) {
             maskImage: reveal,
           }}
         >
-          <img
-            src={`${XRAY_SRC}?v=15`}
-            alt=""
-            draggable={false}
-            className="absolute inset-0 size-full object-cover"
-            style={{ animation: probe ? "af-mb-alive 2.8s ease-in-out infinite" : undefined }}
-          />
-
-          <div
-            className="absolute inset-0 overflow-hidden"
-            style={{ mixBlendMode: "screen", opacity: probe ? 0.55 : 0 }}
-          >
-            <div
-              className="absolute inset-y-[-20%] left-0 w-[35%]"
-              style={{
-                background:
-                  "linear-gradient(90deg, transparent, rgba(255,255,255,0.16), rgba(125,211,252,0.12), transparent)",
-                animation: probe ? "af-mb-sweep 2.4s ease-in-out infinite" : undefined,
-              }}
+          <BoardCoverPlane>
+            <img
+              src={BOARD_SRC}
+              alt="Mainboard Circuit"
+              draggable={false}
+              className="pointer-events-none absolute inset-0 size-full object-fill select-none"
+              style={{ filter: "brightness(1.08) contrast(1.02) saturate(0.62)" }}
             />
-          </div>
-
-          {probe ? (
-            <div
-              className="absolute size-[4.5vmin] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/15"
-              style={{
-                left: `calc(${probe.x}% + 3.2vmin)`,
-                top: `calc(${probe.y}% - 2.4vmin)`,
-                background:
-                  "radial-gradient(circle at 40% 40%, rgba(226,232,240,0.35), rgba(15,23,42,0.2) 55%, transparent 70%)",
-                boxShadow: "0 0 12px rgba(125,211,252,0.25)",
-              }}
-            >
-              <div
-                className="absolute inset-[18%]"
-                style={{
-                  borderRadius: "50%",
-                  background:
-                    "conic-gradient(from 0deg, transparent 0 18%, rgba(226,232,240,0.55) 18% 28%, transparent 28% 48%, rgba(226,232,240,0.4) 48% 58%, transparent 58% 78%, rgba(226,232,240,0.5) 78% 88%, transparent 88% 100%)",
-                  animation: "af-mb-fan 0.55s linear infinite",
-                }}
-              />
-            </div>
-          ) : null}
+            <div className="pointer-events-none absolute inset-0 bg-[#0a0c10]/10 mix-blend-multiply" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_42%,rgba(8,10,14,0.22)_100%)]" />
+          </BoardCoverPlane>
         </div>
       </div>
 
@@ -243,8 +242,8 @@ export function SpiderWebStage({ className }: { className?: string }) {
               width: spark.size,
               height: spark.size,
               background:
-                "radial-gradient(circle, #ffffff 0%, #e2e8f0 35%, #7dd3fc 75%, #34d399 100%)",
-              boxShadow: "0 0 8px rgba(226,232,240,0.75), 0 0 14px rgba(125,211,252,0.35)",
+                "radial-gradient(circle, rgba(167,243,208,0.9) 0%, rgba(52,211,153,0.55) 55%, transparent 100%)",
+              boxShadow: "0 0 6px rgba(16,185,129,0.35)",
               ["--dx" as string]: `${spark.dx}px`,
               ["--dy" as string]: `${spark.dy}px`,
               animation: `af-mb-spark ${spark.life}ms ease-out forwards`,

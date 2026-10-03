@@ -18,16 +18,16 @@ export default async function ComicLandingTestPage({
   setRequestLocale(locale);
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8">
-      <p className="text-xs font-medium tracking-[0.16em] text-primary uppercase">Local only</p>
-      <h1 className="mt-2 text-2xl font-semibold tracking-tight">메인 2페이지 · UI 스토리 프리뷰</h1>
-      <p className="mt-2 text-sm text-muted-foreground">
-        폴드형 듀얼 화면으로 문제 → 해결을 보여줍니다. 전체 재생 후 5초 뒤 자동 반복됩니다. 사이트 본편에는 아직
-        반영하지 않았습니다.
-      </p>
-      <div className="mt-6">
-        <WhyBuyUiStoryPreview />
+    <main className="min-h-dvh bg-[#14181e]">
+      <div className="mx-auto max-w-5xl px-4 py-6">
+        <p className="text-xs font-medium tracking-[0.16em] text-primary uppercase">Local only</p>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight">메인 2페이지 · UI 스토리</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          처음부터 폰 화면 + 첫 프리뷰 자동재생. 스크롤할 때마다 다음 프리뷰. 좁은 폰은 거의 전체화면, 일반
+          폰은 세로 폰 프레임, 노트북·폴드는 기존 Fold 프레임.
+        </p>
       </div>
+      <WhyBuyUiStoryPreview live className="!snap-none" />
     </main>
   );
 }

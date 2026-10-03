@@ -40,8 +40,19 @@ echo "==> stop stale one-off web run containers (seed/build leftovers)"
 docker ps -q --filter "name=acrossflare-web-run-" | xargs -r docker stop 2>/dev/null || true
 
 echo "==> drop one-shot containers so the first compose up does not hit a rename conflict"
-docker rm -f acrossflare-migrate-1 acrossflare-seed-1 acrossflare-backup-init-1 2>/dev/null || true
+# Leftover one-shot names make the first `compose up` exit on a rename conflict.
+docker rm -f \
+  acrossflare-migrate-1 \
+  acrossflare-seed-1 \
+  acrossflare-backup-init-1 \
+  acrossflare-migrate-run-1 \
+  acrossflare-seed-run-1 \
+  acrossflare-backup-init-run-1 \
+  2>/dev/null || true
 docker ps -aq --filter "name=_acrossflare-" | xargs -r docker rm -f
+docker ps -aq --filter "name=acrossflare-migrate" --filter "status=exited" | xargs -r docker rm -f
+docker ps -aq --filter "name=acrossflare-seed" --filter "status=exited" | xargs -r docker rm -f
+docker ps -aq --filter "name=acrossflare-backup-init" --filter "status=exited" | xargs -r docker rm -f
 
 echo "==> docker compose up --build (migrate runs via compose migrate service)"
 "${COMPOSE[@]}" up -d --build
@@ -54,17 +65,22 @@ echo "==> compose ps"
 
 echo "==> restart caddy (admin API is off, so caddy reload cannot reach :2019)"
 "${COMPOSE[@]}" restart caddy
+# First health probe always fails while Caddy is still binding — wait before probing.
+echo "==> wait for Caddy before first health probe"
+sleep 8
 
 echo "==> traffic sync scheduler"
 docker logs acrossflare-api-1 2>&1 | grep traffic_sync_scheduler_started || echo "WARN: traffic_sync_scheduler_started not in logs yet"
 
 echo "==> health"
 health_ok=0
-for _ in 1 2 3 4 5 6 7 8 9 10; do
+for attempt in 1 2 3 4 5 6 7 8 9 10; do
   if curl -sf https://acrossflare.com/api/health && echo; then
+    echo "OK: health (attempt ${attempt})"
     health_ok=1
     break
   fi
+  echo "health not ready yet (attempt ${attempt}); retrying…"
   sleep 3
 done
 if [[ "$health_ok" -ne 1 ]]; then

@@ -214,6 +214,7 @@
       { "q": "公共 Wi-Fi 下通信是否受保护？" }
     ],
     "closing": "使用 AcrossFlare，沿用现在的工作环境。",
+    "backupCaption": "重要资料也可以通过 Vaultwarden 安全备份。",
     "kakao": "KakaoTalk",
     "lineApp": "LINE",
     "youtube": "YouTube",

@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { HeroGrain } from "@/components/marketing/hero-grain";
+import { StoryDeviceFrame, StoryDevicePanes } from "@/components/marketing/story-device-frame";
 
 const STEP_MS = 5800;
 const LOOP_PAUSE_MS = 5000;
@@ -35,21 +36,23 @@ export function WhyBuyUiStoryPreview({
   live = false,
 }: {
   className?: string;
-  /** Full-bleed home deck section (no preview chrome). */
+  /** Full-bleed home deck section (sticky scroll steps). */
   live?: boolean;
 }) {
   const t = useTranslations("heroDeck");
   const items = readHeroItems(t);
+  const sectionRef = useRef<HTMLElement>(null);
   const [runId, setRunId] = useState(0);
   const [step, setStep] = useState(0);
   const [reduced, setReduced] = useState(false);
-  const [closing, setClosing] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [armed, setArmed] = useState(!live);
 
   const captions: Record<StepId, string> = {
     "apps-blocked": items[0]?.q ?? "",
     "wifi-risk": items[4]?.q ?? "",
     "apps-ok": t("closing"),
-    backup: items[2]?.q ?? "",
+    backup: t("backupCaption"),
   };
 
   useEffect(() => {
@@ -60,38 +63,61 @@ export function WhyBuyUiStoryPreview({
     return () => media.removeEventListener("change", apply);
   }, []);
 
+  // Live: scroll progress → discrete preview steps (phone visible + step 0 from start).
   useEffect(() => {
+    if (!live) return;
+    const section = sectionRef.current;
+    if (!section) return;
+    const onScroll = () => {
+      const rect = section.getBoundingClientRect();
+      const total = section.offsetHeight - window.innerHeight;
+      if (rect.top < window.innerHeight * 0.55) setArmed(true);
+      if (total <= 0) {
+        setProgress(1);
+        return;
+      }
+      setProgress(Math.min(1, Math.max(0, -rect.top / total)));
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [live]);
+
+  useEffect(() => {
+    if (live) {
+      if (reduced) {
+        setStep(STEPS.length - 1);
+        return;
+      }
+      const next = Math.min(STEPS.length - 1, Math.floor(progress * STEPS.length + 0.001));
+      setStep(next);
+      return;
+    }
+
     setStep(0);
-    setClosing(false);
     if (reduced) {
       setStep(STEPS.length - 1);
-      setClosing(true);
       return;
     }
     const timers = STEPS.map((_, i) =>
       i === 0 ? null : window.setTimeout(() => setStep(i), STEP_MS * i)
     );
-    const closeTimer = window.setTimeout(() => setClosing(true), STEP_MS * STEPS.length);
     const loopTimer = window.setTimeout(
       () => setRunId((n) => n + 1),
       STEP_MS * STEPS.length + LOOP_PAUSE_MS
     );
     return () => {
       timers.forEach((id) => id && window.clearTimeout(id));
-      window.clearTimeout(closeTimer);
       window.clearTimeout(loopTimer);
     };
-  }, [reduced, runId]);
+  }, [live, reduced, runId, progress]);
 
   const stepId = STEPS[step] ?? "apps-blocked";
+  const closing = step >= STEPS.length - 1;
+  const animate = !reduced && armed;
 
   const stage = (
-    <div
-      className={cn(
-        "relative w-full overflow-hidden bg-[#14181e]",
-        live ? "h-full" : "h-[min(86dvh,680px)]"
-      )}
-    >
+    <div className={cn("relative w-full overflow-hidden bg-[#14181e]", live ? "h-full" : "h-[min(86dvh,680px)]")}>
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(226,232,240,0.07),transparent_34%,rgba(0,0,0,0.2)),repeating-linear-gradient(90deg,rgba(255,255,255,0.045)_0px,rgba(255,255,255,0.045)_1px,transparent_1px,transparent_5px)]" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.1),transparent_55%)]" />
       <HeroGrain />
@@ -111,30 +137,32 @@ export function WhyBuyUiStoryPreview({
         }
       `}</style>
 
-      <div className="absolute inset-x-0 top-9 z-10 flex flex-col items-center px-4 text-center sm:top-11">
-        <h1 className="text-[clamp(1.85rem,5.5vw,3rem)] leading-[0.95] font-semibold tracking-[-0.04em] text-[#f4f4f5]">
+      <div className="absolute inset-x-0 top-9 z-10 flex flex-col items-center px-4 text-center max-[479px]:top-5 sm:top-11">
+        <h1 className="text-[clamp(1.85rem,5.5vw,3rem)] leading-[0.95] font-semibold tracking-[-0.04em] text-[#f4f4f5] max-[479px]:text-[1.45rem]">
           AcrossFlare
         </h1>
-        <p className="mt-2 text-[clamp(0.72rem,1.8vw,1rem)] whitespace-nowrap text-[#888888]">
+        <p className="mt-2 text-[clamp(0.72rem,1.8vw,1rem)] whitespace-nowrap text-[#888888] max-[479px]:hidden">
           Secure Cloud & Network Optimization
         </p>
-        <p className="mt-3 text-[clamp(0.8rem,1.6vw,1rem)] font-medium text-emerald-300/90">{t("headline")}</p>
+        <p className="mt-3 text-[clamp(0.8rem,1.6vw,1rem)] font-medium text-emerald-300/90 max-[479px]:mt-1 max-[479px]:text-[0.78rem]">
+          {t("headline")}
+        </p>
       </div>
 
-      <div className="absolute inset-x-0 top-[8.5rem] bottom-16 z-10 flex flex-col items-center justify-center px-4 sm:top-[9.25rem]">
+      <div className="absolute inset-x-0 top-[8.5rem] bottom-16 z-10 flex flex-col items-center justify-center px-4 max-[479px]:top-[4.5rem] max-[479px]:bottom-10 sm:top-[9.25rem]">
         <div
-          key={`${runId}-${stepId}`}
-          className="w-full max-w-xl"
-          style={reduced ? undefined : { animation: "af-ui-fade-in 0.55s ease-out both" }}
+          key={`${runId}-${stepId}-${armed ? "on" : "off"}`}
+          className="w-full max-w-xl max-[479px]:max-w-none"
+          style={animate ? { animation: "af-ui-fade-in 0.55s ease-out both" } : undefined}
         >
-          <DeviceMock step={stepId} t={t} items={items} animate={!reduced} />
+          <DeviceMock step={stepId} t={t} items={items} animate={animate} />
         </div>
 
-        <p className="mt-5 max-w-xl text-center text-[clamp(0.78rem,1.5vw,0.95rem)] leading-snug text-[#c8c8c8]">
+        <p className="mt-5 max-w-xl text-center text-[clamp(0.78rem,1.5vw,0.95rem)] leading-snug text-[#c8c8c8] max-[479px]:mt-3 max-[479px]:text-[0.78rem]">
           {captions[stepId]}
         </p>
 
-        <div className="mt-4 flex gap-2">
+        <div className="mt-4 flex gap-2 max-[479px]:mt-2.5">
           {STEPS.map((id, i) => (
             <span
               key={id}
@@ -149,7 +177,7 @@ export function WhyBuyUiStoryPreview({
 
       <p
         className={cn(
-          "absolute inset-x-0 bottom-5 z-10 text-center text-[clamp(0.8rem,1.6vw,1rem)] font-medium text-emerald-300 transition-all duration-500",
+          "absolute inset-x-0 bottom-5 z-10 text-center text-[clamp(0.8rem,1.6vw,1rem)] font-medium text-emerald-300 transition-all duration-500 max-[479px]:bottom-3 max-[479px]:text-[0.78rem]",
           closing ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
         )}
       >
@@ -161,13 +189,11 @@ export function WhyBuyUiStoryPreview({
   if (live) {
     return (
       <section
+        ref={sectionRef}
         data-home-page
-        className={cn(
-          "relative h-dvh snap-center snap-always overflow-hidden bg-[#14181e] max-md:snap-start",
-          className
-        )}
+        className={cn("relative h-[380vh] snap-start bg-[#14181e] max-md:snap-start", className)}
       >
-        {stage}
+        <div className="sticky top-0 h-dvh overflow-hidden">{stage}</div>
       </section>
     );
   }
@@ -201,53 +227,12 @@ function DeviceMock({
   animate: boolean;
 }) {
   return (
-    <div className="mx-auto w-[min(100%,520px)]">
-      {/* Fold 8–like: nearly square, slightly wider than tall */}
-      <div className="relative rounded-[1.15rem] border-[3px] border-[#f4f4f5]/90 bg-[#0c0e14] p-[3px] shadow-[0_22px_56px_rgba(0,0,0,0.5)]">
-        <div className="pointer-events-none absolute top-1/2 left-0 z-30 h-7 w-[2px] -translate-y-[120%] rounded-r-sm bg-[#c8c8c8]/40" />
-        <div className="pointer-events-none absolute top-1/2 right-0 z-30 h-7 w-[2px] -translate-y-[120%] rounded-l-sm bg-[#c8c8c8]/40" />
-
-        <div className="relative aspect-[5/4] overflow-hidden rounded-[0.85rem] bg-[#0c0e14]">
-          {/* Soft curved crease — gradient only, no solid line */}
-          <div
-            className="pointer-events-none absolute inset-y-0 left-1/2 z-20 w-10 -translate-x-1/2"
-            aria-hidden="true"
-            style={{
-              background:
-                "radial-gradient(ellipse 70% 100% at 50% 50%, rgba(255,255,255,0.04) 0%, transparent 55%), linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.04) 30%, rgba(255,255,255,0.035) 45%, rgba(255,255,255,0.05) 50%, rgba(0,0,0,0.03) 55%, rgba(0,0,0,0.04) 70%, transparent 100%)",
-            }}
-          />
-
-          <div className="relative z-10 flex h-7 items-end justify-between px-3.5 pb-0.5 text-[10px] text-[#c8c8c8]">
-            <span className="font-medium">9:41</span>
-            <span className="flex items-center gap-1.5">
-              <span className="flex items-end gap-[1.5px]" aria-hidden="true">
-                <span className="h-[3px] w-[2px] rounded-[0.5px] bg-[#c8c8c8]" />
-                <span className="h-[5px] w-[2px] rounded-[0.5px] bg-[#c8c8c8]" />
-                <span className="h-[7px] w-[2px] rounded-[0.5px] bg-[#c8c8c8]" />
-                <span className="h-[9px] w-[2px] rounded-[0.5px] bg-[#c8c8c8]" />
-              </span>
-              <span className="text-[9px] font-semibold tracking-wide text-[#c8c8c8]">CMCC</span>
-              <svg viewBox="0 0 16 12" className="h-[9px] w-3" fill="currentColor" aria-hidden="true">
-                <path d="M1.5 3.5A1.5 1.5 0 0 1 3 2h8a1.5 1.5 0 0 1 1.5 1.5v.5H14a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1.5v.5A1.5 1.5 0 0 1 11 11H3A1.5 1.5 0 0 1 1.5 9.5v-6Z" opacity="0.35" />
-                <path d="M8.5 5.5a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm2.5-1.2c.7.6 1.15 1.5 1.15 2.5s-.45 1.9-1.15 2.5l-.9-.85c.45-.4.75-1 .75-1.65s-.3-1.25-.75-1.65l.9-.85Zm1.85-1.75c1.15 1 1.9 2.45 1.9 4.1s-.75 3.1-1.9 4.1l-.9-.9c.9-.8 1.45-1.9 1.45-3.2S12.35 4.35 11.45 3.55l.9-.9Z" />
-              </svg>
-              <span className="flex items-center" aria-label="Battery 100%">
-                <span className="relative flex h-[9px] w-[18px] items-center rounded-[2px] border border-[#c8c8c8]/90 px-[1px]">
-                  <span className="h-[5px] w-full rounded-[1px] bg-emerald-400" />
-                </span>
-                <span className="ml-[1px] h-[4px] w-[1.5px] rounded-r-[1px] bg-[#c8c8c8]/90" />
-              </span>
-            </span>
-          </div>
-
-          {step === "apps-blocked" && <AppsGrid t={t} items={items} ok={false} animate={animate} />}
-          {step === "wifi-risk" && <WifiPanel animate={animate} />}
-          {step === "apps-ok" && <AppsGrid t={t} items={items} ok animate={animate} />}
-          {step === "backup" && <BackupPanel t={t} animate={animate} />}
-        </div>
-      </div>
-    </div>
+    <StoryDeviceFrame>
+      {step === "apps-blocked" && <AppsGrid t={t} items={items} ok={false} animate={animate} />}
+      {step === "wifi-risk" && <WifiPanel animate={animate} />}
+      {step === "apps-ok" && <AppsGrid t={t} items={items} ok animate={animate} />}
+      {step === "backup" && <BackupPanel t={t} animate={animate} />}
+    </StoryDeviceFrame>
   );
 }
 
@@ -283,9 +268,8 @@ function AppsGrid({
   const apps = primaryApps(t);
 
   return (
-    <div className="flex h-[calc(100%-2rem)] gap-3 px-3 pb-3 pt-1">
-      {/* Left pane */}
-      <div className="flex min-w-0 flex-1 flex-col">
+    <StoryDevicePanes>
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <div className="mb-2 flex items-center justify-between">
           <p className="text-[11px] font-medium text-[#f4f4f5]">Apps</p>
           {ok ? (
@@ -321,12 +305,11 @@ function AppsGrid({
         )}
       </div>
 
-      {/* Right pane */}
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <p className="mb-2 text-[11px] font-medium text-[#f4f4f5]">Sites</p>
         <FadeServiceList variant={ok ? "ok" : "blocked"} animate={animate} />
       </div>
-    </div>
+    </StoryDevicePanes>
   );
 }
 
@@ -421,9 +404,8 @@ function StatusBadge({ ok, delay, animate }: { ok: boolean; delay: number; anima
 
 function WifiPanel({ animate }: { animate: boolean }) {
   return (
-    <div className="flex h-[calc(100%-2rem)] gap-3 px-3 pb-3 pt-1">
-      {/* Left pane — connection */}
-      <div className="flex min-w-0 flex-1 flex-col">
+    <StoryDevicePanes>
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <div className="mb-2 flex items-center justify-between">
           <p className="text-[11px] font-medium text-[#f4f4f5]">Wi‑Fi</p>
           <span className="rounded-full bg-red-600/25 px-2 py-0.5 text-[9px] font-semibold text-red-200">
@@ -449,8 +431,7 @@ function WifiPanel({ animate }: { animate: boolean }) {
         </div>
       </div>
 
-      {/* Right pane — warning */}
-      <div className="flex min-w-0 flex-1 flex-col justify-center gap-2.5">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-center gap-2.5">
         <div
           className="rounded-xl border border-red-500/55 bg-red-950/60 px-3 py-4 text-center"
           style={animate ? { animation: "af-ui-fade-in 0.5s ease-out 0.2s both" } : undefined}
@@ -468,16 +449,15 @@ function WifiPanel({ animate }: { animate: boolean }) {
           <p className="text-[10px] leading-snug text-red-200/90">Public hotel Wi‑Fi · risk of interception</p>
         </div>
       </div>
-    </div>
+    </StoryDevicePanes>
   );
 }
 
 function BackupPanel({ t, animate }: { t: ReturnType<typeof useTranslations>; animate: boolean }) {
   return (
-    <div className="flex h-[calc(100%-2rem)] gap-3 px-3 pb-3 pt-1">
-      {/* Left pane — Vaultwarden 금고 열기 */}
+    <StoryDevicePanes>
       <div
-        className="flex min-w-0 flex-1 flex-col rounded-xl border border-white/10 bg-[#161a22] p-2.5"
+        className="flex min-h-0 min-w-0 flex-1 flex-col rounded-xl border border-white/10 bg-[#161a22] p-2.5"
         style={animate ? { animation: "af-ui-fade-in 0.4s ease-out both" } : undefined}
       >
         <p className="text-[11px] font-semibold leading-snug text-[#f4f4f5]">
@@ -508,9 +488,8 @@ function BackupPanel({ t, animate }: { t: ReturnType<typeof useTranslations>; an
         </button>
       </div>
 
-      {/* Right pane — 기존 파일 백업 */}
       <div
-        className="flex min-w-0 flex-1 flex-col rounded-xl border border-emerald-500/30 bg-[#12161c] p-2.5"
+        className="flex min-h-0 min-w-0 flex-1 flex-col rounded-xl border border-emerald-500/30 bg-[#12161c] p-2.5"
         style={animate ? { animation: "af-ui-fade-in 0.4s ease-out 0.15s both" } : undefined}
       >
         <p className="text-[11px] font-semibold text-emerald-300">{t("backup")}</p>
@@ -535,7 +514,7 @@ function BackupPanel({ t, animate }: { t: ReturnType<typeof useTranslations>; an
           {t("connected")}
         </p>
       </div>
-    </div>
+    </StoryDevicePanes>
   );
 }
 

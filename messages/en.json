@@ -214,6 +214,7 @@
       { "q": "Will traffic stay protected on public Wi-Fi?" }
     ],
     "closing": "Start on AcrossFlare, with your current setup.",
+    "backupCaption": "Important files can also be backed up securely with Vaultwarden.",
     "kakao": "KakaoTalk",
     "lineApp": "LINE",
     "youtube": "YouTube",

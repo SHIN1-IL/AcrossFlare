@@ -214,6 +214,7 @@
       { "q": "公共 Wi-Fi でも通信は保護されるか？" }
     ],
     "closing": "AcrossFlare で、今の環境のまま始めてください。",
+    "backupCaption": "重要な資料も Vaultwarden で安全にバックアップできます。",
     "kakao": "カカオトーク",
     "lineApp": "LINE",
     "youtube": "YouTube",
