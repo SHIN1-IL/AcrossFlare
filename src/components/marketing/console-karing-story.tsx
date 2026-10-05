@@ -24,23 +24,23 @@ const STEPS: StepId[] = [
   "vault-backup",
 ];
 
-const HEADLINE_KEYS: Record<StepId, string> = {
+const HEADLINE_KEYS = {
   "console-click": "headlines.consoleClick",
   "qr-scan": "headlines.qrScan",
   "karing-tap": "headlines.karingTap",
   "karing-on": "headlines.karingOn",
   "vault-login": "headlines.vaultLogin",
   "vault-backup": "headlines.vaultBackup",
-};
+} as const satisfies Record<StepId, string>;
 
-const CAPTION_KEYS: Record<StepId, string> = {
+const CAPTION_KEYS = {
   "console-click": "captions.consoleClick",
   "qr-scan": "captions.qrScan",
   "karing-tap": "captions.karingTap",
   "karing-on": "captions.karingOn",
   "vault-login": "captions.vaultLogin",
   "vault-backup": "captions.vaultBackup",
-};
+} as const satisfies Record<StepId, string>;
 
 type StoryT = ReturnType<typeof useTranslations>;
 type HeroT = ReturnType<typeof useTranslations>;
@@ -193,7 +193,7 @@ export function ConsoleKaringStory({ className }: { className?: string }) {
           >
             <StoryDeviceFrame>
               {stepId === "console-click" && (
-                <ConsoleClickContent t={t} tHero={tHero} animate={animate} />
+                <ConsoleClickContent tHero={tHero} animate={animate} />
               )}
               {stepId === "qr-scan" && <QrScanFoldContent t={t} tHero={tHero} />}
               {stepId === "karing-tap" && (
@@ -229,11 +229,9 @@ export function ConsoleKaringStory({ className }: { className?: string }) {
 
 /** Home main (motherboard) with tap cue on top-left Console */
 function ConsoleClickContent({
-  t,
   tHero,
   animate,
 }: {
-  t: StoryT;
   tHero: HeroT;
   animate: boolean;
 }) {
