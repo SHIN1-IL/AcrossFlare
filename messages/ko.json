@@ -207,11 +207,23 @@
   "heroDeck": {
     "headline": "중국 출장과 여행에서",
     "items": [
-      { "q": "쓰던 메신저를 그대로 연결할 수 있을까?", "note": "카카오톡 · LINE" },
-      { "q": "YouTube와 Netflix는 끊김 없이 재생될까?" },
-      { "q": "중요한 자료는 안전하게 백업될까?" },
-      { "q": "화상회의 품질은 유지될까?", "note": "Zoom · Teams · Webex" },
-      { "q": "공용 Wi-Fi에서도 통신은 보호될까?" }
+      {
+        "q": "쓰던 메신저를 그대로 연결할 수 있을까?",
+        "note": "카카오톡 · LINE"
+      },
+      {
+        "q": "YouTube와 Netflix는 끊김 없이 재생될까?"
+      },
+      {
+        "q": "중요한 자료는 안전하게 백업될까?"
+      },
+      {
+        "q": "화상회의 품질은 유지될까?",
+        "note": "Zoom · Teams · Webex"
+      },
+      {
+        "q": "공용 Wi-Fi에서도 통신은 보호될까?"
+      }
     ],
     "closing": "AcrossFlare로, 지금 환경 그대로 시작하세요.",
     "backupCaption": "중요한 자료도 Vaultwarden으로 안전하게 백업할수 있습니다",
@@ -230,7 +242,12 @@
     "playing": "재생 중",
     "inCall": "회의 중",
     "ping": "핑",
-    "chats": ["잘 들려?", "응, 보여.", "사진 보낼게.", "받았어."],
+    "chats": [
+      "잘 들려?",
+      "응, 보여.",
+      "사진 보낼게.",
+      "받았어."
+    ],
     "copy": "복사",
     "copied": "복사됨",
     "pay": "결제하기",
@@ -251,7 +268,77 @@
     "url": "구독 URL",
     "urlSample": "https://acrossflare.com/api/v1/subscription/…",
     "yaml": ".yaml 다운로드",
-    "qrHint": "Karing에서 이 정사각 QR을 스캔하거나, URL을 복사해 Add Profile에 붙여넣으세요."
+    "qrHint": "Karing에서 이 정사각 QR을 스캔하거나, URL을 복사해 Add Profile에 붙여넣으세요.",
+    "brandTagline": "보안 클라우드 & 네트워크 최적화",
+    "apps": "앱",
+    "sites": "사이트",
+    "blocked": "차단됨",
+    "unsecured": "비보안",
+    "connectedUnsecured": "연결됨 · 비보안",
+    "wifiUnsafeTitle": "이 Wi‑Fi는 안전하지 않습니다",
+    "wifiUnsafeBody": "이 네트워크에서는 트래픽이 암호화되지 않습니다",
+    "wifiRiskNote": "호텔 공용 Wi‑Fi · 가로채기 위험",
+    "vaultSubtitle": "암호·메모 백업",
+    "vaultOpenHint": "금고 열기를 누르면 로그인 화면으로 이동합니다.",
+    "openVault": "금고 열기",
+    "vaultUrl": "Vault URL",
+    "vaultUser": "Vault 사용자"
+  },
+  "consoleStory": {
+    "nextPreviewAria": "다음 프리뷰로 이동",
+    "headlines": {
+      "consoleClick": "홈에서 콘솔로 이동",
+      "qrScan": "카메라로 QR을 스캔해 연결",
+      "karingTap": "한 번의 탭으로 Karing 가동",
+      "karingOn": "암호화 네트워크 가동 완료",
+      "vaultLogin": "Vaultwarden에 로그인",
+      "vaultBackup": "암호·자료를 안전하게 백업"
+    },
+    "captions": {
+      "consoleClick": "메인 화면 오른쪽 상단의 콘솔을 탭하면 구독 화면으로 이어집니다.",
+      "qrScan": "홈페이지 콘솔의 정사각 QR을 카메라에 맞추면 구독이 바로 반영됩니다.",
+      "karingTap": "하단 적색 버튼을 누르면 AcrossFlare 프로파일이 활성화됩니다.",
+      "karingOn": "적색 → 녹색. 암호화 네트워크가 가동됩니다.",
+      "vaultLogin": "계정 이메일과 비밀번호를 입력하면 Vaultwarden에 로그인됩니다.",
+      "vaultBackup": "로그인 후 보관함에서 데이터 가져오기·백업을 바로 이용할 수 있습니다."
+    },
+    "expires": "만료",
+    "expiresValue": "OOOO년 OO월",
+    "camera": "카메라",
+    "scan": "스캔",
+    "scanHint": "콘솔 QR을 프레임에 맞춰 주세요",
+    "login": "로그인",
+    "emailLabel": "이메일 주소",
+    "passwordLabel": "마스터 비밀번호",
+    "required": "(필수)",
+    "rememberEmail": "이메일 기억하기",
+    "navVault": "보관함",
+    "navSend": "Send",
+    "navTools": "도구",
+    "navReports": "보고서",
+    "navSettings": "설정",
+    "passwordManager": "비밀번호 관리자",
+    "allVaults": "모든 보관함",
+    "newItem": "새 항목",
+    "getStarted": "시작하기",
+    "complete": "2/3 완료",
+    "createAccount": "계정 만들기",
+    "importData": "데이터 가져오기",
+    "importHint": "가져오기할 데이터가 없으면, 대신 새 항목을 생성할 수 있습니다.",
+    "installExtension": "브라우저 확장 프로그램 설치",
+    "name": "이름",
+    "owner": "소유자",
+    "user": "사용자",
+    "me": "나",
+    "backupReady": "보안 백업 준비 완료",
+    "backupReadyHint": "암호·메모·자료를 Vaultwarden에 안전하게 보관",
+    "currentProfile": "현재 프로파일",
+    "systemProxy": "시스템 프록시",
+    "myProfiles": "내 프로파일",
+    "dns": "DNS",
+    "addProfile": "프로파일 추가",
+    "rule": "규칙",
+    "global": "글로벌"
   },
   "planSlides": {
     "global-lite": {

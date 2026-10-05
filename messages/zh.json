@@ -207,11 +207,23 @@
   "heroDeck": {
     "headline": "在中国出差或旅行时",
     "items": [
-      { "q": "常用聊天软件能否保持连接？", "note": "KakaoTalk · LINE" },
-      { "q": "YouTube 与 Netflix 能否流畅播放？" },
-      { "q": "重要资料能否安全备份？" },
-      { "q": "会议期间的连接能否保持稳定？", "note": "Zoom · Teams · Webex" },
-      { "q": "公共 Wi-Fi 下通信是否受保护？" }
+      {
+        "q": "常用聊天软件能否保持连接？",
+        "note": "KakaoTalk · LINE"
+      },
+      {
+        "q": "YouTube 与 Netflix 能否流畅播放？"
+      },
+      {
+        "q": "重要资料能否安全备份？"
+      },
+      {
+        "q": "会议期间的连接能否保持稳定？",
+        "note": "Zoom · Teams · Webex"
+      },
+      {
+        "q": "公共 Wi-Fi 下通信是否受保护？"
+      }
     ],
     "closing": "使用 AcrossFlare，沿用现在的工作环境。",
     "backupCaption": "重要资料也可以通过 Vaultwarden 安全备份。",
@@ -230,7 +242,12 @@
     "playing": "播放中",
     "inCall": "会议中",
     "ping": "延迟",
-    "chats": ["听得到吗？", "能看到。", "发张照片。", "收到了。"],
+    "chats": [
+      "听得到吗？",
+      "能看到。",
+      "发张照片。",
+      "收到了。"
+    ],
     "copy": "复制",
     "copied": "已复制",
     "pay": "支付",
@@ -251,7 +268,77 @@
     "url": "订阅地址",
     "urlSample": "https://acrossflare.com/api/v1/subscription/…",
     "yaml": "下载 .yaml",
-    "qrHint": "在 Karing 中扫描此方形二维码，或复制 URL 粘贴到 Add Profile。"
+    "qrHint": "在 Karing 中扫描此方形二维码，或复制 URL 粘贴到 Add Profile。",
+    "brandTagline": "安全云与网络优化",
+    "apps": "应用",
+    "sites": "网站",
+    "blocked": "已屏蔽",
+    "unsecured": "不安全",
+    "connectedUnsecured": "已连接 · 不安全",
+    "wifiUnsafeTitle": "此 Wi‑Fi 不安全",
+    "wifiUnsafeBody": "此网络上的流量未加密",
+    "wifiRiskNote": "酒店公共 Wi‑Fi · 有被窃听风险",
+    "vaultSubtitle": "密码与备忘备份",
+    "vaultOpenHint": "点击打开保险库后进入登录界面。",
+    "openVault": "打开保险库",
+    "vaultUrl": "Vault URL",
+    "vaultUser": "Vault 用户"
+  },
+  "consoleStory": {
+    "nextPreviewAria": "进入下一段预览",
+    "headlines": {
+      "consoleClick": "从首页进入控制台",
+      "qrScan": "用相机扫描二维码连接",
+      "karingTap": "一键启动 Karing",
+      "karingOn": "加密网络已就绪",
+      "vaultLogin": "登录 Vaultwarden",
+      "vaultBackup": "安全备份密码与资料"
+    },
+    "captions": {
+      "consoleClick": "点击首页右上角的控制台，即可进入订阅界面。",
+      "qrScan": "将首页控制台的方形二维码对准相机，即可导入订阅。",
+      "karingTap": "按下底部红色按钮，即可启用 AcrossFlare 配置。",
+      "karingOn": "红 → 绿。加密网络已运行。",
+      "vaultLogin": "输入账户邮箱和密码即可登录 Vaultwarden。",
+      "vaultBackup": "登录后可在保险库中立即导入数据并备份。"
+    },
+    "expires": "到期",
+    "expiresValue": "OOOO年OO月",
+    "camera": "相机",
+    "scan": "扫描",
+    "scanHint": "请将控制台二维码对准取景框",
+    "login": "登录",
+    "emailLabel": "电子邮箱",
+    "passwordLabel": "主密码",
+    "required": "(必填)",
+    "rememberEmail": "记住邮箱",
+    "navVault": "保险库",
+    "navSend": "Send",
+    "navTools": "工具",
+    "navReports": "报告",
+    "navSettings": "设置",
+    "passwordManager": "密码管理器",
+    "allVaults": "全部保险库",
+    "newItem": "新建项目",
+    "getStarted": "开始使用",
+    "complete": "已完成 2/3",
+    "createAccount": "创建账户",
+    "importData": "导入数据",
+    "importHint": "若没有可导入的数据，也可直接新建项目。",
+    "installExtension": "安装浏览器扩展",
+    "name": "名称",
+    "owner": "所有者",
+    "user": "用户",
+    "me": "我",
+    "backupReady": "安全备份已就绪",
+    "backupReadyHint": "将密码、备忘与资料安全保存在 Vaultwarden",
+    "currentProfile": "当前配置",
+    "systemProxy": "系统代理",
+    "myProfiles": "我的配置",
+    "dns": "DNS",
+    "addProfile": "添加配置",
+    "rule": "规则",
+    "global": "全局"
   },
   "planSlides": {
     "global-lite": {

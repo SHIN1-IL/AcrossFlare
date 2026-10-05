@@ -207,11 +207,23 @@
   "heroDeck": {
     "headline": "For travel and business in China",
     "items": [
-      { "q": "Will your current messengers stay connected?", "note": "KakaoTalk · LINE" },
-      { "q": "Will YouTube and Netflix play without interruption?" },
-      { "q": "Will important files stay securely backed up?" },
-      { "q": "Will call quality hold through the meeting?", "note": "Zoom · Teams · Webex" },
-      { "q": "Will traffic stay protected on public Wi-Fi?" }
+      {
+        "q": "Will your current messengers stay connected?",
+        "note": "KakaoTalk · LINE"
+      },
+      {
+        "q": "Will YouTube and Netflix play without interruption?"
+      },
+      {
+        "q": "Will important files stay securely backed up?"
+      },
+      {
+        "q": "Will call quality hold through the meeting?",
+        "note": "Zoom · Teams · Webex"
+      },
+      {
+        "q": "Will traffic stay protected on public Wi-Fi?"
+      }
     ],
     "closing": "Start on AcrossFlare, with your current setup.",
     "backupCaption": "Important files can also be backed up securely with Vaultwarden.",
@@ -230,7 +242,12 @@
     "playing": "Playing",
     "inCall": "In a meeting",
     "ping": "Ping",
-    "chats": ["Can you hear me?", "Yes, I can see it.", "Sending a photo.", "Got it."],
+    "chats": [
+      "Can you hear me?",
+      "Yes, I can see it.",
+      "Sending a photo.",
+      "Got it."
+    ],
     "copy": "Copy",
     "copied": "Copied",
     "pay": "Pay",
@@ -251,7 +268,77 @@
     "url": "Subscription URL",
     "urlSample": "https://acrossflare.com/api/v1/subscription/…",
     "yaml": "Download .yaml",
-    "qrHint": "Scan this square QR in Karing, or copy the URL and paste it into Add Profile."
+    "qrHint": "Scan this square QR in Karing, or copy the URL and paste it into Add Profile.",
+    "brandTagline": "Secure Cloud & Network Optimization",
+    "apps": "Apps",
+    "sites": "Sites",
+    "blocked": "Blocked",
+    "unsecured": "Unsecured",
+    "connectedUnsecured": "Connected · Unsecured",
+    "wifiUnsafeTitle": "This Wi‑Fi is not secure",
+    "wifiUnsafeBody": "Traffic is not encrypted on this network",
+    "wifiRiskNote": "Public hotel Wi‑Fi · risk of interception",
+    "vaultSubtitle": "Password & note backup",
+    "vaultOpenHint": "Open vault takes you to the login screen.",
+    "openVault": "Open vault",
+    "vaultUrl": "Vault URL",
+    "vaultUser": "Vault user"
+  },
+  "consoleStory": {
+    "nextPreviewAria": "Go to next preview",
+    "headlines": {
+      "consoleClick": "Go from home to Console",
+      "qrScan": "Scan the QR with your camera",
+      "karingTap": "Start Karing with one tap",
+      "karingOn": "Encrypted network is live",
+      "vaultLogin": "Sign in to Vaultwarden",
+      "vaultBackup": "Back up passwords and files securely"
+    },
+    "captions": {
+      "consoleClick": "Tap Console at the top right of the home screen to open your subscription view.",
+      "qrScan": "Align the square QR from the homepage console with the camera to import the subscription.",
+      "karingTap": "Press the red button at the bottom to activate the AcrossFlare profile.",
+      "karingOn": "Red → green. The encrypted network is running.",
+      "vaultLogin": "Enter your account email and password to sign in to Vaultwarden.",
+      "vaultBackup": "After login, import data and back up right from the vault."
+    },
+    "expires": "Expires",
+    "expiresValue": "OOOO / OO",
+    "camera": "Camera",
+    "scan": "Scan",
+    "scanHint": "Fit the console QR in the frame",
+    "login": "Log in",
+    "emailLabel": "Email address",
+    "passwordLabel": "Master password",
+    "required": "(required)",
+    "rememberEmail": "Remember email",
+    "navVault": "Vaults",
+    "navSend": "Send",
+    "navTools": "Tools",
+    "navReports": "Reports",
+    "navSettings": "Settings",
+    "passwordManager": "Password Manager",
+    "allVaults": "All vaults",
+    "newItem": "New item",
+    "getStarted": "Get started",
+    "complete": "2/3 complete",
+    "createAccount": "Create an account",
+    "importData": "Import data",
+    "importHint": "If you have nothing to import, create a new item instead.",
+    "installExtension": "Install browser extension",
+    "name": "Name",
+    "owner": "Owner",
+    "user": "User",
+    "me": "Me",
+    "backupReady": "Secure backup ready",
+    "backupReadyHint": "Keep passwords, notes, and files safe in Vaultwarden",
+    "currentProfile": "Current Profile",
+    "systemProxy": "System Proxy",
+    "myProfiles": "My Profiles",
+    "dns": "DNS",
+    "addProfile": "Add Profile",
+    "rule": "Rule",
+    "global": "Global"
   },
   "planSlides": {
     "global-lite": {

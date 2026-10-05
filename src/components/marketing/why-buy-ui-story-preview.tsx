@@ -144,7 +144,7 @@ export function WhyBuyUiStoryPreview({
           AcrossFlare
         </h1>
         <p className="mt-1.5 text-[clamp(0.68rem,1.6vw,0.9rem)] whitespace-nowrap text-[#888888] max-[479px]:hidden">
-          Secure Cloud & Network Optimization
+          {t("brandTagline")}
         </p>
         <p className="mt-2 text-[clamp(0.75rem,1.5vw,0.95rem)] font-medium text-emerald-300/90 max-[479px]:mt-1 max-[479px]:text-[0.75rem]">
           {t("headline")}
@@ -231,7 +231,7 @@ function DeviceMock({
   return (
     <StoryDeviceFrame>
       {step === "apps-blocked" && <AppsGrid t={t} items={items} ok={false} animate={animate} />}
-      {step === "wifi-risk" && <WifiPanel animate={animate} />}
+      {step === "wifi-risk" && <WifiPanel t={t} animate={animate} />}
       {step === "apps-ok" && <AppsGrid t={t} items={items} ok animate={animate} />}
       {step === "backup" && <BackupPanel t={t} animate={animate} />}
     </StoryDeviceFrame>
@@ -273,14 +273,14 @@ function AppsGrid({
     <StoryDevicePanes>
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <div className="mb-2 flex items-center justify-between">
-          <p className="text-[11px] font-medium text-[#f4f4f5]">Apps</p>
+          <p className="text-[11px] font-medium text-[#f4f4f5]">{t("apps")}</p>
           {ok ? (
             <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[9px] font-semibold text-emerald-300">
               AcrossFlare
             </span>
           ) : (
             <span className="rounded-full bg-red-500/20 px-2 py-0.5 text-[9px] font-semibold text-red-300">
-              Blocked
+              {t("blocked")}
             </span>
           )}
         </div>
@@ -308,7 +308,7 @@ function AppsGrid({
       </div>
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <p className="mb-2 text-[11px] font-medium text-[#f4f4f5]">Sites</p>
+        <p className="mb-2 text-[11px] font-medium text-[#f4f4f5]">{t("sites")}</p>
         <FadeServiceList variant={ok ? "ok" : "blocked"} animate={animate} />
       </div>
     </StoryDevicePanes>
@@ -404,19 +404,25 @@ function StatusBadge({ ok, delay, animate }: { ok: boolean; delay: number; anima
   );
 }
 
-function WifiPanel({ animate }: { animate: boolean }) {
+function WifiPanel({
+  t,
+  animate,
+}: {
+  t: ReturnType<typeof useTranslations>;
+  animate: boolean;
+}) {
   return (
     <StoryDevicePanes>
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <div className="mb-2 flex items-center justify-between">
           <p className="text-[11px] font-medium text-[#f4f4f5]">Wi‑Fi</p>
           <span className="rounded-full bg-red-600/25 px-2 py-0.5 text-[9px] font-semibold text-red-200">
-            Unsecured
+            {t("unsecured")}
           </span>
         </div>
         <div className="flex flex-1 flex-col rounded-xl border border-red-500/45 bg-[#12161c] p-3">
           <p className="text-[12px] font-semibold text-[#f4f4f5]">Hotel_Guest</p>
-          <p className="mt-1 text-[10px] font-medium text-red-300">Connected · Unsecured</p>
+          <p className="mt-1 text-[10px] font-medium text-red-300">{t("connectedUnsecured")}</p>
           <div className="mt-6 flex flex-1 items-center justify-center gap-1.5">
             {[0, 1, 2].map((i) => (
               <span
@@ -438,8 +444,8 @@ function WifiPanel({ animate }: { animate: boolean }) {
           className="rounded-xl border border-red-500/55 bg-red-950/60 px-3 py-4 text-center"
           style={animate ? { animation: "af-ui-fade-in 0.5s ease-out 0.2s both" } : undefined}
         >
-          <p className="text-[12px] font-bold leading-snug text-red-100">이 Wi‑Fi는 안전하지 않습니다</p>
-          <p className="mt-2 text-[9px] leading-snug text-red-200/85">Traffic not encrypted on this network</p>
+          <p className="text-[12px] font-bold leading-snug text-red-100">{t("wifiUnsafeTitle")}</p>
+          <p className="mt-2 text-[9px] leading-snug text-red-200/85">{t("wifiUnsafeBody")}</p>
         </div>
         <div
           className="flex items-center gap-2 rounded-xl border border-red-500/35 bg-red-950/40 px-2.5 py-2.5"
@@ -448,7 +454,7 @@ function WifiPanel({ animate }: { animate: boolean }) {
           <span className="text-[14px] text-red-400" aria-hidden="true">
             ⚠
           </span>
-          <p className="text-[10px] leading-snug text-red-200/90">Public hotel Wi‑Fi · risk of interception</p>
+          <p className="text-[10px] leading-snug text-red-200/90">{t("wifiRiskNote")}</p>
         </div>
       </div>
     </StoryDevicePanes>
@@ -464,14 +470,12 @@ function BackupPanel({ t, animate }: { t: ReturnType<typeof useTranslations>; an
       >
         <p className="text-[11px] font-semibold leading-snug text-[#f4f4f5]">
           Vaultwarden
-          <span className="mt-0.5 block text-[9px] font-normal text-[#a1a1aa]">암호·메모 백업</span>
+          <span className="mt-0.5 block text-[9px] font-normal text-[#a1a1aa]">{t("vaultSubtitle")}</span>
         </p>
-        <p className="mt-1.5 text-[8px] leading-snug text-[#8b8b93]">
-          금고 열기를 누르면 로그인 화면으로 이동합니다.
-        </p>
+        <p className="mt-1.5 text-[8px] leading-snug text-[#8b8b93]">{t("vaultOpenHint")}</p>
         <div className="mt-2 space-y-1.5">
-          <VaultField label="Vault URL" value="https://vault.acrossflare.com" animate={animate} delay={0.15} />
-          <VaultField label="Vault 사용자" value="you@acrossflare.com" animate={animate} delay={0.25} />
+          <VaultField label={t("vaultUrl")} value="https://vault.acrossflare.com" animate={animate} delay={0.15} />
+          <VaultField label={t("vaultUser")} value="you@acrossflare.com" animate={animate} delay={0.25} />
         </div>
         <button
           type="button"
@@ -486,7 +490,7 @@ function BackupPanel({ t, animate }: { t: ReturnType<typeof useTranslations>; an
               : undefined
           }
         >
-          금고 열기
+          {t("openVault")}
         </button>
       </div>
 

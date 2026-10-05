@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { HeroGrain } from "@/components/marketing/hero-grain";
 import { MotherboardEdgeBackdrop } from "@/components/marketing/motherboard-edge-backdrop";
@@ -23,23 +24,26 @@ const STEPS: StepId[] = [
   "vault-backup",
 ];
 
-const HEADLINES: Record<StepId, string> = {
-  "console-click": "홈에서 콘솔로 이동",
-  "qr-scan": "카메라로 QR을 스캔해 연결",
-  "karing-tap": "한 번의 탭으로 Karing 가동",
-  "karing-on": "암호화 네트워크 가동 완료",
-  "vault-login": "Vaultwarden에 로그인",
-  "vault-backup": "암호·자료를 안전하게 백업",
+const HEADLINE_KEYS: Record<StepId, string> = {
+  "console-click": "headlines.consoleClick",
+  "qr-scan": "headlines.qrScan",
+  "karing-tap": "headlines.karingTap",
+  "karing-on": "headlines.karingOn",
+  "vault-login": "headlines.vaultLogin",
+  "vault-backup": "headlines.vaultBackup",
 };
 
-const CAPTIONS: Record<StepId, string> = {
-  "console-click": "메인 화면 오른쪽 상단의 콘솔을 탭하면 구독 화면으로 이어집니다.",
-  "qr-scan": "홈페이지 콘솔의 정사각 QR을 카메라에 맞추면 구독이 바로 반영됩니다.",
-  "karing-tap": "하단 적색 버튼을 누르면 AcrossFlare 프로파일이 활성화됩니다.",
-  "karing-on": "적색 → 녹색. 암호화 네트워크가 가동됩니다.",
-  "vault-login": "계정 이메일과 비밀번호를 입력하면 Vaultwarden에 로그인됩니다.",
-  "vault-backup": "로그인 후 보관함에서 데이터 가져오기·백업을 바로 이용할 수 있습니다.",
+const CAPTION_KEYS: Record<StepId, string> = {
+  "console-click": "captions.consoleClick",
+  "qr-scan": "captions.qrScan",
+  "karing-tap": "captions.karingTap",
+  "karing-on": "captions.karingOn",
+  "vault-login": "captions.vaultLogin",
+  "vault-backup": "captions.vaultBackup",
 };
+
+type StoryT = ReturnType<typeof useTranslations>;
+type HeroT = ReturnType<typeof useTranslations>;
 
 /**
  * Sticky scroll story (same device frame as page 2):
@@ -47,6 +51,8 @@ const CAPTIONS: Record<StepId, string> = {
  * Personal details masked as OO. Scroll or tap advances steps.
  */
 export function ConsoleKaringStory({ className }: { className?: string }) {
+  const t = useTranslations("consoleStory");
+  const tHero = useTranslations("heroDeck");
   const sectionRef = useRef<HTMLElement>(null);
   const pointerStart = useRef<{ x: number; y: number } | null>(null);
   const [progress, setProgress] = useState(0);
@@ -130,7 +136,7 @@ export function ConsoleKaringStory({ className }: { className?: string }) {
         }}
         role="button"
         tabIndex={0}
-        aria-label="다음 프리뷰로 이동"
+        aria-label={t("nextPreviewAria")}
       >
         <MotherboardEdgeBackdrop />
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(226,232,240,0.04),transparent_32%,rgba(0,0,0,0.18)),repeating-linear-gradient(90deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_1px,transparent_1px,transparent_5px)]" />
@@ -172,10 +178,10 @@ export function ConsoleKaringStory({ className }: { className?: string }) {
             AcrossFlare
           </h1>
           <p className="mt-1.5 text-[clamp(0.68rem,1.6vw,0.9rem)] whitespace-nowrap text-[#888888] max-[479px]:hidden">
-            Secure Cloud & Network Optimization
+            {tHero("brandTagline")}
           </p>
           <p className="mt-2 text-[clamp(0.75rem,1.5vw,0.95rem)] font-medium text-emerald-300/90 max-[479px]:mt-1 max-[479px]:text-[0.75rem]">
-            {HEADLINES[stepId]}
+            {t(HEADLINE_KEYS[stepId])}
           </p>
         </div>
 
@@ -186,19 +192,23 @@ export function ConsoleKaringStory({ className }: { className?: string }) {
             style={animate ? { animation: "af-ck-fade-in 0.45s ease-out both" } : undefined}
           >
             <StoryDeviceFrame>
-              {stepId === "console-click" && <ConsoleClickContent animate={animate} />}
-              {stepId === "qr-scan" && <QrScanFoldContent />}
-              {stepId === "karing-tap" && <KaringFoldContent active={false} pressed={animate} />}
-              {stepId === "karing-on" && <KaringFoldContent active pressed={false} />}
-              {stepId === "vault-login" && <VaultLoginContent animate={animate} />}
-              {stepId === "vault-backup" && <VaultBackupContent animate={animate} />}
+              {stepId === "console-click" && (
+                <ConsoleClickContent t={t} tHero={tHero} animate={animate} />
+              )}
+              {stepId === "qr-scan" && <QrScanFoldContent t={t} tHero={tHero} />}
+              {stepId === "karing-tap" && (
+                <KaringFoldContent t={t} active={false} pressed={animate} />
+              )}
+              {stepId === "karing-on" && <KaringFoldContent t={t} active pressed={false} />}
+              {stepId === "vault-login" && <VaultLoginContent t={t} animate={animate} />}
+              {stepId === "vault-backup" && <VaultBackupContent t={t} animate={animate} />}
             </StoryDeviceFrame>
           </div>
         </div>
 
         <div className="relative z-20 flex shrink-0 flex-col items-center px-4 pt-3 pb-5 max-[479px]:pt-2 max-[479px]:pb-4">
           <p className="max-w-xl text-center text-[clamp(0.78rem,1.5vw,0.95rem)] leading-snug text-[#c8c8c8] max-[479px]:text-[0.78rem]">
-            {CAPTIONS[stepId]}
+            {t(CAPTION_KEYS[stepId])}
           </p>
           <div className="mt-3 flex gap-2 max-[479px]:mt-2">
             {STEPS.map((id, i) => (
@@ -218,7 +228,15 @@ export function ConsoleKaringStory({ className }: { className?: string }) {
 }
 
 /** Home main (motherboard) with tap cue on top-left Console */
-function ConsoleClickContent({ animate }: { animate: boolean }) {
+function ConsoleClickContent({
+  t,
+  tHero,
+  animate,
+}: {
+  t: StoryT;
+  tHero: HeroT;
+  animate: boolean;
+}) {
   return (
     <div className="relative h-full overflow-hidden bg-[#0e1014]">
       {/* Soft homepage atmosphere */}
@@ -238,7 +256,7 @@ function ConsoleClickContent({ animate }: { animate: boolean }) {
             animate && "animate-[af-ck-glow_1.5s_ease-in-out_infinite]"
           )}
         >
-          콘솔
+          {tHero("consoleTitle")}
           {animate ? (
             <span
               className="pointer-events-none absolute top-1/2 left-1/2 z-20 size-6 rounded-full border-2 border-white/85 bg-emerald-300/40"
@@ -254,18 +272,16 @@ function ConsoleClickContent({ animate }: { animate: boolean }) {
         <h2 className="text-[clamp(1.35rem,5.5vw,1.85rem)] leading-[0.95] font-semibold tracking-[-0.04em] text-[#f4f4f5]">
           AcrossFlare
         </h2>
-        <p className="mt-1.5 text-[9px] whitespace-nowrap text-[#888888]">
-          Secure Cloud & Network Optimization
-        </p>
+        <p className="mt-1.5 text-[9px] whitespace-nowrap text-[#888888]">{tHero("brandTagline")}</p>
         <p className="mt-3 max-w-[16rem] text-[10px] leading-snug text-emerald-300/90">
-          중국 출장과 여행에서
+          {tHero("headline")}
         </p>
       </div>
     </div>
   );
 }
 
-function QrScanFoldContent() {
+function QrScanFoldContent({ t, tHero }: { t: StoryT; tHero: HeroT }) {
   return (
     <StoryDevicePanes className="h-full md:h-full">
       <div className="flex min-h-0 min-w-0 flex-1 flex-col rounded-xl border border-white/10 bg-[#090b0f] p-2.5">
@@ -277,16 +293,16 @@ function QrScanFoldContent() {
             <span className="text-[10px] font-semibold text-[#f4f4f5]">Standard</span>
           </div>
           <span className="rounded-full bg-emerald-500/20 px-1.5 py-0.5 text-[8px] font-semibold text-emerald-300">
-            활성
+            {tHero("active")}
           </span>
         </div>
         <div className="mb-1.5 grid grid-cols-2 gap-1">
           <div className="rounded-md border border-white/8 bg-[#12151c] px-1.5 py-1">
-            <p className="text-[7px] text-[#8b8b93]">만료</p>
-            <p className="truncate text-[8px] font-medium text-[#e4e4e7]">OOOO년 OO월</p>
+            <p className="text-[7px] text-[#8b8b93]">{t("expires")}</p>
+            <p className="truncate text-[8px] font-medium text-[#e4e4e7]">{t("expiresValue")}</p>
           </div>
           <div className="rounded-md border border-white/8 bg-[#12151c] px-1.5 py-1">
-            <p className="text-[7px] text-[#8b8b93]">노드</p>
+            <p className="text-[7px] text-[#8b8b93]">{tHero("nodes")}</p>
             <p className="truncate text-[8px] font-medium text-[#e4e4e7]">node-OO</p>
           </div>
         </div>
@@ -299,9 +315,9 @@ function QrScanFoldContent() {
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col rounded-xl border border-white/10 bg-[#12161c] p-2.5">
         <div className="mb-1.5 flex items-center justify-between">
-          <p className="text-[11px] font-medium text-[#f4f4f5]">카메라</p>
+          <p className="text-[11px] font-medium text-[#f4f4f5]">{t("camera")}</p>
           <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[9px] font-semibold text-emerald-300">
-            Scan
+            {t("scan")}
           </span>
         </div>
         <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-lg bg-[#1c1c1e]">
@@ -314,13 +330,21 @@ function QrScanFoldContent() {
             style={{ top: "40%", animation: "af-ck-scan 1.8s ease-in-out infinite" }}
           />
         </div>
-        <p className="mt-1.5 text-center text-[8px] text-[#8b8b93]">콘솔 QR을 프레임에 맞춰 주세요</p>
+        <p className="mt-1.5 text-center text-[8px] text-[#8b8b93]">{t("scanHint")}</p>
       </div>
     </StoryDevicePanes>
   );
 }
 
-function KaringFoldContent({ active, pressed }: { active: boolean; pressed: boolean }) {
+function KaringFoldContent({
+  t,
+  active,
+  pressed,
+}: {
+  t: StoryT;
+  active: boolean;
+  pressed: boolean;
+}) {
   return (
     <div className="flex h-full flex-col bg-[#e9e9ee] text-[#1c1c1e]">
       <div className="flex items-center gap-2 px-3 pt-1 pb-1">
@@ -352,24 +376,24 @@ function KaringFoldContent({ active, pressed }: { active: boolean; pressed: bool
 
       <div className="mx-2.5 mt-1.5 flex items-center justify-between rounded-xl bg-white px-2.5 py-1.5 shadow-sm">
         <div>
-          <p className="text-[8px] font-semibold text-[#3a3a3c]">Current Profile</p>
+          <p className="text-[8px] font-semibold text-[#3a3a3c]">{t("currentProfile")}</p>
           <p className="text-[10px] font-medium">AcrossFlare</p>
           <p className="text-[7px] text-[#8b8b93]">↑ 0 B ↓ OO GB · OO/OO/OOOO</p>
         </div>
         <div className="flex overflow-hidden rounded-md text-[8px] font-medium">
-          <span className="bg-[#d6d6dc] px-2 py-1">Rule</span>
-          <span className="bg-white px-2 py-1 text-[#8b8b93]">Global</span>
+          <span className="bg-[#d6d6dc] px-2 py-1">{t("rule")}</span>
+          <span className="bg-white px-2 py-1 text-[#8b8b93]">{t("global")}</span>
         </div>
       </div>
 
       <div className="mx-2.5 mt-1.5 grid flex-1 grid-cols-4 gap-1.5 text-[8px]">
         <div className="flex flex-col justify-between rounded-xl bg-white px-2 py-1.5 shadow-sm">
-          <span>System Proxy</span>
+          <span>{t("systemProxy")}</span>
           <span className="mt-1 h-3 w-5 self-end rounded-full bg-[#d1d1d6]">
             <span className="mt-0.5 ml-0.5 block size-2 rounded-full bg-white shadow" />
           </span>
         </div>
-        {["My Profiles", "DNS", "Add Profile"].map((label) => (
+        {[t("myProfiles"), t("dns"), t("addProfile")].map((label) => (
           <div key={label} className="rounded-xl bg-white px-2 py-1.5 shadow-sm">
             {label}
           </div>
@@ -402,7 +426,7 @@ function KaringFoldContent({ active, pressed }: { active: boolean; pressed: bool
 }
 
 /** Vaultwarden login — email then password auto-fill (OO masked) */
-function VaultLoginContent({ animate }: { animate: boolean }) {
+function VaultLoginContent({ t, animate }: { t: StoryT; animate: boolean }) {
   return (
     <div className="flex h-full flex-col bg-[#f0f0f0] text-[#1c1c1e]">
       <div className="flex items-center gap-1.5 px-3 pt-2">
@@ -412,11 +436,11 @@ function VaultLoginContent({ animate }: { animate: boolean }) {
 
       <div className="flex flex-1 flex-col items-center justify-center px-4 pb-4">
         <VaultGear className="size-10" />
-        <p className="mt-2 text-[15px] font-semibold">로그인</p>
+        <p className="mt-2 text-[15px] font-semibold">{t("login")}</p>
 
         <div className="mt-3 w-full max-w-[260px] rounded-lg border border-[#d8d8d8] bg-white px-3 py-3 shadow-sm">
           <label className="block text-[9px] font-medium text-[#5a5a5a]">
-            이메일 주소 <span className="text-[#175ddc]">(required)</span>
+            {t("emailLabel")} <span className="text-[#175ddc]">{t("required")}</span>
           </label>
           <div className="mt-1 overflow-hidden rounded-md border-2 border-[#175ddc] bg-white px-2 py-1.5 font-mono text-[11px] text-[#1c1c1e]">
             <span
@@ -432,7 +456,7 @@ function VaultLoginContent({ animate }: { animate: boolean }) {
           </div>
 
           <label className="mt-2.5 block text-[9px] font-medium text-[#5a5a5a]">
-            마스터 비밀번호 <span className="text-[#175ddc]">(required)</span>
+            {t("passwordLabel")} <span className="text-[#175ddc]">{t("required")}</span>
           </label>
           <div className="mt-1 overflow-hidden rounded-md border border-[#c8c8c8] bg-white px-2 py-1.5 font-mono text-[11px] tracking-[0.18em] text-[#1c1c1e]">
             <span
@@ -451,14 +475,14 @@ function VaultLoginContent({ animate }: { animate: boolean }) {
             <span className="flex size-3 items-center justify-center rounded-[2px] border border-[#8b8b93] bg-white">
               <span className="size-1.5 rounded-[1px] bg-[#175ddc]" />
             </span>
-            이메일 기억하기
+            {t("rememberEmail")}
           </label>
 
           <div
             className="mt-3 rounded-full bg-[#175ddc] py-2 text-center text-[11px] font-semibold text-white"
             style={animate ? { animation: "af-ck-pulse 1.4s ease-in-out 2.4s infinite" } : undefined}
           >
-            로그인
+            {t("login")}
           </div>
         </div>
       </div>
@@ -469,7 +493,15 @@ function VaultLoginContent({ animate }: { animate: boolean }) {
 }
 
 /** Vaultwarden vault — highlight import / backup capability */
-function VaultBackupContent({ animate }: { animate: boolean }) {
+function VaultBackupContent({ t, animate }: { t: StoryT; animate: boolean }) {
+  const nav = [
+    [t("navVault"), true],
+    [t("navSend"), false],
+    [t("navTools"), false],
+    [t("navReports"), false],
+    [t("navSettings"), false],
+  ] as const;
+
   return (
     <div className="flex h-full bg-white text-[#1c1c1e]">
       {/* Compact sidebar */}
@@ -478,15 +510,7 @@ function VaultBackupContent({ animate }: { animate: boolean }) {
           <VaultGear className="size-3.5 shrink-0 invert" />
           <span className="truncate font-medium leading-tight text-white md:text-[8px]">Vaultwarden</span>
         </div>
-        {(
-          [
-            ["보관함", true],
-            ["Send", false],
-            ["도구", false],
-            ["보고서", false],
-            ["설정", false],
-          ] as const
-        ).map(([label, on]) => (
+        {nav.map(([label, on]) => (
           <div
             key={label}
             className={cn(
@@ -497,14 +521,16 @@ function VaultBackupContent({ animate }: { animate: boolean }) {
             {label}
           </div>
         ))}
-        <div className="mt-auto px-1 pt-2 text-[6px] text-[#7a7a7a]">Password Manager</div>
+        <div className="mt-auto px-1 pt-2 text-[6px] text-[#7a7a7a]">{t("passwordManager")}</div>
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <div className="flex items-center justify-between border-b border-[#e5e5e5] px-2.5 py-1.5">
-          <p className="text-[12px] font-semibold">모든 보관함</p>
+          <p className="text-[12px] font-semibold">{t("allVaults")}</p>
           <div className="flex items-center gap-1.5">
-            <span className="rounded-md bg-[#175ddc] px-2 py-1 text-[8px] font-semibold text-white">새 항목</span>
+            <span className="rounded-md bg-[#175ddc] px-2 py-1 text-[8px] font-semibold text-white">
+              {t("newItem")}
+            </span>
             <span className="flex size-5 items-center justify-center rounded-full bg-[#c4a574] text-[7px] font-bold text-white">
               OO
             </span>
@@ -520,8 +546,8 @@ function VaultBackupContent({ animate }: { animate: boolean }) {
             style={animate ? { animation: "af-ck-glow 1.8s ease-in-out infinite" } : undefined}
           >
             <div className="mb-1.5 flex items-center justify-between">
-              <p className="text-[9px] font-semibold">Get Started</p>
-              <p className="text-[8px] font-medium text-[#175ddc]">2/3 Complete</p>
+              <p className="text-[9px] font-semibold">{t("getStarted")}</p>
+              <p className="text-[8px] font-medium text-[#175ddc]">{t("complete")}</p>
             </div>
             <div className="mb-2 h-1 overflow-hidden rounded-full bg-[#d8d8d8]">
               <div className="h-full w-2/3 rounded-full bg-[#175ddc]" />
@@ -529,28 +555,26 @@ function VaultBackupContent({ animate }: { animate: boolean }) {
             <ul className="space-y-1 text-[8px]">
               <li className="flex items-start gap-1.5 text-[#3a3a3c]">
                 <span className="mt-px text-emerald-600">✓</span>
-                <span>Create an account</span>
+                <span>{t("createAccount")}</span>
               </li>
               <li className="flex items-start gap-1.5">
                 <span className="mt-px text-emerald-600">✓</span>
                 <div>
-                  <p className="font-semibold text-emerald-700">데이터 가져오기</p>
-                  <p className="text-[7px] leading-snug text-[#6b6b73]">
-                    가져오기할 데이터가 없으면, 대신 새 항목을 생성할 수 있습니다.
-                  </p>
+                  <p className="font-semibold text-emerald-700">{t("importData")}</p>
+                  <p className="text-[7px] leading-snug text-[#6b6b73]">{t("importHint")}</p>
                 </div>
               </li>
               <li className="flex items-start gap-1.5 text-[#8b8b93]">
                 <span className="mt-px">○</span>
-                <span>Install browser extension</span>
+                <span>{t("installExtension")}</span>
               </li>
             </ul>
           </div>
 
           <div className="rounded-lg border border-[#e5e5e5]">
             <div className="flex items-center justify-between border-b border-[#e5e5e5] px-2 py-1 text-[8px] text-[#6b6b73]">
-              <span>이름</span>
-              <span>소유자</span>
+              <span>{t("name")}</span>
+              <span>{t("owner")}</span>
             </div>
             <div className="flex items-center gap-2 px-2 py-1.5">
               <span className="flex size-5 items-center justify-center rounded bg-[#ececec]">
@@ -558,9 +582,9 @@ function VaultBackupContent({ animate }: { animate: boolean }) {
                   <path d="M3 1.5h6l4 4V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V2.5a1 1 0 0 1 1-1Zm6 0v4h4" />
                 </svg>
               </span>
-              <span className="min-w-0 flex-1 truncate text-[10px] font-medium">사용자</span>
+              <span className="min-w-0 flex-1 truncate text-[10px] font-medium">{t("user")}</span>
               <span className="rounded-full bg-[#c4a574]/25 px-1.5 py-0.5 text-[7px] font-semibold text-[#8a6a3a]">
-                나
+                {t("me")}
               </span>
             </div>
           </div>
@@ -571,8 +595,8 @@ function VaultBackupContent({ animate }: { animate: boolean }) {
               animate && "animate-[af-ck-glow_1.6s_ease-in-out_infinite]"
             )}
           >
-            <p className="text-[10px] font-semibold text-emerald-800">보안 백업 준비 완료</p>
-            <p className="mt-0.5 text-[8px] text-emerald-700/90">암호·메모·자료를 Vaultwarden에 안전하게 보관</p>
+            <p className="text-[10px] font-semibold text-emerald-800">{t("backupReady")}</p>
+            <p className="mt-0.5 text-[8px] text-emerald-700/90">{t("backupReadyHint")}</p>
           </div>
         </div>
       </div>
