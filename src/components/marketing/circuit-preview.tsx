@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
-const DEFAULT_SRC = "/marketing/circuit-preview.jpg";
+const DEFAULT_SRC = "/marketing/circuit-preview-1920.jpg";
 
 type CircuitPreviewProps = {
   imageSrc?: string;

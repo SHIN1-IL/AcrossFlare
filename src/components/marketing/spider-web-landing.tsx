@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { cn } from "@/lib/utils";
+import { BoardArtImage } from "@/components/marketing/board-art-image";
 import { HeroGrain } from "@/components/marketing/hero-grain";
+import { cn } from "@/lib/utils";
 
 const IDLE_HIDE_MS = 1400;
 const SPARK_GAP_MS = 36;
-const BOARD_SRC = "/marketing/circuit-preview.jpg?v=22";
 
 type Spark = {
   id: number;
@@ -199,10 +199,9 @@ export function SpiderWebStage({ className }: { className?: string }) {
         aria-hidden="true"
       >
         <BoardCoverPlane>
-          <img
-            src={BOARD_SRC}
+          <BoardArtImage
+            priority
             alt=""
-            draggable={false}
             className="pointer-events-none absolute inset-0 size-full object-fill opacity-[0.3] select-none"
             style={{ filter: "brightness(0.6) contrast(0.88) saturate(0.4)" }}
           />
@@ -218,10 +217,9 @@ export function SpiderWebStage({ className }: { className?: string }) {
           }}
         >
           <BoardCoverPlane>
-            <img
-              src={BOARD_SRC}
+            <BoardArtImage
+              priority
               alt="Mainboard Circuit"
-              draggable={false}
               className="pointer-events-none absolute inset-0 size-full object-fill select-none"
               style={{ filter: "brightness(1.08) contrast(1.02) saturate(0.62)" }}
             />

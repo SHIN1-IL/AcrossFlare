@@ -10,8 +10,9 @@ describe("hero intro", () => {
     ]);
 
     expect(page).toContain("<SpiderWebLanding />");
-    expect(page).toContain("<WhyBuyUiStoryPreview live />");
-    expect(page).toContain("<ConsoleKaringStory />");
+    expect(page).toContain("<DeferredWhyBuyLive />");
+    expect(page).toContain("<DeferredConsoleKaring />");
+    expect(page).toContain("deferred-home-stories");
     expect(page).toContain("<PlanStages");
     expect(intro).toContain("AcrossFlare");
     expect(intro).toContain("Secure Cloud & Network Optimization");

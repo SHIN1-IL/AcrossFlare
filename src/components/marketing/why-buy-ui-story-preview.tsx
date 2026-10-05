@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
+import { HOME_STORY_HEIGHT } from "@/lib/board-art";
 import { HeroGrain } from "@/components/marketing/hero-grain";
 import { MotherboardEdgeBackdrop } from "@/components/marketing/motherboard-edge-backdrop";
 import { StoryDeviceFrame, StoryDevicePanes } from "@/components/marketing/story-device-frame";
@@ -193,7 +194,7 @@ export function WhyBuyUiStoryPreview({
       <section
         ref={sectionRef}
         data-home-page
-        className={cn("relative h-[380vh] snap-start bg-[#14181e] max-md:snap-start", className)}
+        className={cn("relative snap-start bg-[#14181e] max-md:snap-start", HOME_STORY_HEIGHT.whyBuyLive, className)}
       >
         <div className="sticky top-0 h-dvh overflow-hidden">{stage}</div>
       </section>

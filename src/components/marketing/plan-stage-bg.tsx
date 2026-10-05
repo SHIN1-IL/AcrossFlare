@@ -1,18 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-
-const BOARD_SRC = "/marketing/circuit-preview.jpg?v=22";
+import { BoardArtImage } from "@/components/marketing/board-art-image";
 
 /** Page-1 motherboard plate — base only; plan SVG/motion previews stay on top. */
 export function MotherboardBase() {
   return (
     <>
       <div className="absolute inset-0 bg-[#0e1014]" />
-      <img
-        src={BOARD_SRC}
-        alt=""
-        draggable={false}
+      <BoardArtImage
         className="pointer-events-none absolute inset-0 size-full object-cover opacity-[0.32] select-none"
         style={{ filter: "brightness(0.58) contrast(0.88) saturate(0.4)" }}
       />
@@ -284,7 +280,8 @@ export function LazyStageBackdrop({ variant }: { variant: number }) {
 
   return (
     <div ref={ref} className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-      {active ? <StageBackdrop variant={variant} /> : <MotherboardBase />}
+      {/* Solid plate until near viewport — avoids pulling board art for off-screen plan stages. */}
+      {active ? <StageBackdrop variant={variant} /> : <div className="absolute inset-0 bg-[#0e1014]" />}
     </div>
   );
 }

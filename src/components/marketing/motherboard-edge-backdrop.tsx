@@ -1,10 +1,9 @@
-"use client";
-
-const BOARD_SRC = "/marketing/circuit-preview.jpg?v=22";
+import { BoardArtImage } from "@/components/marketing/board-art-image";
 
 /**
  * Page-1 motherboard visible only at the viewport rim.
  * Center stays clear so phone previews on pages 2–3 stay uncluttered.
+ * Lazy by default — only page 1 spider-web uses priority BoardArtImage.
  */
 export function MotherboardEdgeBackdrop() {
   return (
@@ -20,10 +19,7 @@ export function MotherboardEdgeBackdrop() {
             "radial-gradient(ellipse 56% 62% at 50% 46%, transparent 0%, transparent 46%, rgba(0,0,0,0.5) 72%, #000 100%)",
         }}
       >
-        <img
-          src={BOARD_SRC}
-          alt=""
-          draggable={false}
+        <BoardArtImage
           className="absolute inset-0 size-full object-cover opacity-[0.48] select-none"
           style={{ filter: "brightness(0.62) contrast(0.9) saturate(0.42)" }}
         />
