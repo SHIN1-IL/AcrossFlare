@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
  * One-viewport story player: starts when the section enters view.
@@ -58,7 +58,7 @@ export function useStoryAutoplay(stepCount: number) {
     setFinished(false);
   }, [armed, reduced, runId, stepCount]);
 
-  function nextStep() {
+  const nextStep = useCallback(() => {
     setStep((current) => {
       if (current >= stepCount - 1) {
         setFinished(true);
@@ -66,14 +66,14 @@ export function useStoryAutoplay(stepCount: number) {
       }
       return current + 1;
     });
-  }
+  }, [stepCount]);
 
-  function replay() {
+  const replay = useCallback(() => {
     setFinished(false);
     setStep(0);
     setArmed(true);
     setRunId((n) => n + 1);
-  }
+  }, []);
 
   return {
     sectionRef,

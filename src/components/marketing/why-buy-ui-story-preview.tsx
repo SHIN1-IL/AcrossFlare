@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { HOME_STORY_HEIGHT } from "@/lib/board-art";
@@ -40,7 +40,16 @@ export function WhyBuyUiStoryPreview({
 }) {
   const t = useTranslations("heroDeck");
   const items = readHeroItems(t);
-  const autoplay = useStoryAutoplay(STEPS.length);
+  const {
+    sectionRef,
+    step: liveStep,
+    runId: liveRunId,
+    armed: liveArmed,
+    finished: liveFinished,
+    animate: liveAnimate,
+    nextStep,
+    replay,
+  } = useStoryAutoplay(STEPS.length);
   const [devRunId, setDevRunId] = useState(0);
   const [timedStep, setTimedStep] = useState(0);
   const [devReduced, setDevReduced] = useState(false);
@@ -72,26 +81,28 @@ export function WhyBuyUiStoryPreview({
     }
   }, [live, devReduced, devRunId]);
 
-  const step = live ? autoplay.step : timedStep;
-  const runId = live ? autoplay.runId : devRunId;
-  const armed = live ? autoplay.armed : true;
-  const finished = live ? autoplay.finished : devFinished;
-  const animate = live ? autoplay.animate : !devReduced && !devFinished;
+  const step = live ? liveStep : timedStep;
+  const runId = live ? liveRunId : devRunId;
+  const armed = live ? liveArmed : true;
+  const finished = live ? liveFinished : devFinished;
+  const animate = live ? liveAnimate : !devReduced && !devFinished;
   const stepId = STEPS[step] ?? "apps-blocked";
   const closing = step >= STEPS.length - 1;
 
-  function advanceStep() {
+  const advanceStep = useCallback(() => {
     if (live) {
-      autoplay.nextStep();
+      nextStep();
       return;
     }
-    if (timedStep >= STEPS.length - 1) {
-      setDevFinished(true);
-      window.setTimeout(() => setDevRunId((n) => n + 1), LOOP_PAUSE_MS);
-      return;
-    }
-    setTimedStep((s) => s + 1);
-  }
+    setTimedStep((current) => {
+      if (current >= STEPS.length - 1) {
+        setDevFinished(true);
+        window.setTimeout(() => setDevRunId((n) => n + 1), LOOP_PAUSE_MS);
+        return current;
+      }
+      return current + 1;
+    });
+  }, [live, nextStep]);
 
   const stage = (
     <div
@@ -180,7 +191,7 @@ export function WhyBuyUiStoryPreview({
   if (live) {
     return (
       <section
-        ref={autoplay.sectionRef}
+        ref={sectionRef}
         data-home-page
         className={cn(
           "relative snap-start bg-[#14181e] max-md:snap-start",
@@ -194,12 +205,12 @@ export function WhyBuyUiStoryPreview({
           tabIndex={0}
           aria-label={finished ? t("replayPreview") : t("headline")}
           onClick={() => {
-            if (finished) autoplay.replay();
+            if (finished) replay();
           }}
           onKeyDown={(e) => {
             if ((e.key === "Enter" || e.key === " ") && finished) {
               e.preventDefault();
-              autoplay.replay();
+              replay();
             }
           }}
         >

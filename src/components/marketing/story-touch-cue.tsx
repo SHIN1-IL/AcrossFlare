@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 /** Default: let the screen settle ~1.5s, then one natural press, then advance. */
@@ -35,8 +35,6 @@ export function useStoryTouchCycle(
   const [visible, setVisible] = useState(false);
   const [pressed, setPressed] = useState(false);
   const [nudge, setNudge] = useState(0);
-  const onDoneRef = useRef(onDone);
-  onDoneRef.current = onDone;
 
   useEffect(() => {
     if (!active) {
@@ -74,7 +72,7 @@ export function useStoryTouchCycle(
     );
     timers.push(
       window.setTimeout(() => {
-        if (!cancelled) onDoneRef.current?.();
+        if (!cancelled) onDone?.();
       }, advanceAt)
     );
 
@@ -82,7 +80,7 @@ export function useStoryTouchCycle(
       cancelled = true;
       timers.forEach((id) => window.clearTimeout(id));
     };
-  }, [active, cycleKey, settleMs, pressHoldMs, afterReleaseMs]);
+  }, [active, cycleKey, settleMs, pressHoldMs, afterReleaseMs, onDone]);
 
   return { visible, pressed, nudge };
 }

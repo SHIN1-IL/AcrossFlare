@@ -74,20 +74,27 @@ type TouchCycle = ReturnType<typeof useStoryTouchCycle>;
 export function ConsoleKaringStory({ className }: { className?: string }) {
   const t = useTranslations("consoleStory");
   const tHero = useTranslations("heroDeck");
-  const autoplay = useStoryAutoplay(STEPS.length);
-  const step = autoplay.step;
+  const {
+    sectionRef,
+    step,
+    runId,
+    armed,
+    finished,
+    animate,
+    nextStep,
+    replay,
+  } = useStoryAutoplay(STEPS.length);
   const stepId = STEPS[step] ?? "console-click";
-  const animate = autoplay.animate;
   const touch = useStoryTouchCycle(
     animate,
-    `${autoplay.runId}-${stepId}`,
-    autoplay.nextStep,
+    `${runId}-${stepId}`,
+    nextStep,
     TOUCH_TIMING[stepId]
   );
 
   return (
     <section
-      ref={autoplay.sectionRef}
+      ref={sectionRef}
       data-home-page
       className={cn(
         "relative snap-start bg-[#14181e] max-md:snap-start",
@@ -98,17 +105,17 @@ export function ConsoleKaringStory({ className }: { className?: string }) {
       <div
         className="flex h-dvh cursor-pointer flex-col overflow-hidden"
         onClick={() => {
-          if (autoplay.finished) autoplay.replay();
+          if (finished) replay();
         }}
         onKeyDown={(e) => {
-          if ((e.key === "Enter" || e.key === " ") && autoplay.finished) {
+          if ((e.key === "Enter" || e.key === " ") && finished) {
             e.preventDefault();
-            autoplay.replay();
+            replay();
           }
         }}
         role="button"
         tabIndex={0}
-        aria-label={autoplay.finished ? t("replayPreviewAria") : t("nextPreviewAria")}
+        aria-label={finished ? t("replayPreviewAria") : t("nextPreviewAria")}
       >
         <MotherboardEdgeBackdrop />
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(226,232,240,0.04),transparent_32%,rgba(0,0,0,0.18)),repeating-linear-gradient(90deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_1px,transparent_1px,transparent_5px)]" />
@@ -159,11 +166,11 @@ export function ConsoleKaringStory({ className }: { className?: string }) {
 
         <div className="relative z-[5] mx-auto mt-3 min-h-0 w-full max-w-2xl flex-1 px-3 max-[479px]:mt-2 max-[479px]:max-w-none">
           <div
-            key={`${autoplay.runId}-${stepId}-${autoplay.armed ? "on" : "off"}`}
+            key={`${runId}-${stepId}-${armed ? "on" : "off"}`}
             className="h-full w-full"
             style={animate ? { animation: "af-ck-fade-in 0.45s ease-out both" } : undefined}
           >
-            <StoryDeviceFrame shineKey={autoplay.runId}>
+            <StoryDeviceFrame shineKey={runId}>
               {stepId === "console-click" && (
                 <ConsoleClickContent tHero={tHero} animate={animate} touch={touch} />
               )}
