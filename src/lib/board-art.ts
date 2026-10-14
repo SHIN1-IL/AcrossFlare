@@ -1,6 +1,12 @@
 /** Shared motherboard plate art for home stories (size-stable, cache-busted). */
 export const BOARD_ART_VERSION = 23;
 
+/**
+ * Temporary kill-switch: when false, every BoardArtImage mounts nothing
+ * (home / story edges / plan stages). Art files stay in public/marketing for restore.
+ */
+export const BOARD_ART_ENABLED = false;
+
 const q = `v=${BOARD_ART_VERSION}`;
 
 /** Optimized plate — prefer WebP; JPEG is the universal fallback. */

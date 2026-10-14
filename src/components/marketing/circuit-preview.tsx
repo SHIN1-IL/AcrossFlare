@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { BOARD_ART_ENABLED } from "@/lib/board-art";
 import { cn } from "@/lib/utils";
 
 const DEFAULT_SRC = "/marketing/circuit-preview-1920.jpg";
@@ -21,16 +22,20 @@ export function CircuitPreview({
     <section className={cn("flex w-full justify-center bg-black px-4 py-12", className)}>
       <div className="group relative w-full max-w-5xl rounded-2xl border border-neutral-800/90 bg-neutral-950 p-2.5 shadow-2xl shadow-black transition-all duration-500 hover:border-neutral-700">
         <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-black">
-          <Image
-            src={imageSrc}
-            alt="AcrossFlare Planar Circuit Board"
-            fill
-            priority
-            sizes="(max-width: 1920px) 100vw, 1920px"
-            quality={97}
-            className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.015]"
-            style={{ filter: "brightness(0.84) contrast(0.94) saturate(0.55)" }}
-          />
+          {BOARD_ART_ENABLED ? (
+            <Image
+              src={imageSrc}
+              alt="AcrossFlare Planar Circuit Board"
+              fill
+              priority
+              sizes="(max-width: 1920px) 100vw, 1920px"
+              quality={97}
+              className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.015]"
+              style={{ filter: "brightness(0.84) contrast(0.94) saturate(0.55)" }}
+            />
+          ) : (
+            <div className="absolute inset-0 bg-[#0e1014]" aria-hidden="true" />
+          )}
 
           <div className="pointer-events-none absolute inset-0 bg-[#0a0c10]/18 mix-blend-multiply" />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-neutral-950/75 via-transparent to-neutral-950/22" />
@@ -44,7 +49,7 @@ export function CircuitPreview({
               <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
             </span>
             <span className="font-mono text-xs font-medium tracking-wider text-neutral-300 uppercase">
-              {chipLabel} · ONLINE
+              {chipLabel} · {BOARD_ART_ENABLED ? "ONLINE" : "PARKED"}
             </span>
           </div>
         </div>

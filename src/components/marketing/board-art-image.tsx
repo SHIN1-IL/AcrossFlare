@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { BOARD_ART } from "@/lib/board-art";
+import { BOARD_ART, BOARD_ART_ENABLED } from "@/lib/board-art";
 import { cn } from "@/lib/utils";
 
 type BoardArtImageProps = {
@@ -16,6 +16,7 @@ type BoardArtImageProps = {
 /**
  * Shared motherboard plate with WebP (+ JPEG fallback).
  * Avoids the 4K 1.3MB JPG on first paint while keeping object-fit/mask layouts intact.
+ * When BOARD_ART_ENABLED is false, renders nothing (speed A/B without deleting assets).
  */
 export function BoardArtImage({
   priority = false,
@@ -24,6 +25,10 @@ export function BoardArtImage({
   style,
   alt = "",
 }: BoardArtImageProps) {
+  if (!BOARD_ART_ENABLED) {
+    return null;
+  }
+
   return (
     <picture className={cn("contents", pictureClassName)}>
       <source
