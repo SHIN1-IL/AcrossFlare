@@ -86,7 +86,7 @@ export function KaringAddProfilePreview() {
 
 function PhoneShell({ children }: { children: ReactNode }) {
   return (
-    <div className="relative aspect-[9/14] w-[min(48%,210px)] overflow-hidden rounded-[22px] border border-[#d8d8dc] bg-[#e9e9ee] text-[#1c1c1e] shadow-[0_12px_28px_rgba(0,0,0,0.1)]">
+    <div className="relative aspect-[5/4] w-[min(48%,260px)] overflow-hidden rounded-[14px] border border-[#d8d8dc] bg-[#e9e9ee] text-[#1c1c1e] shadow-[0_12px_28px_rgba(0,0,0,0.1)]">
       {children}
     </div>
   );

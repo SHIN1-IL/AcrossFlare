@@ -1,54 +1,50 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { HOME_STORY_HEIGHT } from "@/lib/board-art";
 import { HeroGrain } from "@/components/marketing/hero-grain";
 import { MotherboardEdgeBackdrop } from "@/components/marketing/motherboard-edge-backdrop";
 import { StoryDeviceFrame, StoryDevicePanes } from "@/components/marketing/story-device-frame";
+import {
+  StoryTouchHighlight,
+  storyTouchTargetClass,
+  useStoryTouchCycle,
+  type StoryTouchTiming,
+} from "@/components/marketing/story-touch-cue";
+import { useStoryAutoplay } from "@/components/marketing/use-story-autoplay";
 
-const STEP_MS = 5800;
-const LOOP_PAUSE_MS = 5000;
-
-/** Extra services / sites often unreachable in China — fade toward bottom */
-const EXTRA_SERVICES = [
-  "Google",
-  "Gmail",
-  "Facebook",
-  "Instagram",
-  "X",
-  "WhatsApp",
-  "Telegram",
-  "Wikipedia",
-  "Spotify",
-  "Slack",
-  "Discord",
-  "Reddit",
-  "Zoom",
-  "Teams",
-] as const;
+const LOOP_PAUSE_MS = 2800;
 
 type StepId = "apps-blocked" | "wifi-risk" | "apps-ok" | "backup";
 
 const STEPS: StepId[] = ["apps-blocked", "wifi-risk", "apps-ok", "backup"];
+
+/** Per-step settle: show UI first (~1.5s+), then one press. */
+const TOUCH_TIMING: Record<StepId, StoryTouchTiming> = {
+  "apps-blocked": { settleMs: 1500 },
+  "wifi-risk": { settleMs: 1600 },
+  "apps-ok": { settleMs: 1500 },
+  /** Vault fields fade in; press Open vault after they settle. */
+  backup: { settleMs: 2000 },
+};
 
 export function WhyBuyUiStoryPreview({
   className,
   live = false,
 }: {
   className?: string;
-  /** Full-bleed home deck section (sticky scroll steps). */
+  /** Full-bleed home deck section — one viewport, autoplay in view. */
   live?: boolean;
 }) {
   const t = useTranslations("heroDeck");
   const items = readHeroItems(t);
-  const sectionRef = useRef<HTMLElement>(null);
-  const [runId, setRunId] = useState(0);
+  const autoplay = useStoryAutoplay(STEPS.length);
+  const [devRunId, setDevRunId] = useState(0);
   const [timedStep, setTimedStep] = useState(0);
-  const [reduced, setReduced] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [armed, setArmed] = useState(!live);
+  const [devReduced, setDevReduced] = useState(false);
+  const [devFinished, setDevFinished] = useState(false);
 
   const captions: Record<StepId, string> = {
     "apps-blocked": items[0]?.q ?? "",
@@ -58,61 +54,44 @@ export function WhyBuyUiStoryPreview({
   };
 
   useEffect(() => {
+    if (live) return;
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const apply = () => setReduced(media.matches);
+    const apply = () => setDevReduced(media.matches);
     apply();
     media.addEventListener("change", apply);
     return () => media.removeEventListener("change", apply);
-  }, []);
-
-  // Live: scroll progress → discrete preview steps (phone visible + step 0 from start).
-  useEffect(() => {
-    if (!live) return;
-    const section = sectionRef.current;
-    if (!section) return;
-    const onScroll = () => {
-      const rect = section.getBoundingClientRect();
-      const total = section.offsetHeight - window.innerHeight;
-      if (rect.top < window.innerHeight * 0.55) setArmed(true);
-      if (total <= 0) {
-        setProgress(1);
-        return;
-      }
-      setProgress(Math.min(1, Math.max(0, -rect.top / total)));
-    };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
   }, [live]);
 
   useEffect(() => {
     if (live) return;
-    if (reduced) {
-      const id = window.setTimeout(() => setTimedStep(STEPS.length - 1), 0);
-      return () => window.clearTimeout(id);
-    }
     setTimedStep(0);
-    const timers = STEPS.map((_, i) =>
-      i === 0 ? null : window.setTimeout(() => setTimedStep(i), STEP_MS * i)
-    );
-    const loopTimer = window.setTimeout(
-      () => setRunId((n) => n + 1),
-      STEP_MS * STEPS.length + LOOP_PAUSE_MS
-    );
-    return () => {
-      timers.forEach((id) => id && window.clearTimeout(id));
-      window.clearTimeout(loopTimer);
-    };
-  }, [live, reduced, runId]);
+    setDevFinished(false);
+    if (devReduced) {
+      setTimedStep(STEPS.length - 1);
+      setDevFinished(true);
+    }
+  }, [live, devReduced, devRunId]);
 
-  const step = live
-    ? reduced
-      ? STEPS.length - 1
-      : Math.min(STEPS.length - 1, Math.floor(progress * STEPS.length + 0.001))
-    : timedStep;
+  const step = live ? autoplay.step : timedStep;
+  const runId = live ? autoplay.runId : devRunId;
+  const armed = live ? autoplay.armed : true;
+  const finished = live ? autoplay.finished : devFinished;
+  const animate = live ? autoplay.animate : !devReduced && !devFinished;
   const stepId = STEPS[step] ?? "apps-blocked";
   const closing = step >= STEPS.length - 1;
-  const animate = !reduced && armed;
+
+  function advanceStep() {
+    if (live) {
+      autoplay.nextStep();
+      return;
+    }
+    if (timedStep >= STEPS.length - 1) {
+      setDevFinished(true);
+      window.setTimeout(() => setDevRunId((n) => n + 1), LOOP_PAUSE_MS);
+      return;
+    }
+    setTimedStep((s) => s + 1);
+  }
 
   const stage = (
     <div
@@ -158,7 +137,16 @@ export function WhyBuyUiStoryPreview({
           className="h-full w-full"
           style={animate ? { animation: "af-ui-fade-in 0.55s ease-out both" } : undefined}
         >
-          <DeviceMock step={stepId} t={t} items={items} animate={animate} />
+          <DeviceMock
+            step={stepId}
+            t={t}
+            items={items}
+            animate={animate}
+            touchKey={`${runId}-${stepId}`}
+            shineKey={runId}
+            touchTiming={TOUCH_TIMING[stepId]}
+            onTouchDone={advanceStep}
+          />
         </div>
       </div>
 
@@ -192,11 +180,31 @@ export function WhyBuyUiStoryPreview({
   if (live) {
     return (
       <section
-        ref={sectionRef}
+        ref={autoplay.sectionRef}
         data-home-page
-        className={cn("relative snap-start bg-[#14181e] max-md:snap-start", HOME_STORY_HEIGHT.whyBuyLive, className)}
+        className={cn(
+          "relative snap-start bg-[#14181e] max-md:snap-start",
+          HOME_STORY_HEIGHT.whyBuyLive,
+          className
+        )}
       >
-        <div className="sticky top-0 h-dvh overflow-hidden">{stage}</div>
+        <div
+          className="h-dvh cursor-pointer overflow-hidden"
+          role="button"
+          tabIndex={0}
+          aria-label={finished ? t("replayPreview") : t("headline")}
+          onClick={() => {
+            if (finished) autoplay.replay();
+          }}
+          onKeyDown={(e) => {
+            if ((e.key === "Enter" || e.key === " ") && finished) {
+              e.preventDefault();
+              autoplay.replay();
+            }
+          }}
+        >
+          {stage}
+        </div>
       </section>
     );
   }
@@ -207,7 +215,7 @@ export function WhyBuyUiStoryPreview({
         <p className="text-xs text-muted-foreground">메인 2페이지 프리뷰 · UI 스토리 (문제 → 해결)</p>
         <button
           type="button"
-          onClick={() => setRunId((n) => n + 1)}
+          onClick={() => setDevRunId((n) => n + 1)}
           className="rounded-md border border-white/15 px-2.5 py-1 text-xs text-foreground/80 transition hover:bg-white/5"
         >
           다시 재생
@@ -223,21 +231,35 @@ function DeviceMock({
   t,
   items,
   animate,
+  touchKey,
+  shineKey,
+  touchTiming,
+  onTouchDone,
 }: {
   step: StepId;
   t: ReturnType<typeof useTranslations>;
   items: HeroItem[];
   animate: boolean;
+  touchKey: string;
+  shineKey: string | number;
+  touchTiming: StoryTouchTiming;
+  onTouchDone: () => void;
 }) {
+  const touch = useStoryTouchCycle(animate, touchKey, onTouchDone, touchTiming);
+
   return (
-    <StoryDeviceFrame>
-      {step === "apps-blocked" && <AppsGrid t={t} items={items} ok={false} animate={animate} />}
-      {step === "wifi-risk" && <WifiPanel t={t} animate={animate} />}
-      {step === "apps-ok" && <AppsGrid t={t} items={items} ok animate={animate} />}
-      {step === "backup" && <BackupPanel t={t} animate={animate} />}
+    <StoryDeviceFrame shineKey={shineKey}>
+      {step === "apps-blocked" && (
+        <AppsGrid t={t} items={items} ok={false} animate={animate} touch={touch} />
+      )}
+      {step === "wifi-risk" && <WifiPanel t={t} animate={animate} touch={touch} />}
+      {step === "apps-ok" && <AppsGrid t={t} items={items} ok animate={animate} touch={touch} />}
+      {step === "backup" && <BackupPanel t={t} animate={animate} touch={touch} />}
     </StoryDeviceFrame>
   );
 }
+
+type TouchCycle = ReturnType<typeof useStoryTouchCycle>;
 
 type HeroItem = { q: string; note?: string };
 
@@ -257,16 +279,24 @@ function readHeroItems(t: ReturnType<typeof useTranslations>): HeroItem[] {
     .filter((item): item is HeroItem => item !== null);
 }
 
+function readExtraSites(t: ReturnType<typeof useTranslations>): string[] {
+  const value = t.raw("extraSites");
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is string => typeof item === "string" && item.length > 0);
+}
+
 function AppsGrid({
   t,
   items,
   ok,
   animate,
+  touch,
 }: {
   t: ReturnType<typeof useTranslations>;
   items: HeroItem[];
   ok: boolean;
   animate: boolean;
+  touch: TouchCycle;
 }) {
   const apps = primaryApps(t);
 
@@ -289,13 +319,23 @@ function AppsGrid({
           {apps.map((app, i) => (
             <div
               key={app.label}
-              className="relative flex flex-col items-center justify-center rounded-xl border border-white/10 bg-[#12161c] py-4"
+              className={cn(
+                "relative flex flex-col items-center justify-center rounded-xl border border-white/10 bg-[#12161c] py-4",
+                i === 0 && storyTouchTargetClass(touch.pressed)
+              )}
               style={
                 animate && ok ? { animation: `af-ui-fade-in 0.45s ease-out ${i * 0.08}s both` } : undefined
               }
             >
               <span className={cn("rounded-lg px-2 py-0.5 text-[9px] font-bold", app.tone)}>{app.label}</span>
               <StatusBadge ok={ok} delay={i * 0.12} animate={animate} />
+              {i === 0 ? (
+                <StoryTouchHighlight
+                  visible={touch.visible}
+                  pressed={touch.pressed}
+                  nudge={touch.nudge}
+                />
+              ) : null}
             </div>
           ))}
         </div>
@@ -332,7 +372,9 @@ function FadeServiceList({
   variant: "blocked" | "danger" | "ok";
   animate: boolean;
 }) {
-  const count = EXTRA_SERVICES.length;
+  const t = useTranslations("heroDeck");
+  const sites = readExtraSites(t);
+  const count = sites.length;
 
   return (
     <div className="relative mt-2 min-h-0 flex-1 overflow-hidden">
@@ -341,7 +383,7 @@ function FadeServiceList({
         aria-hidden="true"
       />
       <ul className="space-y-1 overflow-hidden pt-0.5">
-        {EXTRA_SERVICES.map((name, i) => {
+        {sites.map((name, i) => {
           const t = i / Math.max(1, count - 1);
           const opacity = 1 - t * 0.82;
           const blur = t * 1.1;
@@ -395,7 +437,7 @@ function StatusBadge({ ok, delay, animate }: { ok: boolean; delay: number; anima
   return (
     <span
       className={cn(
-        "absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full text-[10px] font-bold text-white",
+        "absolute top-1.5 right-1.5 z-10 flex size-5 items-center justify-center rounded-full text-[10px] font-bold text-white",
         ok ? "bg-emerald-500" : "bg-red-500"
       )}
       style={animate ? { animation: `af-ui-pulse-badge 1.2s ease-in-out ${delay}s infinite` } : undefined}
@@ -408,21 +450,28 @@ function StatusBadge({ ok, delay, animate }: { ok: boolean; delay: number; anima
 function WifiPanel({
   t,
   animate,
+  touch,
 }: {
   t: ReturnType<typeof useTranslations>;
   animate: boolean;
+  touch: TouchCycle;
 }) {
   return (
     <StoryDevicePanes>
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <div className="mb-2 flex items-center justify-between">
-          <p className="text-[11px] font-medium text-[#f4f4f5]">Wi‑Fi</p>
+          <p className="text-[11px] font-medium text-[#f4f4f5]">{t("wifiLabel")}</p>
           <span className="rounded-full bg-red-600/25 px-2 py-0.5 text-[9px] font-semibold text-red-200">
             {t("unsecured")}
           </span>
         </div>
-        <div className="flex flex-1 flex-col rounded-xl border border-red-500/45 bg-[#12161c] p-3">
-          <p className="text-[12px] font-semibold text-[#f4f4f5]">Hotel_Guest</p>
+        <div
+          className={cn(
+            "relative flex flex-1 flex-col rounded-xl border border-red-500/45 bg-[#12161c] p-3",
+            storyTouchTargetClass(touch.pressed)
+          )}
+        >
+          <p className="text-[12px] font-semibold text-[#f4f4f5]">{t("wifiNetwork")}</p>
           <p className="mt-1 text-[10px] font-medium text-red-300">{t("connectedUnsecured")}</p>
           <div className="mt-6 flex flex-1 items-center justify-center gap-1.5">
             {[0, 1, 2].map((i) => (
@@ -437,6 +486,11 @@ function WifiPanel({
               />
             ))}
           </div>
+          <StoryTouchHighlight
+            visible={touch.visible}
+            pressed={touch.pressed}
+            nudge={touch.nudge}
+          />
         </div>
       </div>
 
@@ -462,7 +516,15 @@ function WifiPanel({
   );
 }
 
-function BackupPanel({ t, animate }: { t: ReturnType<typeof useTranslations>; animate: boolean }) {
+function BackupPanel({
+  t,
+  animate,
+  touch,
+}: {
+  t: ReturnType<typeof useTranslations>;
+  animate: boolean;
+  touch: TouchCycle;
+}) {
   return (
     <StoryDevicePanes>
       <div
@@ -470,7 +532,7 @@ function BackupPanel({ t, animate }: { t: ReturnType<typeof useTranslations>; an
         style={animate ? { animation: "af-ui-fade-in 0.4s ease-out both" } : undefined}
       >
         <p className="text-[11px] font-semibold leading-snug text-[#f4f4f5]">
-          Vaultwarden
+          {t("vaultwarden")}
           <span className="mt-0.5 block text-[9px] font-normal text-[#a1a1aa]">{t("vaultSubtitle")}</span>
         </p>
         <p className="mt-1.5 text-[8px] leading-snug text-[#8b8b93]">{t("vaultOpenHint")}</p>
@@ -481,17 +543,24 @@ function BackupPanel({ t, animate }: { t: ReturnType<typeof useTranslations>; an
         <button
           type="button"
           tabIndex={-1}
-          className="mt-auto w-full rounded-lg bg-[#5eead4] py-2 text-center text-[11px] font-semibold text-[#0a0c12]"
+          className={cn(
+            "relative mt-auto w-full rounded-lg bg-[#5eead4] py-2 text-center text-[11px] font-semibold text-[#0a0c12]",
+            storyTouchTargetClass(touch.pressed)
+          )}
           style={
             animate
               ? {
-                  animation:
-                    "af-ui-fade-in 0.45s ease-out 0.4s both, af-ui-pulse-badge 1.8s ease-in-out 1s infinite",
+                  animation: "af-ui-fade-in 0.45s ease-out 0.4s both",
                 }
               : undefined
           }
         >
           {t("openVault")}
+          <StoryTouchHighlight
+            visible={touch.visible}
+            pressed={touch.pressed}
+            nudge={touch.nudge}
+          />
         </button>
       </div>
 

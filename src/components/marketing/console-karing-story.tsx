@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { HOME_STORY_HEIGHT } from "@/lib/board-art";
@@ -8,6 +7,13 @@ import { BoardArtImage } from "@/components/marketing/board-art-image";
 import { HeroGrain } from "@/components/marketing/hero-grain";
 import { MotherboardEdgeBackdrop } from "@/components/marketing/motherboard-edge-backdrop";
 import { StoryDeviceFrame, StoryDevicePanes } from "@/components/marketing/story-device-frame";
+import {
+  StoryTouchHighlight,
+  storyTouchTargetClass,
+  useStoryTouchCycle,
+  type StoryTouchTiming,
+} from "@/components/marketing/story-touch-cue";
+import { useStoryAutoplay } from "@/components/marketing/use-story-autoplay";
 
 type StepId =
   | "console-click"
@@ -25,6 +31,18 @@ const STEPS: StepId[] = [
   "vault-login",
   "vault-backup",
 ];
+
+/** Per-step settle: screen first, then press (vault waits for type-in). */
+const TOUCH_TIMING: Record<StepId, StoryTouchTiming> = {
+  "console-click": { settleMs: 1500 },
+  "qr-scan": { settleMs: 1800 },
+  "karing-tap": { settleMs: 1500 },
+  "karing-on": { settleMs: 1600 },
+  /** Email ~1.3s + password ends ~2.3s → press login after fill. */
+  "vault-login": { settleMs: 2800 },
+  "vault-backup": { settleMs: 1800 },
+};
+
 
 const HEADLINE_KEYS = {
   "console-click": "headlines.consoleClick",
@@ -46,71 +64,30 @@ const CAPTION_KEYS = {
 
 type StoryT = ReturnType<typeof useTranslations>;
 type HeroT = ReturnType<typeof useTranslations>;
+type TouchCycle = ReturnType<typeof useStoryTouchCycle>;
 
 /**
- * Sticky scroll story (same device frame as page 2):
+ * One-viewport story (same device frame as page 2):
  * console tap → QR scan → Karing red→green → Vaultwarden login → backup vault.
- * Personal details masked as OO. Scroll or tap advances steps.
+ * Auto-plays slowly when in view; stops at the end; tap replays.
  */
 export function ConsoleKaringStory({ className }: { className?: string }) {
   const t = useTranslations("consoleStory");
   const tHero = useTranslations("heroDeck");
-  const sectionRef = useRef<HTMLElement>(null);
-  const pointerStart = useRef<{ x: number; y: number } | null>(null);
-  const [progress, setProgress] = useState(0);
-  const [armed, setArmed] = useState(false);
-  const [reduced, setReduced] = useState(false);
-
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const apply = () => setReduced(media.matches);
-    apply();
-    media.addEventListener("change", apply);
-    return () => media.removeEventListener("change", apply);
-  }, []);
-
-  useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
-    const onScroll = () => {
-      const rect = section.getBoundingClientRect();
-      const total = section.offsetHeight - window.innerHeight;
-      if (rect.top < window.innerHeight * 0.55) setArmed(true);
-      if (total <= 0) {
-        setProgress(1);
-        return;
-      }
-      setProgress(Math.min(1, Math.max(0, -rect.top / total)));
-    };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  const step = reduced
-    ? STEPS.length - 1
-    : Math.min(STEPS.length - 1, Math.floor(progress * STEPS.length + 0.001));
+  const autoplay = useStoryAutoplay(STEPS.length);
+  const step = autoplay.step;
   const stepId = STEPS[step] ?? "console-click";
-  const animate = !reduced && armed;
-
-  function goToStep(next: number) {
-    const section = sectionRef.current;
-    if (!section) return;
-    const clamped = Math.max(0, Math.min(STEPS.length - 1, next));
-    const total = section.offsetHeight - window.innerHeight;
-    if (total <= 0) return;
-    const target = section.offsetTop + (total * (clamped + 0.08)) / STEPS.length;
-    window.scrollTo({ top: target, behavior: "smooth" });
-  }
-
-  function onStageActivate() {
-    if (step >= STEPS.length - 1) return;
-    goToStep(step + 1);
-  }
+  const animate = autoplay.animate;
+  const touch = useStoryTouchCycle(
+    animate,
+    `${autoplay.runId}-${stepId}`,
+    autoplay.nextStep,
+    TOUCH_TIMING[stepId]
+  );
 
   return (
     <section
-      ref={sectionRef}
+      ref={autoplay.sectionRef}
       data-home-page
       className={cn(
         "relative snap-start bg-[#14181e] max-md:snap-start",
@@ -119,30 +96,19 @@ export function ConsoleKaringStory({ className }: { className?: string }) {
       )}
     >
       <div
-        className="sticky top-0 flex h-dvh cursor-pointer flex-col overflow-hidden"
-        onPointerDown={(e) => {
-          pointerStart.current = { x: e.clientX, y: e.clientY };
-        }}
-        onClick={(e) => {
-          const start = pointerStart.current;
-          pointerStart.current = null;
-          if (
-            start &&
-            (Math.abs(e.clientX - start.x) > 12 || Math.abs(e.clientY - start.y) > 12)
-          ) {
-            return;
-          }
-          onStageActivate();
+        className="flex h-dvh cursor-pointer flex-col overflow-hidden"
+        onClick={() => {
+          if (autoplay.finished) autoplay.replay();
         }}
         onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
+          if ((e.key === "Enter" || e.key === " ") && autoplay.finished) {
             e.preventDefault();
-            onStageActivate();
+            autoplay.replay();
           }
         }}
         role="button"
         tabIndex={0}
-        aria-label={t("nextPreviewAria")}
+        aria-label={autoplay.finished ? t("replayPreviewAria") : t("nextPreviewAria")}
       >
         <MotherboardEdgeBackdrop />
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(226,232,240,0.04),transparent_32%,rgba(0,0,0,0.18)),repeating-linear-gradient(90deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_1px,transparent_1px,transparent_5px)]" />
@@ -193,21 +159,29 @@ export function ConsoleKaringStory({ className }: { className?: string }) {
 
         <div className="relative z-[5] mx-auto mt-3 min-h-0 w-full max-w-2xl flex-1 px-3 max-[479px]:mt-2 max-[479px]:max-w-none">
           <div
-            key={`${stepId}-${armed ? "on" : "off"}`}
+            key={`${autoplay.runId}-${stepId}-${autoplay.armed ? "on" : "off"}`}
             className="h-full w-full"
             style={animate ? { animation: "af-ck-fade-in 0.45s ease-out both" } : undefined}
           >
-            <StoryDeviceFrame>
+            <StoryDeviceFrame shineKey={autoplay.runId}>
               {stepId === "console-click" && (
-                <ConsoleClickContent tHero={tHero} animate={animate} />
+                <ConsoleClickContent tHero={tHero} animate={animate} touch={touch} />
               )}
-              {stepId === "qr-scan" && <QrScanFoldContent t={t} tHero={tHero} />}
+              {stepId === "qr-scan" && (
+                <QrScanFoldContent t={t} tHero={tHero} touch={touch} />
+              )}
               {stepId === "karing-tap" && (
-                <KaringFoldContent t={t} active={false} pressed={animate} />
+                <KaringFoldContent t={t} active={false} touch={touch} />
               )}
-              {stepId === "karing-on" && <KaringFoldContent t={t} active pressed={false} />}
-              {stepId === "vault-login" && <VaultLoginContent t={t} animate={animate} />}
-              {stepId === "vault-backup" && <VaultBackupContent t={t} animate={animate} />}
+              {stepId === "karing-on" && (
+                <KaringFoldContent t={t} active touch={touch} />
+              )}
+              {stepId === "vault-login" && (
+                <VaultLoginContent t={t} animate={animate} touch={touch} />
+              )}
+              {stepId === "vault-backup" && (
+                <VaultBackupContent t={t} animate={animate} touch={touch} />
+              )}
             </StoryDeviceFrame>
           </div>
         </div>
@@ -233,13 +207,15 @@ export function ConsoleKaringStory({ className }: { className?: string }) {
   );
 }
 
-/** Home main (motherboard) with tap cue on top-left Console */
+/** Home main (motherboard) with finger tap on Console */
 function ConsoleClickContent({
   tHero,
   animate,
+  touch,
 }: {
   tHero: HeroT;
   animate: boolean;
+  touch: TouchCycle;
 }) {
   return (
     <div className="relative h-full overflow-hidden bg-[#0e1014]">
@@ -256,17 +232,16 @@ function ConsoleClickContent({
         <span
           className={cn(
             "relative rounded-[8px] bg-emerald-500 px-2 py-1 text-[9px] font-semibold text-black shadow-[0_0_0_1px_rgba(52,211,153,0.35)]",
-            animate && "animate-[af-ck-glow_1.5s_ease-in-out_infinite]"
+            animate && !touch.pressed && "animate-[af-ck-glow_1.5s_ease-in-out_infinite]",
+            storyTouchTargetClass(touch.pressed)
           )}
         >
           {tHero("consoleTitle")}
-          {animate ? (
-            <span
-              className="pointer-events-none absolute top-1/2 left-1/2 z-20 size-6 rounded-full border-2 border-white/85 bg-emerald-300/40"
-              style={{ animation: "af-ck-tap 1.35s ease-in-out infinite" }}
-              aria-hidden="true"
-            />
-          ) : null}
+          <StoryTouchHighlight
+            visible={touch.visible}
+            pressed={touch.pressed}
+            nudge={touch.nudge}
+          />
         </span>
       </div>
 
@@ -284,7 +259,15 @@ function ConsoleClickContent({
   );
 }
 
-function QrScanFoldContent({ t, tHero }: { t: StoryT; tHero: HeroT }) {
+function QrScanFoldContent({
+  t,
+  tHero,
+  touch,
+}: {
+  t: StoryT;
+  tHero: HeroT;
+  touch: TouchCycle;
+}) {
   return (
     <StoryDevicePanes className="h-full md:h-full">
       <div className="flex min-h-0 min-w-0 flex-1 flex-col rounded-xl border border-white/10 bg-[#090b0f] p-2.5">
@@ -293,7 +276,7 @@ function QrScanFoldContent({ t, tHero }: { t: StoryT; tHero: HeroT }) {
             <span className="flex size-4 items-center justify-center rounded bg-emerald-500 text-[8px] font-bold text-black">
               A
             </span>
-            <span className="text-[10px] font-semibold text-[#f4f4f5]">Standard</span>
+            <span className="text-[10px] font-semibold text-[#f4f4f5]">{t("planStandard")}</span>
           </div>
           <span className="rounded-full bg-emerald-500/20 px-1.5 py-0.5 text-[8px] font-semibold text-emerald-300">
             {tHero("active")}
@@ -306,10 +289,10 @@ function QrScanFoldContent({ t, tHero }: { t: StoryT; tHero: HeroT }) {
           </div>
           <div className="rounded-md border border-white/8 bg-[#12151c] px-1.5 py-1">
             <p className="text-[7px] text-[#8b8b93]">{tHero("nodes")}</p>
-            <p className="truncate text-[8px] font-medium text-[#e4e4e7]">node-OO</p>
+            <p className="truncate text-[8px] font-medium text-[#e4e4e7]">{t("nodeSample")}</p>
           </div>
         </div>
-        <p className="mb-1 text-[9px] font-semibold text-[#f4f4f5]">Karing QR</p>
+        <p className="mb-1 text-[9px] font-semibold text-[#f4f4f5]">{t("karingQr")}</p>
         <div className="mx-auto w-[72%] min-h-0 flex-1">
           <FakeQr />
         </div>
@@ -323,14 +306,28 @@ function QrScanFoldContent({ t, tHero }: { t: StoryT; tHero: HeroT }) {
             {t("scan")}
           </span>
         </div>
-        <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-lg bg-[#1c1c1e]">
-          <div className="w-[58%]">
-            <FakeQr />
+        <div
+          className={cn(
+            "relative flex min-h-0 flex-1 items-center justify-center rounded-lg bg-[#1c1c1e]",
+            storyTouchTargetClass(touch.pressed)
+          )}
+        >
+          <div className="absolute inset-0 overflow-hidden rounded-lg">
+            <div className="flex h-full items-center justify-center">
+              <div className="w-[58%]">
+                <FakeQr />
+              </div>
+            </div>
+            <div className="pointer-events-none absolute inset-[14%] rounded-md border-2 border-emerald-400/85" />
+            <div
+              className="pointer-events-none absolute inset-x-[14%] h-0.5 bg-emerald-400/90 shadow-[0_0_12px_rgba(52,211,153,0.8)]"
+              style={{ top: "40%", animation: "af-ck-scan 1.8s ease-in-out infinite" }}
+            />
           </div>
-          <div className="pointer-events-none absolute inset-[14%] rounded-md border-2 border-emerald-400/85" />
-          <div
-            className="pointer-events-none absolute inset-x-[14%] h-0.5 bg-emerald-400/90 shadow-[0_0_12px_rgba(52,211,153,0.8)]"
-            style={{ top: "40%", animation: "af-ck-scan 1.8s ease-in-out infinite" }}
+          <StoryTouchHighlight
+            visible={touch.visible}
+            pressed={touch.pressed}
+            nudge={touch.nudge}
           />
         </div>
         <p className="mt-1.5 text-center text-[8px] text-[#8b8b93]">{t("scanHint")}</p>
@@ -342,11 +339,11 @@ function QrScanFoldContent({ t, tHero }: { t: StoryT; tHero: HeroT }) {
 function KaringFoldContent({
   t,
   active,
-  pressed,
+  touch,
 }: {
   t: StoryT;
   active: boolean;
-  pressed: boolean;
+  touch: TouchCycle;
 }) {
   return (
     <div className="flex h-full flex-col bg-[#e9e9ee] text-[#1c1c1e]">
@@ -356,7 +353,7 @@ function KaringFoldContent({
           {!active ? <span className="absolute -top-0.5 -left-0.5 size-1.5 rounded-full bg-red-500" /> : null}
         </span>
         <PencilIcon />
-        <span className="ml-auto text-[10px] font-medium text-[#6b6b70]">Karing</span>
+        <span className="ml-auto text-[10px] font-medium text-[#6b6b70]">{t("karingApp")}</span>
       </div>
 
       <div className="grid grid-cols-4 gap-1.5 px-2.5">
@@ -365,7 +362,7 @@ function KaringFoldContent({
             [<ClockIcon key="c" />, active ? "0:00:17" : "0:00:00"],
             [<MonitorIcon key="m" />, active ? "10" : "—"],
             [<TrafficIcon key="t" />, active ? "↑OO\n↓OO" : "↑0\n↓0"],
-            [<SpeedIcon key="s" />, "0 B/s"],
+            [<SpeedIcon key="s" />, t("speedIdle")],
           ] as const
         ).map(([icon, v], i) => (
           <div key={i} className="rounded-lg bg-white px-1.5 py-1 shadow-sm">
@@ -381,7 +378,7 @@ function KaringFoldContent({
         <div>
           <p className="text-[8px] font-semibold text-[#3a3a3c]">{t("currentProfile")}</p>
           <p className="text-[10px] font-medium">AcrossFlare</p>
-          <p className="text-[7px] text-[#8b8b93]">↑ 0 B ↓ OO GB · OO/OO/OOOO</p>
+          <p className="text-[7px] text-[#8b8b93]">{t("profileTraffic")}</p>
         </div>
         <div className="flex overflow-hidden rounded-md text-[8px] font-medium">
           <span className="bg-[#d6d6dc] px-2 py-1">{t("rule")}</span>
@@ -406,21 +403,28 @@ function KaringFoldContent({
       <div className="relative mt-1 flex flex-col items-center">
         <div className="relative z-10 mb-[-14px]">
           <div
-            className="flex size-[58px] items-center justify-center rounded-full border-[4px] bg-[#e9e9ee] shadow-[0_6px_16px_rgba(0,0,0,0.12)]"
+            className={cn(
+              "relative flex size-[58px] items-center justify-center rounded-full border-[4px] bg-[#e9e9ee] shadow-[0_6px_16px_rgba(0,0,0,0.12)]",
+              storyTouchTargetClass(touch.pressed)
+            )}
             style={{
               borderColor: active ? "#28c840" : "#e11d48",
-              transition: "border-color 220ms ease",
-              animation: pressed && !active ? "af-ck-press 1.2s ease-in-out infinite" : undefined,
+              transition: "border-color 220ms ease, transform 150ms ease-out",
             }}
           >
             {active ? <ShieldCheck /> : <ShieldX />}
+            <StoryTouchHighlight
+              visible={touch.visible}
+              pressed={touch.pressed}
+              nudge={touch.nudge}
+            />
           </div>
         </div>
         <div className="flex w-full items-end justify-between bg-white px-3 pt-4 pb-2 text-[9px] shadow-[0_-4px_16px_rgba(0,0,0,0.04)]">
           <span className="w-10" />
-          <span className="font-medium text-[#3a3a3c]">node-OO</span>
+          <span className="font-medium text-[#3a3a3c]">{t("nodeSample")}</span>
           <span className={cn("font-semibold", active ? "text-emerald-600" : "text-[#8b8b93]")}>
-            {active ? "43 ms ›" : "— ›"}
+            {active ? t("latencySample") : t("latencyEmpty")}
           </span>
         </div>
       </div>
@@ -429,12 +433,20 @@ function KaringFoldContent({
 }
 
 /** Vaultwarden login — email then password auto-fill (OO masked) */
-function VaultLoginContent({ t, animate }: { t: StoryT; animate: boolean }) {
+function VaultLoginContent({
+  t,
+  animate,
+  touch,
+}: {
+  t: StoryT;
+  animate: boolean;
+  touch: TouchCycle;
+}) {
   return (
     <div className="flex h-full flex-col bg-[#f0f0f0] text-[#1c1c1e]">
       <div className="flex items-center gap-1.5 px-3 pt-2">
         <VaultGear className="size-4" />
-        <span className="text-[10px] font-medium tracking-tight text-[#3a3a3c]">vaultwarden</span>
+        <span className="text-[10px] font-medium tracking-tight text-[#3a3a3c]">{t("vaultwarden")}</span>
       </div>
 
       <div className="flex flex-1 flex-col items-center justify-center px-4 pb-4">
@@ -482,21 +494,36 @@ function VaultLoginContent({ t, animate }: { t: StoryT; animate: boolean }) {
           </label>
 
           <div
-            className="mt-3 rounded-full bg-[#175ddc] py-2 text-center text-[11px] font-semibold text-white"
-            style={animate ? { animation: "af-ck-pulse 1.4s ease-in-out 2.4s infinite" } : undefined}
+            className={cn(
+              "relative mt-3 rounded-full bg-[#175ddc] py-2 text-center text-[11px] font-semibold text-white",
+              storyTouchTargetClass(touch.pressed)
+            )}
           >
             {t("login")}
+            <StoryTouchHighlight
+              visible={touch.visible}
+              pressed={touch.pressed}
+              nudge={touch.nudge}
+            />
           </div>
         </div>
       </div>
 
-      <p className="pb-2 text-center text-[7px] text-[#8b8b93]">Vaultwarden Web · Version 2025.1.1</p>
+      <p className="pb-2 text-center text-[7px] text-[#8b8b93]">{t("vaultFooter")}</p>
     </div>
   );
 }
 
 /** Vaultwarden vault — highlight import / backup capability */
-function VaultBackupContent({ t, animate }: { t: StoryT; animate: boolean }) {
+function VaultBackupContent({
+  t,
+  animate,
+  touch,
+}: {
+  t: StoryT;
+  animate: boolean;
+  touch: TouchCycle;
+}) {
   const nav = [
     [t("navVault"), true],
     [t("navSend"), false],
@@ -511,7 +538,7 @@ function VaultBackupContent({ t, animate }: { t: StoryT; animate: boolean }) {
       <div className="flex w-[72px] shrink-0 flex-col bg-[#1a1d21] px-1.5 py-2 text-[7px] text-[#c8c8c8] md:w-[96px]">
         <div className="mb-2 flex items-center gap-1 px-0.5">
           <VaultGear className="size-3.5 shrink-0 invert" />
-          <span className="truncate font-medium leading-tight text-white md:text-[8px]">Vaultwarden</span>
+          <span className="truncate font-medium leading-tight text-white md:text-[8px]">{t("vaultwarden")}</span>
         </div>
         {nav.map(([label, on]) => (
           <div
@@ -543,11 +570,21 @@ function VaultBackupContent({ t, animate }: { t: StoryT; animate: boolean }) {
         <div className="min-h-0 flex-1 space-y-2 overflow-hidden p-2">
           <div
             className={cn(
-              "rounded-lg border border-[#d8d8d8] bg-[#f7f7f7] p-2",
-              animate && "ring-2 ring-emerald-400/70"
+              "relative rounded-lg border border-[#d8d8d8] bg-[#f7f7f7] p-2",
+              animate && "ring-2 ring-emerald-400/70",
+              storyTouchTargetClass(touch.pressed)
             )}
-            style={animate ? { animation: "af-ck-glow 1.8s ease-in-out infinite" } : undefined}
+            style={
+              animate && !touch.pressed
+                ? { animation: "af-ck-glow 1.8s ease-in-out infinite" }
+                : undefined
+            }
           >
+            <StoryTouchHighlight
+              visible={touch.visible}
+              pressed={touch.pressed}
+              nudge={touch.nudge}
+            />
             <div className="mb-1.5 flex items-center justify-between">
               <p className="text-[9px] font-semibold">{t("getStarted")}</p>
               <p className="text-[8px] font-medium text-[#175ddc]">{t("complete")}</p>

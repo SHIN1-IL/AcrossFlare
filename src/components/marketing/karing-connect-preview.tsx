@@ -34,7 +34,7 @@ export function KaringConnectPreview() {
       data-play={play ? "" : undefined}
       className={cn(styles?.stage, "pointer-events-none flex h-full min-h-full w-full select-none")}
     >
-      <div className="flex h-full min-h-full w-full flex-col overflow-hidden rounded-[22px] border border-[#d8d8dc] bg-[#e9e9ee] text-[#1c1c1e] shadow-[0_12px_28px_rgba(0,0,0,0.1)]">
+      <div className="flex aspect-[5/4] h-auto min-h-0 w-full flex-col overflow-hidden rounded-[14px] border border-[#d8d8dc] bg-[#e9e9ee] text-[#1c1c1e] shadow-[0_12px_28px_rgba(0,0,0,0.1)]">
         <div className="flex items-center justify-between px-3 pt-2 text-[9px] text-[#6b6b70]">
           <span>9:41</span>
           <span className="font-medium">Karing</span>

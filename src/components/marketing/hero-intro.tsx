@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { storyDeviceShellClassName } from "@/components/marketing/story-device-frame";
 import { cn } from "@/lib/utils";
 
 const FRAMES = ["signup", "pay", "console", "copy", "scan"] as const;
@@ -656,11 +657,11 @@ function QrScan({ local, label }: { local: number; label: string }) {
         {locked ? <span className="absolute -inset-1 rounded-md border-2 border-primary" /> : null}
       </div>
       <div
-        className="absolute h-36 w-[4.5rem] rounded-[1.2rem] border-2 border-zinc-200 bg-zinc-950/85 shadow-lg"
+        className="absolute h-36 w-[4.5rem] rounded-[10px] border-2 border-zinc-200 bg-zinc-950/85 shadow-lg"
         style={{ transform: `translate(${(1 - eased) * 96}px, ${(1 - eased) * 28}px)` }}
       >
-        <span className="absolute top-1.5 left-1/2 h-1 w-6 -translate-x-1/2 rounded-full bg-zinc-500" />
-        <span className="absolute inset-x-2 top-6 bottom-5 rounded-md border border-primary/60" />
+        <span className="absolute top-1.5 left-1/2 h-1 w-5 -translate-x-1/2 rounded-[1px] bg-zinc-500" />
+        <span className="absolute inset-x-2 top-6 bottom-5 rounded-[6px] border border-primary/60" />
         <span
           className="absolute right-2 left-2 h-px bg-primary"
           style={{ top: `${28 + sweep * 48}%`, opacity: locked ? 0 : 1 }}
@@ -797,14 +798,12 @@ function MessengerPhones({
 
 function PhoneShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative w-[min(40cqw,calc(86cqh*9/19.5))] shrink-0">
-      <span className="absolute top-[22%] -left-[3px] h-8 w-[3px] rounded-l bg-[#d4d4d8]" />
-      <span className="absolute top-[16%] -right-[3px] h-12 w-[3px] rounded-r bg-[#d4d4d8]" />
-      <div className="relative flex aspect-[9/19.5] w-full flex-col overflow-hidden rounded-[1.45rem] border-[3px] border-[#f4f4f5] bg-[#111] shadow-[0_16px_36px_rgba(0,0,0,0.34)]">
-        <div className="pointer-events-none absolute top-[6px] left-1/2 z-20 h-[6px] w-[32%] -translate-x-1/2 rounded-full bg-[#111]" />
-        {children}
-        <span className="pointer-events-none absolute bottom-1.5 left-1/2 z-20 h-[3px] w-8 -translate-x-1/2 rounded-full bg-black/35" />
-      </div>
+    <div className="relative w-[min(46cqw,calc(86cqh*1646/1178))] shrink-0 max-[479px]:w-[min(70cqw,calc(72cqh*1178/1646))]">
+      <span className="absolute top-[18%] -left-[3px] h-8 w-[3px] rounded-[1px] bg-[#d4d4d8] max-[479px]:block min-[480px]:hidden" />
+      <span className="absolute top-[32%] -left-[3px] h-6 w-[3px] rounded-[1px] bg-[#d4d4d8]/80 max-[479px]:block min-[480px]:hidden" />
+      <span className="absolute top-[22%] -right-[3px] h-10 w-[3px] rounded-[1px] bg-[#d4d4d8] max-[479px]:block min-[480px]:hidden" />
+      <span className="absolute top-[14%] -right-[3px] hidden h-9 w-[3px] rounded-[1px] bg-[#d4d4d8] min-[480px]:block" />
+      <div className={storyDeviceShellClassName("flex w-full flex-col bg-[#111]")}>{children}</div>
     </div>
   );
 }

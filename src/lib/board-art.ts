@@ -18,8 +18,8 @@ export const BOARD_ART = {
   height: 1080,
 } as const;
 
-/** Must match live story section heights so deferred shells do not jump scroll. */
+/** One-viewport home stories (autoplay in view; must match deferred shells). */
 export const HOME_STORY_HEIGHT = {
-  whyBuyLive: "h-[380vh]",
-  consoleKaring: "h-[520vh]",
+  whyBuyLive: "h-dvh",
+  consoleKaring: "h-dvh",
 } as const;

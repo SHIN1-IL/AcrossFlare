@@ -18,7 +18,7 @@ When the user says **원본**, **원본으로 돌려줘**, **원상복구**, or 
 
 - **1페이지**: circular orb web (`/marketing/semiconductor-web.jpg`), soft bg darken `bg-black/[0.07]` when web shows (texture kept, no solid fill), radial ellipse mask, sparks, no cursor-following square glow / no pointer-capture blob, transform origin fixed at center
 - **2페이지 preview**: Fold-like dual UI story in `why-buy-ui-story-preview.tsx` (auto-loop +5s after full run)
-- **Dev harness**: `/dev/web-landing` = page1 + page2; `/dev/comic-landing` = page2 only
+- **Dev harness**: `/dev/web-landing` = page2 UI story preview only; `/dev/comic-landing` = page2 only
 - Home live page 2 is `WhyBuyUiStoryPreview live` (Fold UI story); console→Karing follows after it
 
 Restore by copying snapshot → live path. Only overwrite files the user asked to revert. If they update what "원본" means later, replace the matching snapshot and this rule.

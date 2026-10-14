@@ -282,7 +282,27 @@
     "vaultOpenHint": "Open vault takes you to the login screen.",
     "openVault": "Open vault",
     "vaultUrl": "Vault URL",
-    "vaultUser": "Vault user"
+    "vaultUser": "Vault user",
+    "replayPreview": "Tap to replay",
+    "wifiLabel": "Wi‑Fi",
+    "wifiNetwork": "Hotel_Guest",
+    "vaultwarden": "Vaultwarden",
+    "extraSites": [
+      "Google",
+      "Gmail",
+      "Facebook",
+      "Instagram",
+      "X",
+      "WhatsApp",
+      "Telegram",
+      "Wikipedia",
+      "Spotify",
+      "Slack",
+      "Discord",
+      "Reddit",
+      "Zoom",
+      "Teams"
+    ]
   },
   "consoleStory": {
     "nextPreviewAria": "Go to next preview",
@@ -338,7 +358,18 @@
     "dns": "DNS",
     "addProfile": "Add Profile",
     "rule": "Rule",
-    "global": "Global"
+    "global": "Global",
+    "replayPreviewAria": "Replay preview",
+    "planStandard": "Standard",
+    "karingQr": "Karing QR",
+    "karingApp": "Karing",
+    "nodeSample": "node-OO",
+    "vaultwarden": "Vaultwarden",
+    "speedIdle": "0 B/s",
+    "latencySample": "43 ms ›",
+    "latencyEmpty": "— ›",
+    "vaultFooter": "Vaultwarden Web · Version 2025.1.1",
+    "profileTraffic": "↑ 0 B ↓ OO GB · OO/OO/OOOO"
   },
   "planSlides": {
     "global-lite": {

@@ -282,7 +282,27 @@
     "vaultOpenHint": "保管庫を開くとログイン画面に進みます。",
     "openVault": "保管庫を開く",
     "vaultUrl": "Vault URL",
-    "vaultUser": "Vault ユーザー"
+    "vaultUser": "Vault ユーザー",
+    "replayPreview": "タップして再生",
+    "wifiLabel": "Wi‑Fi",
+    "wifiNetwork": "ホテル_ゲスト",
+    "vaultwarden": "ボルトワーデン",
+    "extraSites": [
+      "Google",
+      "Gmail",
+      "Facebook",
+      "Instagram",
+      "X",
+      "WhatsApp",
+      "Telegram",
+      "Wikipedia",
+      "Spotify",
+      "Slack",
+      "Discord",
+      "Reddit",
+      "Zoom",
+      "Teams"
+    ]
   },
   "consoleStory": {
     "nextPreviewAria": "次のプレビューへ",
@@ -291,7 +311,7 @@
       "qrScan": "カメラで QR を読み取って接続",
       "karingTap": "ワンタップで Karing を起動",
       "karingOn": "暗号化ネットワーク稼働完了",
-      "vaultLogin": "Vaultwarden にログイン",
+      "vaultLogin": "ボルトワーデンにログイン",
       "vaultBackup": "パスワードと資料を安全にバックアップ"
     },
     "captions": {
@@ -299,7 +319,7 @@
       "qrScan": "ホームページのコンソールにある正方形 QR をカメラに合わせると購読が反映されます。",
       "karingTap": "下部の赤いボタンを押すと AcrossFlare プロファイルが有効になります。",
       "karingOn": "赤 → 緑。暗号化ネットワークが稼働します。",
-      "vaultLogin": "アカウントのメールとパスワードを入力すると Vaultwarden にログインできます。",
+      "vaultLogin": "アカウントのメールとパスワードを入力するとボルトワーデンにログインできます。",
       "vaultBackup": "ログイン後、保管庫でデータ取り込みとバックアップをすぐ使えます。"
     },
     "expires": "期限",
@@ -313,7 +333,7 @@
     "required": "(必須)",
     "rememberEmail": "メールを記憶する",
     "navVault": "保管庫",
-    "navSend": "Send",
+    "navSend": "送信",
     "navTools": "ツール",
     "navReports": "レポート",
     "navSettings": "設定",
@@ -331,14 +351,25 @@
     "user": "ユーザー",
     "me": "自分",
     "backupReady": "セキュアバックアップ準備完了",
-    "backupReadyHint": "パスワード・メモ・資料を Vaultwarden に安全保管",
+    "backupReadyHint": "パスワード・メモ・資料をボルトワーデンに安全保管",
     "currentProfile": "現在のプロファイル",
     "systemProxy": "システムプロキシ",
     "myProfiles": "マイプロファイル",
     "dns": "DNS",
     "addProfile": "プロファイル追加",
     "rule": "ルール",
-    "global": "グローバル"
+    "global": "グローバル",
+    "replayPreviewAria": "プレビューを再生",
+    "planStandard": "スタンダード",
+    "karingQr": "Karing QR",
+    "karingApp": "Karing",
+    "nodeSample": "node-OO",
+    "vaultwarden": "ボルトワーデン",
+    "speedIdle": "0 B/秒",
+    "latencySample": "43 ms ›",
+    "latencyEmpty": "— ›",
+    "vaultFooter": "ボルトワーデン Web · バージョン 2025.1.1",
+    "profileTraffic": "↑ 0 B ↓ OO GB · OO/OO/OOOO"
   },
   "planSlides": {
     "global-lite": {

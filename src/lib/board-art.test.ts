@@ -6,8 +6,8 @@ describe("board art", () => {
     expect(BOARD_ART.webp1920).toContain("circuit-preview-1920.webp");
     expect(BOARD_ART.jpeg1920).toContain("circuit-preview-1920.jpg");
     expect(BOARD_ART.webp1920).toMatch(/\?v=\d+/);
-    expect(HOME_STORY_HEIGHT.whyBuyLive).toBe("h-[380vh]");
-    expect(HOME_STORY_HEIGHT.consoleKaring).toBe("h-[520vh]");
+    expect(HOME_STORY_HEIGHT.whyBuyLive).toBe("h-dvh");
+    expect(HOME_STORY_HEIGHT.consoleKaring).toBe("h-dvh");
   });
 
   it("parks motherboard plates behind a kill-switch for speed A/B", () => {

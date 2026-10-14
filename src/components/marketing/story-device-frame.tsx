@@ -1,68 +1,153 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Shared device chrome for home page 2–3.
- * - ≤479px: tall phone, nearly fullscreen
- * - 480–767px: normal tall phone with margins
- * - ≥768px: Fold-like 5:4 (current desktop look)
+ * Shared iPhone Duo chrome (home stories + marketing phone mocks).
+ * Physical shell: 164.6 × 117.8 mm. Landscape on tablet/laptop; portrait on phone.
+ * Flat screen only — no center crease. Corners stay squared-off.
  */
+export const STORY_DEVICE = {
+  /** Real duo width — landscape 164.6mm, portrait 117.8mm. Never fills the viewport. */
+  shellMax: "max-w-[min(92vw,164.6mm)] max-[479px]:max-w-[min(88vw,117.8mm)]",
+  /** Landscape 164.6:117.8 · portrait 117.8:164.6 (phone only). */
+  aspect: "aspect-[1646/1178] max-[479px]:aspect-[1178/1646]",
+  /** Angular corners (sharper than soft phone curves). */
+  outerRadius: "rounded-[6px]",
+  innerRadius: "rounded-[3px]",
+  border: "border-[3px]",
+  pad: "p-[3px]",
+} as const;
+
 export function StoryDeviceFrame({
   children,
   className,
+  /** When set, plays a one-shot soft light-ray reflection (~4s) on first show / replay. */
+  shineKey,
 }: {
   children: ReactNode;
   className?: string;
+  shineKey?: string | number;
 }) {
   return (
     <div
       className={cn(
-        "mx-auto flex h-full max-h-full w-full max-w-[min(98vw,460px)] items-center justify-center max-[479px]:max-w-[min(99vw,480px)] min-[480px]:max-md:max-w-[min(84vw,400px)] md:max-w-[min(100%,620px)]",
+        "mx-auto flex h-full w-full items-center justify-center",
         className
       )}
     >
       <div
         className={cn(
-          "relative h-full max-h-full w-auto max-w-full border-[#f4f4f5]/90 bg-[#0c0e14] shadow-[0_22px_56px_rgba(0,0,0,0.5)]",
-          "rounded-[2rem] border-[5px] p-[3px] max-[479px]:rounded-[1.85rem]",
-          "min-[480px]:max-md:rounded-[2.1rem] min-[480px]:max-md:border-[6px]",
-          "md:rounded-[1.15rem] md:border-[3px]",
-          // Height-first fit so captions below the frame never get clipped.
-          "aspect-[9/19.5] md:aspect-[5/4]"
+          "relative w-full border-[#f4f4f5]/90 bg-[#0c0e14] shadow-[0_22px_56px_rgba(0,0,0,0.5)]",
+          STORY_DEVICE.shellMax,
+          STORY_DEVICE.aspect,
+          STORY_DEVICE.outerRadius,
+          STORY_DEVICE.border,
+          STORY_DEVICE.pad
         )}
       >
-        {/* Phone side buttons */}
-        <div className="pointer-events-none absolute top-[18%] -left-[5px] z-30 h-10 w-[3px] rounded-l-sm bg-[#c8c8c8]/45 md:hidden" />
-        <div className="pointer-events-none absolute top-[28%] -left-[5px] z-30 h-14 w-[3px] rounded-l-sm bg-[#c8c8c8]/35 md:hidden" />
-        <div className="pointer-events-none absolute top-[22%] -right-[5px] z-30 h-16 w-[3px] rounded-r-sm bg-[#c8c8c8]/45 md:hidden" />
+        {/* Portrait (phone): volume left, power right */}
+        <div className="pointer-events-none absolute top-[18%] -left-[4px] z-30 h-10 w-[3px] rounded-[1px] bg-[#c8c8c8]/45 max-[479px]:block min-[480px]:hidden" />
+        <div className="pointer-events-none absolute top-[32%] -left-[4px] z-30 h-7 w-[3px] rounded-[1px] bg-[#c8c8c8]/35 max-[479px]:block min-[480px]:hidden" />
+        <div className="pointer-events-none absolute top-[22%] -right-[4px] z-30 h-12 w-[3px] rounded-[1px] bg-[#c8c8c8]/45 max-[479px]:block min-[480px]:hidden" />
 
-        {/* Fold hinge nubs */}
-        <div className="pointer-events-none absolute top-1/2 left-0 z-30 hidden h-7 w-[2px] -translate-y-[120%] rounded-r-sm bg-[#c8c8c8]/40 md:block" />
-        <div className="pointer-events-none absolute top-1/2 right-0 z-30 hidden h-7 w-[2px] -translate-y-[120%] rounded-l-sm bg-[#c8c8c8]/40 md:block" />
+        {/* Landscape (tablet/laptop): single power on right short edge, near top */}
+        <div className="pointer-events-none absolute top-[14%] -right-[4px] z-30 hidden h-11 w-[3px] rounded-[1px] bg-[#c8c8c8]/50 min-[480px]:block" />
+
+        {/* Bottom edge: USB-C + speaker grilles (product silhouette) */}
+        <div
+          className="pointer-events-none absolute bottom-[-5px] left-1/2 z-30 flex -translate-x-1/2 items-center gap-3"
+          aria-hidden="true"
+        >
+          <span className="flex gap-[2px]">
+            <span className="h-[2px] w-[2px] rounded-full bg-[#c8c8c8]/35" />
+            <span className="h-[2px] w-[2px] rounded-full bg-[#c8c8c8]/35" />
+            <span className="h-[2px] w-[2px] rounded-full bg-[#c8c8c8]/35" />
+            <span className="h-[2px] w-[2px] rounded-full bg-[#c8c8c8]/35" />
+          </span>
+          <span className="h-[3px] w-5 rounded-[1px] bg-[#c8c8c8]/40" />
+          <span className="flex gap-[2px]">
+            <span className="h-[2px] w-[2px] rounded-full bg-[#c8c8c8]/35" />
+            <span className="h-[2px] w-[2px] rounded-full bg-[#c8c8c8]/35" />
+            <span className="h-[2px] w-[2px] rounded-full bg-[#c8c8c8]/35" />
+            <span className="h-[2px] w-[2px] rounded-full bg-[#c8c8c8]/35" />
+          </span>
+        </div>
 
         <div
           className={cn(
             "relative h-full w-full overflow-hidden bg-[#0c0e14]",
-            "rounded-[1.55rem] max-[479px]:rounded-[1.4rem]",
-            "min-[480px]:max-md:rounded-[1.65rem]",
-            "md:rounded-[0.85rem]"
+            STORY_DEVICE.innerRadius
           )}
         >
-          <div
-            className="pointer-events-none absolute inset-y-0 left-1/2 z-20 hidden w-10 -translate-x-1/2 md:block"
-            aria-hidden="true"
-            style={{
-              background:
-                "radial-gradient(ellipse 70% 100% at 50% 50%, rgba(255,255,255,0.04) 0%, transparent 55%), linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.04) 30%, rgba(255,255,255,0.035) 45%, rgba(255,255,255,0.05) 50%, rgba(0,0,0,0.03) 55%, rgba(0,0,0,0.04) 70%, transparent 100%)",
-            }}
-          />
-
           <StoryDeviceStatusBar />
-          <div className="relative z-10 h-[calc(100%-1.75rem)]">{children}</div>
+          <div className="relative z-10 h-[calc(100%-1.75rem)]">
+            {children}
+            {shineKey != null ? <StoryScreenShine replayKey={shineKey} /> : null}
+          </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+/** Soft light-ray reflection — once per replayKey, ~2s, no loop. */
+function StoryScreenShine({ replayKey }: { replayKey: string | number }) {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const apply = () => setReduced(media.matches);
+    apply();
+    media.addEventListener("change", apply);
+    return () => media.removeEventListener("change", apply);
+  }, []);
+
+  if (reduced) return null;
+
+  return (
+    <div
+      key={replayKey}
+      className="pointer-events-none absolute inset-0 z-50 overflow-hidden"
+      aria-hidden="true"
+    >
+      <style>{`
+        @keyframes af-screen-shine-sweep {
+          0% { opacity: 0; transform: translateX(-55%) skewX(-16deg); }
+          12% { opacity: 1; }
+          55% { opacity: 0.55; }
+          100% { opacity: 0; transform: translateX(125%) skewX(-16deg); }
+        }
+        @keyframes af-screen-shine-rays {
+          0% { opacity: 0; }
+          18% { opacity: 0.9; }
+          70% { opacity: 0.35; }
+          100% { opacity: 0; }
+        }
+      `}</style>
+      {/* Broad glass sweep */}
+      <div
+        className="absolute inset-y-[-10%] left-0 w-[42%]"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.03) 28%, rgba(255,255,255,0.14) 48%, rgba(226,232,240,0.1) 58%, rgba(255,255,255,0.03) 72%, transparent 100%)",
+          animation: "af-screen-shine-sweep 2s cubic-bezier(0.33, 0.1, 0.25, 1) both",
+        }}
+      />
+      {/* Thin light rays */}
+      <div
+        className="absolute inset-y-[-12%] left-0 w-[36%] mix-blend-screen"
+        style={{
+          background:
+            "repeating-linear-gradient(105deg, transparent 0 10px, rgba(255,255,255,0.045) 10px 11px, transparent 11px 22px)",
+          maskImage:
+            "linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.8) 35%, rgba(0,0,0,0.8) 65%, transparent 100%)",
+          WebkitMaskImage:
+            "linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.8) 35%, rgba(0,0,0,0.8) 65%, transparent 100%)",
+          animation:
+            "af-screen-shine-sweep 2s cubic-bezier(0.33, 0.1, 0.25, 1) both, af-screen-shine-rays 2s ease-out both",
+        }}
+      />
     </div>
   );
 }
@@ -97,7 +182,7 @@ function StoryDeviceStatusBar() {
   );
 }
 
-/** Dual-pane row on Fold; stacked column on phone. */
+/** Dual panes — stacked on phone (portrait), side-by-side on tablet/laptop (landscape). */
 export function StoryDevicePanes({
   children,
   className,
@@ -108,11 +193,21 @@ export function StoryDevicePanes({
   return (
     <div
       className={cn(
-        "flex h-[calc(100%-0.25rem)] flex-col gap-2 px-3 pt-1 pb-3 md:h-[calc(100%-2rem)] md:flex-row md:gap-3",
+        "flex h-full flex-col gap-2 px-2.5 pt-1 pb-2.5 min-[480px]:flex-row min-[480px]:gap-3 min-[480px]:px-3 min-[480px]:pb-3",
         className
       )}
     >
       {children}
     </div>
+  );
+}
+
+/** Class string for non-StoryDeviceFrame phone shells that should match the duo chrome. */
+export function storyDeviceShellClassName(className?: string) {
+  return cn(
+    "relative w-full overflow-hidden border-[3px] border-[#f4f4f5]/90 bg-[#0c0e14] shadow-[0_16px_36px_rgba(0,0,0,0.34)]",
+    STORY_DEVICE.aspect,
+    STORY_DEVICE.outerRadius,
+    className
   );
 }

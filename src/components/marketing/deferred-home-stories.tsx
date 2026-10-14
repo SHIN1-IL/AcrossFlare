@@ -14,8 +14,8 @@ type WhyBuyProps = { live?: boolean; className?: string };
 type ConsoleProps = { className?: string };
 
 /**
- * Height-stable deferred mount for home scroll stories.
- * - Same vh + data-home-page as live stories → no snap/scroll jump
+ * Height-stable deferred mount for home story pages.
+ * - Same h-dvh + data-home-page as live stories → no snap jump
  * - Dynamic import → page-1 JS stays lean
  * - Modest rootMargin + idle fallback → blank panels stay rare without racing LCP
  */
@@ -78,7 +78,7 @@ function StoryShell({
       className={cn("relative snap-start bg-[#14181e] max-md:snap-start", heightClass, className)}
       aria-hidden="true"
     >
-      <div className="sticky top-0 h-dvh bg-[#14181e]" />
+      <div className="h-dvh bg-[#14181e]" />
     </section>
   );
 }
