@@ -657,6 +657,18 @@
     "title": "支持专区",
     "lead": "感谢使用 AcrossFlare。",
     "comingSoon": "服务即将上线",
+    "chat": {
+      "open": "咨询",
+      "close": "关闭",
+      "title": "支持咨询",
+      "lead": "可咨询下载、Karing 设置、备份和常见问题。",
+      "placeholder": "输入问题",
+      "send": "发送",
+      "thinking": "正在写回答",
+      "error": "暂时无法回答。请查看本页的常见问题。",
+      "unconfigured": "咨询窗口还在准备。请查看本页的常见问题。",
+      "rate": "提问太频繁。请稍后再试。"
+    },
     "downloads": {
       "title": "下载中心",
       "lead": "点击下方按钮，安装适合本设备的最新客户端。",

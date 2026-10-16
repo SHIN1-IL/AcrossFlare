@@ -43,7 +43,15 @@ fi
 
 export AF_SSH_PASS="$PASSWORD"
 export AF_ORIGIN_HOST="$ORIGIN_HOST"
-export AF_REMOTE_SCRIPT="$REMOTE_SCRIPT"
+AF_GEMINI_KEY="$(grep -E '^GEMINI_API_KEY=' "$ROOT/.env" 2>/dev/null | head -1 | cut -d= -f2- | sed 's/^"//; s/"$//' || true)"
+AF_GEMINI_MODEL="$(grep -E '^GEMINI_MODEL=' "$ROOT/.env" 2>/dev/null | head -1 | cut -d= -f2- | sed 's/^"//; s/"$//' || true)"
+AF_REMOTE_BODY="$(mktemp)"
+{
+  printf 'export GEMINI_API_KEY=%q\nexport GEMINI_MODEL=%q\n' "$AF_GEMINI_KEY" "${AF_GEMINI_MODEL:-gemini-3.5-flash-lite}"
+  cat "$REMOTE_SCRIPT"
+} > "$AF_REMOTE_BODY"
+trap 'rm -f "$AF_REMOTE_BODY"' EXIT
+export AF_REMOTE_SCRIPT="$AF_REMOTE_BODY"
 
 echo "==> SSH 연결 및 배포 진행 중..."
 /usr/bin/expect <<'EXPECT'

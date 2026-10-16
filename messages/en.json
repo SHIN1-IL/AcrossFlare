@@ -657,6 +657,18 @@
     "title": "Support Zone",
     "lead": "Thank you for using AcrossFlare.",
     "comingSoon": "Service coming soon",
+    "chat": {
+      "open": "Ask",
+      "close": "Close",
+      "title": "Support chat",
+      "lead": "Ask about downloads, Karing setup, backup, and the FAQ.",
+      "placeholder": "Type a question",
+      "send": "Send",
+      "thinking": "Writing an answer",
+      "error": "No answer right now. Check the FAQ on this page.",
+      "unconfigured": "Chat is not ready yet. Check the FAQ on this page.",
+      "rate": "Too many questions. Please try again in a little while."
+    },
     "downloads": {
       "title": "Download Center",
       "lead": "Use the button below to install the latest client for this device.",

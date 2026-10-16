@@ -136,8 +136,7 @@ function MarginEditor({ locale, onSaved }: { locale: string; onSaved: () => void
   const [month, setMonth] = useState(() => currentMonthKey());
   const snapshot = useMarginSnapshot(month);
   const [failed, setFailed] = useState(false);
-  const [drafts, setDrafts] = useState<Record<string, string>>({});
-  const [dirty, setDirty] = useState(false);
+  const [drafts, setDrafts] = useState<Record<string, string> | null>(null);
   const [busy, setBusy] = useState(false);
   const [formError, setFormError] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -145,12 +144,16 @@ function MarginEditor({ locale, onSaved }: { locale: string; onSaved: () => void
   const [addDraft, setAddDraft] = useState({ label: "", amount: "", note: "", recurring: false });
   const money = (amount: number) => formatMoney(locale, amount, "KRW");
   const atCurrent = month >= currentMonthKey();
+  const costDrafts =
+    drafts ??
+    Object.fromEntries((snapshot?.nodes ?? []).map((node) => [node.id, String(node.monthlyCostKrw)]));
 
-  useEffect(() => {
-    setDirty(false);
+  function showMonth(next: string) {
+    setMonth(next);
+    setDrafts(null);
     setEditingId(null);
     setFormError("");
-  }, [month]);
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -164,16 +167,9 @@ function MarginEditor({ locale, onSaved }: { locale: string; onSaved: () => void
     };
   }, [month]);
 
-  useEffect(() => {
-    if (!snapshot || dirty) {
-      return;
-    }
-    setDrafts(Object.fromEntries(snapshot.nodes.map((node) => [node.id, String(node.monthlyCostKrw)])));
-  }, [dirty, snapshot]);
-
-  const draftCostsValid = snapshot?.nodes.every((node) => parseKrwAmount(drafts[node.id] ?? "", true) != null) ?? false;
+  const draftCostsValid = snapshot?.nodes.every((node) => parseKrwAmount(costDrafts[node.id] ?? "", true) != null) ?? false;
   const previewOperating =
-    snapshot?.nodes.reduce((sum, node) => sum + (parseKrwAmount(drafts[node.id] ?? "", true) ?? node.monthlyCostKrw), 0) ??
+    snapshot?.nodes.reduce((sum, node) => sum + (parseKrwAmount(costDrafts[node.id] ?? "", true) ?? node.monthlyCostKrw), 0) ??
     0;
   const previewMargin = (snapshot?.revenueKrw ?? 0) - previewOperating;
 
@@ -190,7 +186,7 @@ function MarginEditor({ locale, onSaved }: { locale: string; onSaved: () => void
       body: JSON.stringify({
         nodes: snapshot.nodes.map((node) => ({
           id: node.id,
-          monthlyCostKrw: parseKrwAmount(drafts[node.id] ?? "", true),
+          monthlyCostKrw: parseKrwAmount(costDrafts[node.id] ?? "", true),
         })),
       }),
     });
@@ -199,7 +195,7 @@ function MarginEditor({ locale, onSaved }: { locale: string; onSaved: () => void
       setFormError(t("marginSaveFailed"));
       return;
     }
-    setDirty(false);
+    setDrafts(null);
     await refreshMargin(month);
     onSaved();
   }
@@ -260,7 +256,7 @@ function MarginEditor({ locale, onSaved }: { locale: string; onSaved: () => void
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-2">
-        <Button type="button" variant="outline" size="sm" onClick={() => setMonth((value) => shiftMonth(value, -1))}>
+        <Button type="button" variant="outline" size="sm" onClick={() => showMonth(shiftMonth(month, -1))}>
           {t("marginPrev")}
         </Button>
         <p className="font-mono text-sm">{formatMonthLabel(locale, month)}</p>
@@ -269,7 +265,7 @@ function MarginEditor({ locale, onSaved }: { locale: string; onSaved: () => void
           variant="outline"
           size="sm"
           disabled={atCurrent}
-          onClick={() => setMonth((value) => shiftMonth(value, 1))}
+          onClick={() => showMonth(shiftMonth(month, 1))}
         >
           {t("marginNext")}
         </Button>
@@ -307,10 +303,9 @@ function MarginEditor({ locale, onSaved }: { locale: string; onSaved: () => void
                   inputMode="numeric"
                   className={fieldClass}
                   aria-label={`${node.name} ${t("marginAmount")}`}
-                  value={drafts[node.id] ?? ""}
+                  value={costDrafts[node.id] ?? ""}
                   onChange={(event) => {
-                    setDirty(true);
-                    setDrafts((current) => ({ ...current, [node.id]: event.target.value }));
+                    setDrafts({ ...costDrafts, [node.id]: event.target.value });
                   }}
                 />
               </li>

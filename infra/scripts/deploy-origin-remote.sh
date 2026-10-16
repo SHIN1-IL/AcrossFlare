@@ -32,6 +32,15 @@ if [[ -f .env ]]; then
   if grep -q '^PROVISION_MODE=simulate' .env 2>/dev/null; then
     echo "WARN: PROVISION_MODE=simulate — set live in .env before real provisioning."
   fi
+  gemini_current="$(grep -E '^GEMINI_API_KEY=' .env | head -1 | cut -d= -f2- | sed 's/^"//; s/"$//' || true)"
+  if [[ -n "$gemini_current" ]]; then
+    echo "==> GEMINI_API_KEY already set"
+  elif [[ -n "${GEMINI_API_KEY:-}" ]]; then
+    printf '\nGEMINI_API_KEY="%s"\nGEMINI_MODEL="%s"\n' "$GEMINI_API_KEY" "${GEMINI_MODEL:-gemini-3.5-flash-lite}" >> .env
+    echo "==> wrote GEMINI_API_KEY to origin .env"
+  else
+    echo "WARN: GEMINI_API_KEY missing — support chat stays on the FAQ fallback."
+  fi
 else
   echo "WARN: .env missing — copy from .env.example before live use."
 fi

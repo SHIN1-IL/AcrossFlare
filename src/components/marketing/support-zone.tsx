@@ -3,6 +3,7 @@
 import { BookOpen, CircleHelp, Download, HardDrive, LifeBuoy, type LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { BackupSetupGuide } from "@/components/marketing/backup-guide";
+import { SupportChat } from "@/components/marketing/support-chat";
 import { KaringDownloadCta, useClientKaringOs } from "@/components/marketing/karing-download";
 import { KaringHelpFaq, KaringSetupGuide } from "@/components/marketing/karing-guide";
 import { MotherboardEdgeBackdrop } from "@/components/marketing/motherboard-edge-backdrop";
@@ -98,6 +99,7 @@ export function SupportZone() {
           })}
         </ol>
       </div>
+      <SupportChat />
     </section>
   );
 }

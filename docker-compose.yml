@@ -163,6 +163,8 @@ services:
       NODE_OPTIONS: ${NODE_OPTIONS:---max-old-space-size=384}
       CLOUDFLARE_ZONE_ID: ${CLOUDFLARE_ZONE_ID:-}
       CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.5-flash-lite}
     depends_on:
       postgres:
         condition: service_healthy
