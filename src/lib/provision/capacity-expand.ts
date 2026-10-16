@@ -25,6 +25,42 @@ export type BootstrapTarget = {
   status: "READY" | "OPENING";
 };
 
+/** Display occupancy. Checkout still reserves with the stored seatsUsed counter. */
+export function occupiedSeats(seatsUsed: number, attached: number) {
+  return Math.max(0, seatsUsed, attached);
+}
+
+export function groupSeatView(input: { seatsUsed: number; seatsMax: number; attached: number }) {
+  const used = occupiedSeats(input.seatsUsed, input.attached);
+  const max = Math.max(0, input.seatsMax);
+  const remaining = Math.max(0, max - used);
+  return { used, max, remaining, full: remaining === 0 };
+}
+
+/**
+ * One subscription is one seat even when it is attached to every node in the group.
+ * A stored instance group wins over a node overlap, so the same row is not counted twice.
+ */
+export function attachedSeatCount(
+  group: { id: string; nodeIds: readonly string[] },
+  subscriptions: ReadonlyArray<{ instanceGroupId: string | null; nodeIds: readonly string[] }>
+) {
+  const nodes = new Set(group.nodeIds);
+  let count = 0;
+  for (const subscription of subscriptions) {
+    if (subscription.instanceGroupId) {
+      if (subscription.instanceGroupId === group.id) {
+        count += 1;
+      }
+      continue;
+    }
+    if (subscription.nodeIds.some((id) => nodes.has(id))) {
+      count += 1;
+    }
+  }
+  return count;
+}
+
 export function utcDayStart(now = new Date()) {
   const since = new Date(now);
   since.setUTCHours(0, 0, 0, 0);

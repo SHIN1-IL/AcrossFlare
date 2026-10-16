@@ -10,7 +10,9 @@ import {
 import { prisma } from "@/lib/db";
 import {
   DAILY_BOOTSTRAP_LIMIT,
+  attachedSeatCount,
   bootstrapFailureSince,
+  groupSeatView,
   neededSlotsForPool,
   utcDayStart,
 } from "@/lib/provision/capacity-expand";
@@ -266,7 +268,7 @@ export async function listPoolCapacity() {
             seatsMax: true,
             nodes: {
               select: {
-                node: { select: { role: true, status: true } },
+                node: { select: { id: true, role: true, status: true } },
               },
             },
           },
@@ -294,12 +296,36 @@ export async function listPoolCapacity() {
     failuresByPool.set(job.poolId, (failuresByPool.get(job.poolId) ?? 0) + 1);
   }
 
+  const nodeIds = [
+    ...new Set(pools.flatMap((pool) => pool.groups.flatMap((group) => group.nodes.map((row) => row.node.id)))),
+  ];
+  const linked = nodeIds.length
+    ? await prisma.subscription.findMany({
+        where: { nodes: { some: { id: { in: nodeIds } } } },
+        select: { instanceGroupId: true, nodes: { select: { id: true } } },
+      })
+    : [];
+  const attachments = linked.map((subscription) => ({
+    instanceGroupId: subscription.instanceGroupId,
+    nodeIds: subscription.nodes.map((node) => node.id),
+  }));
+
   return {
     pools: pools.map((pool) => {
+      const seatView = (group: (typeof pool.groups)[number]) =>
+        groupSeatView({
+          seatsUsed: group.seatsUsed,
+          seatsMax: group.seatsMax,
+          attached: attachedSeatCount(
+            { id: group.id, nodeIds: group.nodes.map((row) => row.node.id) },
+            attachments
+          ),
+        });
       const ready = pool.groups.filter((group) => group.status === InstanceGroupStatus.READY);
-      const seatsUsed = ready.reduce((sum, group) => sum + group.seatsUsed, 0);
-      const seatsMax = ready.reduce((sum, group) => sum + group.seatsMax, 0);
-      const seatsRemaining = Math.max(0, seatsMax - seatsUsed);
+      const readyViews = ready.map(seatView);
+      const seatsUsed = readyViews.reduce((sum, view) => sum + view.used, 0);
+      const seatsMax = readyViews.reduce((sum, view) => sum + view.max, 0);
+      const seatsRemaining = readyViews.reduce((sum, view) => sum + view.remaining, 0);
       const opening = pool.groups.find((group) => group.status === InstanceGroupStatus.OPENING);
       const openingPrimaryOnline = opening
         ? opening.nodes.filter(
@@ -322,13 +348,16 @@ export async function listPoolCapacity() {
           openingPrimaryOnline,
         }),
         recentBootstrapFailures: failuresByPool.get(pool.id) ?? 0,
-        groups: pool.groups.map((group) => ({
-          id: group.id,
-          name: group.name,
-          status: group.status,
-          seatsUsed: group.seatsUsed,
-          seatsMax: group.seatsMax,
-        })),
+        groups: pool.groups.map((group) => {
+          const view = seatView(group);
+          return {
+            id: group.id,
+            name: group.name,
+            status: group.status,
+            seatsUsed: view.used,
+            seatsMax: view.max,
+          };
+        }),
       };
     }),
     bootstrap: {

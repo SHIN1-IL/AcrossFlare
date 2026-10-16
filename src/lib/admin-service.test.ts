@@ -30,7 +30,8 @@ describe("admin-service", () => {
     expect(adminServiceFromPlanId("global-pro")).toBe("hybrid");
     expect(adminServiceFromPlanId("hybrid-year")).toBe("hybrid");
     expect(adminServiceFromPlanId("workspace-c")).toBe("workspace");
-    expect(adminServiceFromPlanId("marketing-lite")).toBe("standard");
+    expect(adminServiceFromPlanId("marketing-lite")).toBe("workspace");
+    expect(adminServiceFromPlanId("marketing-standard")).toBe("workspace");
     expect(isCatalogPlanId("global-lite")).toBe(true);
     expect(isLegacyPlanId("global-pro")).toBe(true);
     expect(catalogPlanIds("standard")).toEqual(["global-week", "global-lite", "global-year"]);

@@ -40,6 +40,9 @@ export function adminServiceFromPlanId(planId: string): AdminServiceId {
   if (publicService === "hybrid" || publicService === "workspace") {
     return publicService;
   }
+  if (publicService === "marketing") {
+    return "workspace";
+  }
 
   return "standard";
 }

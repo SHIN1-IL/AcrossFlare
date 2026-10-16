@@ -20,7 +20,10 @@ import {
   adminQueueCounts,
   canRetryProvision,
   currentFulfillmentStep,
+  customerFacingStatus,
+  failureDetail,
   matchesAdminQueueFilter,
+  shouldShowFulfillmentStep,
   paginateItems,
   parseAdminQueueFilter,
   sortAdminQueue,
@@ -201,23 +204,26 @@ export function CustomerTable({
                       .filter(Boolean);
                     const plan = customer.planId ? getLivePlan(customer.planId) : null;
                     const step = currentFulfillmentStep(customer);
+                    const facing = customerFacingStatus(customer);
+                    const detail = failureDetail(customer);
                     const retrying = retryingId === customer.id;
-                    const statusLabel = customer.signupOnly
-                      ? t("statusSignupOnly")
-                      : t(
-                          customer.status === "active"
-                            ? "statusActive"
-                            : customer.status === "provisioning"
-                              ? "statusProvisioning"
-                              : customer.status === "unpaid"
-                                ? "statusUnpaid"
-                                : "statusFailed"
-                        );
+                    const statusLabel =
+                      facing === "signup_only"
+                        ? t("statusSignupOnly")
+                        : facing === "expired"
+                          ? t("statusExpired")
+                          : facing === "active"
+                            ? t("statusActive")
+                            : facing === "provisioning"
+                              ? t("statusProvisioning")
+                              : facing === "unpaid"
+                                ? t("statusUnpaid")
+                                : t("statusFailed");
 
                     return (
                       <tr key={customer.id} className="border-b border-border last:border-0">
-                        <td className="px-4 py-3 font-mono text-xs">{customer.email}</td>
-                        <td className="px-4 py-3 font-mono text-xs">
+                        <td className="px-4 py-3 font-mono text-xs whitespace-nowrap">{customer.email}</td>
+                        <td className="px-4 py-3 font-mono text-xs whitespace-nowrap">
                           {formatDate(locale, customer.signedUpAt || customer.createdAt)}
                         </td>
                         <td className="px-4 py-3">
@@ -234,26 +240,29 @@ export function CustomerTable({
                             "—"
                           )}
                         </td>
-                        <td className="px-4 py-3 font-mono text-xs">
+                        <td className="px-4 py-3 font-mono text-xs whitespace-nowrap">
                           {customer.signupOnly ? "—" : formatDate(locale, customer.createdAt)}
                         </td>
-                        <td className="px-4 py-3 font-mono text-xs">
+                        <td className="px-4 py-3 font-mono text-xs whitespace-nowrap">
                           {customer.signupOnly || !customer.expiresAt
                             ? "—"
                             : formatDate(locale, customer.expiresAt)}
                         </td>
                         <td className="px-4 py-3">
-                          <StatusPill label={statusLabel} tone={toneFor(customer.status)} />
+                          <StatusPill
+                            label={statusLabel}
+                            tone={facing === "expired" ? "warn" : toneFor(customer.status)}
+                          />
                         </td>
                         <td className="px-4 py-3">
                           {customer.signupOnly ? (
                             <span className="text-muted-foreground">—</span>
-                          ) : (
+                          ) : shouldShowFulfillmentStep(customer) ? (
                             <>
                               <StatusPill label={stepLabels[step.id] ?? step.id} tone={stepTone(step.status)} />
                               {customer.provisionError ? (
                                 <p
-                                  className="mt-1 max-w-[180px] truncate font-mono text-[11px] text-destructive"
+                                  className="mt-1 max-w-[220px] text-[11px] text-destructive"
                                   title={customer.provisionError}
                                 >
                                   {customer.provisionError === "capacity_full"
@@ -263,6 +272,18 @@ export function CustomerTable({
                               ) : ddns.length ? (
                                 <p className="mt-1 max-w-[180px] truncate font-mono text-[11px] text-muted-foreground">
                                   {ddns.join(" · ")}
+                                </p>
+                              ) : null}
+                            </>
+                          ) : (
+                            <>
+                              <StatusPill label={t("statusFailed")} tone="warn" />
+                              {detail ? (
+                                <p
+                                  className="mt-1 max-w-[220px] text-[11px] text-destructive"
+                                  title={detail}
+                                >
+                                  {detail === "capacity_full" ? t("capacityFullError") : detail}
                                 </p>
                               ) : null}
                             </>

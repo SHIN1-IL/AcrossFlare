@@ -14,6 +14,7 @@ import { useAdmin } from "@/hooks/use-admin";
 import { Link } from "@/i18n/navigation";
 import { adminTabMessageKey } from "@/lib/admin-nav";
 import { productForAdminService, type AdminServiceId } from "@/lib/admin-service";
+import { planTrafficQuota, provisionExpiryDate } from "@/lib/plans";
 import { normalizeEmail } from "@/lib/session";
 import { clearProvision, getCustomerById, listAllPlansForService, runProvision } from "@/lib/admin-store";
 import { AdminPlanOption } from "@/components/admin/admin-plan-label";
@@ -21,13 +22,17 @@ import { AdminPlanOption } from "@/components/admin/admin-plan-label";
 export function ProvisionPanel({ service }: { service: AdminServiceId }) {
   const t = useTranslations("admin");
   const tApp = useTranslations("app");
-  const { provision, provisioning } = useAdmin();
+  const { provision, provisioning, provisionSimulate } = useAdmin();
   const product = productForAdminService(service);
   const plans = listAllPlansForService(service);
   const [email, setEmail] = useState("");
   const [planId, setPlanId] = useState("");
-  const [expiresAt, setExpiresAt] = useState(defaultExpiry);
+  const [expiresAt, setExpiresAt] = useState("");
+  const [expiryTouched, setExpiryTouched] = useState(false);
   const selectedPlanId = planId || plans[0]?.id || "";
+  const selectedPlan = plans.find((plan) => plan.id === selectedPlanId) ?? null;
+  const selectedQuota = selectedPlan ? planTrafficQuota(selectedPlan) : null;
+  const expiryValue = expiryTouched ? expiresAt : selectedPlanId ? provisionExpiryDate(selectedPlanId) : "";
   const [memo, setMemo] = useState("");
   const [simulateFail, setSimulateFail] = useState(false);
   const [error, setError] = useState("");
@@ -55,7 +60,7 @@ export function ProvisionPanel({ service }: { service: AdminServiceId }) {
           onSubmit={(event) => {
             event.preventDefault();
             const normalized = normalizeEmail(email);
-            if (!normalized || !selectedPlanId || !expiresAt) {
+            if (!normalized || !selectedPlanId || !expiryValue) {
               setError(t("required"));
               return;
             }
@@ -65,9 +70,9 @@ export function ProvisionPanel({ service }: { service: AdminServiceId }) {
                 product,
                 email: normalized,
                 planId: selectedPlanId,
-                expiresAt,
+                expiresAt: expiryValue,
                 memo,
-                simulateFail,
+                simulateFail: provisionSimulate && simulateFail,
               });
               if (result && "error" in result && result.error === "already_active") {
                 setError(t("alreadyActive"));
@@ -91,7 +96,11 @@ export function ProvisionPanel({ service }: { service: AdminServiceId }) {
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-2">
               <Label>{t("plan")}</Label>
-              <select className={fieldClass} value={selectedPlanId} onChange={(event) => setPlanId(event.target.value)}>
+              <select
+                className={fieldClass}
+                value={selectedPlanId}
+                onChange={(event) => setPlanId(event.target.value)}
+              >
                 {plans.map((plan) => (
                   <AdminPlanOption key={plan.id} planId={plan.id} fallback={plan.name} />
                 ))}
@@ -102,19 +111,36 @@ export function ProvisionPanel({ service }: { service: AdminServiceId }) {
               <input
                 type="date"
                 className={fieldClass}
-                value={expiresAt}
-                onChange={(event) => setExpiresAt(event.target.value)}
+                value={expiryValue}
+                onChange={(event) => {
+                  setExpiryTouched(true);
+                  setExpiresAt(event.target.value);
+                }}
               />
             </div>
           </div>
+          {selectedPlan ? (
+            <p className="text-sm text-muted-foreground">
+              {selectedPlan.trafficGb == null
+                ? t("unlimited")
+                : selectedQuota?.cadence === "month"
+                  ? t("provisionYearTraffic", {
+                      total: selectedPlan.trafficGb,
+                      month: selectedQuota.gb,
+                    })
+                  : t("provisionTraffic", { total: selectedPlan.trafficGb })}
+            </p>
+          ) : null}
           <div className="space-y-2">
             <Label>{t("memo")}</Label>
             <textarea className={areaClass} value={memo} onChange={(event) => setMemo(event.target.value)} />
           </div>
-          <label className="flex items-center gap-2 text-sm text-muted-foreground">
-            <input type="checkbox" checked={simulateFail} onChange={(event) => setSimulateFail(event.target.checked)} />
-            {t("simulateFail")}
-          </label>
+          {provisionSimulate ? (
+            <label className="flex items-center gap-2 text-sm text-muted-foreground">
+              <input type="checkbox" checked={simulateFail} onChange={(event) => setSimulateFail(event.target.checked)} />
+              {t("simulateFail")}
+            </label>
+          ) : null}
           {error ? <p className="text-sm text-destructive">{error}</p> : null}
           <Button type="submit" disabled={provisioning || !plans.length} className="rounded-[10px]">
             {t("issue")}
@@ -157,8 +183,3 @@ export function ProvisionPanel({ service }: { service: AdminServiceId }) {
   );
 }
 
-function defaultExpiry() {
-  const date = new Date();
-  date.setDate(date.getDate() + 30);
-  return date.toISOString().slice(0, 10);
-}

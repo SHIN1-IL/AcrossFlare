@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
+import { fieldClass } from "@/components/admin/admin-drawer";
 import { Button } from "@/components/ui/button";
 import {
   ADMIN_PERMISSIONS,
@@ -33,6 +34,9 @@ export function StaffManager() {
   const [staff, setStaff] = useState<StaffUser[]>([]);
   const [error, setError] = useState("");
   const [pending, setPending] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+  const visible = staff.filter((user) => user.email.toLowerCase().includes(query.trim().toLowerCase()));
 
   const load = useCallback(async () => {
     const response = await fetch("/api/v1/admin/staff", { credentials: "include" });
@@ -90,6 +94,7 @@ export function StaffManager() {
         return;
       }
       await load();
+      setConfirmId(null);
     } finally {
       setPending(null);
     }
@@ -99,8 +104,9 @@ export function StaffManager() {
     <div className="mx-auto max-w-6xl">
       <AdminPageHeader title={t("staffTitle")} subtitle={t("staffSubtitle")} />
       {ownerEmail ? (
-        <p className="mb-4 font-mono text-xs text-muted-foreground">{t("staffOwnerHint", { email: ownerEmail })}</p>
+        <p className="mb-2 font-mono text-xs text-muted-foreground">{t("staffOwnerHint", { email: ownerEmail })}</p>
       ) : null}
+      <p className="mb-4 text-xs text-muted-foreground">{t("staffCodesHint")}</p>
       {error ? <p className="mb-4 text-sm text-destructive">{error}</p> : null}
 
       {staff.length === 0 ? (
@@ -108,6 +114,20 @@ export function StaffManager() {
           {t("staffEmpty")}
         </p>
       ) : (
+        <>
+        <div className="mb-3">
+          <input
+            className={fieldClass}
+            value={query}
+            placeholder={t("staffSearch")}
+            onChange={(event) => setQuery(event.target.value)}
+          />
+        </div>
+        {visible.length === 0 ? (
+          <p className="rounded-2xl border border-border bg-card px-4 py-8 text-sm text-muted-foreground">
+            {t("staffSearchEmpty")}
+          </p>
+        ) : (
         <div className="overflow-x-auto rounded-2xl border border-border">
           <table className="w-full min-w-[860px] text-left text-sm">
             <thead className="border-b border-border bg-surface text-xs text-muted-foreground">
@@ -119,7 +139,7 @@ export function StaffManager() {
               </tr>
             </thead>
             <tbody>
-              {staff.map((user) => {
+              {visible.map((user) => {
                 const busy = pending === user.id;
                 return (
                   <tr key={user.id} className="border-b border-border last:border-0">
@@ -165,15 +185,39 @@ export function StaffManager() {
                           {t("staffDemote")}
                         </Button>
                       ) : (
-                        <Button
-                          type="button"
-                          size="sm"
-                          className="rounded-[10px]"
-                          disabled={busy}
-                          onClick={() => void save(user.id, "STAFF", DEFAULT_STAFF_PERMISSIONS)}
-                        >
-                          {t("staffPromote")}
-                        </Button>
+                        confirmId === user.id ? (
+                          <div className="flex justify-end gap-1">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="rounded-[10px]"
+                              disabled={busy}
+                              onClick={() => setConfirmId(null)}
+                            >
+                              {t("cancel")}
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              className="rounded-[10px]"
+                              disabled={busy}
+                              onClick={() => void save(user.id, "STAFF", DEFAULT_STAFF_PERMISSIONS)}
+                            >
+                              {t("staffConfirmPromote")}
+                            </Button>
+                          </div>
+                        ) : (
+                          <Button
+                            type="button"
+                            size="sm"
+                            className="rounded-[10px]"
+                            disabled={busy}
+                            onClick={() => setConfirmId(user.id)}
+                          >
+                            {t("staffPromote")}
+                          </Button>
+                        )
                       )}
                     </td>
                   </tr>
@@ -182,6 +226,8 @@ export function StaffManager() {
             </tbody>
           </table>
         </div>
+        )}
+        </>
       )}
     </div>
   );

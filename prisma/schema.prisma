@@ -192,6 +192,8 @@ model Node {
   realityShortId       String?
   realityServerName    String?
   realityFingerprint   String?
+  /// Monthly VPS purchase cost in KRW. The owner margin card sums these.
+  monthlyCostKrw       Int     @default(0)
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
@@ -386,6 +388,22 @@ model TrafficSnapshot {
 
   @@unique([subscriptionId, nodeId])
   @@index([subscriptionId])
+}
+
+/// Cash sales, friends, and other revenue that never hits Payment.
+model MarginAdjustment {
+  id        String   @id @default(cuid())
+  label     String
+  amountKrw Int
+  note      String   @default("")
+  /// When true, counted every month from `month` onward.
+  recurring Boolean  @default(false)
+  /// YYYY-MM in Asia/Seoul. One-time month, or the first month of a recurring entry.
+  month     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([month])
 }
 
 model TrafficSyncRun {

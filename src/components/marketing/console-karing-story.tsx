@@ -2,8 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import { HOME_STORY_HEIGHT } from "@/lib/board-art";
-import { BoardArtImage } from "@/components/marketing/board-art-image";
+import { HOME_STORY_HEIGHT } from "@/lib/home-story-height";
 import { HeroGrain } from "@/components/marketing/hero-grain";
 import { MotherboardEdgeBackdrop } from "@/components/marketing/motherboard-edge-backdrop";
 import { StoryDeviceFrame, StoryDevicePanes } from "@/components/marketing/story-device-frame";
@@ -214,7 +213,7 @@ export function ConsoleKaringStory({ className }: { className?: string }) {
   );
 }
 
-/** Home main (motherboard) with finger tap on Console */
+/** Home console with a finger tap on Console */
 function ConsoleClickContent({
   tHero,
   animate,
@@ -226,11 +225,6 @@ function ConsoleClickContent({
 }) {
   return (
     <div className="relative h-full overflow-hidden bg-[#0e1014]">
-      {/* Soft homepage atmosphere — lazy plate (story itself is deferred). */}
-      <BoardArtImage
-        alt=""
-        className="absolute inset-0 size-full object-cover opacity-90"
-      />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(14,16,20,0.55),rgba(14,16,20,0.2)_40%,rgba(14,16,20,0.72))]" />
       <div className="pointer-events-none absolute -top-[10%] -right-[12%] h-[48%] w-[55%] rounded-full bg-emerald-400/15 blur-2xl" />
 

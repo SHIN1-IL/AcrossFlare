@@ -5,6 +5,7 @@ import {
   planPricePeriodKey,
   planTrafficQuota,
   plans,
+  provisionExpiryDate,
   publicPlanFrom,
   resolveMarketingPlans,
 } from "@/lib/plans";
@@ -22,6 +23,16 @@ describe("plan node codes", () => {
     expect(getPlanById("global-year")!.nodes).toEqual(["LA(B)"]);
     expect(getPlanById("hybrid-lite")!.nodes).toEqual(["Tokyo", "LA(A)"]);
     expect(getPlanById("workspace-a")!.nodes).toEqual(["Tokyo", "LA(A)"]);
+  });
+});
+
+describe("provisionExpiryDate", () => {
+  const now = new Date("2026-10-16T12:00:00.000Z");
+
+  it("follows the plan term instead of a fixed 30 days", () => {
+    expect(provisionExpiryDate("global-week", now)).toBe("2026-10-23");
+    expect(provisionExpiryDate("hybrid-lite", now)).toBe("2026-11-15");
+    expect(provisionExpiryDate("global-year", now)).toBe("2027-10-11");
   });
 });
 

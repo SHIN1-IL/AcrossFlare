@@ -4,7 +4,10 @@ import {
   adminQueueCounts,
   canRetryProvision,
   currentFulfillmentStep,
+  customerFacingStatus,
+  failureDetail,
   fulfillmentSteps,
+  shouldShowFulfillmentStep,
   isExpiringSoon,
   matchesAdminQueueFilter,
   paginateItems,
@@ -118,6 +121,32 @@ describe("admin-queue", () => {
     expect(canRetryProvision(customer({ status: "failed" }))).toBe(true);
     expect(canRetryProvision(customer({ status: "unpaid" }))).toBe(false);
     expect(canRetryProvision(customer({ status: "active" }))).toBe(false);
+  });
+
+  it("labels a past active date as expired and keeps a failed ready step from looking finished", () => {
+    const now = Date.parse("2026-10-16T00:00:00.000Z");
+    const expired = customer({ status: "active", expiresAt: "2026-09-26T00:00:00.000Z" });
+    expect(customerFacingStatus(expired, now)).toBe("expired");
+    expect(customerFacingStatus(customer({ status: "active", expiresAt: "2031-01-01T00:00:00.000Z" }), now)).toBe(
+      "active"
+    );
+    expect(customerFacingStatus(customer({ status: "failed", expiresAt: "2026-09-26T00:00:00.000Z" }), now)).toBe(
+      "failed"
+    );
+
+    const failedReady = customer({
+      status: "failed",
+      provisionStep: "ready",
+      provisionError: "",
+      memo: "Seed marketing demo — disabled for traffic sync",
+    });
+    expect(currentFulfillmentStep(failedReady)).toEqual({ id: "ready", status: "failed" });
+    expect(shouldShowFulfillmentStep(failedReady)).toBe(false);
+    expect(shouldShowFulfillmentStep(customer({ status: "failed", provisionStep: "xui" }))).toBe(true);
+    expect(failureDetail(failedReady)).toBe("Seed marketing demo — disabled for traffic sync");
+    expect(failureDetail(customer({ status: "failed", provisionError: "xui timeout", memo: "ignored" }))).toBe(
+      "xui timeout"
+    );
   });
 
   it("skips backup on marketing rows", () => {

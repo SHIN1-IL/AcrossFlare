@@ -267,6 +267,15 @@ export function planPeriodMs(planId: string) {
   return MONTH_MS;
 }
 
+/** Local calendar date an operator should see when issuing this plan. */
+export function provisionExpiryDate(planId: string, now = new Date()) {
+  const expires = new Date(now.getTime() + planPeriodMs(planId));
+  const year = expires.getUTCFullYear();
+  const month = String(expires.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(expires.getUTCDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 export type PlanTrafficQuota = {
   cadence: "month" | "total";
   gb: number;

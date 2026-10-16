@@ -244,7 +244,7 @@ export function OpsHealthPanel({ owner }: { owner: boolean }) {
         <MetricCell
           label={t("ops.panel.activeGlobal")}
           value={String(active?.value ?? 0)}
-          threshold={String(active?.threshold ?? 100)}
+          threshold={t("ops.panel.alertThreshold", { count: active?.threshold ?? 100 })}
           level={active?.level ?? "ok"}
         />
         <MetricCell
@@ -268,10 +268,9 @@ export function OpsHealthPanel({ owner }: { owner: boolean }) {
       </dl>
 
       <div className="mt-5 flex flex-wrap gap-4 border-t border-border pt-4">
-        {infraFlag(
-          health.provisionSimulate ? t("ops.panel.provisionSimulate") : t("ops.panel.provisionLive"),
-          !health.provisionSimulate
-        )}
+        {health.provisionSimulate
+          ? infraFlag(t("ops.panel.provisionSimulate"), false)
+          : null}
         {infraFlag(t("ops.panel.trafficSync"), health.trafficSyncEnabled)}
         {infraFlag(t("ops.panel.cron"), health.trafficSyncEnabled && Boolean(health.lastSyncAt))}
       </div>

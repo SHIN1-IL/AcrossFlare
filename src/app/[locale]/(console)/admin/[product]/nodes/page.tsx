@@ -11,7 +11,7 @@ export default async function AdminNodesPage({
   params: Promise<{ locale: string; product: string }>;
   searchParams: Promise<{ bootstrap?: string; pool?: string; role?: string }>;
 }) {
-  const { locale, product } = await resolveAdminProduct(params, "nodes");
+  const { locale, product, service } = await resolveAdminProduct(params, "nodes");
   const query = await searchParams;
   setRequestLocale(locale);
   await requireAdminPage(locale, "nodes");
@@ -19,6 +19,7 @@ export default async function AdminNodesPage({
   return (
     <NodeManager
       product={product}
+      service={service}
       bootstrapRequest={
         query.bootstrap === "1" ? { poolId: query.pool ?? "", role } : null
       }

@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { chooseBootstrapTarget, neededSlotsForPool } from "@/lib/provision/capacity-expand";
+import {
+  attachedSeatCount,
+  chooseBootstrapTarget,
+  groupSeatView,
+  neededSlotsForPool,
+  occupiedSeats,
+} from "@/lib/provision/capacity-expand";
 
 const at = (iso: string) => new Date(iso);
 
@@ -20,6 +26,34 @@ describe("neededSlotsForPool", () => {
     expect(
       neededSlotsForPool({ maxSelectable: 2, seatsRemaining: 0, openingPrimaryOnline: 1 })
     ).toEqual([{ role: "primary", count: 1 }]);
+  });
+});
+
+describe("occupied seats", () => {
+  it("shows attached customers when the stored counter was never incremented", () => {
+    expect(occupiedSeats(0, 4)).toBe(4);
+    expect(occupiedSeats(3, 1)).toBe(3);
+    expect(occupiedSeats(0, 0)).toBe(0);
+  });
+
+  it("keeps one hybrid customer as one seat across both nodes", () => {
+    const subscriptions = [
+      { instanceGroupId: null, nodeIds: ["tokyo", "la-a"] },
+      { instanceGroupId: "hybrid-g1", nodeIds: ["tokyo"] },
+      { instanceGroupId: "standard-g1", nodeIds: ["la-b", "tokyo"] },
+    ];
+    expect(attachedSeatCount({ id: "hybrid-g1", nodeIds: ["tokyo", "la-a"] }, subscriptions)).toBe(2);
+    expect(attachedSeatCount({ id: "standard-g1", nodeIds: ["la-b"] }, subscriptions)).toBe(1);
+  });
+
+  it("reports remaining seats from the higher of the counter and attachments", () => {
+    expect(groupSeatView({ seatsUsed: 0, seatsMax: 10, attached: 2 })).toEqual({
+      used: 2,
+      max: 10,
+      remaining: 8,
+      full: false,
+    });
+    expect(groupSeatView({ seatsUsed: 0, seatsMax: 10, attached: 10 }).full).toBe(true);
   });
 });
 

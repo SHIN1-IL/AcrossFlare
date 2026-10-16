@@ -1,9 +1,9 @@
 "use client";
 
-import { LayoutDashboard, LayoutGrid, LogOut, Menu, Server, Shield, Ticket, Users, Wallet, X } from "lucide-react";
+import { LayoutDashboard, LayoutGrid, LogOut, Menu, Server, Settings, Shield, Ticket, Users, Wallet, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { OwnerPasswordBanner } from "@/components/admin/owner-password-banner";
+import { MarginCard } from "@/components/admin/margin-card";
 import { Phase2OpsBanner } from "@/components/admin/ops-health";
 import { AdminTabSwitch } from "@/components/admin/admin-tab-switch";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
@@ -38,6 +38,28 @@ function SessionRole({ owner, className }: { owner: boolean; className?: string 
     <p className={cn("font-mono text-[11px] tracking-[0.16em] text-primary uppercase", className)}>
       {owner ? t("sessionRoleOwner") : t("sessionRoleStaff")}
     </p>
+  );
+}
+
+function SettingsLink({ onNavigate }: { onNavigate?: () => void }) {
+  const t = useTranslations("admin");
+  const pathname = usePathname();
+  const href = "/admin/settings";
+  const active = pathname === href || pathname.startsWith(`${href}/`);
+
+  return (
+    <Link
+      href={href}
+      prefetch
+      onClick={onNavigate}
+      className={cn(
+        "inline-flex items-center gap-2 text-sm transition-colors",
+        active ? "text-primary" : "text-muted-foreground hover:text-foreground"
+      )}
+    >
+      <Settings className="size-4" />
+      {t("navSettings")}
+    </Link>
   );
 }
 
@@ -150,34 +172,42 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-dvh bg-background">
-      <aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-surface px-3 py-4 md:flex">
-        <div className="space-y-4 px-1 pb-4">
+    <div className="flex h-dvh overflow-hidden bg-background">
+      <aside className="hidden h-full w-64 shrink-0 flex-col border-r border-border bg-surface px-3 py-4 md:flex">
+        <div className="shrink-0 space-y-4 px-1 pb-4">
           <Logo />
           <SessionRole owner={owner} className="px-2" />
           <AdminTabSwitch />
         </div>
-        <NavLinks product={product} permissions={permissions} owner={owner} />
-        <div className="mt-auto space-y-3 px-1 pt-6">
-          <LocaleSwitcher />
-          <SessionIdentity email={session.email} owner={owner} />
-          <button
-            type="button"
-            onClick={() => {
-              void clearSession().then(() => {
-                router.replace("/");
-                router.refresh();
-              });
-            }}
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <LogOut className="size-4" />
-            {tApp("logout")}
-          </button>
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+          <NavLinks product={product} permissions={permissions} owner={owner} />
+          <div className="mt-auto space-y-3 px-1 pt-4">
+            <SettingsLink />
+            <LocaleSwitcher />
+            <SessionIdentity email={session.email} owner={owner} />
+            <button
+              type="button"
+              onClick={() => {
+                void clearSession().then(() => {
+                  router.replace("/");
+                  router.refresh();
+                });
+              }}
+              className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <LogOut className="size-4" />
+              {tApp("logout")}
+            </button>
+          </div>
         </div>
+        {owner ? (
+          <div className="shrink-0 border-t border-border px-1 pt-3">
+            <MarginCard />
+          </div>
+        ) : null}
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-border px-4 py-3 md:hidden">
           <div className="min-w-0">
             <Logo />
@@ -196,13 +226,19 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <div className="space-y-4 border-b border-border px-4 py-3 md:hidden">
             <AdminTabSwitch />
             <NavLinks product={product} permissions={permissions} owner={owner} onNavigate={() => setOpen(false)} />
+            <SettingsLink onNavigate={() => setOpen(false)} />
             <LocaleSwitcher />
             <SessionIdentity email={session.email} owner={owner} />
+            {owner ? <MarginCard /> : null}
+          </div>
+        ) : null}
+        {owner && !open ? (
+          <div className="fixed bottom-3 left-3 z-30 w-56 md:hidden">
+            <MarginCard />
           </div>
         ) : null}
         <Phase2OpsBanner owner={owner} />
-        {owner ? <OwnerPasswordBanner /> : null}
-        <main className="flex-1 px-4 py-8 md:px-8">{children}</main>
+        <main className={cn("min-h-0 flex-1 overflow-y-auto px-4 py-8 md:px-8", owner && "max-md:pb-44")}>{children}</main>
       </div>
     </div>
   );

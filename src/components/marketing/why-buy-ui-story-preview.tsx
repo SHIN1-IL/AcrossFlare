@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import { HOME_STORY_HEIGHT } from "@/lib/board-art";
+import { HOME_STORY_HEIGHT } from "@/lib/home-story-height";
 import { HeroGrain } from "@/components/marketing/hero-grain";
 import { MotherboardEdgeBackdrop } from "@/components/marketing/motherboard-edge-backdrop";
 import { StoryDeviceFrame, StoryDevicePanes } from "@/components/marketing/story-device-frame";

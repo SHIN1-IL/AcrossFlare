@@ -5,15 +5,14 @@ import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { CapacityAlerts } from "@/components/admin/capacity-alerts";
 import { OpsHealthPanel } from "@/components/admin/ops-health";
 import { StatusPill } from "@/components/app/status-pill";
-import { buttonVariants } from "@/components/ui/button";
 import { useAdmin } from "@/hooks/use-admin";
 import { useSession } from "@/hooks/use-account";
 import { Link } from "@/i18n/navigation";
+import { customerFacingStatus, failureDetail } from "@/lib/admin-queue";
 import { isOwnerSession } from "@/lib/auth-types";
 import { jobsForAdminService, poolsForAdminService } from "@/lib/admin-overview";
 import { listCustomersForService } from "@/lib/admin-store";
 import type { AdminServiceId } from "@/lib/admin-service";
-import { cn } from "@/lib/utils";
 
 function jobTone(status: string) {
   if (status === "succeeded") {
@@ -59,43 +58,27 @@ export function AdminOverview({ service }: { service: AdminServiceId }) {
   const { capacityPools, bootstrapQuota, bootstrapJobs } = useAdmin();
   const pools = poolsForAdminService(service, capacityPools ?? []);
   const jobs = canNodes ? jobsForAdminService(service, bootstrapJobs ?? []).slice(0, 12) : [];
-  const failures = canCustomers
-    ? listCustomersForService(service).filter((customer) => customer.status === "failed")
-    : [];
+  const serviceCustomers = canCustomers ? listCustomersForService(service) : [];
+  const failures = serviceCustomers.filter((customer) => customer.status === "failed");
+  const tabActive = serviceCustomers.filter((customer) => customerFacingStatus(customer) === "active").length;
 
   return (
     <div className="mx-auto max-w-5xl">
-      <AdminPageHeader
-        title={t("overviewTitle")}
-        subtitle={t("overviewSubtitle")}
-        action={
-          <div className="flex flex-wrap gap-2">
-            {canCustomers ? (
-              <Link
-                href={`/admin/${service}/customers`}
-                className={cn(buttonVariants(), "rounded-[10px]")}
-              >
-                {t("navCustomers")}
-              </Link>
-            ) : null}
-            {canNodes ? (
-              <Link
-                href={`/admin/${service}/nodes`}
-                className={cn(buttonVariants({ variant: "outline" }), "rounded-[10px]")}
-              >
-                {t("capacityAddNode")}
-              </Link>
-            ) : null}
-          </div>
-        }
-      />
+      <AdminPageHeader title={t("overviewTitle")} subtitle={t("overviewSubtitle")} />
       <OpsHealthPanel owner={owner} />
       {canCustomers || canNodes ? (
         <CapacityAlerts pools={pools} quota={bootstrapQuota} allowAdd={canNodes} showSyncNote />
       ) : null}
 
       <section className="mb-6 space-y-3">
-        <h2 className="text-sm font-medium">{t("overviewSeats")}</h2>
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="text-sm font-medium">{t("overviewSeats")}</h2>
+          {canCustomers ? (
+            <p className="font-mono text-xs text-muted-foreground">
+              {t("overviewTabActive", { count: tabActive })}
+            </p>
+          ) : null}
+        </div>
         {pools.length ? (
           <div className="grid gap-3 sm:grid-cols-2">
             {pools.map((pool) => (
@@ -106,8 +89,10 @@ export function AdminOverview({ service }: { service: AdminServiceId }) {
                     remaining: pool.seatsRemaining,
                     used: pool.seatsUsed,
                     max: pool.seatsMax,
-                    selectable: pool.maxSelectable,
                   })}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {t("capacitySelectable", { count: pool.maxSelectable })}
                 </p>
                 {pool.groups.length ? (
                   <ul className="mt-3 space-y-1 border-t border-border pt-3 text-xs text-muted-foreground">
@@ -144,9 +129,9 @@ export function AdminOverview({ service }: { service: AdminServiceId }) {
                   >
                     <span>{customer.email}</span>
                     <span className="text-xs text-muted-foreground">
-                      {customer.provisionError === "capacity_full"
+                      {failureDetail(customer) === "capacity_full"
                         ? t("capacityFullError")
-                        : customer.provisionError || t("statusFailed")}
+                        : failureDetail(customer) || t("statusFailed")}
                     </span>
                   </Link>
                 </li>

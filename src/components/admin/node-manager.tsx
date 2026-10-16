@@ -21,6 +21,8 @@ import {
   updateNode,
 } from "@/lib/admin-store";
 import type { AdminNode, NodeRole, XuiProbeInbound } from "@/lib/admin";
+import { poolsForAdminService } from "@/lib/admin-overview";
+import type { AdminServiceId } from "@/lib/admin-service";
 import type { ProductId } from "@/lib/plans";
 
 const emptyDraft = {
@@ -58,19 +60,23 @@ const emptyBootstrap = {
 
 export function NodeManager({
   product,
+  service,
   bootstrapRequest,
 }: {
   product: ProductId;
+  service: AdminServiceId;
   bootstrapRequest?: { poolId: string; role: NodeRole } | null;
 }) {
   const t = useTranslations("admin");
   const { migrate, migrating, provisionSimulate, capacityPools, bootstrapQuota } = useAdmin();
   const nodes = listNodes(product);
-  const poolsForProduct = (capacityPools ?? []).filter(
-    (pool) =>
-      String(pool.product).toLowerCase() === product ||
-      (bootstrapRequest?.poolId ? pool.id === bootstrapRequest.poolId : false)
-  );
+  const scopedPools = poolsForAdminService(service, capacityPools ?? []);
+  const requestedPool = bootstrapRequest?.poolId
+    ? (capacityPools ?? []).find(
+        (pool) => pool.id === bootstrapRequest.poolId && !scopedPools.some((item) => item.id === pool.id)
+      )
+    : null;
+  const poolsForProduct = requestedPool ? [...scopedPools, requestedPool] : scopedPools;
   const [advanced, setAdvanced] = useState(false);
   const [editing, setEditing] = useState<AdminNode | "new" | null>(null);
   const [bootstrapping, setBootstrapping] = useState(false);
@@ -127,6 +133,7 @@ export function NodeManager({
   const job = migrate?.product === product ? migrate : null;
   const sourceCount = source ? countNodeUsers(source.id) : 0;
   const placeholders = nodes.filter((node) => node.wiring === "placeholder").length;
+  const degraded = nodes.filter((node) => node.status === "degraded");
 
   function openCreate() {
     setEditing("new");
@@ -266,8 +273,10 @@ export function NodeManager({
                   remaining: pool.seatsRemaining,
                   used: pool.seatsUsed,
                   max: pool.seatsMax,
-                  selectable: pool.maxSelectable,
                 })}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {t("capacitySelectable", { count: pool.maxSelectable })}
               </p>
             </div>
           ))}
@@ -280,6 +289,11 @@ export function NodeManager({
             {t("addNode")}
           </Button>
         </div>
+      ) : null}
+      {degraded.length ? (
+        <p className="rounded-2xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm text-amber-200">
+          {t("degradedBanner", { names: degraded.map((node) => node.name).join(", ") })}
+        </p>
       ) : null}
       {placeholders > 0 ? (
         <p className="rounded-2xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm text-amber-200">

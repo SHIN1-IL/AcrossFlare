@@ -1,4 +1,4 @@
-import type { AdminCustomer, JobStep, JobStepStatus } from "@/lib/admin";
+import type { AdminCustomer, CustomerStatus, JobStep, JobStepStatus } from "@/lib/admin";
 import { stepsFromProvision, provisionSteps } from "@/lib/admin";
 
 export const ADMIN_QUEUE_FILTERS = [
@@ -123,6 +123,46 @@ export function fulfillmentSteps(customer: AdminCustomer): JobStep[] {
 export function currentFulfillmentStep(customer: AdminCustomer): JobStep {
   const current = fulfillmentSteps(customer).find((step) => step.status !== "done");
   return current ?? { id: "ready", status: "done" };
+}
+
+export type CustomerFacingStatus = CustomerStatus | "expired" | "signup_only";
+
+/** Active rows whose end date has passed read as expired. Stored status is unchanged. */
+export function customerFacingStatus(
+  customer: Pick<AdminCustomer, "status" | "signupOnly" | "expiresAt">,
+  now = Date.now()
+): CustomerFacingStatus {
+  if (customer.signupOnly) {
+    return "signup_only";
+  }
+  if (customer.status === "active" && isExpired(customer.expiresAt, now)) {
+    return "expired";
+  }
+  return customer.status;
+}
+
+/** Failed rows explain themselves with the error, then the memo. A ready step is not success. */
+export function failureDetail(
+  customer: Pick<AdminCustomer, "status" | "provisionError" | "memo">
+) {
+  if (customer.status !== "failed") {
+    return "";
+  }
+  const error = customer.provisionError.trim();
+  if (error) {
+    return error;
+  }
+  return customer.memo.trim();
+}
+
+export function shouldShowFulfillmentStep(customer: AdminCustomer) {
+  if (customer.signupOnly) {
+    return false;
+  }
+  if (customer.status !== "failed") {
+    return true;
+  }
+  return currentFulfillmentStep(customer).id !== "ready";
 }
 
 export function stepTone(status: JobStepStatus): "ok" | "warn" | "neutral" {

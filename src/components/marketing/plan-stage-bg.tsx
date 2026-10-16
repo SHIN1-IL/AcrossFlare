@@ -1,17 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { BoardArtImage } from "@/components/marketing/board-art-image";
 
-/** Page-1 motherboard plate — base only; plan SVG/motion previews stay on top. */
-export function MotherboardBase() {
+/** Dark base under plan-stage pattern layers. */
+function StageBase() {
   return (
     <>
       <div className="absolute inset-0 bg-[#0e1014]" />
-      <BoardArtImage
-        className="pointer-events-none absolute inset-0 size-full object-cover opacity-[0.32] select-none"
-        style={{ filter: "brightness(0.58) contrast(0.88) saturate(0.4)" }}
-      />
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(226,232,240,0.04),transparent_34%,rgba(0,0,0,0.22))]" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.07),transparent_55%)]" />
       <div
@@ -31,7 +26,7 @@ function StageBackdrop({ variant }: { variant: number }) {
 
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-      <MotherboardBase />
+      <StageBase />
       {index === 0 ? <DotsField /> : null}
       {index === 1 ? <LineGrid /> : null}
       {index === 2 ? <RingField /> : null}
@@ -280,7 +275,7 @@ export function LazyStageBackdrop({ variant }: { variant: number }) {
 
   return (
     <div ref={ref} className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-      {/* Solid plate until near viewport — avoids pulling board art for off-screen plan stages. */}
+      {/* Solid fill until near the viewport — pattern layers mount only then. */}
       {active ? <StageBackdrop variant={variant} /> : <div className="absolute inset-0 bg-[#0e1014]" />}
     </div>
   );

@@ -6,7 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export function OwnerPasswordBanner() {
+export function OwnerPasswordBanner({
+  embedded = false,
+  showEnvHint = true,
+}: {
+  embedded?: boolean;
+  showEnvHint?: boolean;
+}) {
   const t = useTranslations("admin");
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
@@ -16,9 +22,15 @@ export function OwnerPasswordBanner() {
   const [saved, setSaved] = useState(false);
 
   return (
-    <div className="border-b border-border bg-surface px-4 py-4 md:px-8">
+    <div
+      className={
+        embedded
+          ? "rounded-2xl border border-border bg-card p-5"
+          : "border-b border-border bg-surface px-4 py-4 md:px-8"
+      }
+    >
       <form
-        className="mx-auto flex max-w-3xl flex-col gap-3"
+        className={embedded ? "flex flex-col gap-3" : "mx-auto flex max-w-3xl flex-col gap-3"}
         onSubmit={async (event) => {
           event.preventDefault();
           setSaved(false);
@@ -59,7 +71,7 @@ export function OwnerPasswordBanner() {
         }}
       >
         <p className="text-sm font-medium text-foreground">{t("passwordBannerTitle")}</p>
-        <p className="text-xs leading-5 text-muted-foreground">{t("passwordBannerHint")}</p>
+        {showEnvHint ? <p className="text-xs leading-5 text-muted-foreground">{t("passwordBannerHint")}</p> : null}
         <div className="grid gap-3 sm:grid-cols-3">
           <div className="space-y-1">
             <Label htmlFor="owner-password-current">{t("passwordCurrent")}</Label>

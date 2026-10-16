@@ -7,7 +7,7 @@ import {
   type ComponentType,
   type RefObject,
 } from "react";
-import { HOME_STORY_HEIGHT } from "@/lib/board-art";
+import { HOME_STORY_HEIGHT } from "@/lib/home-story-height";
 import { cn } from "@/lib/utils";
 
 type WhyBuyProps = { live?: boolean; className?: string };
