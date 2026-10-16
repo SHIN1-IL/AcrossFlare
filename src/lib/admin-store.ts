@@ -5,10 +5,13 @@ import {
   type AdminPlan,
   type AdminPromoCode,
   type AdminState,
+  type AdminBootstrapJob,
+  type BootstrapQuota,
   type JobStep,
   type NodeRole,
   type XuiProbeInbound,
 } from "@/lib/admin";
+import { DAILY_BOOTSTRAP_LIMIT } from "@/lib/provision/capacity-expand";
 import type { Plan, ProductId } from "@/lib/plans";
 import {
   adminServiceFromPlanId,
@@ -18,11 +21,20 @@ import {
   type AdminServiceId,
 } from "@/lib/admin-service";
 
+const emptyQuota: BootstrapQuota = {
+  used: 0,
+  limit: DAILY_BOOTSTRAP_LIMIT,
+  recentFailures: 0,
+};
+
 const empty: AdminState = {
   plans: [],
   nodes: [],
   customers: [],
   promoCodes: [],
+  capacityPools: [],
+  bootstrapQuota: emptyQuota,
+  bootstrapJobs: [],
   provision: null,
   migrate: null,
   provisionSimulate: false,
@@ -42,7 +54,10 @@ let refreshPromise: Promise<void> | null = null;
 let adminSeeded = false;
 
 export function seedAdminState(
-  state: Pick<AdminState, "plans" | "nodes" | "customers" | "promoCodes" | "provisionSimulate">
+  state: Pick<
+    AdminState,
+    "plans" | "nodes" | "customers" | "promoCodes" | "capacityPools" | "provisionSimulate"
+  > & { bootstrapQuota?: BootstrapQuota; bootstrapJobs?: AdminBootstrapJob[] }
 ) {
   memory = {
     ...memory,
@@ -50,6 +65,9 @@ export function seedAdminState(
     nodes: state.nodes ?? [],
     customers: state.customers ?? [],
     promoCodes: state.promoCodes ?? [],
+    capacityPools: state.capacityPools ?? [],
+    bootstrapQuota: state.bootstrapQuota ?? emptyQuota,
+    bootstrapJobs: state.bootstrapJobs ?? memory.bootstrapJobs,
     provisionSimulate: Boolean(state.provisionSimulate),
   };
   adminSeeded = true;
@@ -122,13 +140,26 @@ export async function refreshAdmin() {
     }
 
     const data = await readJson<
-      Pick<AdminState, "plans" | "nodes" | "customers" | "promoCodes" | "provisionSimulate">
+      Pick<
+        AdminState,
+        | "plans"
+        | "nodes"
+        | "customers"
+        | "promoCodes"
+        | "capacityPools"
+        | "bootstrapQuota"
+        | "bootstrapJobs"
+        | "provisionSimulate"
+      >
     >(response);
     patch({
       plans: data.plans ?? [],
       nodes: data.nodes ?? [],
       customers: mergeCustomers(data.customers ?? []),
       promoCodes: data.promoCodes ?? [],
+      capacityPools: data.capacityPools ?? [],
+      bootstrapQuota: data.bootstrapQuota ?? emptyQuota,
+      bootstrapJobs: data.bootstrapJobs ?? [],
       provisionSimulate: Boolean(data.provisionSimulate),
     });
   })().finally(() => {
@@ -302,11 +333,52 @@ export async function deletePlan(id: string) {
   return true;
 }
 
+export async function bootstrapNode(input: {
+  product: ProductId;
+  role: NodeRole;
+  provider?: string;
+  poolId?: string;
+  name: string;
+  ddnsHost: string;
+  sshHost: string;
+  sshPort?: string;
+  sshUser?: string;
+  sshPassword?: string;
+  sshPrivateKey?: string;
+  panelPort?: string;
+  vlessPort?: string;
+  realityDest?: string;
+}) {
+  const response = await fetch("/api/v1/admin/nodes/bootstrap", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  const data = await readJson<{
+    ok?: boolean;
+    job?: {
+      id: string;
+      status: string;
+      nodeId: string | null;
+      error: string;
+      log: string;
+    };
+    error?: string;
+  }>(response);
+  if (!response.ok || !data.job) {
+    return { ok: false as const, error: data.error ?? "failed" };
+  }
+  await refreshAdmin();
+  return { ok: Boolean(data.ok), job: data.job, error: data.job.error || data.error };
+}
+
 export async function addNode(input: {
   product: ProductId;
   name: string;
   ddns: string;
   role: NodeRole;
+  provider?: string;
   host: string;
   port: string;
   username: string;
@@ -339,6 +411,7 @@ export async function updateNode(
     name: string;
     ddns: string;
     role: NodeRole;
+    provider?: string;
     host: string;
     port: string;
     username: string;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { CapacityAlerts } from "@/components/admin/capacity-alerts";
 import { OpsHealthPanel } from "@/components/admin/ops-health";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { buttonVariants } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { useSession } from "@/hooks/use-account";
 import { Link } from "@/i18n/navigation";
 import { isOwnerSession } from "@/lib/auth-types";
 import { ADMIN_TAB_PRODUCTS, adminHomeDescKey, adminTabMessageKey, firstAdminPath } from "@/lib/admin-nav";
+import { poolsForAdminService } from "@/lib/admin-overview";
 import { listCustomersForService, listNodesForService, listPlansForService } from "@/lib/admin-store";
 import { adminQueueCounts } from "@/lib/admin-queue";
 import type { AdminServiceId } from "@/lib/admin-service";
@@ -17,8 +19,11 @@ import { cn } from "@/lib/utils";
 function ProductCard({ service }: { service: AdminServiceId }) {
   const t = useTranslations("admin");
   const session = useSession();
-  useAdmin();
+  const { capacityPools } = useAdmin();
   const permissions = session?.permissions ?? [];
+  const pools = poolsForAdminService(service, capacityPools ?? []);
+  const seatsRemaining = pools.reduce((sum, pool) => sum + pool.seatsRemaining, 0);
+  const canSeeSeats = permissions.includes("customers") || permissions.includes("nodes");
   const href = firstAdminPath(service, permissions, isOwnerSession(session));
   const { catalog } = listPlansForService(service);
   const planCount = catalog.length;
@@ -80,6 +85,11 @@ function ProductCard({ service }: { service: AdminServiceId }) {
           </div>
         </div>
       ) : null}
+      {canSeeSeats && pools.length ? (
+        <p className="mt-4 font-mono text-xs text-muted-foreground">
+          {t("overviewSeatCount", { count: seatsRemaining })}
+        </p>
+      ) : null}
       <Link href={href} className={cn(buttonVariants(), "mt-6 rounded-[10px]")}>
         {t("open")}
       </Link>
@@ -90,12 +100,24 @@ function ProductCard({ service }: { service: AdminServiceId }) {
 export function AdminHome() {
   const t = useTranslations("admin");
   const session = useSession();
+  const { capacityPools, bootstrapQuota } = useAdmin();
   const owner = isOwnerSession(session);
+  const permissions = session?.permissions ?? [];
+  const canNodes = owner || permissions.includes("nodes");
+  const canSeeCapacity = canNodes || permissions.includes("customers");
 
   return (
     <div className="mx-auto max-w-5xl">
       <AdminPageHeader title={t("homeTitle")} subtitle={t("homeSubtitle")} />
       <OpsHealthPanel owner={owner} />
+      {canSeeCapacity ? (
+        <CapacityAlerts
+          pools={capacityPools}
+          quota={bootstrapQuota}
+          allowAdd={canNodes}
+          showSyncNote
+        />
+      ) : null}
       <div className="grid items-stretch gap-4 md:grid-cols-3">
         {ADMIN_TAB_PRODUCTS.map((service) => (
           <ProductCard key={service} service={service} />

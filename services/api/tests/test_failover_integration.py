@@ -1,7 +1,5 @@
 from datetime import datetime, timezone
 
-import pytest
-
 from app.failover import FailoverNode, maybe_failover
 from app.failover_rules import FailoverSubscription
 
@@ -17,7 +15,7 @@ def test_maybe_failover_provisions_links_and_marks(monkeypatch):
         uuid="uuid-1",
         xui_email="af_sub1",
     )
-    racknerd = FailoverNode(
+    failover_node = FailoverNode(
         id="g-la-rn",
         host="10.0.0.99",
         port=2053,
@@ -27,7 +25,7 @@ def test_maybe_failover_provisions_links_and_marks(monkeypatch):
     )
 
     monkeypatch.setattr("app.failover.load_failover_subscription", lambda conn, sid: subscription)
-    monkeypatch.setattr("app.failover.find_racknerd_nodes", lambda conn, product: [racknerd])
+    monkeypatch.setattr("app.failover.find_failover_nodes", lambda conn, product: [failover_node])
     monkeypatch.setattr("app.failover.provision_live", lambda: True)
 
     provisioned: list[str] = []
@@ -68,7 +66,7 @@ def test_maybe_failover_skips_when_not_eligible(monkeypatch):
     assert maybe_failover(object(), "sub-pro", {}) is False
 
 
-def test_maybe_failover_skips_without_racknerd_pool(monkeypatch):
+def test_maybe_failover_skips_without_failover_pool(monkeypatch):
     subscription = FailoverSubscription(
         id="sub-1",
         product="GLOBAL",
@@ -80,6 +78,6 @@ def test_maybe_failover_skips_without_racknerd_pool(monkeypatch):
         xui_email="af_sub1",
     )
     monkeypatch.setattr("app.failover.load_failover_subscription", lambda conn, sid: subscription)
-    monkeypatch.setattr("app.failover.find_racknerd_nodes", lambda conn, product: [])
+    monkeypatch.setattr("app.failover.find_failover_nodes", lambda conn, product: [])
 
     assert maybe_failover(object(), "sub-1", {}) is False

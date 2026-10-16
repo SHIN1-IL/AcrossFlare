@@ -33,7 +33,7 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/*": ["./messages/**/*", "./prisma/**/*"],
   },
-  serverExternalPackages: ["@prisma/client", "prisma", "undici"],
+  serverExternalPackages: ["@prisma/client", "prisma", "undici", "ssh2"],
   async headers() {
     const security = securityHeadersForRuntime(process.env.NODE_ENV);
     return [

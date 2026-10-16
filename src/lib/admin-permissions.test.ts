@@ -57,5 +57,11 @@ describe("admin-permissions", () => {
       customers: [3],
       promoCodes: [4],
     });
+    expect(
+      filterAdminState({ ...state, bootstrapJobs: [{ id: "job" }] }, ["customers"]).bootstrapJobs
+    ).toEqual([]);
+    expect(
+      filterAdminState({ ...state, bootstrapJobs: [{ id: "job" }] }, ["nodes"]).bootstrapJobs
+    ).toEqual([{ id: "job" }]);
   });
 });

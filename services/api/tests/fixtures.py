@@ -11,7 +11,7 @@ def decoded_sub(body: str) -> str:
 
 REALITY_NODE = {
     "ddns": "node-la-b.acrossflare.com",
-    "role": "BANDWAGON",
+    "role": "PRIMARY",
     "vlessPort": 443,
     "realityPublicKey": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
     "realityShortId": "0123456789",
@@ -42,7 +42,7 @@ FAILOVER_ROW = {
     "failover": True,
     "nodes": [
         REALITY_NODE,
-        {**REALITY_NODE, "ddns": "node-la-rn.acrossflare.com", "role": "RACKNERD"},
+        {**REALITY_NODE, "ddns": "node-la-rn.acrossflare.com", "role": "FAILOVER"},
     ],
 }
 
@@ -51,7 +51,7 @@ FAILOVER_POOL_ROW = {
     "traffic_used_gb": 150.0,
     "failover": True,
     "nodes": [REALITY_NODE],
-    "pool_nodes": [{**REALITY_NODE, "ddns": "node-la-rn.acrossflare.com", "role": "RACKNERD"}],
+    "pool_nodes": [{**REALITY_NODE, "ddns": "node-la-rn.acrossflare.com", "role": "FAILOVER"}],
 }
 
 EXPIRED_ROW = {

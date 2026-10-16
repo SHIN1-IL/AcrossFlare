@@ -29,7 +29,8 @@ import {
 } from "@/lib/provision/build";
 import { appUrl, isProvisionSimulate } from "@/lib/provision/config";
 import { assertRealityConfigured } from "@/lib/provision/reality";
-import { provisionSubscription, ProvisionError, selectNodesForPlan } from "@/lib/provision/run";
+import { assignNodesForPlan, poolIdForNodeCodes, releaseSeat } from "@/lib/provision/capacity";
+import { provisionSubscription, ProvisionError } from "@/lib/provision/run";
 import { addXuiClient, deleteXuiClient, probeXuiPanel } from "@/lib/provision/xui";
 
 export class AdminActionError extends Error {
@@ -71,6 +72,7 @@ export async function saveAdminPlan(input: PlanInput): Promise<AdminPlan> {
     trafficGb: input.trafficGb,
     backupGb: productHasBackup(input.product) ? input.backupGb : null,
     nodeCodes: input.nodes,
+    poolId: poolIdForNodeCodes(product, input.nodes),
     visible: input.visible,
     featured: input.featured,
   };
@@ -156,7 +158,8 @@ export async function addAdminNode(input: {
   product: ProductId;
   name: string;
   ddns: string;
-  role: "BANDWAGON" | "RACKNERD";
+  role: "PRIMARY" | "FAILOVER";
+  provider?: string;
   host: string;
   port: number;
   username: string;
@@ -181,6 +184,7 @@ export async function addAdminNode(input: {
       name,
       ddns,
       role: input.role,
+      provider: (input.provider ?? "").trim().slice(0, 64),
       host,
       port: input.port,
       username: input.username.trim(),
@@ -200,7 +204,8 @@ export async function updateAdminNode(
   input: {
     name: string;
     ddns: string;
-    role: "BANDWAGON" | "RACKNERD";
+    role: "PRIMARY" | "FAILOVER";
+    provider?: string;
     host: string;
     port: number;
     username: string;
@@ -232,6 +237,8 @@ export async function updateAdminNode(
       name,
       ddns,
       role: input.role,
+      provider:
+        input.provider === undefined ? existing.provider : input.provider.trim().slice(0, 64),
       host,
       port: input.port,
       username,
@@ -461,6 +468,7 @@ export async function expireCustomer(customerId: string): Promise<{ customer: Ad
   }
 
   await destroyXuiClients(subscription.nodes, subscription.credentials);
+  await releaseSeat(subscription.instanceGroupId, subscription.id);
 
   await prisma.subscription.update({
     where: { id: customerId },
@@ -468,6 +476,8 @@ export async function expireCustomer(customerId: string): Promise<{ customer: Ad
       status: SubscriptionStatus.UNPAID,
       expiresAt: new Date(),
       memo: "Expired after live card test",
+      instanceGroupId: null,
+      nodes: { set: [] },
     },
   });
 
@@ -515,8 +525,11 @@ export async function changeCustomerPlan(input: {
     steps = markStep(steps, 0, "done");
     steps = markStep(steps, 1, "running");
 
-    const nextNodes = await selectNodesForPlan(subscription.product, toPlan);
-    const issued = await recreateClients(subscription, toPlan, nextNodes);
+    const assigned = await assignNodesForPlan(subscription.product, toPlan, {
+      subscriptionId: subscription.id,
+      previousGroupId: subscription.instanceGroupId,
+    });
+    const issued = await recreateClients(subscription, toPlan, assigned.nodes);
     steps = markStep(steps, 1, "done");
     steps = markStep(steps, 2, "running");
 
@@ -526,7 +539,8 @@ export async function changeCustomerPlan(input: {
         planId: toPlan.id,
         provisionStep: "ready",
         provisionError: "",
-        nodes: { set: nextNodes.map((node) => ({ id: node.id })) },
+        instanceGroupId: assigned.instanceGroupId,
+        nodes: { set: assigned.nodes.map((node) => ({ id: node.id })) },
         credentials: {
           upsert: {
             create: issued,

@@ -40,6 +40,9 @@ function switchedHref(
 
   const swapped = pathname.replace(`/admin/${currentSegment}`, `/admin/${next}`);
   const suffix = swapped.split("/")[3];
+  if (suffix === "overview") {
+    return permissions.includes("customers") || permissions.includes("nodes") ? swapped : fallback;
+  }
   if (
     suffix &&
     suffix !== "staff" &&

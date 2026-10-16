@@ -67,6 +67,7 @@ export function filterAdminState<
     nodes: unknown[];
     customers: unknown[];
     promoCodes: unknown[];
+    bootstrapJobs?: unknown[];
   },
 >(state: T, permissions: readonly AdminPermission[]): T {
   const canPlans =
@@ -81,5 +82,8 @@ export function filterAdminState<
     customers: permissions.includes("customers") ? state.customers : [],
     nodes: permissions.includes("nodes") ? state.nodes : [],
     promoCodes: permissions.includes("codes") ? state.promoCodes : [],
+    ...(state.bootstrapJobs
+      ? { bootstrapJobs: permissions.includes("nodes") ? state.bootstrapJobs : [] }
+      : {}),
   };
 }

@@ -113,6 +113,18 @@ describe("toAdminCustomer", () => {
   });
 });
 
+describe("parseNodeRole", () => {
+  it("maps logical roles and legacy vendor aliases", async () => {
+    const { parseNodeRole } = await import("@/lib/admin-data");
+    expect(parseNodeRole("primary")).toBe(NodeRole.PRIMARY);
+    expect(parseNodeRole("failover")).toBe(NodeRole.FAILOVER);
+    expect(parseNodeRole("bandwagon")).toBe(NodeRole.PRIMARY);
+    expect(parseNodeRole("racknerd")).toBe(NodeRole.FAILOVER);
+    expect(parseNodeRole("BANDWAGON")).toBe(NodeRole.PRIMARY);
+    expect(parseNodeRole("nope")).toBeNull();
+  });
+});
+
 describe("toAdminNode", () => {
   it("masks the panel host and flags seed nodes as unwired", () => {
     const node = {
@@ -120,7 +132,8 @@ describe("toAdminNode", () => {
       product: Product.GLOBAL,
       name: "Tokyo-Bandwagon",
       ddns: "node-tokyo.acrossflare.com",
-      role: NodeRole.BANDWAGON,
+      role: NodeRole.PRIMARY,
+      provider: "bandwagon",
       status: NodeHealth.ONLINE,
       host: "10.0.0.22",
       port: 2053,

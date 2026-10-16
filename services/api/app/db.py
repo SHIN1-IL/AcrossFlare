@@ -4,7 +4,8 @@ import psycopg
 from fastapi import HTTPException
 
 from app.config import DATABASE_URL
-from app.failover import fetch_racknerd_pool
+from app.failover import fetch_failover_pool
+from app.nodes import ROLE_FAILOVER
 
 
 def fetch_subscription_by_token(token: str) -> dict[str, Any] | None:
@@ -69,8 +70,8 @@ def fetch_subscription_by_token(token: str) -> dict[str, Any] | None:
         product = row[6]
         failover = bool(row[4])
         pool_nodes: list[dict[str, str]] = []
-        if failover and not any(node.get("role") == "RACKNERD" for node in nodes):
-            pool_nodes = fetch_racknerd_pool(conn, product)
+        if failover and not any(node.get("role") == ROLE_FAILOVER for node in nodes):
+            pool_nodes = fetch_failover_pool(conn, product)
 
     return {
         "uuid": row[0],

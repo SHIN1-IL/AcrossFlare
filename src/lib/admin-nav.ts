@@ -20,6 +20,7 @@ export function productHasBackup(product: ProductId | AdminServiceId) {
 
 export function adminNavItems(service: AdminServiceId, permissions?: readonly AdminPermission[]) {
   const items = [
+    { suffix: "overview" as const, key: "navOverview" as const },
     { suffix: "customers" as const, key: "navCustomers" as const },
     { suffix: "plans" as const, key: "navPlans" as const },
     { suffix: "codes" as const, key: "navCodes" as const },
@@ -33,7 +34,8 @@ export function adminNavItems(service: AdminServiceId, permissions?: readonly Ad
   }
 
   const allowed = new Set(permissions);
-  return scoped.filter((item) => allowed.has(item.suffix));
+  const canOverview = allowed.has("customers") || allowed.has("nodes");
+  return scoped.filter((item) => (item.suffix === "overview" ? canOverview : allowed.has(item.suffix)));
 }
 
 export function firstAdminPath(

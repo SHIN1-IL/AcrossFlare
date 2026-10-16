@@ -21,7 +21,7 @@ See also: [infra.md](./infra.md) (origin deploy), [.env.example](../.env.example
 | Node REALITY fields in Admin | `realityPublicKey`, `realityShortId`, `realityServerName` per node | Karing YAML missing `reality-opts`; live provision fails |
 | 3x-ui REALITY inbound | `minClientVer` / `minClient` = `1.0.0` (never empty) | Karing `reality verification failed` on Xray 26.7.11+ |
 | `WG_SERVER_PUBLIC_KEY` | Set | Marketing WireGuard fails in live mode |
-| `CLOUDFLARE_ZONE_ID` + `CLOUDFLARE_API_TOKEN` | Set on origin | No deploy/admin purge; edge stays cold after TTL |
+| `CLOUDFLARE_ZONE_ID` + `CLOUDFLARE_API_TOKEN` | Set on origin (Cache Purge + DNS Edit for node bootstrap) | No deploy/admin purge; bootstrap DDNS skipped/fails |
 | `SLO_ALERT_WEBHOOK_URL` | Optional | No Slack/Discord on edge SLO breach |
 
 Cron is explicitly off when `PROVISION_MODE=simulate`:
@@ -50,7 +50,7 @@ On the origin VPS, in order:
 3. `npm run origin:up` (or redeploy)
 4. Health: `https://acrossflare.com/api/health`, `/dashboard`, `vault.`, `sync.`
 5. `npm run edge:cron:install` after Cloudflare purge token is in `.env`
-6. Admin: Bandwagon + RackNerd nodes **ONLINE**, API creds verified
+6. Admin: PRIMARY (+ FAILOVER if used) nodes **ONLINE**, API creds verified
 7. `npx prisma migrate deploy` (TrafficSnapshot / TrafficSyncRun migrations)
 
 ---

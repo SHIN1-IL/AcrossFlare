@@ -33,6 +33,8 @@ const CHECKOUT_FAILURES = [
   "phone_required",
   "phone_invalid",
   "already_owned",
+  "capacity_full",
+  "capacity_full_after_pay",
 ] as const;
 
 type CheckoutFailure = (typeof CHECKOUT_FAILURES)[number] | "failed" | "agree";
@@ -239,7 +241,8 @@ export function CheckoutView({
             checkout.error === "paymentwall_not_configured" ||
             checkout.error === "phone_required" ||
             checkout.error === "phone_invalid" ||
-            checkout.error === "already_owned"
+            checkout.error === "already_owned" ||
+            checkout.error === "capacity_full"
             ? checkout.error
             : "failed"
         );
@@ -400,6 +403,10 @@ export function CheckoutView({
                               ? t("phoneInvalid")
                               : error === "already_owned"
                                 ? t("alreadyOwned")
+                                : error === "capacity_full"
+                                  ? t("capacityFull")
+                                  : error === "capacity_full_after_pay"
+                                    ? t("capacityFullAfterPay")
                               : error === "portone_not_configured" ||
                                   error === "stripe_not_configured" ||
                                   error === "paymentwall_not_configured" ||
@@ -507,6 +514,7 @@ type PaymentPoll = {
   status?: string;
   subscriptionStatus?: string | null;
   provisionStep?: string | null;
+  provisionError?: string | null;
 };
 
 async function waitForPayment(paymentId: string) {
@@ -532,7 +540,7 @@ async function waitForProvision(paymentId: string, onStep: (step: string | null)
     }
 
     if (data.status === "FAILED" || data.subscriptionStatus === "FAILED") {
-      throw new Error("failed");
+      throw new Error(data.provisionError === "capacity_full" ? "capacity_full_after_pay" : "failed");
     }
 
     await sleep(400);

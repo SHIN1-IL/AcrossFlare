@@ -13,17 +13,17 @@ const reality = (ddns: string, role: NodeRole): YamlNode => ({
   realityFingerprint: "chrome",
 });
 
-const bandwagon = reality("node-la-b.acrossflare.com", NodeRole.BANDWAGON);
-const racknerd = reality("node-la-rn.acrossflare.com", NodeRole.RACKNERD);
+const primary = reality("node-la-b.acrossflare.com", NodeRole.PRIMARY);
+const failoverNode = reality("node-la-rn.acrossflare.com", NodeRole.FAILOVER);
 
 describe("phase1 scenarios (typescript parity)", () => {
-  it("standard plan under limit keeps bandwagon nodes", () => {
-    const hosts = pickHostsForYaml([bandwagon, racknerd], false);
+  it("standard plan under limit keeps PRIMARY nodes", () => {
+    const hosts = pickHostsForYaml([primary, failoverNode], false);
     expect(hosts).toEqual(["node-la-b.acrossflare.com"]);
   });
 
-  it("failover switches yaml hosts to racknerd", () => {
-    const yaml = buildVlessYamlFromNodes([bandwagon, racknerd], "uuid-1", true);
+  it("failover switches yaml hosts to FAILOVER", () => {
+    const yaml = buildVlessYamlFromNodes([primary, failoverNode], "uuid-1", true);
     expect(yaml).toContain("node-la-rn.acrossflare.com");
     expect(yaml).not.toContain("node-la-b.acrossflare.com");
   });

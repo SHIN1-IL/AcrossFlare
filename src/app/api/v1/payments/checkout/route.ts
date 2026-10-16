@@ -7,6 +7,7 @@ import { portoneCustomerPhone } from "@/lib/payments/portone";
 import { defaultPaymentMethod, parseAppLocale, parsePaymentMethod, quotePayment } from "@/lib/payments/quote";
 import { CheckoutStartError, startProviderCheckout } from "@/lib/payments/start";
 import { hasActiveService } from "@/lib/owned-service";
+import { poolHasOpenSeat } from "@/lib/provision/capacity";
 import { isPublicCheckoutProduct } from "@/lib/plans";
 import { lookupPromoCode } from "@/lib/promo";
 import { toPrismaProduct } from "@/lib/product";
@@ -39,6 +40,10 @@ export async function POST(request: Request) {
   const plan = await prisma.plan.findUnique({ where: { id: body.planId } });
   if (!plan || !plan.visible || plan.product !== toPrismaProduct(product)) {
     return NextResponse.json({ error: "invalid_plan" }, { status: 400 });
+  }
+
+  if (plan.poolId && !(await poolHasOpenSeat(plan.poolId))) {
+    return NextResponse.json({ error: "capacity_full" }, { status: 409 });
   }
 
   const owned = await prisma.subscription.findMany({

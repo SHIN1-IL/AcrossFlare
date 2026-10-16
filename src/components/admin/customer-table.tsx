@@ -256,7 +256,9 @@ export function CustomerTable({
                                   className="mt-1 max-w-[180px] truncate font-mono text-[11px] text-destructive"
                                   title={customer.provisionError}
                                 >
-                                  {customer.provisionError}
+                                  {customer.provisionError === "capacity_full"
+                                    ? t("capacityFullError")
+                                    : customer.provisionError}
                                 </p>
                               ) : ddns.length ? (
                                 <p className="mt-1 max-w-[180px] truncate font-mono text-[11px] text-muted-foreground">

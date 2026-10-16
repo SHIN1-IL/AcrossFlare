@@ -52,7 +52,8 @@ const SEED_NODES = [
     product: Product.GLOBAL,
     name: "Tokyo-Bandwagon",
     ddns: "node-tokyo.acrossflare.com",
-    role: "BANDWAGON" as const,
+    role: "PRIMARY" as const,
+    provider: "bandwagon",
     status: "ONLINE" as const,
     host: "10.0.0.22",
     port: 2053,
@@ -65,7 +66,8 @@ const SEED_NODES = [
     product: Product.GLOBAL,
     name: "LA(B)-Bandwagon",
     ddns: "node-la-b.acrossflare.com",
-    role: "BANDWAGON" as const,
+    role: "PRIMARY" as const,
+    provider: "bandwagon",
     status: "ONLINE" as const,
     host: "10.0.0.55",
     port: 2053,
@@ -78,7 +80,8 @@ const SEED_NODES = [
     product: Product.GLOBAL,
     name: "LA(A)-Bandwagon",
     ddns: "node-la-a.acrossflare.com",
-    role: "BANDWAGON" as const,
+    role: "PRIMARY" as const,
+    provider: "bandwagon",
     status: "ONLINE" as const,
     host: "10.0.0.66",
     port: 2053,
@@ -91,7 +94,8 @@ const SEED_NODES = [
     product: Product.GLOBAL,
     name: "LA-RackNerd",
     ddns: "node-la-rn.acrossflare.com",
-    role: "RACKNERD" as const,
+    role: "FAILOVER" as const,
+    provider: "racknerd",
     status: "ONLINE" as const,
     host: "10.0.0.99",
     port: 2053,
@@ -104,7 +108,8 @@ const SEED_NODES = [
     product: Product.GLOBAL,
     name: "Tokyo-RackNerd",
     ddns: "node-tokyo-rn.acrossflare.com",
-    role: "RACKNERD" as const,
+    role: "FAILOVER" as const,
+    provider: "racknerd",
     status: "ONLINE" as const,
     host: "10.0.0.23",
     port: 2053,
@@ -117,7 +122,8 @@ const SEED_NODES = [
     product: Product.MARKETING,
     name: "US-East Bandwagon",
     ddns: "node-use.acrossflare.com",
-    role: "BANDWAGON" as const,
+    role: "PRIMARY" as const,
+    provider: "bandwagon",
     status: "OFFLINE" as const,
     host: "10.0.0.10",
     port: 2053,
@@ -130,7 +136,8 @@ const SEED_NODES = [
     product: Product.MARKETING,
     name: "US-West Bandwagon",
     ddns: "node-usw.acrossflare.com",
-    role: "BANDWAGON" as const,
+    role: "PRIMARY" as const,
+    provider: "bandwagon",
     status: "OFFLINE" as const,
     host: "10.0.0.44",
     port: 2053,
@@ -143,11 +150,49 @@ const SEED_NODES = [
 async function main() {
   const passwordHash = await hashPassword(DEMO_PASSWORD);
 
+  const { poolIdForNodeCodes } = await import("../src/lib/provision/capacity");
+
+  await prisma.capacityPool.upsert({
+    where: { id: "global-standard" },
+    update: { name: "Global Standard", maxSelectable: 1, seatsMaxDefault: 10 },
+    create: {
+      id: "global-standard",
+      product: Product.GLOBAL,
+      name: "Global Standard",
+      maxSelectable: 1,
+      seatsMaxDefault: 10,
+    },
+  });
+  await prisma.capacityPool.upsert({
+    where: { id: "global-hybrid" },
+    update: { name: "Global Hybrid", maxSelectable: 2, seatsMaxDefault: 10 },
+    create: {
+      id: "global-hybrid",
+      product: Product.GLOBAL,
+      name: "Global Hybrid",
+      maxSelectable: 2,
+      seatsMaxDefault: 10,
+    },
+  });
+  await prisma.capacityPool.upsert({
+    where: { id: "marketing-default" },
+    update: { name: "Marketing Default", maxSelectable: 1, seatsMaxDefault: 10 },
+    create: {
+      id: "marketing-default",
+      product: Product.MARKETING,
+      name: "Marketing Default",
+      maxSelectable: 1,
+      seatsMaxDefault: 10,
+    },
+  });
+
   for (const plan of plans) {
+    const product = toPrismaProduct(plan.product);
+    const poolId = poolIdForNodeCodes(product, plan.nodes);
     await prisma.plan.upsert({
       where: { id: plan.id },
       update: {
-        product: toPrismaProduct(plan.product),
+        product,
         name: plan.name,
         priceKrw: plan.prices.krw,
         priceUsd: plan.prices.usd,
@@ -156,12 +201,13 @@ async function main() {
         trafficGb: plan.trafficGb,
         backupGb: plan.backupGb,
         nodeCodes: plan.nodes,
+        poolId,
         featured: Boolean(plan.featured),
         visible: true,
       },
       create: {
         id: plan.id,
-        product: toPrismaProduct(plan.product),
+        product,
         name: plan.name,
         priceKrw: plan.prices.krw,
         priceUsd: plan.prices.usd,
@@ -170,6 +216,7 @@ async function main() {
         trafficGb: plan.trafficGb,
         backupGb: plan.backupGb,
         nodeCodes: plan.nodes,
+        poolId,
         featured: Boolean(plan.featured),
         visible: true,
       },
@@ -198,10 +245,34 @@ async function main() {
         name: node.name,
         ddns: node.ddns,
         role: node.role,
+        provider: node.provider,
       },
       create: node,
     });
   }
+
+  async function ensureGroup(id: string, poolId: string, name: string, nodeIds: string[]) {
+    await prisma.instanceGroup.upsert({
+      where: { id },
+      update: { poolId, name, status: "READY" },
+      create: { id, poolId, name, status: "READY", seatsUsed: 0, seatsMax: 10 },
+    });
+    for (const [index, nodeId] of nodeIds.entries()) {
+      const exists = await prisma.node.findUnique({ where: { id: nodeId }, select: { id: true } });
+      if (!exists) {
+        continue;
+      }
+      await prisma.instanceGroupNode.upsert({
+        where: { groupId_nodeId: { groupId: id, nodeId } },
+        update: { sortOrder: index },
+        create: { groupId: id, nodeId, sortOrder: index },
+      });
+    }
+  }
+
+  await ensureGroup("ig-global-standard-1", "global-standard", "Standard G1", ["g-la-b-bw"]);
+  await ensureGroup("ig-global-hybrid-1", "global-hybrid", "Hybrid G1", ["g-tokyo-bw", "g-la-a-bw"]);
+  await ensureGroup("ig-marketing-1", "marketing-default", "Marketing G1", ["m-use-bw"]);
 
   for (const account of DEMO_USERS) {
     await prisma.user.upsert({

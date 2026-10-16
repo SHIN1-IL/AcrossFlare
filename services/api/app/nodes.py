@@ -1,9 +1,13 @@
 import re
 from typing import Any, TypedDict
 
-from app.config import DEFAULT_VLESS_PORT, VLESS_CLIENT_FLOW
+from app.config import DEFAULT_VLESS_PORT
 
 _IPV4 = re.compile(r"(?:https?://)?(\d{1,3}(?:\.\d{1,3}){3})")
+
+# Logical roles (provider/vendor is irrelevant for YAML routing).
+ROLE_PRIMARY = "PRIMARY"
+ROLE_FAILOVER = "FAILOVER"
 
 
 class NodeRow(TypedDict, total=False):
@@ -38,17 +42,17 @@ def pick_nodes(
         return []
 
     if failover:
-        racknerd = [node for node in nodes if node.get("role") == "RACKNERD"]
-        if racknerd:
-            return racknerd
+        failover_nodes = [node for node in nodes if node.get("role") == ROLE_FAILOVER]
+        if failover_nodes:
+            return failover_nodes
         pool = pool_nodes or []
-        pool_racknerd = [node for node in pool if node.get("role") == "RACKNERD"]
-        if pool_racknerd:
-            return pool_racknerd
+        pool_failover = [node for node in pool if node.get("role") == ROLE_FAILOVER]
+        if pool_failover:
+            return pool_failover
         return list(nodes)
 
-    bandwagon = [node for node in nodes if node.get("role") == "BANDWAGON"]
-    return bandwagon or list(nodes)
+    primary = [node for node in nodes if node.get("role") == ROLE_PRIMARY]
+    return primary or list(nodes)
 
 
 def pick_hosts(

@@ -30,9 +30,9 @@ def maybe_failover(
     if not subscription or not should_failover(subscription):
         return False
 
-    nodes = find_racknerd_nodes(conn, subscription.product)
+    nodes = find_failover_nodes(conn, subscription.product)
     if not nodes:
-        logger.warning("failover_skipped subscription=%s reason=no_racknerd_node", subscription_id)
+        logger.warning("failover_skipped subscription=%s reason=no_failover_node", subscription_id)
         return False
 
     if provision_live():
@@ -59,7 +59,7 @@ def maybe_failover(
 
     mark_failover(conn, subscription_id)
     logger.info(
-        "failover_applied subscription=%s racknerd_nodes=%s",
+        "failover_applied subscription=%s failover_nodes=%s",
         subscription_id,
         [node.id for node in nodes],
     )
@@ -105,14 +105,14 @@ def load_failover_subscription(conn: psycopg.Connection, subscription_id: str) -
     )
 
 
-def find_racknerd_nodes(conn: psycopg.Connection, product: str) -> list[FailoverNode]:
+def find_failover_nodes(conn: psycopg.Connection, product: str) -> list[FailoverNode]:
     with conn.cursor() as cur:
         cur.execute(
             """
             SELECT id, host, port, username, password, ddns
             FROM "Node"
             WHERE product = %s
-              AND role = 'RACKNERD'
+              AND role = 'FAILOVER'
               AND status <> 'OFFLINE'
             ORDER BY "createdAt" ASC
             """,
@@ -133,7 +133,11 @@ def find_racknerd_nodes(conn: psycopg.Connection, product: str) -> list[Failover
     ]
 
 
-def fetch_racknerd_pool(conn: psycopg.Connection, product: str) -> list[dict[str, str | int | None]]:
+# Back-compat alias for older tests/imports.
+find_racknerd_nodes = find_failover_nodes
+
+
+def fetch_failover_pool(conn: psycopg.Connection, product: str) -> list[dict[str, str | int | None]]:
     with conn.cursor() as cur:
         cur.execute(
             """
@@ -148,7 +152,7 @@ def fetch_racknerd_pool(conn: psycopg.Connection, product: str) -> list[dict[str
               "realityFingerprint"
             FROM "Node"
             WHERE product = %s
-              AND role = 'RACKNERD'
+              AND role = 'FAILOVER'
               AND status <> 'OFFLINE'
             ORDER BY "createdAt" ASC
             """,
@@ -169,6 +173,9 @@ def fetch_racknerd_pool(conn: psycopg.Connection, product: str) -> list[dict[str
         }
         for row in rows
     ]
+
+
+fetch_racknerd_pool = fetch_failover_pool
 
 
 def link_node_to_subscription(conn: psycopg.Connection, node_id: str, subscription_id: str) -> None:

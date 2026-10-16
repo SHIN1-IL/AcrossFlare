@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { writeAdminAudit } from "@/lib/admin-audit";
 import { AdminActionError, removeAdminNode, updateAdminNode } from "@/lib/admin-actions";
 import { requirePermission } from "@/lib/admin-auth";
-import { parseNodeRole, toAdminNode } from "@/lib/admin-data";
+import { parseNodeProvider, parseNodeRole, toAdminNode } from "@/lib/admin-data";
 
 export async function PATCH(
   request: Request,
@@ -19,6 +19,7 @@ export async function PATCH(
         name?: string;
         ddns?: string;
         role?: string;
+        provider?: string;
         host?: string;
         port?: string | number;
         username?: string;
@@ -42,6 +43,7 @@ export async function PATCH(
       name: body.name ?? "",
       ddns: body.ddns ?? "",
       role,
+      provider: body.provider === undefined ? undefined : parseNodeProvider(body.provider),
       host: body.host ?? "",
       port: Number(body.port) || 2053,
       username: body.username ?? "",

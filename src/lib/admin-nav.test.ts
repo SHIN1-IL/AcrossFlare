@@ -11,11 +11,12 @@ describe("admin-nav", () => {
 
   it("hides nav items the staff cannot open", () => {
     expect(adminNavItems("workspace", ["customers", "codes"]).map((item) => item.suffix)).toEqual([
+      "overview",
       "customers",
       "codes",
     ]);
     expect(adminNavItems("standard", ["codes", "provision"]).map((item) => item.suffix)).toEqual(["provision"]);
-    expect(firstAdminPath("hybrid", ["nodes"])).toBe("/admin/hybrid/nodes");
+    expect(firstAdminPath("hybrid", ["nodes"])).toBe("/admin/hybrid/overview");
     expect(firstAdminPath("standard", [], true)).toBe("/admin/staff");
   });
 

@@ -75,6 +75,7 @@ export function toAdminNode(node: Node): AdminNode {
     name: node.name,
     ddns: node.ddns,
     role: toUiRole(node.role),
+    provider: node.provider ?? "",
     status: toUiHealth(node.status),
     hostMasked: maskHost(node.host),
     port: node.port,
@@ -247,7 +248,7 @@ function toCredentials(row: CustomerRow): CustomerCredentials | null {
 }
 
 function toUiRole(role: NodeRole): UiNodeRole {
-  return role === NodeRole.RACKNERD ? "racknerd" : "bandwagon";
+  return role === NodeRole.FAILOVER ? "failover" : "primary";
 }
 
 function toUiHealth(status: NodeHealth): UiNodeHealth {
@@ -297,7 +298,10 @@ export function toAdminPromoCode(
 }
 
 export async function listAdminState() {
-  const [plans, nodes, subscriptions, promoCodes, signupOnlyUsers] = await Promise.all([
+  const { listPoolCapacity } = await import("@/lib/provision/capacity");
+  const { DAILY_BOOTSTRAP_LIMIT } = await import("@/lib/provision/capacity-expand");
+  const { listRecentBootstrapJobs } = await import("@/lib/bootstrap/run");
+  const [plans, nodes, subscriptions, promoCodes, signupOnlyUsers, capacity, bootstrapJobs] = await Promise.all([
     prisma.plan.findMany({ orderBy: { name: "asc" } }),
     prisma.node.findMany({ orderBy: { createdAt: "asc" } }),
     prisma.subscription.findMany({
@@ -316,6 +320,8 @@ export async function listAdminState() {
       select: { id: true, email: true, createdAt: true },
       orderBy: { createdAt: "desc" },
     }),
+    listPoolCapacity().catch(() => null),
+    listRecentBootstrapJobs().catch(() => []),
   ]);
 
   return {
@@ -326,6 +332,13 @@ export async function listAdminState() {
       ...signupOnlyUsers.map(toSignupOnlyCustomer),
     ],
     promoCodes: promoCodes.map(toAdminPromoCode),
+    capacityPools: capacity?.pools ?? [],
+    bootstrapQuota: capacity?.bootstrap ?? {
+      used: 0,
+      limit: DAILY_BOOTSTRAP_LIMIT,
+      recentFailures: 0,
+    },
+    bootstrapJobs,
     provisionSimulate: isProvisionSimulate(),
   };
 }
@@ -367,13 +380,29 @@ export function parseProduct(value: string | null | undefined): Product | null {
 }
 
 export function parseNodeRole(value: string | null | undefined): NodeRole | null {
-  if (value === "bandwagon" || value === NodeRole.BANDWAGON) {
-    return NodeRole.BANDWAGON;
+  const normalized = (value ?? "").trim().toLowerCase();
+  // Logical roles + legacy vendor aliases (pre–Phase A admin clients).
+  if (
+    normalized === "primary" ||
+    normalized === "bandwagon" ||
+    value === NodeRole.PRIMARY ||
+    value === "BANDWAGON"
+  ) {
+    return NodeRole.PRIMARY;
   }
-  if (value === "racknerd" || value === NodeRole.RACKNERD) {
-    return NodeRole.RACKNERD;
+  if (
+    normalized === "failover" ||
+    normalized === "racknerd" ||
+    value === NodeRole.FAILOVER ||
+    value === "RACKNERD"
+  ) {
+    return NodeRole.FAILOVER;
   }
   return null;
+}
+
+export function parseNodeProvider(value: string | null | undefined): string {
+  return (value ?? "").trim().slice(0, 64);
 }
 
 export async function listPublicPlans(product?: ProductId) {

@@ -32,7 +32,7 @@ describe("provision/build", () => {
     expect(karingDeepLink(url)).toContain("karing://install-config?url=");
     expect(url).not.toContain("vless://");
     const share = vlessRealityShareLink(
-      { ...realityNode("node-tokyo.acrossflare.com", NodeRole.BANDWAGON), host: "https://74.82.221.67:2053" },
+      { ...realityNode("node-tokyo.acrossflare.com", NodeRole.PRIMARY), host: "https://74.82.221.67:2053" },
       "uuid-1"
     );
     expect(share.startsWith("vless://uuid-1@74.82.221.67:443?")).toBe(true);
@@ -41,7 +41,7 @@ describe("provision/build", () => {
   });
 
   it("emits REALITY VLESS yaml with the backup dashboard notice", () => {
-    const yaml = buildVlessYaml([realityNode("node-tokyo.acrossflare.com", NodeRole.BANDWAGON)], "uuid-1");
+    const yaml = buildVlessYaml([realityNode("node-tokyo.acrossflare.com", NodeRole.PRIMARY)], "uuid-1");
     expect(yaml).toContain("type: vless");
     expect(yaml).toContain("server: node-tokyo.acrossflare.com");
     expect(yaml).toContain("uuid: uuid-1");
@@ -57,7 +57,7 @@ describe("provision/build", () => {
   });
 
   it("falls back to legacy WS yaml when REALITY fields are missing", () => {
-    const yaml = buildVlessYaml([{ ddns: "node-tokyo.acrossflare.com", role: NodeRole.BANDWAGON }], "uuid-1");
+    const yaml = buildVlessYaml([{ ddns: "node-tokyo.acrossflare.com", role: NodeRole.PRIMARY }], "uuid-1");
     expect(yaml).toContain("network: ws");
     expect(yaml).toContain("path: /vless");
   });
@@ -68,10 +68,10 @@ describe("provision/build", () => {
     expect(syncthingFolderId("clxyz1234567890ab")).toMatch(/^af-/);
   });
 
-  it("prefers bandwagon nodes unless failover is active", () => {
+  it("prefers PRIMARY nodes unless failover is active", () => {
     const nodes = [
-      realityNode("node-la-b.acrossflare.com", NodeRole.BANDWAGON),
-      realityNode("node-la-rn.acrossflare.com", NodeRole.RACKNERD),
+      realityNode("node-la-b.acrossflare.com", NodeRole.PRIMARY),
+      realityNode("node-la-rn.acrossflare.com", NodeRole.FAILOVER),
     ];
     expect(pickHostsForYaml(nodes, false)).toEqual(["node-la-b.acrossflare.com"]);
     expect(pickHostsForYaml(nodes, true)).toEqual(["node-la-rn.acrossflare.com"]);
@@ -80,8 +80,8 @@ describe("provision/build", () => {
   it("builds yaml from node roles and failover state", () => {
     const yaml = buildVlessYamlFromNodes(
       [
-        realityNode("node-la-b.acrossflare.com", NodeRole.BANDWAGON),
-        realityNode("node-la-rn.acrossflare.com", NodeRole.RACKNERD),
+        realityNode("node-la-b.acrossflare.com", NodeRole.PRIMARY),
+        realityNode("node-la-rn.acrossflare.com", NodeRole.FAILOVER),
       ],
       "uuid-1",
       true

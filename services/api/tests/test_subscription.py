@@ -10,7 +10,7 @@ from tests.fixtures import decoded_sub
 
 REALITY_NODE = {
     "ddns": "node-la-b.acrossflare.com",
-    "role": "BANDWAGON",
+    "role": "PRIMARY",
     "vlessPort": 443,
     "realityPublicKey": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
     "realityShortId": "0123456789",
@@ -22,7 +22,7 @@ REALITY_NODE = {
 def test_pick_hosts_prefers_bandwagon_when_not_failover():
     nodes = [
         REALITY_NODE,
-        {**REALITY_NODE, "ddns": "node-la-rn.acrossflare.com", "role": "RACKNERD"},
+        {**REALITY_NODE, "ddns": "node-la-rn.acrossflare.com", "role": "FAILOVER"},
     ]
     assert pick_hosts(nodes, failover=False) == ["node-la-b.acrossflare.com"]
 
@@ -30,7 +30,7 @@ def test_pick_hosts_prefers_bandwagon_when_not_failover():
 def test_pick_hosts_uses_racknerd_when_failover():
     nodes = [
         REALITY_NODE,
-        {**REALITY_NODE, "ddns": "node-la-rn.acrossflare.com", "role": "RACKNERD"},
+        {**REALITY_NODE, "ddns": "node-la-rn.acrossflare.com", "role": "FAILOVER"},
     ]
     assert pick_hosts(nodes, failover=True) == ["node-la-rn.acrossflare.com"]
 
@@ -158,7 +158,7 @@ def test_resolve_subscription_failover_uses_unlimited_total():
         "traffic_gb": 150.0,
         "nodes": [
             REALITY_NODE,
-            {**REALITY_NODE, "ddns": "node-la-rn.acrossflare.com", "role": "RACKNERD"},
+            {**REALITY_NODE, "ddns": "node-la-rn.acrossflare.com", "role": "FAILOVER"},
         ],
         "pool_nodes": [],
     }
@@ -181,7 +181,7 @@ def test_resolve_subscription_failover_uses_pool_nodes():
         "failover": True,
         "traffic_gb": 150.0,
         "nodes": [REALITY_NODE],
-        "pool_nodes": [{**REALITY_NODE, "ddns": "node-la-rn.acrossflare.com", "role": "RACKNERD"}],
+        "pool_nodes": [{**REALITY_NODE, "ddns": "node-la-rn.acrossflare.com", "role": "FAILOVER"}],
     }
     body, headers = resolve_subscription(row)
     plain = decoded_sub(body)
@@ -198,7 +198,7 @@ def test_resolve_subscription_raises_for_missing_uuid():
 def test_pick_nodes_returns_full_rows():
     nodes = [
         REALITY_NODE,
-        {**REALITY_NODE, "ddns": "node-la-rn.acrossflare.com", "role": "RACKNERD"},
+        {**REALITY_NODE, "ddns": "node-la-rn.acrossflare.com", "role": "FAILOVER"},
     ]
     picked = pick_nodes(nodes, failover=True)
     assert picked[0]["ddns"] == "node-la-rn.acrossflare.com"

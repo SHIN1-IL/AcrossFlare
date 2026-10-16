@@ -1,5 +1,4 @@
 import {
-  NodeHealth,
   Product,
   SubscriptionStatus,
   type Credential,
@@ -14,7 +13,7 @@ import {
   vaultwardenBaseUrl,
 } from "@/lib/provision/config";
 import { exitHostFor, issueMarketingSecrets, nextWgAddress, regionFrom } from "@/lib/marketing/secrets";
-import { nodeNameMatchesCode } from "@/lib/provision/node-match";
+import { assignNodesForPlan, releaseSeat } from "@/lib/provision/capacity";
 import {
   buildVlessYamlFromNodes,
   defaultExitIp,
@@ -25,28 +24,22 @@ import {
   xuiClientEmail,
   yamlUrlFor,
 } from "@/lib/provision/build";
+import { ProvisionError } from "@/lib/provision/errors";
 import { assertRealityConfigured } from "@/lib/provision/reality";
 import { issueVaultwardenBackup } from "@/lib/provision/vaultwarden";
 import { addXuiClient, addWireGuardPeer, updateXuiClientExpiry } from "@/lib/provision/xui";
 
+export { ProvisionError } from "@/lib/provision/errors";
+
 type LoadedSubscription = Subscription & {
   plan: Plan;
   nodes: Node[];
+  instanceGroupId: string | null;
   // include: { credentials: true } returns the whole row. A hand-written subset
   // drops new fields, and the origin image build is the first place that fails.
   credentials: Credential | null;
   user: { email: string };
 };
-
-export class ProvisionError extends Error {
-  constructor(
-    public code: string,
-    message?: string
-  ) {
-    super(message ?? code);
-    this.name = "ProvisionError";
-  }
-}
 
 export async function provisionSubscription(subscriptionId: string) {
   const subscription = await prisma.subscription.findUnique({
@@ -99,9 +92,14 @@ export async function provisionSubscription(subscriptionId: string) {
     return subscription.id;
   }
 
+  let reservedGroupId: string | null = null;
   try {
-    const nodes = subscription.product === Product.WORKSPACE ? [] : await assignNodes(subscription);
-    const issued = await issueCredentials(subscription, nodes);
+    const assigned =
+      subscription.product === Product.WORKSPACE
+        ? { nodes: [] as Node[], instanceGroupId: null as string | null }
+        : await assignNodes(subscription);
+    reservedGroupId = assigned.instanceGroupId;
+    const issued = await issueCredentials(subscription, assigned.nodes);
 
     await prisma.subscription.update({
       where: { id: subscription.id },
@@ -110,7 +108,8 @@ export async function provisionSubscription(subscriptionId: string) {
         provisionStep: "ready",
         provisionError: "",
         memo: "",
-        nodes: { set: nodes.map((node) => ({ id: node.id })) },
+        instanceGroupId: assigned.instanceGroupId,
+        nodes: { set: assigned.nodes.map((node) => ({ id: node.id })) },
         credentials: {
           upsert: {
             create: issued,
@@ -122,13 +121,18 @@ export async function provisionSubscription(subscriptionId: string) {
 
     return subscription.id;
   } catch (error) {
+    if (reservedGroupId) {
+      await releaseSeat(reservedGroupId, subscription.id).catch(() => undefined);
+    }
     const message = error instanceof Error ? error.message : "provision_failed";
+    const code = error instanceof ProvisionError ? error.code : message;
     await prisma.subscription.update({
       where: { id: subscription.id },
       data: {
         status: SubscriptionStatus.FAILED,
-        provisionError: message,
+        provisionError: code,
         memo: "Provisioning failed",
+        instanceGroupId: null,
       },
     });
     throw error;
@@ -140,7 +144,9 @@ async function renewIssuedSubscription(subscription: LoadedSubscription) {
     return;
   }
 
-  const nodes = subscription.nodes.length ? subscription.nodes : await assignNodes(subscription);
+  const nodes = subscription.nodes.length
+    ? subscription.nodes
+    : (await assignNodes(subscription)).nodes;
   await Promise.all(
     nodes.map((node) =>
       updateXuiClientExpiry(node, {
@@ -153,29 +159,16 @@ async function renewIssuedSubscription(subscription: LoadedSubscription) {
   );
 }
 
-export async function selectNodesForPlan(product: Product, plan: Plan) {
-  const pool = await prisma.node.findMany({
-    where: {
-      product,
-      status: { not: NodeHealth.OFFLINE },
-    },
-    orderBy: { createdAt: "asc" },
-  });
-
-  const matched = plan.nodeCodes
-    .map((code) => pool.find((node) => nodeNameMatchesCode(node.name, code)))
-    .filter((node): node is Node => Boolean(node));
-
-  const nodes = matched.length ? uniqueNodes(matched) : pool.slice(0, Math.min(2, pool.length));
-  if (!nodes.length) {
-    throw new ProvisionError("node_missing");
-  }
-
-  return nodes;
+/** @deprecated Prefer assignNodesForPlan — kept for admin plan-change callers. */
+export async function selectNodesForPlan(product: Product, plan: Plan, subscriptionId?: string) {
+  const result = await assignNodesForPlan(product, plan, { subscriptionId });
+  return result.nodes;
 }
 
 async function assignNodes(subscription: LoadedSubscription) {
-  return selectNodesForPlan(subscription.product, subscription.plan);
+  return assignNodesForPlan(subscription.product, subscription.plan, {
+    subscriptionId: subscription.id,
+  });
 }
 
 async function issueCredentials(subscription: LoadedSubscription, nodes: Node[]) {
@@ -362,17 +355,6 @@ async function addClients(
 
   assertRealityConfigured(nodes);
   await Promise.all(nodes.map((node) => addXuiClient(node, input)));
-}
-
-function uniqueNodes(nodes: Node[]) {
-  const seen = new Set<string>();
-  return nodes.filter((node) => {
-    if (seen.has(node.id)) {
-      return false;
-    }
-    seen.add(node.id);
-    return true;
-  });
 }
 
 function wait(ms: number) {

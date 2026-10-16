@@ -50,14 +50,27 @@ enum PromoCodeStatus {
 }
 
 enum NodeRole {
-  BANDWAGON
-  RACKNERD
+  PRIMARY
+  FAILOVER
 }
 
 enum NodeHealth {
   ONLINE
   DEGRADED
   OFFLINE
+}
+
+enum InstanceGroupStatus {
+  READY
+  OPENING
+  DRAINING
+}
+
+enum BootstrapJobStatus {
+  QUEUED
+  RUNNING
+  SUCCEEDED
+  FAILED
 }
 
 model User {
@@ -97,6 +110,9 @@ model Plan {
   trafficGb Int?
   backupGb  Int?
   nodeCodes String[]
+  /// Capacity pool for node assignment. Null = no VPN nodes (e.g. Workspace).
+  poolId    String?
+  pool      CapacityPool? @relation(fields: [poolId], references: [id], onDelete: SetNull)
   featured  Boolean  @default(false)
   visible   Boolean  @default(true)
   createdAt DateTime @default(now())
@@ -107,6 +123,54 @@ model Plan {
   promoCodes    PromoCode[]
 
   @@index([product])
+  @@index([poolId])
+}
+
+/// Logical capacity pool (e.g. standard=1 selectable, hybrid=2). Provider-agnostic.
+model CapacityPool {
+  id            String   @id
+  product       Product
+  name          String
+  /// How many PRIMARY nodes a subscriber may receive from a group.
+  maxSelectable Int      @default(1)
+  /// Default seat cap when creating a new instance group.
+  seatsMaxDefault Int    @default(10)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  plans  Plan[]
+  groups InstanceGroup[]
+
+  @@index([product])
+}
+
+/// One concrete set of nodes that shares a seat counter.
+model InstanceGroup {
+  id        String              @id @default(cuid())
+  poolId    String
+  pool      CapacityPool        @relation(fields: [poolId], references: [id], onDelete: Cascade)
+  name      String
+  status    InstanceGroupStatus @default(READY)
+  seatsUsed Int                 @default(0)
+  seatsMax  Int                 @default(10)
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+
+  nodes         InstanceGroupNode[]
+  subscriptions Subscription[]
+
+  @@index([poolId, status])
+}
+
+model InstanceGroupNode {
+  groupId   String
+  group     InstanceGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  nodeId    String
+  node      Node          @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  sortOrder Int           @default(0)
+
+  @@id([groupId, nodeId])
+  @@index([nodeId])
 }
 
 model Node {
@@ -115,6 +179,8 @@ model Node {
   name      String
   ddns      String
   role      NodeRole
+  /// Vendor label only (bandwagon, racknerd, contabo, …). Not used for failover routing.
+  provider  String     @default("")
   status    NodeHealth @default(ONLINE)
   host      String
   port      Int
@@ -132,6 +198,7 @@ model Node {
   subscriptions Subscription[]
 
   trafficSnapshots TrafficSnapshot[]
+  groupMemberships InstanceGroupNode[]
 
   @@index([product])
 }
@@ -151,6 +218,8 @@ model Subscription {
   trafficUsedGb   Float              @default(0)
   backupUsedGb    Float              @default(0)
   failover        Boolean            @default(false)
+  instanceGroupId String?
+  instanceGroup   InstanceGroup?     @relation(fields: [instanceGroupId], references: [id], onDelete: SetNull)
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
 
@@ -162,6 +231,7 @@ model Subscription {
 
   @@index([userId, product])
   @@index([status])
+  @@index([instanceGroupId])
 }
 
 model Credential {
@@ -273,6 +343,34 @@ model AdminAuditLog {
   @@index([createdAt])
   @@index([targetType, targetId])
   @@index([actorId])
+}
+
+/// One-shot node bootstrap (purchase → IP/SSH → panel + REALITY + DDNS + DB).
+/// SSH secrets are never persisted; only passed in-memory for the run.
+model NodeBootstrapJob {
+  id          String             @id @default(cuid())
+  status      BootstrapJobStatus @default(QUEUED)
+  product     Product
+  role        NodeRole           @default(PRIMARY)
+  provider    String             @default("")
+  poolId      String?
+  groupId     String?
+  name        String
+  ddnsHost    String
+  sshHost     String
+  sshPort     Int                @default(22)
+  sshUser     String             @default("root")
+  panelPort   Int                @default(2053)
+  vlessPort   Int                @default(443)
+  realityDest String             @default("www.microsoft.com")
+  nodeId      String?
+  log         String             @default("")
+  error       String             @default("")
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  completedAt DateTime?
+
+  @@index([status, createdAt])
 }
 
 model TrafficSnapshot {

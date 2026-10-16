@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { addAdminNode, AdminActionError } from "@/lib/admin-actions";
 import { writeAdminAudit } from "@/lib/admin-audit";
 import { requirePermission } from "@/lib/admin-auth";
-import { parseNodeRole, toAdminNode } from "@/lib/admin-data";
+import { parseNodeProvider, parseNodeRole, toAdminNode } from "@/lib/admin-data";
 import { isProductId } from "@/lib/plans";
 
 export async function POST(request: Request) {
@@ -17,6 +17,7 @@ export async function POST(request: Request) {
         name?: string;
         ddns?: string;
         role?: string;
+        provider?: string;
         host?: string;
         port?: string | number;
         username?: string;
@@ -41,6 +42,7 @@ export async function POST(request: Request) {
       name: body.name ?? "",
       ddns: body.ddns ?? "",
       role,
+      provider: parseNodeProvider(body.provider),
       host: body.host ?? "",
       port: Number(body.port) || 2053,
       username: body.username ?? "",

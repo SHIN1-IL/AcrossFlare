@@ -3,6 +3,8 @@ RUN apk add --no-cache libc6-compat openssl
 
 FROM base AS deps
 WORKDIR /app
+# ssh2 (node bootstrap) needs a native build on Alpine.
+RUN apk add --no-cache python3 make g++
 COPY package.json package-lock.json ./
 COPY prisma ./prisma
 RUN npm ci

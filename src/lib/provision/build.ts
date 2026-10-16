@@ -74,12 +74,12 @@ export function pickNodesForYaml(nodes: YamlNode[], failover: boolean) {
   }
 
   if (failover) {
-    const racknerd = nodes.filter((node) => node.role === NodeRole.RACKNERD);
-    return racknerd.length ? racknerd : nodes;
+    const failoverNodes = nodes.filter((node) => node.role === NodeRole.FAILOVER);
+    return failoverNodes.length ? failoverNodes : nodes;
   }
 
-  const bandwagon = nodes.filter((node) => node.role === NodeRole.BANDWAGON);
-  return bandwagon.length ? bandwagon : nodes;
+  const primary = nodes.filter((node) => node.role === NodeRole.PRIMARY);
+  return primary.length ? primary : nodes;
 }
 
 /** @deprecated Use pickNodesForYaml */

@@ -1,15 +1,17 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AdminDrawer, fieldClass } from "@/components/admin/admin-drawer";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
+import { CapacityAlerts } from "@/components/admin/capacity-alerts";
 import { StatusPill } from "@/components/app/status-pill";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useAdmin } from "@/hooks/use-admin";
 import {
   addNode,
+  bootstrapNode,
   clearMigrate,
   countNodeUsers,
   deleteNode,
@@ -24,7 +26,8 @@ import type { ProductId } from "@/lib/plans";
 const emptyDraft = {
   name: "",
   ddns: "",
-  role: "bandwagon" as NodeRole,
+  role: "primary" as NodeRole,
+  provider: "",
   host: "",
   port: "2053",
   username: "",
@@ -37,11 +40,44 @@ const emptyDraft = {
   realityFingerprint: "chrome",
 };
 
-export function NodeManager({ product }: { product: ProductId }) {
+const emptyBootstrap = {
+  name: "",
+  ddnsHost: "",
+  role: "primary" as NodeRole,
+  provider: "",
+  poolId: "",
+  sshHost: "",
+  sshPort: "22",
+  sshUser: "root",
+  sshPassword: "",
+  sshPrivateKey: "",
+  panelPort: "2053",
+  vlessPort: "443",
+  realityDest: "www.microsoft.com",
+};
+
+export function NodeManager({
+  product,
+  bootstrapRequest,
+}: {
+  product: ProductId;
+  bootstrapRequest?: { poolId: string; role: NodeRole } | null;
+}) {
   const t = useTranslations("admin");
-  const { migrate, migrating, provisionSimulate } = useAdmin();
+  const { migrate, migrating, provisionSimulate, capacityPools, bootstrapQuota } = useAdmin();
   const nodes = listNodes(product);
+  const poolsForProduct = (capacityPools ?? []).filter(
+    (pool) =>
+      String(pool.product).toLowerCase() === product ||
+      (bootstrapRequest?.poolId ? pool.id === bootstrapRequest.poolId : false)
+  );
+  const [advanced, setAdvanced] = useState(false);
   const [editing, setEditing] = useState<AdminNode | "new" | null>(null);
+  const [bootstrapping, setBootstrapping] = useState(false);
+  const [bootstrapDraft, setBootstrapDraft] = useState(emptyBootstrap);
+  const [bootstrapError, setBootstrapError] = useState("");
+  const [bootstrapLog, setBootstrapLog] = useState("");
+  const [bootstrapBusy, setBootstrapBusy] = useState(false);
   const [source, setSource] = useState<AdminNode | null>(null);
   const [targetId, setTargetId] = useState("");
   const [error, setError] = useState("");
@@ -52,6 +88,41 @@ export function NodeManager({ product }: { product: ProductId }) {
   const [probeOk, setProbeOk] = useState(false);
   const [inbounds, setInbounds] = useState<XuiProbeInbound[]>([]);
   const [rowProbe, setRowProbe] = useState<{ id: string; ok: boolean; text: string } | null>(null);
+  const openedBootstrap = useRef(false);
+
+  function openBootstrap(poolId?: string, role: NodeRole = "primary") {
+    const fallback = poolsForProduct.find((pool) => pool.full)?.id ?? poolsForProduct[0]?.id ?? "";
+    setBootstrapping(true);
+    setBootstrapDraft({
+      ...emptyBootstrap,
+      poolId: poolId || fallback,
+      role,
+    });
+    setBootstrapError("");
+    setBootstrapLog("");
+  }
+
+  useEffect(() => {
+    if (!bootstrapRequest || openedBootstrap.current) {
+      return;
+    }
+    openedBootstrap.current = true;
+    setBootstrapping(true);
+    setBootstrapDraft({
+      ...emptyBootstrap,
+      poolId: bootstrapRequest.poolId,
+      role: bootstrapRequest.role,
+    });
+    setBootstrapError("");
+    setBootstrapLog("");
+  }, [bootstrapRequest]);
+
+  function bootstrapErrorText(code: string) {
+    if (code === "bootstrap_daily_limit") {
+      return t("bootstrapDailyLimit", { limit: bootstrapQuota.limit });
+    }
+    return code;
+  }
 
   const job = migrate?.product === product ? migrate : null;
   const sourceCount = source ? countNodeUsers(source.id) : 0;
@@ -72,6 +143,7 @@ export function NodeManager({ product }: { product: ProductId }) {
       name: node.name,
       ddns: node.ddns,
       role: node.role,
+      provider: node.provider,
       host: "",
       port: String(node.port || 2053),
       username: "",
@@ -145,16 +217,69 @@ export function NodeManager({ product }: { product: ProductId }) {
         title={t("nodesTitle")}
         subtitle={t("nodesSubtitle")}
         action={
-          <Button type="button" className="rounded-[10px]" onClick={openCreate}>
-            {t("addNode")}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" className="rounded-[10px]" onClick={() => openBootstrap()}>
+              {t("bootstrapNode")}
+            </Button>
+            <Button
+              type="button"
+              variant={advanced ? "secondary" : "outline"}
+              className="rounded-[10px]"
+              aria-pressed={advanced}
+              onClick={() => {
+                setAdvanced((open) => {
+                  if (open) {
+                    setSource(null);
+                    setEditing(null);
+                  }
+                  return !open;
+                });
+              }}
+            >
+              {t("nodesAdvanced")}
+            </Button>
+          </div>
         }
       />
 
+      <CapacityAlerts
+        pools={poolsForProduct}
+        quota={bootstrapQuota}
+        allowAdd
+        onAdd={openBootstrap}
+      />
       {provisionSimulate ? (
         <p className="rounded-2xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm text-amber-200">
           {t("simulateBanner")}
         </p>
+      ) : null}
+      {poolsForProduct.length ? (
+        <div className="grid gap-3 sm:grid-cols-2">
+          {poolsForProduct.map((pool) => (
+            <div
+              key={pool.id}
+              className="rounded-2xl border border-border bg-surface px-4 py-3 text-sm"
+            >
+              <p className="font-medium text-foreground">{pool.name}</p>
+              <p className="mt-1 text-muted-foreground">
+                {t("capacitySeats", {
+                  remaining: pool.seatsRemaining,
+                  used: pool.seatsUsed,
+                  max: pool.seatsMax,
+                  selectable: pool.maxSelectable,
+                })}
+              </p>
+            </div>
+          ))}
+        </div>
+      ) : null}
+      {advanced ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-surface px-4 py-3">
+          <p className="text-sm text-muted-foreground">{t("nodesAdvancedHint")}</p>
+          <Button type="button" variant="outline" className="rounded-[10px]" onClick={openCreate}>
+            {t("addNode")}
+          </Button>
+        </div>
       ) : null}
       {placeholders > 0 ? (
         <p className="rounded-2xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm text-amber-200">
@@ -163,16 +288,17 @@ export function NodeManager({ product }: { product: ProductId }) {
       ) : null}
 
       <div className="overflow-x-auto rounded-2xl border border-border">
-        <table className="w-full min-w-[980px] text-left text-sm">
+        <table className={`w-full text-left text-sm ${advanced ? "min-w-[980px]" : "min-w-[640px]"}`}>
           <thead className="border-b border-border bg-surface text-xs text-muted-foreground">
             <tr>
               <th className="px-4 py-3 font-medium">{t("nodeName")}</th>
+              <th className="px-4 py-3 font-medium">{t("role")}</th>
               <th className="px-4 py-3 font-medium">{t("ddns")}</th>
-              <th className="px-4 py-3 font-medium">{t("panel")}</th>
-              <th className="px-4 py-3 font-medium">{t("wiring")}</th>
+              {advanced ? <th className="px-4 py-3 font-medium">{t("panel")}</th> : null}
+              {advanced ? <th className="px-4 py-3 font-medium">{t("wiring")}</th> : null}
               <th className="px-4 py-3 font-medium">{t("nodeStatus")}</th>
               <th className="px-4 py-3 font-medium">{t("users")}</th>
-              <th className="px-4 py-3 font-medium" />
+              {advanced ? <th className="px-4 py-3 font-medium" /> : null}
             </tr>
           </thead>
           <tbody>
@@ -181,27 +307,34 @@ export function NodeManager({ product }: { product: ProductId }) {
               return (
                 <tr key={node.id} className="border-b border-border last:border-0">
                   <td className="px-4 py-3">{node.name}</td>
+                  <td className="px-4 py-3 text-xs">
+                    {node.role === "failover" ? t("roleFailover") : t("rolePrimary")}
+                  </td>
                   <td className="px-4 py-3 font-mono text-xs">{node.ddns}</td>
-                  <td className="px-4 py-3">
-                    <p className="font-mono text-xs">
-                      {node.hostMasked}:{node.port}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {node.inboundId ? t("inboundValue", { id: node.inboundId }) : t("inboundNone")}
-                    </p>
-                  </td>
-                  <td className="px-4 py-3">
-                    <StatusPill
-                      label={t(
-                        node.wiring === "placeholder"
-                          ? "wiring_placeholder"
-                          : node.wiring === "local"
-                            ? "wiring_local"
-                            : "wiring_ready"
-                      )}
-                      tone={node.wiring === "ready" ? "ok" : "warn"}
-                    />
-                  </td>
+                  {advanced ? (
+                    <td className="px-4 py-3">
+                      <p className="font-mono text-xs">
+                        {node.hostMasked}:{node.port}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {node.inboundId ? t("inboundValue", { id: node.inboundId }) : t("inboundNone")}
+                      </p>
+                    </td>
+                  ) : null}
+                  {advanced ? (
+                    <td className="px-4 py-3">
+                      <StatusPill
+                        label={t(
+                          node.wiring === "placeholder"
+                            ? "wiring_placeholder"
+                            : node.wiring === "local"
+                              ? "wiring_local"
+                              : "wiring_ready"
+                        )}
+                        tone={node.wiring === "ready" ? "ok" : "warn"}
+                      />
+                    </td>
+                  ) : null}
                   <td className="px-4 py-3">
                     <StatusPill
                       label={t(node.status)}
@@ -209,6 +342,7 @@ export function NodeManager({ product }: { product: ProductId }) {
                     />
                   </td>
                   <td className="px-4 py-3 font-mono text-xs">{users}</td>
+                  {advanced ? (
                   <td className="px-4 py-3 text-right">
                     <Button type="button" variant="ghost" size="sm" onClick={() => openEdit(node)}>
                       {t("edit")}
@@ -254,6 +388,7 @@ export function NodeManager({ product }: { product: ProductId }) {
                       </p>
                     ) : null}
                   </td>
+                  ) : null}
                 </tr>
               );
             })}
@@ -261,7 +396,7 @@ export function NodeManager({ product }: { product: ProductId }) {
         </table>
       </div>
 
-      {source ? (
+      {advanced && source ? (
         <section className="space-y-4 rounded-2xl border border-border bg-card p-5">
           <p className="text-sm">{t("migrateTitle")}</p>
           <p className="font-mono text-xs text-muted-foreground">
@@ -334,6 +469,168 @@ export function NodeManager({ product }: { product: ProductId }) {
       ) : null}
 
       <AdminDrawer
+        open={bootstrapping}
+        title={t("bootstrapNode")}
+        onClose={() => !bootstrapBusy && setBootstrapping(false)}
+      >
+        <form
+          className="space-y-4"
+          onSubmit={(event) => {
+            event.preventDefault();
+            if (
+              !bootstrapDraft.name.trim() ||
+              !bootstrapDraft.ddnsHost.trim() ||
+              !bootstrapDraft.sshHost.trim() ||
+              (!bootstrapDraft.sshPassword.trim() && !bootstrapDraft.sshPrivateKey.trim())
+            ) {
+              setBootstrapError(t("required"));
+              return;
+            }
+            setBootstrapBusy(true);
+            setBootstrapError("");
+            setBootstrapLog(t("bootstrapRunning"));
+            void (async () => {
+              const result = await bootstrapNode({
+                product,
+                role: bootstrapDraft.role,
+                provider: bootstrapDraft.provider,
+                poolId: bootstrapDraft.poolId || undefined,
+                name: bootstrapDraft.name,
+                ddnsHost: bootstrapDraft.ddnsHost,
+                sshHost: bootstrapDraft.sshHost,
+                sshPort: bootstrapDraft.sshPort,
+                sshUser: bootstrapDraft.sshUser,
+                sshPassword: bootstrapDraft.sshPassword || undefined,
+                sshPrivateKey: bootstrapDraft.sshPrivateKey || undefined,
+                panelPort: bootstrapDraft.panelPort,
+                vlessPort: bootstrapDraft.vlessPort,
+                realityDest: bootstrapDraft.realityDest,
+              });
+              setBootstrapBusy(false);
+              if (!result.ok) {
+                setBootstrapError(
+                  result.error ? bootstrapErrorText(result.error) : t("bootstrapFailed")
+                );
+                setBootstrapLog(result.job?.log || "");
+                return;
+              }
+              setBootstrapLog(result.job?.log || t("bootstrapDone"));
+              setBootstrapping(false);
+            })();
+          }}
+        >
+          <p className="text-xs text-muted-foreground">{t("bootstrapHint")}</p>
+          <Field label={t("nodeName")}>
+            <input
+              className={fieldClass}
+              value={bootstrapDraft.name}
+              onChange={(event) => setBootstrapDraft({ ...bootstrapDraft, name: event.target.value })}
+            />
+          </Field>
+          <Field label={t("ddns")}>
+            <input
+              className={fieldClass}
+              placeholder="node-xx.acrossflare.com"
+              value={bootstrapDraft.ddnsHost}
+              onChange={(event) => setBootstrapDraft({ ...bootstrapDraft, ddnsHost: event.target.value })}
+            />
+          </Field>
+          <Field label={t("role")}>
+            <select
+              className={fieldClass}
+              value={bootstrapDraft.role}
+              onChange={(event) =>
+                setBootstrapDraft({ ...bootstrapDraft, role: event.target.value as NodeRole })
+              }
+            >
+              <option value="primary">{t("rolePrimary")}</option>
+              <option value="failover">{t("roleFailover")}</option>
+            </select>
+          </Field>
+          <Field label={t("provider")}>
+            <input
+              className={fieldClass}
+              placeholder={t("providerPlaceholder")}
+              value={bootstrapDraft.provider}
+              onChange={(event) => setBootstrapDraft({ ...bootstrapDraft, provider: event.target.value })}
+            />
+          </Field>
+          {poolsForProduct.length ? (
+            <Field label={t("bootstrapPool")}>
+              <select
+                className={fieldClass}
+                value={bootstrapDraft.poolId}
+                onChange={(event) => setBootstrapDraft({ ...bootstrapDraft, poolId: event.target.value })}
+              >
+                <option value="">{t("bootstrapPoolNone")}</option>
+                {poolsForProduct.map((pool) => (
+                  <option key={pool.id} value={pool.id}>
+                    {pool.name}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          ) : null}
+          <Field label={t("bootstrapSshHost")}>
+            <input
+              className={fieldClass}
+              placeholder="203.0.113.10"
+              value={bootstrapDraft.sshHost}
+              onChange={(event) => setBootstrapDraft({ ...bootstrapDraft, sshHost: event.target.value })}
+            />
+          </Field>
+          <Field label={t("bootstrapSshPort")}>
+            <input
+              className={fieldClass}
+              value={bootstrapDraft.sshPort}
+              onChange={(event) => setBootstrapDraft({ ...bootstrapDraft, sshPort: event.target.value })}
+            />
+          </Field>
+          <Field label={t("bootstrapSshUser")}>
+            <input
+              className={fieldClass}
+              value={bootstrapDraft.sshUser}
+              onChange={(event) => setBootstrapDraft({ ...bootstrapDraft, sshUser: event.target.value })}
+            />
+          </Field>
+          <Field label={t("bootstrapSshPassword")}>
+            <input
+              type="password"
+              className={fieldClass}
+              value={bootstrapDraft.sshPassword}
+              onChange={(event) => setBootstrapDraft({ ...bootstrapDraft, sshPassword: event.target.value })}
+            />
+          </Field>
+          <Field label={t("bootstrapSshKey")}>
+            <textarea
+              className={fieldClass}
+              rows={3}
+              value={bootstrapDraft.sshPrivateKey}
+              onChange={(event) =>
+                setBootstrapDraft({ ...bootstrapDraft, sshPrivateKey: event.target.value })
+              }
+            />
+          </Field>
+          <Field label={t("realityServerName")}>
+            <input
+              className={fieldClass}
+              value={bootstrapDraft.realityDest}
+              onChange={(event) => setBootstrapDraft({ ...bootstrapDraft, realityDest: event.target.value })}
+            />
+          </Field>
+          {bootstrapError ? <p className="text-sm text-destructive">{bootstrapError}</p> : null}
+          {bootstrapLog ? (
+            <pre className="max-h-48 overflow-auto rounded-xl bg-surface-2 p-3 font-mono text-[11px] text-muted-foreground whitespace-pre-wrap">
+              {bootstrapLog}
+            </pre>
+          ) : null}
+          <Button type="submit" className="rounded-[10px]" disabled={bootstrapBusy}>
+            {bootstrapBusy ? t("bootstrapRunning") : t("bootstrapRun")}
+          </Button>
+        </form>
+      </AdminDrawer>
+
+      <AdminDrawer
         open={editing !== null}
         title={editing && editing !== "new" ? t("editNode") : t("addNode")}
         onClose={() => setEditing(null)}
@@ -381,9 +678,17 @@ export function NodeManager({ product }: { product: ProductId }) {
               value={draft.role}
               onChange={(event) => setDraft({ ...draft, role: event.target.value as NodeRole })}
             >
-              <option value="bandwagon">{t("roleBandwagon")}</option>
-              <option value="racknerd">{t("roleRacknerd")}</option>
+              <option value="primary">{t("rolePrimary")}</option>
+              <option value="failover">{t("roleFailover")}</option>
             </select>
+          </Field>
+          <Field label={t("provider")}>
+            <input
+              className={fieldClass}
+              placeholder={t("providerPlaceholder")}
+              value={draft.provider}
+              onChange={(event) => setDraft({ ...draft, provider: event.target.value })}
+            />
           </Field>
           <p className="text-xs text-muted-foreground">{t("maskedHint")}</p>
           <Field label={t("host")}>

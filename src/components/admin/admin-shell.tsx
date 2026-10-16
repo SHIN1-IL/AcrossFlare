@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutGrid, LogOut, Menu, Server, Shield, Ticket, Users, Wallet, X } from "lucide-react";
+import { LayoutDashboard, LayoutGrid, LogOut, Menu, Server, Shield, Ticket, Users, Wallet, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { OwnerPasswordBanner } from "@/components/admin/owner-password-banner";
@@ -19,6 +19,7 @@ import { clearSession } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
 const NAV_ICONS = {
+  overview: LayoutDashboard,
   customers: Users,
   plans: Wallet,
   codes: Ticket,

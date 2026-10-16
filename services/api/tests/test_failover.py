@@ -24,6 +24,6 @@ def test_should_failover_only_for_global_with_limit():
 
 
 def test_pick_hosts_uses_pool_when_failover_without_assigned_racknerd():
-    nodes = [{"ddns": "node-la-b.acrossflare.com", "role": "BANDWAGON"}]
-    pool = [{"ddns": "node-la-rn.acrossflare.com", "role": "RACKNERD"}]
+    nodes = [{"ddns": "node-la-b.acrossflare.com", "role": "PRIMARY"}]
+    pool = [{"ddns": "node-la-rn.acrossflare.com", "role": "FAILOVER"}]
     assert pick_hosts(nodes, failover=True, pool_nodes=pool) == ["node-la-rn.acrossflare.com"]

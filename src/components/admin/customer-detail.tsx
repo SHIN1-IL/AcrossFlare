@@ -179,7 +179,9 @@ export function CustomerDetail({ service, id }: { service: AdminServiceId; id: s
           }}
         />
         {customer.provisionError ? (
-          <p className="font-mono text-xs text-destructive">{customer.provisionError}</p>
+          <p className="font-mono text-xs text-destructive">
+            {customer.provisionError === "capacity_full" ? t("capacityFullError") : customer.provisionError}
+          </p>
         ) : null}
         {retryError ? <p className="text-sm text-destructive">{retryError}</p> : null}
         {expireError ? <p className="text-sm text-destructive">{expireError}</p> : null}

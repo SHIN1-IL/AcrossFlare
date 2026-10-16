@@ -12,7 +12,7 @@ export type AdminPlan = Plan & {
   visible: boolean;
 };
 
-export type NodeRole = "bandwagon" | "racknerd";
+export type NodeRole = "primary" | "failover";
 export type NodeHealth = "online" | "degraded" | "offline";
 
 export type AdminNode = {
@@ -21,6 +21,8 @@ export type AdminNode = {
   name: string;
   ddns: string;
   role: NodeRole;
+  /** Vendor label only; not used for routing. */
+  provider: string;
   status: NodeHealth;
   hostMasked: string;
   port: number;
@@ -161,11 +163,59 @@ export type AdminPromoCode = {
   redeemedAt: string | null;
 };
 
+export type AdminPoolCapacity = {
+  id: string;
+  product: string;
+  name: string;
+  maxSelectable: number;
+  seatsUsed: number;
+  seatsMax: number;
+  seatsRemaining: number;
+  full: boolean;
+  neededSlots: Array<{ role: "primary" | "failover"; count: number }>;
+  recentBootstrapFailures: number;
+  groups: Array<{
+    id: string;
+    name: string;
+    status: string;
+    seatsUsed: number;
+    seatsMax: number;
+  }>;
+};
+
+export type BootstrapQuota = {
+  used: number;
+  limit: number;
+  recentFailures: number;
+};
+
+export type AdminBootstrapJob = {
+  id: string;
+  status: string;
+  product: string;
+  role: "primary" | "failover";
+  provider: string;
+  poolId: string | null;
+  groupId: string | null;
+  name: string;
+  ddnsHost: string;
+  sshHost: string;
+  sshPort: number;
+  nodeId: string | null;
+  log: string;
+  error: string;
+  createdAt: string;
+  completedAt: string | null;
+};
+
 export type AdminState = {
   plans: AdminPlan[];
   nodes: AdminNode[];
   customers: AdminCustomer[];
   promoCodes: AdminPromoCode[];
+  capacityPools: AdminPoolCapacity[];
+  bootstrapQuota: BootstrapQuota;
+  bootstrapJobs: AdminBootstrapJob[];
   provision: ProvisionSession | null;
   migrate: MigrateJob | null;
   provisionSimulate: boolean;
