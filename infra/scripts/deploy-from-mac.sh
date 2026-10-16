@@ -22,11 +22,6 @@ if ! (cd "$ROOT" && npm run typecheck); then
   exit 1
 fi
 
-if ! command -v expect >/dev/null 2>&1; then
-  echo "ERROR: expect가 필요합니다. Xcode Command Line Tools를 설치하세요."
-  exit 1
-fi
-
 PASSWORD="$(
   osascript \
     -e 'display dialog "Origin VPS SSH 비밀번호를 입력하세요." & return & return & "root@167.179.86.16" default answer "" with title "AcrossFlare 배포" with hidden answer with icon note buttons {"취소", "배포 시작"} default button "배포 시작"' \
@@ -46,34 +41,27 @@ export AF_ORIGIN_HOST="$ORIGIN_HOST"
 AF_GEMINI_KEY="$(grep -E '^GEMINI_API_KEY=' "$ROOT/.env" 2>/dev/null | head -1 | cut -d= -f2- | sed 's/^"//; s/"$//' || true)"
 AF_GEMINI_MODEL="$(grep -E '^GEMINI_MODEL=' "$ROOT/.env" 2>/dev/null | head -1 | cut -d= -f2- | sed 's/^"//; s/"$//' || true)"
 AF_REMOTE_BODY="$(mktemp)"
+AF_ASKPASS="$(mktemp)"
 {
   printf 'export GEMINI_API_KEY=%q\nexport GEMINI_MODEL=%q\n' "$AF_GEMINI_KEY" "${AF_GEMINI_MODEL:-gemini-3.5-flash-lite}"
   cat "$REMOTE_SCRIPT"
 } > "$AF_REMOTE_BODY"
-trap 'rm -f "$AF_REMOTE_BODY"' EXIT
-export AF_REMOTE_SCRIPT="$AF_REMOTE_BODY"
+AF_SSH_PASS="$PASSWORD" python3 - "$AF_ASKPASS" << 'PY'
+import os, pathlib, shlex, sys
+path = pathlib.Path(sys.argv[1])
+path.write_text("#!/bin/sh\nprintf '%s\\n' " + shlex.quote(os.environ["AF_SSH_PASS"]) + "\n")
+path.chmod(0o700)
+PY
+trap 'rm -f "$AF_REMOTE_BODY" "$AF_ASKPASS"' EXIT
+export SSH_ASKPASS="$AF_ASKPASS"
+export SSH_ASKPASS_REQUIRE=force
+export DISPLAY="${DISPLAY:-:0}"
 
 echo "==> SSH 연결 및 배포 진행 중..."
-/usr/bin/expect <<'EXPECT'
-set timeout 1200
-set password $env(AF_SSH_PASS)
-set host $env(AF_ORIGIN_HOST)
-set script_path $env(AF_REMOTE_SCRIPT)
-
-log_user 1
-
-spawn bash -c "ssh -t -o StrictHostKeyChecking=accept-new -o PreferredAuthentications=password -o PubkeyAuthentication=no $host bash -s < '$script_path'"
-expect {
-  -re "(?i)password:" {
-    send "$password\r"
-    exp_continue
-  }
-  eof
-}
-catch wait result
-set exit_code [lindex $result 3]
-if {$exit_code eq ""} { set exit_code 0 }
-exit $exit_code
-EXPECT
+ssh -o StrictHostKeyChecking=accept-new \
+  -o PreferredAuthentications=password \
+  -o PubkeyAuthentication=no \
+  -o NumberOfPasswordPrompts=1 \
+  "$ORIGIN_HOST" bash -s < "$AF_REMOTE_BODY"
 
 echo "==> 완료"
