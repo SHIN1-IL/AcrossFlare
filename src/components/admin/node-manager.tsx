@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { AdminDrawer, fieldClass } from "@/components/admin/admin-drawer";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { CapacityAlerts } from "@/components/admin/capacity-alerts";
+import { HybridTeamLimits } from "@/components/admin/hybrid-team-limits";
 import { StatusPill } from "@/components/app/status-pill";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -22,6 +23,7 @@ import {
 } from "@/lib/admin-store";
 import type { AdminNode, NodeRole, XuiProbeInbound } from "@/lib/admin";
 import { poolsForAdminService } from "@/lib/admin-overview";
+import { HYBRID_POOL_ID } from "@/lib/provision/capacity-expand";
 import type { AdminServiceId } from "@/lib/admin-service";
 import type { ProductId } from "@/lib/plans";
 
@@ -278,6 +280,9 @@ export function NodeManager({
               <p className="mt-1 text-xs text-muted-foreground">
                 {t("capacitySelectable", { count: pool.maxSelectable })}
               </p>
+              {pool.id === HYBRID_POOL_ID ? (
+                <HybridTeamLimits maxSelectable={pool.maxSelectable} teamSeatsMax={pool.teamSeatsMax} />
+              ) : null}
             </div>
           ))}
         </div>

@@ -168,6 +168,8 @@ export type AdminPoolCapacity = {
   product: string;
   name: string;
   maxSelectable: number;
+  /** Seat cap of the current team, or the pool default when no team exists yet. */
+  teamSeatsMax: number;
   seatsUsed: number;
   seatsMax: number;
   seatsRemaining: number;

@@ -1,6 +1,42 @@
 /** How many bootstrap jobs may start in one UTC day. */
 export const DAILY_BOOTSTRAP_LIMIT = 20;
 
+export const HYBRID_POOL_ID = "global-hybrid";
+/** Hybrid customers receive this many primary nodes unless an admin raises it. */
+export const HYBRID_SELECTABLE_MIN = 2;
+export const HYBRID_SELECTABLE_MAX = 9;
+/** People who can share one hybrid node team. */
+export const HYBRID_SEATS_MIN = 1;
+export const HYBRID_SEATS_MAX = 10;
+
+export function parseHybridSelectable(value: unknown) {
+  const count = typeof value === "number" ? value : Number(value);
+  if (!Number.isInteger(count) || count < HYBRID_SELECTABLE_MIN || count > HYBRID_SELECTABLE_MAX) {
+    return null;
+  }
+  return count;
+}
+
+export function parseHybridSeats(value: unknown) {
+  const count = typeof value === "number" ? value : Number(value);
+  if (!Number.isInteger(count) || count < HYBRID_SEATS_MIN || count > HYBRID_SEATS_MAX) {
+    return null;
+  }
+  return count;
+}
+
+/** Ready and opening groups share one team size. A cap below people already assigned is refused. */
+export function planHybridSeatUpdate(
+  groups: ReadonlyArray<{ id: string; status: string; seatsUsed: number }>,
+  seatsMax: number
+): { ok: true; groupIds: string[] } | { ok: false; error: "seats_below_used" } {
+  const targets = groups.filter((group) => group.status === "READY" || group.status === "OPENING");
+  if (targets.some((group) => group.seatsUsed > seatsMax)) {
+    return { ok: false, error: "seats_below_used" };
+  }
+  return { ok: true, groupIds: targets.map((group) => group.id) };
+}
+
 /** Failed bootstrap jobs in this window raise an admin alert. No automatic VPS purchase. */
 export const BOOTSTRAP_FAILURE_ALERT_COUNT = 3;
 export const BOOTSTRAP_FAILURE_WINDOW_MS = 24 * 60 * 60 * 1000;

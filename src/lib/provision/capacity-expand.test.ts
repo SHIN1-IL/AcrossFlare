@@ -5,6 +5,9 @@ import {
   groupSeatView,
   neededSlotsForPool,
   occupiedSeats,
+  parseHybridSeats,
+  parseHybridSelectable,
+  planHybridSeatUpdate,
 } from "@/lib/provision/capacity-expand";
 
 const at = (iso: string) => new Date(iso);
@@ -136,5 +139,47 @@ describe("chooseBootstrapTarget", () => {
       groups: [],
     });
     expect(target).toEqual({ groupId: null, status: "OPENING" });
+  });
+});
+
+describe("hybrid team limits", () => {
+  it("keeps the hybrid node count between 2 and 9", () => {
+    expect(parseHybridSelectable(2)).toBe(2);
+    expect(parseHybridSelectable(9)).toBe(9);
+    expect(parseHybridSelectable(1)).toBeNull();
+    expect(parseHybridSelectable(10)).toBeNull();
+    expect(parseHybridSelectable(2.5)).toBeNull();
+  });
+
+  it("keeps the hybrid team size between 1 and 10", () => {
+    expect(parseHybridSeats(1)).toBe(1);
+    expect(parseHybridSeats(10)).toBe(10);
+    expect(parseHybridSeats(0)).toBeNull();
+    expect(parseHybridSeats(11)).toBeNull();
+  });
+
+  it("refuses a team size below people already assigned", () => {
+    expect(
+      planHybridSeatUpdate(
+        [
+          { id: "ready", status: "READY", seatsUsed: 4 },
+          { id: "opening", status: "OPENING", seatsUsed: 0 },
+          { id: "old", status: "DRAINING", seatsUsed: 9 },
+        ],
+        3
+      )
+    ).toEqual({ ok: false, error: "seats_below_used" });
+  });
+
+  it("updates ready and opening teams together", () => {
+    expect(
+      planHybridSeatUpdate(
+        [
+          { id: "ready", status: "READY", seatsUsed: 2 },
+          { id: "opening", status: "OPENING", seatsUsed: 0 },
+        ],
+        2
+      )
+    ).toEqual({ ok: true, groupIds: ["ready", "opening"] });
   });
 });

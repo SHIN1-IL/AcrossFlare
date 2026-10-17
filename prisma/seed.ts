@@ -165,7 +165,7 @@ async function main() {
   });
   await prisma.capacityPool.upsert({
     where: { id: "global-hybrid" },
-    update: { name: "Global Hybrid", maxSelectable: 2, seatsMaxDefault: 10 },
+    update: { name: "Global Hybrid" },
     create: {
       id: "global-hybrid",
       product: Product.GLOBAL,

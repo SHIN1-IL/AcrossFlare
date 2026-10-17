@@ -8,6 +8,7 @@ function pool(id: string, product = "GLOBAL"): AdminPoolCapacity {
     product,
     name: id,
     maxSelectable: 1,
+    teamSeatsMax: 10,
     seatsUsed: 1,
     seatsMax: 10,
     seatsRemaining: 9,

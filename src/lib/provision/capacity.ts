@@ -10,10 +10,15 @@ import {
 import { prisma } from "@/lib/db";
 import {
   DAILY_BOOTSTRAP_LIMIT,
+  HYBRID_POOL_ID,
   attachedSeatCount,
   bootstrapFailureSince,
   groupSeatView,
   neededSlotsForPool,
+  occupiedSeats,
+  parseHybridSeats,
+  parseHybridSelectable,
+  planHybridSeatUpdate,
   utcDayStart,
 } from "@/lib/provision/capacity-expand";
 import { ProvisionError } from "@/lib/provision/errors";
@@ -326,6 +331,9 @@ export async function listPoolCapacity() {
       const seatsUsed = readyViews.reduce((sum, view) => sum + view.used, 0);
       const seatsMax = readyViews.reduce((sum, view) => sum + view.max, 0);
       const seatsRemaining = readyViews.reduce((sum, view) => sum + view.remaining, 0);
+      const team =
+        pool.groups.find((group) => group.status === InstanceGroupStatus.READY) ??
+        pool.groups.find((group) => group.status === InstanceGroupStatus.OPENING);
       const opening = pool.groups.find((group) => group.status === InstanceGroupStatus.OPENING);
       const openingPrimaryOnline = opening
         ? opening.nodes.filter(
@@ -338,6 +346,7 @@ export async function listPoolCapacity() {
         product: pool.product,
         name: pool.name,
         maxSelectable: pool.maxSelectable,
+        teamSeatsMax: team?.seatsMax ?? pool.seatsMaxDefault,
         seatsUsed,
         seatsMax,
         seatsRemaining,
@@ -366,4 +375,73 @@ export async function listPoolCapacity() {
       recentFailures: failedJobs.length,
     },
   };
+}
+
+export async function updateHybridTeamLimits(input: { maxSelectable: unknown; seatsMax: unknown }) {
+  const maxSelectable = parseHybridSelectable(input.maxSelectable);
+  const seatsMax = parseHybridSeats(input.seatsMax);
+  if (maxSelectable == null || seatsMax == null) {
+    throw new ProvisionError("invalid_limits");
+  }
+
+  const pool = await prisma.capacityPool.findUnique({
+    where: { id: HYBRID_POOL_ID },
+    include: {
+      groups: {
+        select: {
+          id: true,
+          status: true,
+          seatsUsed: true,
+          nodes: { select: { nodeId: true } },
+        },
+      },
+    },
+  });
+  if (!pool) {
+    throw new ProvisionError("pool_missing");
+  }
+
+  const nodeIds = pool.groups.flatMap((group) => group.nodes.map((row) => row.nodeId));
+  const linked = nodeIds.length
+    ? await prisma.subscription.findMany({
+        where: { nodes: { some: { id: { in: nodeIds } } } },
+        select: { instanceGroupId: true, nodes: { select: { id: true } } },
+      })
+    : [];
+  const attachments = linked.map((subscription) => ({
+    instanceGroupId: subscription.instanceGroupId,
+    nodeIds: subscription.nodes.map((node) => node.id),
+  }));
+  const measured = pool.groups.map((group) => ({
+    id: group.id,
+    status: group.status,
+    seatsUsed: occupiedSeats(
+      group.seatsUsed,
+      attachedSeatCount(
+        { id: group.id, nodeIds: group.nodes.map((row) => row.nodeId) },
+        attachments
+      )
+    ),
+  }));
+  const plan = planHybridSeatUpdate(measured, seatsMax);
+  if (!plan.ok) {
+    throw new ProvisionError(plan.error);
+  }
+
+  await prisma.$transaction([
+    prisma.capacityPool.update({
+      where: { id: HYBRID_POOL_ID },
+      data: { maxSelectable, seatsMaxDefault: seatsMax },
+    }),
+    ...(plan.groupIds.length
+      ? [
+          prisma.instanceGroup.updateMany({
+            where: { id: { in: plan.groupIds } },
+            data: { seatsMax },
+          }),
+        ]
+      : []),
+  ]);
+
+  return { maxSelectable, seatsMax };
 }
