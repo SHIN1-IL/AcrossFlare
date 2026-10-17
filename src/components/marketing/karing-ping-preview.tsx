@@ -35,9 +35,9 @@ export function KaringPingPreview() {
       ref={stageRef}
       aria-hidden="true"
       data-play={play ? "" : undefined}
-      className={cn(styles?.stage, "pointer-events-none flex h-full min-h-full w-full select-none")}
+      className={cn(styles?.stage, "pointer-events-none flex w-full select-none")}
     >
-      <div className="flex aspect-[5/4] h-auto min-h-0 w-full flex-col overflow-hidden rounded-[14px] border border-[#d8d8dc] bg-white text-[#1c1c1e] shadow-[0_12px_28px_rgba(0,0,0,0.1)]">
+      <div className="flex w-full flex-col overflow-hidden rounded-[14px] border border-[#d8d8dc] bg-white text-[#1c1c1e] shadow-[0_12px_28px_rgba(0,0,0,0.1)]">
         <div className="flex items-center justify-between px-3 pt-2 text-[9px] text-[#6b6b70]">
           <span>9:41</span>
           <span className="font-medium">Karing</span>
@@ -87,8 +87,6 @@ export function KaringPingPreview() {
           />
         </div>
 
-        {/* Empty remainder so phone matches left height */}
-        <div className="min-h-0 flex-1 bg-white" />
       </div>
     </div>
   );

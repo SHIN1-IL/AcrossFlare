@@ -89,13 +89,13 @@ export function KaringSetupGuide({
                 </PreviewBoundary>
               ) : null}
               {step.id === "connect" ? (
-                <div className="mt-4 grid w-full max-w-[460px] grid-cols-2 items-stretch gap-3">
-                  <div className="flex h-full min-h-0 flex-col">
+                <div className="mt-4 grid w-full max-w-[460px] grid-cols-2 items-start gap-3">
+                  <div className="flex min-w-0 flex-col">
                     <PreviewBoundary>
                       <KaringConnectPreview />
                     </PreviewBoundary>
                   </div>
-                  <div className="flex h-full min-h-0 flex-col">
+                  <div className="flex min-w-0 flex-col">
                     <PreviewBoundary>
                       <KaringPingPreview />
                     </PreviewBoundary>

@@ -59,7 +59,7 @@ export function KaringImportPreview() {
       className={cn(styles?.stage, "pointer-events-none mt-4 flex w-full max-w-[460px] select-none gap-3")}
     >
       {/* Add Profile Link */}
-      <div className="aspect-[5/4] w-[min(48%,260px)] overflow-hidden rounded-[14px] border border-[#d8d8dc] bg-white text-[#1c1c1e] shadow-[0_12px_28px_rgba(0,0,0,0.1)]">
+      <div className="w-[min(48%,260px)] overflow-hidden rounded-[14px] border border-[#d8d8dc] bg-white text-[#1c1c1e] shadow-[0_12px_28px_rgba(0,0,0,0.1)]">
         <div className="flex items-center justify-between px-3 pt-2 text-[8px] text-[#6b6b70]">
           <span>9:41</span>
           <span className="font-medium">Karing</span>
@@ -117,7 +117,7 @@ export function KaringImportPreview() {
       </div>
 
       {/* QR 코드 스캔 */}
-      <div className="aspect-[5/4] w-[min(48%,260px)] overflow-hidden rounded-[14px] border border-[#d8d8dc] bg-white text-[#1c1c1e] shadow-[0_12px_28px_rgba(0,0,0,0.1)]">
+      <div className="w-[min(48%,260px)] overflow-hidden rounded-[14px] border border-[#d8d8dc] bg-white text-[#1c1c1e] shadow-[0_12px_28px_rgba(0,0,0,0.1)]">
         <div className="flex items-center justify-between px-2.5 pt-2 text-[8px] text-[#3a3a3c]">
           <span>KT 13:13</span>
           <span className="flex items-center gap-0.5">
