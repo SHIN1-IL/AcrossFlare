@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { HOME_STORY_HEIGHT } from "@/lib/home-story-height";
@@ -40,6 +40,7 @@ export function WhyBuyUiStoryPreview({
 }) {
   const t = useTranslations("heroDeck");
   const items = readHeroItems(t);
+  const outcomeLines = readLines(t.raw("outcomeLines"));
   const {
     sectionRef,
     step: liveStep,
@@ -89,20 +90,18 @@ export function WhyBuyUiStoryPreview({
   const stepId = STEPS[step] ?? "apps-blocked";
   const closing = step >= STEPS.length - 1;
 
-  const advanceStep = useCallback(() => {
+  function advanceStep() {
     if (live) {
       nextStep();
       return;
     }
-    setTimedStep((current) => {
-      if (current >= STEPS.length - 1) {
-        setDevFinished(true);
-        window.setTimeout(() => setDevRunId((n) => n + 1), LOOP_PAUSE_MS);
-        return current;
-      }
-      return current + 1;
-    });
-  }, [live, nextStep]);
+    if (timedStep >= STEPS.length - 1) {
+      setDevFinished(true);
+      window.setTimeout(() => setDevRunId((n) => n + 1), LOOP_PAUSE_MS);
+      return;
+    }
+    setTimedStep(timedStep + 1);
+  }
 
   const stage = (
     <div
@@ -130,16 +129,42 @@ export function WhyBuyUiStoryPreview({
         }
       `}</style>
 
-      <div className="relative z-10 flex shrink-0 flex-col items-center px-4 pt-8 text-center max-[479px]:pt-5 sm:pt-10">
-        <h1 className="text-[clamp(1.55rem,4.5vw,2.5rem)] leading-[0.95] font-semibold tracking-[-0.04em] text-[#f4f4f5] max-[479px]:text-[1.35rem]">
-          AcrossFlare
-        </h1>
-        <p className="mt-1.5 text-[clamp(0.68rem,1.6vw,0.9rem)] whitespace-nowrap text-[#888888] max-[479px]:hidden">
-          {t("brandTagline")}
-        </p>
-        <p className="mt-2 text-[clamp(0.75rem,1.5vw,0.95rem)] font-medium text-emerald-300/90 max-[479px]:mt-1 max-[479px]:text-[0.75rem]">
-          {t("headline")}
-        </p>
+      <div
+        className={cn(
+          "relative z-10 flex shrink-0 flex-col items-center px-4 text-center",
+          live ? "pt-[4.5rem] max-[479px]:pt-16" : "pt-8 max-[479px]:pt-5 sm:pt-10"
+        )}
+      >
+        {live ? (
+          <div className="w-full max-w-md text-left">
+            <h1 className="text-center text-[clamp(0.95rem,2.2vw,1.2rem)] font-medium text-emerald-300/90">
+              {t("headline")}
+            </h1>
+            <ul className="mt-2 space-y-1">
+              {outcomeLines.map((line) => (
+                <li
+                  key={line}
+                  className="flex gap-2 text-left text-[clamp(0.72rem,1.45vw,0.85rem)] leading-snug text-[#c8c8c8]"
+                >
+                  <span className="mt-[0.45em] size-1 shrink-0 rounded-full bg-emerald-400" aria-hidden="true" />
+                  <span>{line}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <>
+            <h1 className="text-[clamp(1.55rem,4.5vw,2.5rem)] leading-[0.95] font-semibold tracking-[-0.04em] text-[#f4f4f5] max-[479px]:text-[1.35rem]">
+              AcrossFlare
+            </h1>
+            <p className="mt-1.5 text-[clamp(0.68rem,1.6vw,0.9rem)] whitespace-nowrap text-[#888888] max-[479px]:hidden">
+              {t("brandTagline")}
+            </p>
+            <p className="mt-2 text-[clamp(0.75rem,1.5vw,0.95rem)] font-medium text-emerald-300/90 max-[479px]:mt-1 max-[479px]:text-[0.75rem]">
+              {t("headline")}
+            </p>
+          </>
+        )}
       </div>
 
       <div className="relative z-10 mx-auto mt-3 min-h-0 w-full max-w-2xl flex-1 px-3 max-[479px]:mt-2 max-[479px]:max-w-none">
@@ -288,6 +313,11 @@ function readHeroItems(t: ReturnType<typeof useTranslations>): HeroItem[] {
       } satisfies HeroItem;
     })
     .filter((item): item is HeroItem => item !== null);
+}
+
+function readLines(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is string => typeof item === "string" && item.length > 0);
 }
 
 function readExtraSites(t: ReturnType<typeof useTranslations>): string[] {

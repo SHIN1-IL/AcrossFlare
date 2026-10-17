@@ -206,6 +206,11 @@
   },
   "heroDeck": {
     "headline": "For travel and business in China",
+    "outcomeLines": [
+      "KakaoTalk and LINE stay connected",
+      "Hotel Wi-Fi traffic stays encrypted",
+      "Passwords and notes back up in the browser with Vaultwarden"
+    ],
     "items": [
       {
         "q": "Will your current messengers stay connected?",

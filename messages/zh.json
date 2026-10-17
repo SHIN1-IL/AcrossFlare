@@ -206,6 +206,11 @@
   },
   "heroDeck": {
     "headline": "在中国出差或旅行时",
+    "outcomeLines": [
+      "KakaoTalk 和 LINE 保持连接",
+      "酒店公共 Wi-Fi 上的通信也会加密",
+      "密码和备忘通过 Vaultwarden 在浏览器里备份"
+    ],
     "items": [
       {
         "q": "常用聊天软件能否保持连接？",
