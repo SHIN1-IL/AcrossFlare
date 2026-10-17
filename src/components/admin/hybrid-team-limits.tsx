@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { fieldClass } from "@/components/admin/admin-drawer";
 import { Button } from "@/components/ui/button";
@@ -28,13 +28,13 @@ export function HybridTeamLimits({
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
 
-  useEffect(() => {
-    if (editing) {
-      return;
-    }
+  function startEdit() {
     setNodes(String(maxSelectable));
     setSeats(String(teamSeatsMax));
-  }, [editing, maxSelectable, teamSeatsMax]);
+    setError("");
+    setSaved(false);
+    setEditing(true);
+  }
 
   async function save() {
     setBusy(true);
@@ -120,7 +120,7 @@ export function HybridTeamLimits({
           </div>
         </>
       ) : (
-        <Button type="button" variant="outline" className="rounded-[10px]" onClick={() => setEditing(true)}>
+        <Button type="button" variant="outline" className="rounded-[10px]" onClick={startEdit}>
           {t("hybridLimitsEdit")}
         </Button>
       )}
