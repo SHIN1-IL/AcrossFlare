@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import { MarginCard } from "@/components/admin/margin-card";
 import { Phase2OpsBanner } from "@/components/admin/ops-health";
 import { AdminTabSwitch } from "@/components/admin/admin-tab-switch";
-import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { Logo } from "@/components/marketing/logo";
 import { buttonVariants } from "@/components/ui/button";
 import { useHydrated, useSession, useSessionProbeDone } from "@/hooks/use-account";
@@ -41,28 +40,6 @@ function SessionRole({ owner, className }: { owner: boolean; className?: string 
   );
 }
 
-function SettingsLink({ onNavigate }: { onNavigate?: () => void }) {
-  const t = useTranslations("admin");
-  const pathname = usePathname();
-  const href = "/admin/settings";
-  const active = pathname === href || pathname.startsWith(`${href}/`);
-
-  return (
-    <Link
-      href={href}
-      prefetch
-      onClick={onNavigate}
-      className={cn(
-        "inline-flex items-center gap-2 text-sm transition-colors",
-        active ? "text-primary" : "text-muted-foreground hover:text-foreground"
-      )}
-    >
-      <Settings className="size-4" />
-      {t("navSettings")}
-    </Link>
-  );
-}
-
 function SessionIdentity({ email, owner }: { email: string; owner: boolean }) {
   return (
     <div className="space-y-1">
@@ -87,6 +64,13 @@ function NavLinks({
   const pathname = usePathname();
   const staffHref = "/admin/staff";
   const staffActive = pathname === staffHref || pathname.startsWith(`${staffHref}/`);
+  const settingsHref = "/admin/settings";
+  const settingsActive = pathname === settingsHref || pathname.startsWith(`${settingsHref}/`);
+  const itemClass = (active: boolean) =>
+    cn(
+      "flex items-center gap-2 rounded-[10px] px-3 py-2 text-sm transition-colors",
+      active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-surface-2 hover:text-foreground"
+    );
 
   return (
     <nav className="space-y-1">
@@ -101,12 +85,7 @@ function NavLinks({
             href={href}
             prefetch
             onClick={onNavigate}
-            className={cn(
-              "flex items-center gap-2 rounded-[10px] px-3 py-2 text-sm transition-colors",
-              active
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:bg-surface-2 hover:text-foreground"
-            )}
+            className={itemClass(active)}
           >
             <Icon className="size-4" />
             {t(item.key)}
@@ -118,17 +97,16 @@ function NavLinks({
           href={staffHref}
           prefetch
           onClick={onNavigate}
-          className={cn(
-            "flex items-center gap-2 rounded-[10px] px-3 py-2 text-sm transition-colors",
-            staffActive
-              ? "bg-primary/10 text-primary"
-              : "text-muted-foreground hover:bg-surface-2 hover:text-foreground"
-          )}
+          className={itemClass(staffActive)}
         >
           <Shield className="size-4" />
           {t("navStaff")}
         </Link>
       ) : null}
+      <Link href={settingsHref} prefetch onClick={onNavigate} className={itemClass(settingsActive)}>
+        <Settings className="size-4" />
+        {t("navSettings")}
+      </Link>
     </nav>
   );
 }
@@ -182,8 +160,6 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
           <NavLinks product={product} permissions={permissions} owner={owner} />
           <div className="mt-auto space-y-3 px-1 pt-4">
-            <SettingsLink />
-            <LocaleSwitcher />
             <SessionIdentity email={session.email} owner={owner} />
             <button
               type="button"
@@ -226,8 +202,6 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <div className="space-y-4 border-b border-border px-4 py-3 md:hidden">
             <AdminTabSwitch />
             <NavLinks product={product} permissions={permissions} owner={owner} onNavigate={() => setOpen(false)} />
-            <SettingsLink onNavigate={() => setOpen(false)} />
-            <LocaleSwitcher />
             <SessionIdentity email={session.email} owner={owner} />
             {owner ? <MarginCard /> : null}
           </div>

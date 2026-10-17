@@ -3,12 +3,14 @@
 import { useTranslations } from "next-intl";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { OwnerPasswordBanner } from "@/components/admin/owner-password-banner";
+import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { useSession } from "@/hooks/use-account";
 import { Link } from "@/i18n/navigation";
 import { isOwnerSession } from "@/lib/auth-types";
 
 export function AdminSettings() {
   const t = useTranslations("admin");
+  const tNav = useTranslations("nav");
   const session = useSession();
   const owner = isOwnerSession(session);
 
@@ -28,6 +30,10 @@ export function AdminSettings() {
             {t("settingsStaffLink")}
           </Link>
         ) : null}
+      </section>
+      <section className="space-y-3 rounded-2xl border border-border bg-card p-5">
+        <h2 className="text-sm font-medium">{tNav("language")}</h2>
+        <LocaleSwitcher />
       </section>
       <OwnerPasswordBanner embedded showEnvHint={owner} />
     </div>
