@@ -3,7 +3,7 @@ import {
   DEFAULT_VLESS_PORT,
   applyRealityInboundDefaults,
 } from "@/lib/provision/reality";
-import { probeXuiPanel, type XuiPanelTarget } from "@/lib/provision/xui";
+import { probeXuiPanel, isTlsProtocolMismatch, type XuiPanelTarget } from "@/lib/provision/xui";
 import { generateRealityKeyPair, generateRealityShortId } from "@/lib/bootstrap/reality-keys";
 
 export type BootstrapRealityResult = {
@@ -17,13 +17,42 @@ export type BootstrapRealityResult = {
 
 type XuiJson = { success?: boolean; msg?: string; obj?: unknown };
 
+function setCookiePairs(response: Response) {
+  const cookies =
+    typeof response.headers.getSetCookie === "function"
+      ? response.headers.getSetCookie()
+      : response.headers.get("set-cookie")
+        ? [response.headers.get("set-cookie") as string]
+        : [];
+  return cookies.map((item) => item.split(";")[0]?.trim() ?? "").filter(Boolean);
+}
+
+/** Later cookies with the same name replace earlier ones. The panel rejects the API when the pre-login cookie is sent first. */
+function mergeCookiePairs(existing: string, incoming: string[]) {
+  const jar = new Map<string, string>();
+  for (const part of existing.split(";")) {
+    const trimmed = part.trim();
+    const eq = trimmed.indexOf("=");
+    if (eq > 0) {
+      jar.set(trimmed.slice(0, eq), trimmed.slice(eq + 1));
+    }
+  }
+  for (const pair of incoming) {
+    const eq = pair.indexOf("=");
+    if (eq > 0) {
+      jar.set(pair.slice(0, eq), pair.slice(eq + 1));
+    }
+  }
+  return [...jar.entries()].map(([key, value]) => `${key}=${value}`).join("; ");
+}
+
 async function loginAndRequest(node: XuiPanelTarget, path: string, init?: RequestInit) {
   // Reuse probe login path by dynamically importing internals via public API surface:
   // We call list through probe, then add/update with duplicated fetch using password login.
   const { xuiApiToken, xuiTlsInsecure } = await import("@/lib/provision/config");
   const { Agent } = await import("undici");
 
-  const base =
+  let base =
     node.host.startsWith("http://") || node.host.startsWith("https://")
       ? node.host.replace(/\/$/, "")
       : `${node.port === 443 || node.port === 2053 ? "https" : "http"}://${node.host}:${node.port}`;
@@ -34,12 +63,22 @@ async function loginAndRequest(node: XuiPanelTarget, path: string, init?: Reques
       : undefined;
 
   async function rawFetch(url: string, requestInit: RequestInit) {
-    return fetch(url, {
-      ...requestInit,
-      redirect: "manual",
-      signal: AbortSignal.timeout(20_000),
-      ...(dispatcher ? { dispatcher } : {}),
-    } as RequestInit);
+    const send = (target: string) =>
+      fetch(target, {
+        ...requestInit,
+        redirect: "manual",
+        signal: AbortSignal.timeout(20_000),
+        ...(dispatcher ? { dispatcher } : {}),
+      } as RequestInit);
+    try {
+      return await send(url);
+    } catch (error) {
+      if (!url.startsWith("https://") || !isTlsProtocolMismatch(error)) {
+        throw error;
+      }
+      base = `http://${base.slice("https://".length)}`;
+      return await send(`http://${url.slice("https://".length)}`);
+    }
   }
 
   const token = xuiApiToken();
@@ -51,13 +90,7 @@ async function loginAndRequest(node: XuiPanelTarget, path: string, init?: Reques
     const boot = await rawFetch(`${base}/`, { method: "GET" });
     const html = await boot.text();
     csrf = html.match(/name="csrf-token"\s+content="([^"]+)"/)?.[1] ?? "";
-    const setCookie =
-      typeof boot.headers.getSetCookie === "function"
-        ? boot.headers.getSetCookie()
-        : boot.headers.get("set-cookie")
-          ? [boot.headers.get("set-cookie") as string]
-          : [];
-    cookie = setCookie.map((item) => item.split(";")[0]).join("; ");
+    cookie = mergeCookiePairs("", setCookiePairs(boot));
 
     const login = await rawFetch(`${base}/login`, {
       method: "POST",
@@ -69,15 +102,7 @@ async function loginAndRequest(node: XuiPanelTarget, path: string, init?: Reques
       },
       body: JSON.stringify({ username: node.username, password: node.password }),
     });
-    const loginCookies =
-      typeof login.headers.getSetCookie === "function"
-        ? login.headers.getSetCookie()
-        : login.headers.get("set-cookie")
-          ? [login.headers.get("set-cookie") as string]
-          : [];
-    cookie = [...cookie.split("; ").filter(Boolean), ...loginCookies.map((item) => item.split(";")[0])]
-      .filter(Boolean)
-      .join("; ");
+    cookie = mergeCookiePairs(cookie, setCookiePairs(login));
     const loginBody = (await login.json().catch(() => null)) as XuiJson | null;
     if (loginBody?.success === false) {
       throw new Error(loginBody.msg || "login_failed");

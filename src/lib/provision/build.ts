@@ -91,6 +91,23 @@ export function buildVlessYamlFromNodes(nodes: YamlNode[], uuid: string, failove
   return buildVlessYaml(pickNodesForYaml(nodes, failover), uuid, { refreshHint: failover });
 }
 
+export type SubscriptionPreviewProxy = {
+  name: string;
+  server: string;
+  port: number;
+  servername: string;
+};
+
+/** Live profile Karing would import: node name, connect host, and REALITY SNI. No keys. */
+export function previewSubscriptionProxies(nodes: YamlNode[], failover: boolean): SubscriptionPreviewProxy[] {
+  return pickNodesForYaml(nodes, failover).map((node, index) => ({
+    name: node.ddns.split(".")[0] || `node-${index}`,
+    server: vlessConnectHost(node),
+    port: node.vlessPort ?? DEFAULT_VLESS_PORT,
+    servername: hasRealityConfig(node) ? node.realityServerName!.trim() : "",
+  }));
+}
+
 function proxyName(node: YamlNode, index: number) {
   return node.ddns.split(".")[0] ?? `node-${index}`;
 }

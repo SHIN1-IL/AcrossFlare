@@ -3,6 +3,7 @@ import {
   buildVlessYaml,
   buildVlessYamlFromNodes,
   karingDeepLink,
+  previewSubscriptionProxies,
   pickHostsForYaml,
   syncthingFolderId,
   vaultUserId,
@@ -38,6 +39,14 @@ describe("provision/build", () => {
     expect(share.startsWith("vless://uuid-1@74.82.221.67:443?")).toBe(true);
     expect(share).toContain("security=reality");
     expect(share).toContain("sni=www.microsoft.com");
+    expect(previewSubscriptionProxies([realityNode("node-tokyo.acrossflare.com", NodeRole.PRIMARY)], false)).toEqual([
+      {
+        name: "node-tokyo",
+        server: "node-tokyo.acrossflare.com",
+        port: 443,
+        servername: "www.microsoft.com",
+      },
+    ]);
   });
 
   it("emits REALITY VLESS yaml with the backup dashboard notice", () => {

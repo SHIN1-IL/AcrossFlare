@@ -45,6 +45,8 @@ function toneFor(status: CustomerStatus) {
 
 const FILTER_LABEL: Record<
   AdminQueueFilter,
+  | "filterCurrent"
+  | "filterEnded"
   | "filterAll"
   | "filterFailed"
   | "filterProvisioning"
@@ -53,6 +55,8 @@ const FILTER_LABEL: Record<
   | "filterExpired"
   | "filterExpiring"
 > = {
+  current: "filterCurrent",
+  ended: "filterEnded",
   all: "filterAll",
   failed: "filterFailed",
   provisioning: "filterProvisioning",

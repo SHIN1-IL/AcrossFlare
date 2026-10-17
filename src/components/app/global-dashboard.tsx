@@ -6,7 +6,9 @@ import { IssuingSkeleton, ProductEmpty } from "@/components/app/product-empty";
 import { KaringConnectPanel } from "@/components/app/karing-connect-panel";
 import { StatusPill } from "@/components/app/status-pill";
 import { UsageMeter } from "@/components/app/usage-meter";
+import { SubscriptionRefreshTest } from "@/components/admin/subscription-refresh-test";
 import { useAccount } from "@/hooks/use-account";
+import { isAdminSession } from "@/lib/auth-types";
 import { Link } from "@/i18n/navigation";
 import { DocumentLink } from "@/components/marketing/cached-marketing-link";
 import { formatDate } from "@/lib/format-date";
@@ -16,7 +18,7 @@ import { SUPPORT_HREF } from "@/lib/support-zone";
 export function GlobalDashboard({ product = "global" }: { product?: "global" | "hybrid" | "workspace" }) {
   const t = useTranslations("app");
   const locale = useLocale();
-  const { account } = useAccount();
+  const { account, session } = useAccount();
 
   if (!account) {
     return null;
@@ -91,6 +93,11 @@ export function GlobalDashboard({ product = "global" }: { product?: "global" | "
       <section className="space-y-3">
         <p className="text-xs leading-5 text-muted-foreground">{t("karingRefreshHint")}</p>
         <KaringConnectPanel yamlUrl={lane.yamlUrl} showDownload />
+        {isAdminSession(session) ? (
+          <SubscriptionRefreshTest
+            service={product === "workspace" ? "workspace" : product === "hybrid" ? "hybrid" : "standard"}
+          />
+        ) : null}
       </section>
 
       {hasBackup ? (

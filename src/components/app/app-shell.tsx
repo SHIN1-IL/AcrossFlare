@@ -9,6 +9,7 @@ import { Logo } from "@/components/marketing/logo";
 import { buttonVariants } from "@/components/ui/button";
 import { useAccount, useHydrated, useSessionProbeDone } from "@/hooks/use-account";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import { isAdminSession } from "@/lib/auth-types";
 import { clearSession } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
@@ -90,15 +91,24 @@ export function AppShell({
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (hydrated && probeDone && !session) {
+    if (!hydrated || !probeDone) {
+      return;
+    }
+
+    if (!session) {
       router.replace({
         pathname: "/login",
         query: { next: pathname },
       });
+      return;
+    }
+
+    if (isAdminSession(session)) {
+      router.replace("/admin");
     }
   }, [hydrated, pathname, probeDone, router, session]);
 
-  if (!hydrated || !probeDone || !session || !accountReady) {
+  if (!hydrated || !probeDone || !session || isAdminSession(session) || !accountReady) {
     return (
       <div className="flex min-h-dvh items-center justify-center bg-background">
         <div className="h-8 w-8 animate-pulse rounded-full bg-primary/20" />

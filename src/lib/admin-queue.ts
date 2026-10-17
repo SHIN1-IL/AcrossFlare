@@ -2,6 +2,8 @@ import type { AdminCustomer, CustomerStatus, JobStep, JobStepStatus } from "@/li
 import { stepsFromProvision, provisionSteps } from "@/lib/admin";
 
 export const ADMIN_QUEUE_FILTERS = [
+  "current",
+  "ended",
   "all",
   "failed",
   "provisioning",
@@ -38,12 +40,35 @@ export function isExpired(expiresAt: string, now = Date.now()) {
   return expires < now;
 }
 
+/** Active subscription whose end date has not passed. */
+export function isCurrentCustomer(customer: Pick<AdminCustomer, "status" | "signupOnly" | "expiresAt">, now = Date.now()) {
+  return !customer.signupOnly && customer.status === "active" && !isExpired(customer.expiresAt, now);
+}
+
+/** Provision finished, and the customer is no longer using the service. */
+export function isEndedCustomer(
+  customer: Pick<AdminCustomer, "status" | "signupOnly" | "expiresAt" | "provisionStep">,
+  now = Date.now()
+) {
+  if (customer.signupOnly || customer.provisionStep !== "ready") {
+    return false;
+  }
+  if (customer.status === "failed" || customer.status === "provisioning") {
+    return false;
+  }
+  return !isCurrentCustomer(customer, now);
+}
+
 export function matchesAdminQueueFilter(
   customer: AdminCustomer,
   filter: AdminQueueFilter,
   now = Date.now()
 ) {
   switch (filter) {
+    case "current":
+      return isCurrentCustomer(customer, now);
+    case "ended":
+      return isEndedCustomer(customer, now);
     case "failed":
       return customer.status === "failed";
     case "provisioning":
@@ -73,6 +98,8 @@ export function sortAdminQueue(customers: AdminCustomer[], now = Date.now()) {
 
 export function adminQueueCounts(customers: AdminCustomer[], now = Date.now()) {
   return {
+    current: customers.filter((customer) => isCurrentCustomer(customer, now)).length,
+    ended: customers.filter((customer) => isEndedCustomer(customer, now)).length,
     failed: customers.filter((customer) => customer.status === "failed").length,
     provisioning: customers.filter((customer) => customer.status === "provisioning").length,
     unpaid: customers.filter((customer) => customer.status === "unpaid" && !customer.signupOnly).length,

@@ -90,6 +90,8 @@ describe("admin-queue", () => {
     ];
 
     expect(adminQueueCounts(rows, now)).toEqual({
+      current: 2,
+      ended: 2,
       failed: 1,
       provisioning: 1,
       unpaid: 1,
@@ -97,6 +99,17 @@ describe("admin-queue", () => {
       expired: 1,
       expiring: 1,
     });
+    expect(rows.filter((row) => matchesAdminQueueFilter(row, "current", now)).map((row) => row.id)).toEqual([
+      "soon",
+      "ok",
+    ]);
+    expect(rows.filter((row) => matchesAdminQueueFilter(row, "ended", now)).map((row) => row.id)).toEqual([
+      "pay",
+      "old",
+    ]);
+    expect(
+      matchesAdminQueueFilter(customer({ status: "unpaid", provisionStep: "queued" }), "ended", now)
+    ).toBe(false);
     expect(rows.filter((row) => matchesAdminQueueFilter(row, "unpaid", now)).map((row) => row.id)).toEqual(["pay"]);
     expect(rows.filter((row) => matchesAdminQueueFilter(row, "signup_only", now)).map((row) => row.id)).toEqual([
       "signup",

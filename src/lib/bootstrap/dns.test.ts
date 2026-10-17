@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { upsertNodeARecord } from "@/lib/bootstrap/dns";
+import { dnsRecordAlreadySet, upsertNodeARecord } from "@/lib/bootstrap/dns";
+import { resolve4 } from "node:dns/promises";
+
+vi.mock("node:dns/promises", () => ({
+  resolve4: vi.fn(),
+}));
 
 describe("upsertNodeARecord", () => {
   afterEach(() => {
@@ -15,6 +20,15 @@ describe("upsertNodeARecord", () => {
     if (result.ok) {
       expect(result.skipped).toBe(true);
     }
+  });
+
+  it("accepts a hostname that already resolves to the VPS address", async () => {
+    vi.mocked(resolve4).mockResolvedValue(["74.82.221.67"]);
+    await expect(dnsRecordAlreadySet("node-tokyo.acrossflare.com", "74.82.221.67")).resolves.toBe(true);
+    vi.mocked(resolve4).mockResolvedValue(["1.2.3.4"]);
+    await expect(dnsRecordAlreadySet("node-tokyo.acrossflare.com", "74.82.221.67")).resolves.toBe(false);
+    vi.mocked(resolve4).mockRejectedValue(new Error("ENOTFOUND"));
+    await expect(dnsRecordAlreadySet("missing.acrossflare.com", "74.82.221.67")).resolves.toBe(false);
   });
 
   it("rejects non-ipv4", async () => {

@@ -1,5 +1,6 @@
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
+import { SessionProvider } from "@/components/auth/session-provider";
 import { resolveLocale } from "@/i18n/locale";
 import { MARKETING_MESSAGE_KEYS, pickMessages } from "@/i18n/messages";
 
@@ -14,5 +15,9 @@ export default async function MarketingLayout({
   setRequestLocale(locale);
   const messages = pickMessages(await getMessages(), MARKETING_MESSAGE_KEYS);
 
-  return <NextIntlClientProvider locale={locale} messages={messages}>{children}</NextIntlClientProvider>;
+  return (
+    <NextIntlClientProvider locale={locale} messages={messages}>
+      <SessionProvider>{children}</SessionProvider>
+    </NextIntlClientProvider>
+  );
 }

@@ -8,7 +8,7 @@ import {
 } from "@prisma/client";
 import { randomBytes } from "node:crypto";
 import { prisma } from "@/lib/db";
-import { upsertNodeARecord } from "@/lib/bootstrap/dns";
+import { dnsRecordAlreadySet, upsertNodeARecord } from "@/lib/bootstrap/dns";
 import { buildRemoteInstallScript } from "@/lib/bootstrap/remote-install";
 import { sshRunScript, type SshAuth } from "@/lib/bootstrap/ssh";
 import { ensureBootstrapRealityInbound } from "@/lib/bootstrap/xui-inbound";
@@ -145,9 +145,15 @@ export async function runBootstrapJob(jobId: string, secrets: BootstrapSecrets) 
     await logLine(jobId, "dns: upsert A record (DNS only)");
     const dns = await upsertNodeARecord({ fqdn: job.ddnsHost, ipv4: job.sshHost });
     if (!dns.ok) {
-      throw new BootstrapError("dns_failed", dns.error);
-    }
-    if (dns.skipped) {
+      const already = await dnsRecordAlreadySet(job.ddnsHost, job.sshHost);
+      if (!already) {
+        throw new BootstrapError("dns_failed", dns.error);
+      }
+      await logLine(
+        jobId,
+        `dns: api failed (${dns.error}); public A already ${job.sshHost}, continuing`
+      );
+    } else if (dns.skipped) {
       await logLine(jobId, `dns: skipped (${dns.reason})`);
     } else {
       await logLine(jobId, `dns: ok record=${dns.recordId}`);
@@ -168,7 +174,7 @@ export async function runBootstrapJob(jobId: string, secrets: BootstrapSecrets) 
     if (remote.code !== 0 || !remote.stdout.includes("AF_BOOTSTRAP_PANEL_READY")) {
       throw new BootstrapError(
         "remote_install_failed",
-        (remote.stderr || remote.stdout || "install_failed").slice(0, 500)
+        `${remote.stderr}\n${remote.stdout}`.trim().slice(-500) || "install_failed"
       );
     }
 

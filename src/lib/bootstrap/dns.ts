@@ -1,7 +1,24 @@
+import { resolve4 } from "node:dns/promises";
+
 export type DnsUpsertResult =
   | { ok: true; recordId: string; skipped?: false }
   | { ok: true; recordId: ""; skipped: true; reason: string }
   | { ok: false; error: string };
+
+/** True when public DNS already points the node hostname at this VPS. */
+export async function dnsRecordAlreadySet(fqdn: string, ipv4: string) {
+  const name = fqdn.trim().toLowerCase().replace(/\.$/, "");
+  const expected = ipv4.trim();
+  if (!name || !expected) {
+    return false;
+  }
+  try {
+    const answers = await resolve4(name);
+    return answers.includes(expected);
+  } catch {
+    return false;
+  }
+}
 
 function cloudflareCreds() {
   const zoneId = process.env.CLOUDFLARE_ZONE_ID?.trim();

@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { localePath } from "@/i18n/path";
+import { documentHref, localePath } from "@/i18n/path";
 import { buttonVariants } from "@/components/ui/button";
 import {
   CachedMarketingLink,
@@ -13,7 +13,7 @@ import { ServiceNav } from "@/components/marketing/service-nav";
 import { SupportNav } from "@/components/marketing/support-nav";
 import { useHydrated, useSession, useSignedInFlag } from "@/hooks/use-account";
 import { signedInHomeHref } from "@/lib/auth-types";
-import { clearSession } from "@/lib/session";
+import { clearSession, refreshSession } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
 export function MarketingHeader() {
@@ -23,7 +23,13 @@ export function MarketingHeader() {
   const session = useSession();
   const signedInFlag = useSignedInFlag();
   const signedIn = hydrated && (Boolean(session) || signedInFlag);
-  const consoleHref = signedInHomeHref(session);
+  const consoleHref = session ? signedInHomeHref(session) : null;
+
+  function openConsole() {
+    void refreshSession().then((next) => {
+      window.location.assign(documentHref(locale, signedInHomeHref(next)));
+    });
+  }
 
   function logout() {
     void clearSession().then(() => {
@@ -54,15 +60,28 @@ export function MarketingHeader() {
               >
                 {t("logout")}
               </button>
-              <DocumentLink
-                href={consoleHref}
-                className={cn(
-                  buttonVariants({ size: "sm" }),
-                  "rounded-[10px] px-2 md:px-2.5"
-                )}
-              >
-                {t("console")}
-              </DocumentLink>
+              {consoleHref ? (
+                <DocumentLink
+                  href={consoleHref}
+                  className={cn(
+                    buttonVariants({ size: "sm" }),
+                    "rounded-[10px] px-2 md:px-2.5"
+                  )}
+                >
+                  {t("console")}
+                </DocumentLink>
+              ) : (
+                <button
+                  type="button"
+                  onClick={openConsole}
+                  className={cn(
+                    buttonVariants({ size: "sm" }),
+                    "rounded-[10px] px-2 md:px-2.5"
+                  )}
+                >
+                  {t("console")}
+                </button>
+              )}
             </>
           ) : (
             <>

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { checkoutReturnUrl } from "@/lib/payments/start";
-import { summarizeXuiInbounds, xuiTlsDispatcher } from "@/lib/provision/xui";
+import { summarizeXuiInbounds, xuiTlsDispatcher, isTlsProtocolMismatch } from "@/lib/provision/xui";
 
 describe("payments/start return url", () => {
   const env = { ...process.env };
@@ -41,6 +41,14 @@ describe("xui tls", () => {
   it("scopes insecure TLS to the panel dispatcher", () => {
     expect(xuiTlsDispatcher()).toBeDefined();
     expect(process.env.NODE_TLS_REJECT_UNAUTHORIZED).toBeUndefined();
+  });
+
+  it("treats a plain-HTTP panel on the HTTPS port as a protocol mismatch", () => {
+    const cause = Object.assign(new Error("tlsv1 alert protocol version"), {
+      code: "ERR_SSL_TLSV1_ALERT_PROTOCOL_VERSION",
+    });
+    expect(isTlsProtocolMismatch(new TypeError("fetch failed", { cause }))).toBe(true);
+    expect(isTlsProtocolMismatch(new Error("ECONNREFUSED"))).toBe(false);
   });
 });
 

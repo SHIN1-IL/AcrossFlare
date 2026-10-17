@@ -85,6 +85,32 @@ function cookieHeader(response: Response) {
     .join("; ");
 }
 
+export function isTlsProtocolMismatch(error: unknown) {
+  const parts: string[] = [];
+  let current: unknown = error;
+  for (let depth = 0; depth < 4 && current; depth += 1) {
+    if (current instanceof Error) {
+      parts.push(current.name, current.message);
+      const code = (current as Error & { code?: string }).code;
+      if (code) {
+        parts.push(code);
+      }
+      current = "cause" in current ? (current as { cause?: unknown }).cause : undefined;
+      continue;
+    }
+    parts.push(String(current));
+    break;
+  }
+  const text = parts.join(" ").toLowerCase();
+  return (
+    text.includes("tlsv1 alert protocol version") ||
+    text.includes("wrong version number") ||
+    text.includes("packet length too long") ||
+    text.includes("err_ssl_tlsv1_alert_protocol_version") ||
+    text.includes("eproto")
+  );
+}
+
 function csrfFromHtml(html: string) {
   return html.match(/name="csrf-token"\s+content="([^"]+)"/)?.[1] ?? "";
 }
@@ -115,6 +141,18 @@ async function panelFetch(url: string, init: RequestInit) {
   return response;
 }
 
+async function fetchPanel(baseUrl: string, path: string, init: RequestInit) {
+  try {
+    return { baseUrl, response: await panelFetch(`${baseUrl}${path}`, init) };
+  } catch (error) {
+    if (!baseUrl.startsWith("https://") || !isTlsProtocolMismatch(error)) {
+      throw error;
+    }
+    const httpBase = `http://${baseUrl.slice("https://".length)}`;
+    return { baseUrl: httpBase, response: await panelFetch(`${httpBase}${path}`, init) };
+  }
+}
+
 function panelLabel(node: XuiPanelTarget) {
   return node.id || node.host || "panel";
 }
@@ -125,8 +163,10 @@ async function login(node: XuiPanelTarget): Promise<XuiSession> {
     return { baseUrl: panelBase(node), cookie: "", csrf: "", bearer: token };
   }
 
-  const baseUrl = panelBase(node);
-  const bootstrap = await panelFetch(`${baseUrl}/`, { method: "GET" });
+  let baseUrl = panelBase(node);
+  const opened = await fetchPanel(baseUrl, "/", { method: "GET" });
+  baseUrl = opened.baseUrl;
+  const bootstrap = opened.response;
   const csrf = csrfFromHtml(await bootstrap.text());
   let cookie = cookieHeader(bootstrap);
 
@@ -168,7 +208,9 @@ async function panelRequest(session: XuiSession, path: string, init: RequestInit
     headers.set("X-CSRF-Token", session.csrf);
   }
 
-  const response = await panelFetch(`${session.baseUrl}${path}`, { ...init, headers });
+  const result = await fetchPanel(session.baseUrl, path, { ...init, headers });
+  session.baseUrl = result.baseUrl;
+  const response = result.response;
   const body = (await response.json().catch(() => null)) as XuiJson | null;
 
   if (!response.ok || body?.success === false) {
