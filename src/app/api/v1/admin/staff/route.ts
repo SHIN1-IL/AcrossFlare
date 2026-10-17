@@ -10,6 +10,7 @@ import {
   permissionsFor,
 } from "@/lib/admin-permissions";
 import { prisma } from "@/lib/db";
+import { NODE_PROBE_USER_EMAIL } from "@/lib/subscription-scope";
 
 function toStaffUser(row: {
   id: string;
@@ -34,7 +35,7 @@ export async function GET() {
   }
 
   const users = await prisma.user.findMany({
-    where: { role: { in: ["USER", "STAFF"] } },
+    where: { role: { in: ["USER", "STAFF"] }, email: { not: NODE_PROBE_USER_EMAIL } },
     select: { id: true, email: true, role: true, staffPermissions: true, createdAt: true },
     orderBy: { email: "asc" },
   });

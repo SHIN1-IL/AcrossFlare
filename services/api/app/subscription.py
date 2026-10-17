@@ -22,7 +22,8 @@ def resolve_subscription(
     expires_at = row.get("expires_at")
     used_gb = float(row.get("traffic_used_gb") or 0)
     limit_gb = row.get("traffic_gb")
-    failover = bool(row.get("failover"))
+    probe = bool(row.get("probe"))
+    failover = False if probe else bool(row.get("failover"))
     nodes: list[NodeRow] = row.get("nodes") or []
     pool_nodes: list[NodeRow] = row.get("pool_nodes") or []
 
@@ -32,7 +33,8 @@ def resolve_subscription(
     current = now or datetime.now(timezone.utc)
     expired = bool(expires_at and _as_utc(expires_at) < current)
     over_limit = (
-        limit_gb is not None
+        not probe
+        and limit_gb is not None
         and not failover
         and used_gb >= float(limit_gb)
     )
@@ -41,7 +43,7 @@ def resolve_subscription(
     headers = karing_headers(
         expire_at=expires_at,
         used_gb=used_gb,
-        limit_gb=None if failover else limit_gb,
+        limit_gb=None if probe or failover else limit_gb,
         filename=attachment,
     )
 

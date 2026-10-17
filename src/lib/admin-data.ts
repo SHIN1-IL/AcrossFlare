@@ -33,6 +33,7 @@ import { toPrismaProduct, toProductId } from "@/lib/product";
 import { appUrl, isProvisionSimulate } from "@/lib/provision/config";
 import { yamlUrlFor } from "@/lib/provision/build";
 import { nodeWiring } from "@/lib/provision/node-wiring";
+import { NODE_PROBE_USER_EMAIL, customerSubscriptionWhere } from "@/lib/subscription-scope";
 
 type CustomerRow = Subscription & {
   user: { email: string; createdAt: Date };
@@ -305,6 +306,7 @@ export async function listAdminState() {
     prisma.plan.findMany({ orderBy: { name: "asc" } }),
     prisma.node.findMany({ orderBy: { createdAt: "asc" } }),
     prisma.subscription.findMany({
+      where: customerSubscriptionWhere,
       include: customerListInclude(),
       orderBy: { createdAt: "desc" },
     }),
@@ -315,6 +317,7 @@ export async function listAdminState() {
     prisma.user.findMany({
       where: {
         role: "USER",
+        email: { not: NODE_PROBE_USER_EMAIL },
         subscriptions: { none: {} },
       },
       select: { id: true, email: true, createdAt: true },
@@ -356,7 +359,7 @@ export async function getAdminCustomer(id: string) {
     }),
   ]);
 
-  if (!row) {
+  if (!row || row.probeNodeId) {
     return null;
   }
 

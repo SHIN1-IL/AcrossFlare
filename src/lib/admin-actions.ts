@@ -32,6 +32,7 @@ import { assertRealityConfigured } from "@/lib/provision/reality";
 import { assignNodesForPlan, poolIdForNodeCodes, releaseSeat } from "@/lib/provision/capacity";
 import { provisionSubscription, ProvisionError } from "@/lib/provision/run";
 import { addXuiClient, deleteXuiClient, probeXuiPanel } from "@/lib/provision/xui";
+import { customerOnNodeWhere } from "@/lib/subscription-scope";
 
 export class AdminActionError extends Error {
   constructor(
@@ -319,8 +320,19 @@ function parseInboundId(value: number | null | undefined) {
 }
 
 export async function removeAdminNode(id: string) {
+  const [node, probe] = await Promise.all([
+    prisma.node.findUnique({ where: { id } }),
+    prisma.subscription.findUnique({
+      where: { probeNodeId: id },
+      include: { credentials: true },
+    }),
+  ]);
+  if (node && probe) {
+    await destroyXuiClients([node], probe.credentials);
+  }
+
   const inUse = await prisma.subscription.count({
-    where: { nodes: { some: { id } } },
+    where: customerOnNodeWhere(id),
   });
   if (inUse > 0) {
     throw new AdminActionError("node_in_use", 409);
@@ -584,8 +596,8 @@ export async function migrateNodeUsers(input: {
 
   const movers = await prisma.subscription.findMany({
     where: {
+      ...customerOnNodeWhere(from.id),
       product,
-      nodes: { some: { id: from.id } },
     },
     include: { plan: true, nodes: true, credentials: true },
   });

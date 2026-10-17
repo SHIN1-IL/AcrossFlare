@@ -8,6 +8,7 @@ import {
   type Plan,
 } from "@prisma/client";
 import { prisma } from "@/lib/db";
+import { customerSubscriptionWhere } from "@/lib/subscription-scope";
 import {
   DAILY_BOOTSTRAP_LIMIT,
   HYBRID_POOL_ID,
@@ -306,7 +307,7 @@ export async function listPoolCapacity() {
   ];
   const linked = nodeIds.length
     ? await prisma.subscription.findMany({
-        where: { nodes: { some: { id: { in: nodeIds } } } },
+        where: { ...customerSubscriptionWhere, nodes: { some: { id: { in: nodeIds } } } },
         select: { instanceGroupId: true, nodes: { select: { id: true } } },
       })
     : [];
@@ -404,7 +405,7 @@ export async function updateHybridTeamLimits(input: { maxSelectable: unknown; se
   const nodeIds = pool.groups.flatMap((group) => group.nodes.map((row) => row.nodeId));
   const linked = nodeIds.length
     ? await prisma.subscription.findMany({
-        where: { nodes: { some: { id: { in: nodeIds } } } },
+        where: { ...customerSubscriptionWhere, nodes: { some: { id: { in: nodeIds } } } },
         select: { instanceGroupId: true, nodes: { select: { id: true } } },
       })
     : [];

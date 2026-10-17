@@ -110,6 +110,25 @@ def test_resolve_subscription_returns_empty_proxies_when_expired():
     assert "expire=" in headers["subscription-userinfo"]
 
 
+def test_resolve_subscription_admin_probe_ignores_quota_and_keeps_failover_node():
+    failover_node = {**REALITY_NODE, "ddns": "node-new.acrossflare.com", "role": "FAILOVER"}
+    row = {
+        "uuid": "uuid-probe",
+        "status": "ACTIVE",
+        "expires_at": datetime(2036, 1, 1, tzinfo=timezone.utc),
+        "traffic_used_gb": 999.0,
+        "failover": True,
+        "traffic_gb": 10.0,
+        "probe": True,
+        "nodes": [failover_node],
+        "pool_nodes": [REALITY_NODE],
+    }
+    body, headers = resolve_subscription(row, fmt="clash")
+    assert "node-new" in body
+    assert "node-la-b" not in body
+    assert "total=0" in headers["subscription-userinfo"]
+
+
 def test_resolve_subscription_returns_empty_proxies_when_over_limit():
     row = {
         "uuid": "uuid-1",

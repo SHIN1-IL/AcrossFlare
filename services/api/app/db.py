@@ -24,6 +24,7 @@ def fetch_subscription_by_token(token: str) -> dict[str, Any] | None:
                   s.failover,
                   p."trafficGb",
                   s.product::text,
+                  s."probeNodeId" IS NOT NULL AS probe,
                   COALESCE(
                     json_agg(
                       json_build_object(
@@ -53,7 +54,8 @@ def fetch_subscription_by_token(token: str) -> dict[str, Any] | None:
                   s."trafficUsedGb",
                   s.failover,
                   p."trafficGb",
-                  s.product
+                  s.product,
+                  s."probeNodeId"
                 LIMIT 1
                 """,
                 (token,),
@@ -63,12 +65,13 @@ def fetch_subscription_by_token(token: str) -> dict[str, Any] | None:
         if not row:
             return None
 
-        nodes = row[7]
+        nodes = row[8]
         if not isinstance(nodes, list):
             nodes = []
 
         product = row[6]
-        failover = bool(row[4])
+        probe = bool(row[7])
+        failover = False if probe else bool(row[4])
         pool_nodes: list[dict[str, str]] = []
         if failover and not any(node.get("role") == ROLE_FAILOVER for node in nodes):
             pool_nodes = fetch_failover_pool(conn, product)
@@ -83,4 +86,5 @@ def fetch_subscription_by_token(token: str) -> dict[str, Any] | None:
         "product": product,
         "nodes": nodes,
         "pool_nodes": pool_nodes,
+        "probe": probe,
     }

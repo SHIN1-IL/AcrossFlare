@@ -45,12 +45,15 @@ export async function loadCustomerSubscriptionPreview(id: string) {
     where: { id },
     include: previewInclude,
   });
-  return row ? toSubscriptionPreview(row) : null;
+  if (!row || row.probeNodeId) {
+    return null;
+  }
+  return toSubscriptionPreview(row);
 }
 
 export async function loadOwnSubscriptionPreview(userId: string, service: PublicServiceId) {
   const rows = await prisma.subscription.findMany({
-    where: { userId },
+    where: { userId, probeNodeId: null },
     orderBy: { createdAt: "desc" },
     include: previewInclude,
   });

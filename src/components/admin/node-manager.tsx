@@ -6,6 +6,7 @@ import { AdminDrawer, fieldClass } from "@/components/admin/admin-drawer";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { CapacityAlerts } from "@/components/admin/capacity-alerts";
 import { HybridTeamLimits } from "@/components/admin/hybrid-team-limits";
+import { KaringConnectPanel } from "@/components/app/karing-connect-panel";
 import { StatusPill } from "@/components/app/status-pill";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -17,6 +18,7 @@ import {
   countNodeUsers,
   deleteNode,
   listNodes,
+  issueNodeKaring,
   probeNode,
   runMigrate,
   updateNode,
@@ -96,6 +98,9 @@ export function NodeManager({
   const [probeOk, setProbeOk] = useState(false);
   const [inbounds, setInbounds] = useState<XuiProbeInbound[]>([]);
   const [rowProbe, setRowProbe] = useState<{ id: string; ok: boolean; text: string } | null>(null);
+  const [karingBusyId, setKaringBusyId] = useState<string | null>(null);
+  const [karingError, setKaringError] = useState("");
+  const [karing, setKaring] = useState<{ nodeId: string; name: string; yamlUrl: string } | null>(null);
   const openedBootstrap = useRef(false);
 
   function openBootstrap(poolId?: string, role: NodeRole = "primary") {
@@ -220,6 +225,38 @@ export function NodeManager({
     setProbeNote(text);
   }
 
+  function karingErrorText(code: string) {
+    if (code === "reality_not_configured") {
+      return t("karingRealityMissing");
+    }
+    if (code === "node_not_ready") {
+      return t("karingNodeNotReady");
+    }
+    if (code === "plan_missing") {
+      return t("karingPlanMissing");
+    }
+    if (code === "inbound_missing") {
+      return t("karingInboundMissing");
+    }
+    if (code === "panel_unreachable") {
+      return t("karingPanelUnreachable");
+    }
+    return t("karingCheckFail", { error: code });
+  }
+
+  async function openKaring(node: AdminNode) {
+    setKaringBusyId(node.id);
+    setKaringError("");
+    const result = await issueNodeKaring(node.id);
+    setKaringBusyId(null);
+    if (!result.ok) {
+      setKaring(null);
+      setKaringError(karingErrorText(result.error));
+      return;
+    }
+    setKaring({ nodeId: node.id, name: node.name, yamlUrl: result.yamlUrl });
+  }
+
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <AdminPageHeader
@@ -307,7 +344,7 @@ export function NodeManager({
       ) : null}
 
       <div className="overflow-x-auto rounded-2xl border border-border">
-        <table className={`w-full text-left text-sm ${advanced ? "min-w-[980px]" : "min-w-[640px]"}`}>
+        <table className={`w-full text-left text-sm ${advanced ? "min-w-[1100px]" : "min-w-[760px]"}`}>
           <thead className="border-b border-border bg-surface text-xs text-muted-foreground">
             <tr>
               <th className="px-4 py-3 font-medium">{t("nodeName")}</th>
@@ -317,6 +354,7 @@ export function NodeManager({
               {advanced ? <th className="px-4 py-3 font-medium">{t("wiring")}</th> : null}
               <th className="px-4 py-3 font-medium">{t("nodeStatus")}</th>
               <th className="px-4 py-3 font-medium">{t("users")}</th>
+              <th className="px-4 py-3 font-medium" />
               {advanced ? <th className="px-4 py-3 font-medium" /> : null}
             </tr>
           </thead>
@@ -361,6 +399,20 @@ export function NodeManager({
                     />
                   </td>
                   <td className="px-4 py-3 font-mono text-xs">{users}</td>
+                  <td className="px-4 py-3 text-right">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="rounded-[10px]"
+                      disabled={karingBusyId === node.id}
+                      onClick={() => {
+                        void openKaring(node);
+                      }}
+                    >
+                      {karingBusyId === node.id ? t("karingChecking") : t("karingCheck")}
+                    </Button>
+                  </td>
                   {advanced ? (
                   <td className="px-4 py-3 text-right">
                     <Button type="button" variant="ghost" size="sm" onClick={() => openEdit(node)}>
@@ -414,6 +466,25 @@ export function NodeManager({
           </tbody>
         </table>
       </div>
+
+      {karingError ? <p className="text-sm text-destructive">{karingError}</p> : null}
+      {karing ? (
+        <section className="space-y-4 rounded-2xl border border-border bg-card p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-sm">{t("karingCheckTitle", { name: karing.name })}</p>
+              <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{t("karingCheckHint")}</p>
+              {provisionSimulate ? (
+                <p className="mt-2 text-sm text-muted-foreground">{t("karingSimulateHint")}</p>
+              ) : null}
+            </div>
+            <Button type="button" variant="outline" className="rounded-[10px]" onClick={() => setKaring(null)}>
+              {t("close")}
+            </Button>
+          </div>
+          <KaringConnectPanel yamlUrl={karing.yamlUrl} showDownload />
+        </section>
+      ) : null}
 
       {advanced && source ? (
         <section className="space-y-4 rounded-2xl border border-border bg-card p-5">

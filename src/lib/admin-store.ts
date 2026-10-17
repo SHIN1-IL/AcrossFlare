@@ -468,6 +468,18 @@ export async function probeNode(input: {
   return { ok: false as const, error: data.error ?? "probe_failed" };
 }
 
+export async function issueNodeKaring(nodeId: string) {
+  const response = await fetch(`/api/v1/admin/nodes/${nodeId}/karing`, {
+    method: "POST",
+    credentials: "include",
+  });
+  const data = await readJson<{ yamlUrl?: string; error?: string }>(response);
+  if (!response.ok || !data.yamlUrl) {
+    return { ok: false as const, error: data.error ?? "failed" };
+  }
+  return { ok: true as const, yamlUrl: data.yamlUrl };
+}
+
 export async function deleteNode(id: string) {
   const response = await fetch(`/api/v1/admin/nodes/${id}`, {
     method: "DELETE",

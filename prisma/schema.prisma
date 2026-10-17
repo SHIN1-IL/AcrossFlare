@@ -198,6 +198,7 @@ model Node {
   updatedAt DateTime   @updatedAt
 
   subscriptions Subscription[]
+  probeSubscription Subscription? @relation("NodeKaringProbe")
 
   trafficSnapshots TrafficSnapshot[]
   groupMemberships InstanceGroupNode[]
@@ -222,6 +223,9 @@ model Subscription {
   failover        Boolean            @default(false)
   instanceGroupId String?
   instanceGroup   InstanceGroup?     @relation(fields: [instanceGroupId], references: [id], onDelete: SetNull)
+  /// Admin Karing check for one node. Null on every customer subscription.
+  probeNodeId     String?            @unique
+  probeNode       Node?              @relation("NodeKaringProbe", fields: [probeNodeId], references: [id], onDelete: Cascade)
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
 

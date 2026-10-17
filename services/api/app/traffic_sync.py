@@ -163,6 +163,7 @@ def load_sync_rows() -> list[SyncRow]:
                 JOIN "Node" n ON n.id = ns."A"
                 WHERE s.status = 'ACTIVE'
                   AND c."xuiEmail" IS NOT NULL
+                  AND s."probeNodeId" IS NULL
                   AND s.product IN ('GLOBAL', 'MARKETING')
                   AND n.status <> 'OFFLINE'
                 ORDER BY s.id, n."createdAt"
