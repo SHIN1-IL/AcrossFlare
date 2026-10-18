@@ -9,6 +9,7 @@ from urllib.parse import quote
 import httpx
 
 from app.config import REALITY_MIN_CLIENT_VER, VLESS_CLIENT_FLOW, XUI_API_TOKEN, XUI_TLS_INSECURE
+from app.reality_keys import reality_key_for_client
 
 logger = logging.getLogger(__name__)
 
@@ -203,6 +204,64 @@ def apply_reality_inbound_defaults(reality: dict[str, Any]) -> dict[str, Any]:
     return reality
 
 
+def apply_karing_reality_settings(reality: dict[str, Any]) -> bool:
+    """Keep the same key bytes, but store them as raw URL-safe base64."""
+    changed = False
+    if (reality.get("minClientVer") or "").strip() != REALITY_MIN_CLIENT_VER or (
+        reality.get("minClient") or ""
+    ).strip() != REALITY_MIN_CLIENT_VER:
+        apply_reality_inbound_defaults(reality)
+        changed = True
+
+    private_key = (reality.get("privateKey") or "").strip()
+    if private_key:
+        canonical = reality_key_for_client(private_key)
+        if canonical != private_key:
+            reality["privateKey"] = canonical
+            changed = True
+
+    settings = as_json_obj(reality.get("settings"))
+    public_key = (settings.get("publicKey") or "").strip()
+    if public_key:
+        canonical = reality_key_for_client(public_key)
+        if canonical != public_key:
+            settings["publicKey"] = canonical
+            reality["settings"] = settings
+            changed = True
+    return changed
+
+
+def persist_reality_karing_fix(session: XuiSession, inbound: dict[str, Any]) -> str | None:
+    """Rewrite one inbound when its REALITY keys use standard base64. Returns the client public key."""
+    stream = as_json_obj(inbound.get("streamSettings"))
+    if (stream.get("security") or "").lower() != "reality":
+        return None
+    reality = as_json_obj(stream.get("realitySettings"))
+    if not (reality.get("privateKey") or "").strip():
+        logger.warning("reality_private_key_missing inbound=%s", inbound.get("id"))
+        return None
+    public_key = (as_json_obj(reality.get("settings")).get("publicKey") or "").strip()
+    if apply_karing_reality_settings(reality):
+        stream["realitySettings"] = reality
+        updated = dict(inbound)
+        updated["streamSettings"] = json.dumps(stream, separators=(",", ":"))
+        sniff = as_json_obj(inbound.get("sniffing"))
+        sniff["enabled"] = False
+        sniff["destOverride"] = []
+        updated["sniffing"] = json.dumps(sniff, separators=(",", ":"))
+        if isinstance(inbound.get("settings"), dict):
+            updated["settings"] = json.dumps(inbound["settings"], separators=(",", ":"))
+        panel_request(
+            session,
+            f"/panel/api/inbounds/update/{inbound['id']}",
+            method="POST",
+            json_body=updated,
+        )
+        public_key = (as_json_obj(reality.get("settings")).get("publicKey") or public_key).strip()
+    canonical = reality_key_for_client(public_key)
+    return canonical or None
+
+
 def ensure_reality_min_client_ver(session: XuiSession, inbound_id: int) -> None:
     listed = panel_request(session, "/panel/api/inbounds/list") or {}
     inbound = next(
@@ -213,29 +272,9 @@ def ensure_reality_min_client_ver(session: XuiSession, inbound_id: int) -> None:
         ),
         None,
     )
-    if not inbound:
+    if not isinstance(inbound, dict):
         return
-    stream = as_json_obj(inbound.get("streamSettings"))
-    if (stream.get("security") or "").lower() != "reality":
-        return
-    reality = as_json_obj(stream.get("realitySettings"))
-    if not (reality.get("privateKey") or "").strip():
-        logger.warning("reality_private_key_missing inbound=%s", inbound_id)
-        return
-    if (reality.get("minClientVer") or "").strip() == REALITY_MIN_CLIENT_VER:
-        return
-    apply_reality_inbound_defaults(reality)
-    stream["realitySettings"] = reality
-    updated = dict(inbound)
-    updated["streamSettings"] = json.dumps(stream, separators=(",", ":"))
-    sniff = as_json_obj(inbound.get("sniffing"))
-    if sniff:
-        sniff["enabled"] = False
-        sniff["destOverride"] = []
-        updated["sniffing"] = json.dumps(sniff, separators=(",", ":"))
-    if isinstance(inbound.get("settings"), dict):
-        updated["settings"] = json.dumps(inbound["settings"], separators=(",", ":"))
-    panel_request(session, f"/panel/api/inbounds/update/{inbound_id}", method="POST", json_body=updated)
+    persist_reality_karing_fix(session, inbound)
 
 
 def _client_fields(

@@ -1,4 +1,4 @@
-import { Prisma, Product, SubscriptionStatus } from "@prisma/client";
+import { Prisma, Product, SubscriptionStatus, type Node } from "@prisma/client";
 import { randomBytes } from "node:crypto";
 import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/password";
@@ -12,6 +12,7 @@ import {
 import { appUrl, isProvisionSimulate } from "@/lib/provision/config";
 import { nodeWiring } from "@/lib/provision/node-wiring";
 import { hasRealityConfig } from "@/lib/provision/reality";
+import { selectableBundle } from "@/lib/provision/capacity-expand";
 import { addXuiClient, updateXuiClientExpiry, XuiError } from "@/lib/provision/xui";
 import { NODE_PROBE_USER_EMAIL } from "@/lib/subscription-scope";
 
@@ -71,7 +72,85 @@ export async function issueNodeKaringProbe(nodeId: string) {
   }
 
   const expiresAt = probeExpiresAt();
-  const user = await prisma.user.upsert({
+  const user = await probeUser();
+
+  const existing = await prisma.subscription.findUnique({
+    where: { probeNodeId: node.id },
+    include: { credentials: true },
+  });
+
+  const yamlUrl = await persistProbeSubscription({
+    existing,
+    userId: user.id,
+    planId: plan.id,
+    product: node.product,
+    expiresAt,
+    probe: { probeNodeId: node.id },
+    nodes: [node],
+  });
+  return { yamlUrl };
+}
+
+export async function issueGroupKaringProbe(groupId: string) {
+  const group = await prisma.instanceGroup.findUnique({
+    where: { id: groupId },
+    include: {
+      pool: true,
+      nodes: {
+        orderBy: { sortOrder: "asc" },
+        include: { node: true },
+      },
+    },
+  });
+  if (!group) {
+    throw new NodeKaringProbeError("not_found", 404);
+  }
+
+  const bundle = selectableBundle(
+    group.nodes.map((row) => row.node),
+    group.pool.maxSelectable
+  );
+  if (!bundle.length) {
+    throw new NodeKaringProbeError("node_not_ready");
+  }
+  const blocked = bundle.find(
+    (node) => node.product === Product.WORKSPACE || !hasRealityConfig(node) || nodeWiring(node) === "placeholder"
+  );
+  if (blocked) {
+    throw new NodeKaringProbeError(
+      nodeWiring(blocked) === "placeholder" ? "node_not_ready" : "reality_not_configured"
+    );
+  }
+  const ready = bundle;
+
+  const plan = await prisma.plan.findFirst({
+    where: { product: ready[0].product },
+    orderBy: { createdAt: "asc" },
+  });
+  if (!plan) {
+    throw new NodeKaringProbeError("plan_missing");
+  }
+
+  const expiresAt = probeExpiresAt();
+  const user = await probeUser();
+  const existing = await prisma.subscription.findUnique({
+    where: { probeGroupId: group.id },
+    include: { credentials: true },
+  });
+  const yamlUrl = await persistProbeSubscription({
+    existing,
+    userId: user.id,
+    planId: plan.id,
+    product: ready[0].product,
+    expiresAt,
+    probe: { probeGroupId: group.id },
+    nodes: ready,
+  });
+  return { yamlUrl };
+}
+
+async function probeUser() {
+  return prisma.user.upsert({
     where: { email: NODE_PROBE_USER_EMAIL },
     update: {},
     create: {
@@ -80,27 +159,35 @@ export async function issueNodeKaringProbe(nodeId: string) {
       role: "USER",
     },
   });
+}
 
-  const existing = await prisma.subscription.findUnique({
-    where: { probeNodeId: node.id },
-    include: { credentials: true },
-  });
-
-  let subscription = existing;
+async function persistProbeSubscription(input: {
+  existing: {
+    id: string;
+    credentials: { uuid: string | null; yamlToken: string | null; xuiEmail: string | null } | null;
+  } | null;
+  userId: string;
+  planId: string;
+  product: Product;
+  expiresAt: Date;
+  probe: { probeNodeId: string } | { probeGroupId: string };
+  nodes: Node[];
+}) {
+  let subscription = input.existing;
   if (!subscription) {
     try {
       subscription = await prisma.subscription.create({
         data: {
-          userId: user.id,
-          planId: plan.id,
-          product: node.product,
+          userId: input.userId,
+          planId: input.planId,
+          product: input.product,
           status: SubscriptionStatus.ACTIVE,
-          expiresAt,
+          expiresAt: input.expiresAt,
           memo: "Admin Karing check",
           provisionStep: "ready",
           failover: false,
-          probeNodeId: node.id,
-          nodes: { connect: { id: node.id } },
+          ...input.probe,
+          nodes: { connect: input.nodes.map((node) => ({ id: node.id })) },
         },
         include: { credentials: true },
       });
@@ -109,7 +196,7 @@ export async function issueNodeKaringProbe(nodeId: string) {
         throw error;
       }
       subscription = await prisma.subscription.findUnique({
-        where: { probeNodeId: node.id },
+        where: input.probe,
         include: { credentials: true },
       });
       if (!subscription) {
@@ -141,17 +228,19 @@ export async function issueNodeKaringProbe(nodeId: string) {
   });
 
   if (!isProvisionSimulate()) {
-    const client = { uuid, email: xuiEmail, expiresAt, trafficGb: null };
-    try {
-      await addXuiClient(node, client);
-    } catch (error) {
-      if (error instanceof XuiError || error instanceof Error) {
-        throw new NodeKaringProbeError(probePanelErrorCode(error), 502);
+    const client = { uuid, email: xuiEmail, expiresAt: input.expiresAt, trafficGb: null };
+    for (const node of input.nodes) {
+      try {
+        await addXuiClient(node, client);
+      } catch (error) {
+        if (error instanceof XuiError || error instanceof Error) {
+          throw new NodeKaringProbeError(probePanelErrorCode(error), 502);
+        }
+        throw error;
       }
-      throw error;
-    }
-    if (existing?.credentials?.uuid) {
-      await updateXuiClientExpiry(node, client).catch(() => undefined);
+      if (input.existing?.credentials?.uuid) {
+        await updateXuiClientExpiry(node, client).catch(() => undefined);
+      }
     }
   }
 
@@ -159,13 +248,13 @@ export async function issueNodeKaringProbe(nodeId: string) {
     where: { id: subscription.id },
     data: {
       status: SubscriptionStatus.ACTIVE,
-      expiresAt,
+      expiresAt: input.expiresAt,
       failover: false,
       provisionStep: "ready",
       provisionError: "",
-      nodes: { set: [{ id: node.id }] },
+      nodes: { set: input.nodes.map((node) => ({ id: node.id })) },
     },
   });
 
-  return { yamlUrl };
+  return yamlUrl;
 }

@@ -359,7 +359,7 @@ export async function getAdminCustomer(id: string) {
     }),
   ]);
 
-  if (!row || row.probeNodeId) {
+  if (!row || row.probeNodeId || row.probeGroupId) {
     return null;
   }
 

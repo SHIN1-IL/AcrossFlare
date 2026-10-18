@@ -3,6 +3,7 @@ from urllib.parse import quote, urlencode
 
 from app.config import BACKUP_ANNOUNCE, BACKUP_DASHBOARD_URL, DEFAULT_VLESS_PORT, KARING_REFRESH_ANNOUNCE, VLESS_CLIENT_FLOW
 from app.nodes import NodeRow, has_reality_config, vless_connect_host
+from app.reality_keys import reality_key_for_client
 
 
 def with_backup_notice(yaml_body: str, *, refresh_hint: bool = False) -> str:
@@ -44,7 +45,7 @@ def _build_reality_proxy(node: NodeRow, uuid: str, index: int) -> str:
         f"    flow: {VLESS_CLIENT_FLOW}",
         f"    servername: {node.get('realityServerName')}",
         "    reality-opts:",
-        f"      public-key: {node.get('realityPublicKey')}",
+        f"      public-key: {reality_key_for_client(node.get('realityPublicKey'))}",
     ]
     short_id = (node.get("realityShortId") or "").strip()
     if short_id:
@@ -65,7 +66,7 @@ def _build_reality_uri(node: NodeRow, uuid: str, index: int) -> str:
             "encryption": "none",
             "flow": VLESS_CLIENT_FLOW,
             "fp": (node.get("realityFingerprint") or "").strip() or "chrome",
-            "pbk": (node.get("realityPublicKey") or "").strip(),
+            "pbk": reality_key_for_client(node.get("realityPublicKey")),
             "security": "reality",
             "sid": (node.get("realityShortId") or "").strip(),
             "sni": (node.get("realityServerName") or "").strip(),

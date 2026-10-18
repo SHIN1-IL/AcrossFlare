@@ -182,6 +182,13 @@ export type AdminPoolCapacity = {
     status: string;
     seatsUsed: number;
     seatsMax: number;
+    /** Nodes one customer URL contains. Length follows the pool's node count. */
+    nodes: Array<{
+      id: string;
+      name: string;
+      ddns: string;
+      role: "primary" | "failover";
+    }>;
   }>;
 };
 

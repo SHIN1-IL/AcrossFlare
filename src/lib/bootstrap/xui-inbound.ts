@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import {
   DEFAULT_VLESS_PORT,
   applyRealityInboundDefaults,
+  realityKeyForClient,
 } from "@/lib/provision/reality";
 import { probeXuiPanel, isTlsProtocolMismatch, type XuiPanelTarget } from "@/lib/provision/xui";
 import { generateRealityKeyPair, generateRealityShortId } from "@/lib/bootstrap/reality-keys";
@@ -228,9 +229,10 @@ export async function ensureBootstrapRealityInbound(
       body: JSON.stringify(updated),
     });
 
-    const settingsPub =
+    const settingsPub = realityKeyForClient(
       publicKey ||
-      String(asObj(asObj(stream.realitySettings).settings).publicKey ?? "").trim();
+        String(asObj(asObj(stream.realitySettings).settings).publicKey ?? "").trim()
+    );
     if (!settingsPub) {
       throw new Error("reality_public_key_missing");
     }
@@ -320,7 +322,7 @@ export async function ensureBootstrapRealityInbound(
   return {
     inboundId: created.id,
     vlessPort,
-    realityPublicKey: keys.publicKey,
+    realityPublicKey: realityKeyForClient(keys.publicKey),
     realityShortId: shortId,
     realityServerName: destHost,
     realityFingerprint: "chrome",

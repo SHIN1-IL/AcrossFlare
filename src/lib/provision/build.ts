@@ -3,6 +3,7 @@ import { randomBytes } from "node:crypto";
 import {
   DEFAULT_VLESS_PORT,
   hasRealityConfig,
+  realityKeyForClient,
   VLESS_CLIENT_FLOW,
   vlessConnectHost,
   type RealityFields,
@@ -58,7 +59,7 @@ export function vlessRealityShareLink(node: YamlNode, uuid: string, remark?: str
     encryption: "none",
     flow: VLESS_CLIENT_FLOW,
     fp: node.realityFingerprint?.trim() || "chrome",
-    pbk: node.realityPublicKey!.trim(),
+    pbk: realityKeyForClient(node.realityPublicKey),
     security: "reality",
     sid: node.realityShortId?.trim() || "",
     sni: node.realityServerName!.trim(),
@@ -126,7 +127,7 @@ function buildRealityProxy(node: YamlNode, uuid: string, index: number) {
     `    flow: ${VLESS_CLIENT_FLOW}`,
     `    servername: ${node.realityServerName}`,
     `    reality-opts:`,
-    `      public-key: ${node.realityPublicKey}`,
+    `      public-key: ${realityKeyForClient(node.realityPublicKey)}`,
   ];
 
   if (node.realityShortId?.trim()) {

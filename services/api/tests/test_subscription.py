@@ -35,6 +35,23 @@ def test_pick_hosts_uses_racknerd_when_failover():
     assert pick_hosts(nodes, failover=True) == ["node-la-rn.acrossflare.com"]
 
 
+def test_build_vless_yaml_uses_raw_url_public_key():
+    import base64
+
+    from app.yaml_builder import build_vless_uri_list
+
+    raw = bytes(range(32))
+    padded = base64.b64encode(raw).decode("ascii")
+    client_key = base64.urlsafe_b64encode(raw).decode("ascii").rstrip("=")
+    node = {**REALITY_NODE, "realityPublicKey": padded}
+    yaml = build_vless_yaml([node], "uuid-1")
+    uri = build_vless_uri_list([node], "uuid-1")
+    assert padded.endswith("=")
+    assert f"public-key: {client_key}" in yaml
+    assert padded not in yaml
+    assert f"pbk={client_key}" in uri
+
+
 def test_build_vless_yaml_matches_karing_reality_shape():
     yaml = build_vless_yaml([REALITY_NODE], "uuid-1")
     assert "type: vless" in yaml

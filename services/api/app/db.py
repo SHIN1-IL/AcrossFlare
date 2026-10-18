@@ -24,10 +24,11 @@ def fetch_subscription_by_token(token: str) -> dict[str, Any] | None:
                   s.failover,
                   p."trafficGb",
                   s.product::text,
-                  s."probeNodeId" IS NOT NULL AS probe,
+                  (s."probeNodeId" IS NOT NULL OR s."probeGroupId" IS NOT NULL) AS probe,
                   COALESCE(
                     json_agg(
                       json_build_object(
+                        'id', n.id,
                         'ddns', n.ddns,
                         'host', n.host,
                         'role', n.role::text,
@@ -55,7 +56,8 @@ def fetch_subscription_by_token(token: str) -> dict[str, Any] | None:
                   s.failover,
                   p."trafficGb",
                   s.product,
-                  s."probeNodeId"
+                  s."probeNodeId",
+                  s."probeGroupId"
                 LIMIT 1
                 """,
                 (token,),

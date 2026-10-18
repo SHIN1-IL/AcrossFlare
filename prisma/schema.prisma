@@ -157,7 +157,8 @@ model InstanceGroup {
   updatedAt DateTime            @updatedAt
 
   nodes         InstanceGroupNode[]
-  subscriptions Subscription[]
+  subscriptions Subscription[]     @relation("GroupSubscriptions")
+  karingProbe   Subscription?       @relation("GroupKaringProbe")
 
   @@index([poolId, status])
 }
@@ -222,10 +223,13 @@ model Subscription {
   backupUsedGb    Float              @default(0)
   failover        Boolean            @default(false)
   instanceGroupId String?
-  instanceGroup   InstanceGroup?     @relation(fields: [instanceGroupId], references: [id], onDelete: SetNull)
+  instanceGroup   InstanceGroup?     @relation("GroupSubscriptions", fields: [instanceGroupId], references: [id], onDelete: SetNull)
   /// Admin Karing check for one node. Null on every customer subscription.
   probeNodeId     String?            @unique
   probeNode       Node?              @relation("NodeKaringProbe", fields: [probeNodeId], references: [id], onDelete: Cascade)
+  /// Admin Karing check for one node bundle. Null on every customer subscription.
+  probeGroupId    String?            @unique
+  probeGroup      InstanceGroup?     @relation("GroupKaringProbe", fields: [probeGroupId], references: [id], onDelete: Cascade)
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
 

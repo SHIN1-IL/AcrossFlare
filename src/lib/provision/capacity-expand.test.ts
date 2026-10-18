@@ -8,6 +8,7 @@ import {
   parseHybridSeats,
   parseHybridSelectable,
   planHybridSeatUpdate,
+  selectableBundle,
 } from "@/lib/provision/capacity-expand";
 
 const at = (iso: string) => new Date(iso);
@@ -139,6 +140,18 @@ describe("chooseBootstrapTarget", () => {
       groups: [],
     });
     expect(target).toEqual({ groupId: null, status: "OPENING" });
+  });
+
+  it("puts the designated node count into one bundle", () => {
+    const nodes = [
+      { id: "tokyo", role: "PRIMARY", status: "ONLINE" },
+      { id: "la", role: "PRIMARY", status: "ONLINE" },
+      { id: "extra", role: "PRIMARY", status: "ONLINE" },
+      { id: "spare", role: "FAILOVER", status: "ONLINE" },
+      { id: "down", role: "PRIMARY", status: "OFFLINE" },
+    ];
+    expect(selectableBundle(nodes, 2).map((node) => node.id)).toEqual(["tokyo", "la"]);
+    expect(selectableBundle(nodes, 3).map((node) => node.id)).toEqual(["tokyo", "la", "extra"]);
   });
 });
 

@@ -8,7 +8,7 @@ describe("origin deploy typecheck gate", () => {
     const script = readFileSync(path.join(root, "infra/scripts/deploy-from-mac.sh"), "utf8");
     const typecheck = script.indexOf("npm run typecheck");
     const password = script.indexOf("osascript");
-    const ssh = script.indexOf("spawn bash");
+    const ssh = script.indexOf("ssh -o StrictHostKeyChecking");
     const pkg = JSON.parse(readFileSync(path.join(root, "package.json"), "utf8")) as {
       scripts: { typecheck: string };
     };

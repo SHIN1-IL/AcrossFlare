@@ -1,7 +1,7 @@
 import type { Node } from "@prisma/client";
 import { Agent } from "undici";
 import { xuiApiToken, xuiTlsInsecure } from "@/lib/provision/config";
-import { applyRealityInboundDefaults, REALITY_MIN_CLIENT_VER, VLESS_CLIENT_FLOW } from "@/lib/provision/reality";
+import { canonicalizeRealityInbound, VLESS_CLIENT_FLOW } from "@/lib/provision/reality";
 
 export class XuiError extends Error {
   constructor(message: string) {
@@ -325,11 +325,9 @@ async function ensureRealityMinClientVer(session: XuiSession, inboundId: number)
   if (!String(reality.privateKey ?? "").trim()) {
     return;
   }
-  if (String(reality.minClientVer ?? "").trim() === REALITY_MIN_CLIENT_VER) {
+  if (!canonicalizeRealityInbound(reality)) {
     return;
   }
-
-  applyRealityInboundDefaults(reality);
   stream.realitySettings = reality;
   const sniff = asJsonObj(inbound.sniffing);
   sniff.enabled = false;

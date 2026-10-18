@@ -45,7 +45,7 @@ export async function loadCustomerSubscriptionPreview(id: string) {
     where: { id },
     include: previewInclude,
   });
-  if (!row || row.probeNodeId) {
+  if (!row || row.probeNodeId || row.probeGroupId) {
     return null;
   }
   return toSubscriptionPreview(row);
@@ -53,7 +53,7 @@ export async function loadCustomerSubscriptionPreview(id: string) {
 
 export async function loadOwnSubscriptionPreview(userId: string, service: PublicServiceId) {
   const rows = await prisma.subscription.findMany({
-    where: { userId, probeNodeId: null },
+    where: { userId, probeNodeId: null, probeGroupId: null },
     orderBy: { createdAt: "desc" },
     include: previewInclude,
   });

@@ -94,7 +94,7 @@ const RECEIPT_LIMIT = 12;
 export async function loadAccountSnapshot(email: string, userId: string): Promise<AccountSnapshot> {
   const [subscriptions, payments] = await Promise.all([
     prisma.subscription.findMany({
-      where: { userId, probeNodeId: null },
+      where: { userId, probeNodeId: null, probeGroupId: null },
       orderBy: { createdAt: "desc" },
       include: subscriptionInclude,
     }),

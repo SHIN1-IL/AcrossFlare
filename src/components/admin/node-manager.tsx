@@ -6,6 +6,7 @@ import { AdminDrawer, fieldClass } from "@/components/admin/admin-drawer";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { CapacityAlerts } from "@/components/admin/capacity-alerts";
 import { HybridTeamLimits } from "@/components/admin/hybrid-team-limits";
+import { NodeBundleBanner } from "@/components/admin/node-bundle-banner";
 import { KaringConnectPanel } from "@/components/app/karing-connect-panel";
 import { StatusPill } from "@/components/app/status-pill";
 import { Button } from "@/components/ui/button";
@@ -141,6 +142,12 @@ export function NodeManager({
   const sourceCount = source ? countNodeUsers(source.id) : 0;
   const placeholders = nodes.filter((node) => node.wiring === "placeholder").length;
   const degraded = nodes.filter((node) => node.status === "degraded");
+  const bundles = poolsForProduct.flatMap((pool) =>
+    pool.groups
+      .filter((group) => group.nodes.length > 0)
+      .map((group) => ({ poolName: pool.name, group }))
+  );
+  const bundleNodeIds = new Set(bundles.flatMap((bundle) => bundle.group.nodes.map((node) => node.id)));
 
   function openCreate() {
     setEditing("new");
@@ -342,6 +349,18 @@ export function NodeManager({
           {t("placeholderBanner", { count: placeholders })}
         </p>
       ) : null}
+      {bundles.length ? (
+        <div className="space-y-3">
+          {bundles.map((bundle) => (
+            <NodeBundleBanner
+              key={bundle.group.id}
+              poolName={bundle.poolName}
+              group={bundle.group}
+              simulate={provisionSimulate}
+            />
+          ))}
+        </div>
+      ) : null}
 
       <div className="overflow-x-auto rounded-2xl border border-border">
         <table className={`w-full text-left text-sm ${advanced ? "min-w-[1100px]" : "min-w-[760px]"}`}>
@@ -400,6 +419,7 @@ export function NodeManager({
                   </td>
                   <td className="px-4 py-3 font-mono text-xs">{users}</td>
                   <td className="px-4 py-3 text-right">
+                    {bundleNodeIds.has(node.id) ? null : (
                     <Button
                       type="button"
                       variant="outline"
@@ -412,6 +432,7 @@ export function NodeManager({
                     >
                       {karingBusyId === node.id ? t("karingChecking") : t("karingCheck")}
                     </Button>
+                    )}
                   </td>
                   {advanced ? (
                   <td className="px-4 py-3 text-right">

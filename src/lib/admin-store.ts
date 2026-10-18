@@ -480,6 +480,18 @@ export async function issueNodeKaring(nodeId: string) {
   return { ok: true as const, yamlUrl: data.yamlUrl };
 }
 
+export async function issueGroupKaring(groupId: string) {
+  const response = await fetch(`/api/v1/admin/capacity/groups/${groupId}/karing`, {
+    method: "POST",
+    credentials: "include",
+  });
+  const data = await readJson<{ yamlUrl?: string; error?: string }>(response);
+  if (!response.ok || !data.yamlUrl) {
+    return { ok: false as const, error: data.error ?? "failed" };
+  }
+  return { ok: true as const, yamlUrl: data.yamlUrl };
+}
+
 export async function deleteNode(id: string) {
   const response = await fetch(`/api/v1/admin/nodes/${id}`, {
     method: "DELETE",

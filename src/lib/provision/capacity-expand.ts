@@ -61,6 +61,17 @@ export type BootstrapTarget = {
   status: "READY" | "OPENING";
 };
 
+/** Online nodes a customer actually receives from one group, in group order. */
+export function selectableBundle<T extends { role: string; status: string }>(
+  nodes: readonly T[],
+  maxSelectable: number
+) {
+  const online = nodes.filter((node) => node.status !== "OFFLINE");
+  const primary = online.filter((node) => node.role === "PRIMARY");
+  const ordered = primary.length ? primary : online;
+  return ordered.slice(0, Math.max(1, maxSelectable));
+}
+
 /** Display occupancy. Checkout still reserves with the stored seatsUsed counter. */
 export function occupiedSeats(seatsUsed: number, attached: number) {
   return Math.max(0, seatsUsed, attached);

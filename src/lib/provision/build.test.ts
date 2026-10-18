@@ -65,6 +65,23 @@ describe("provision/build", () => {
     expect(yaml).toContain("#profile-web-page-url: https://acrossflare.com/dashboard");
   });
 
+  it("emits the REALITY public key as raw url-safe base64", () => {
+    const raw = Buffer.from("ff".repeat(32), "hex");
+    const padded = raw.toString("base64");
+    const yaml = buildVlessYaml(
+      [{ ...realityNode("node-tokyo.acrossflare.com", NodeRole.PRIMARY), realityPublicKey: padded }],
+      "uuid-1"
+    );
+    const share = vlessRealityShareLink(
+      { ...realityNode("node-tokyo.acrossflare.com", NodeRole.PRIMARY), realityPublicKey: padded },
+      "uuid-1"
+    );
+    const clientKey = raw.toString("base64url");
+    expect(yaml).toContain(`public-key: ${clientKey}`);
+    expect(yaml).not.toContain(padded);
+    expect(share).toContain(`pbk=${encodeURIComponent(clientKey)}`);
+  });
+
   it("falls back to legacy WS yaml when REALITY fields are missing", () => {
     const yaml = buildVlessYaml([{ ddns: "node-tokyo.acrossflare.com", role: NodeRole.PRIMARY }], "uuid-1");
     expect(yaml).toContain("network: ws");

@@ -20,6 +20,7 @@ import {
   parseHybridSeats,
   parseHybridSelectable,
   planHybridSeatUpdate,
+  selectableBundle,
   utcDayStart,
 } from "@/lib/provision/capacity-expand";
 import { ProvisionError } from "@/lib/provision/errors";
@@ -94,7 +95,7 @@ export async function assignNodesForPlan(
     });
 
     if (existing?.instanceGroupId && existing.instanceGroup && plan.poolId === existing.instanceGroup.poolId) {
-      const nodes = selectableNodes(
+      const nodes = selectableBundle(
         existing.instanceGroup.nodes.map((row) => row.node),
         existing.instanceGroup.pool.maxSelectable
       );
@@ -200,7 +201,7 @@ async function reserveSeatAndLoadNodes(
     throw new ProvisionError("node_missing");
   }
 
-  const nodes = selectableNodes(
+  const nodes = selectableBundle(
     group.nodes.map((row) => row.node),
     group.pool.maxSelectable
   );
@@ -214,13 +215,6 @@ async function reserveSeatAndLoadNodes(
   }
 
   return { nodes, instanceGroupId: group.id };
-}
-
-function selectableNodes(nodes: Node[], maxSelectable: number) {
-  const online = nodes.filter((node) => node.status !== NodeHealth.OFFLINE);
-  const primary = online.filter((node) => node.role === NodeRole.PRIMARY);
-  const ordered = primary.length ? primary : online;
-  return ordered.slice(0, Math.max(1, maxSelectable));
 }
 
 async function matchNodesByCodes(product: Product, nodeCodes: string[]) {
@@ -273,8 +267,9 @@ export async function listPoolCapacity() {
             seatsUsed: true,
             seatsMax: true,
             nodes: {
+              orderBy: { sortOrder: "asc" },
               select: {
-                node: { select: { id: true, role: true, status: true } },
+                node: { select: { id: true, name: true, ddns: true, role: true, status: true } },
               },
             },
           },
@@ -360,12 +355,22 @@ export async function listPoolCapacity() {
         recentBootstrapFailures: failuresByPool.get(pool.id) ?? 0,
         groups: pool.groups.map((group) => {
           const view = seatView(group);
+          const bundle = selectableBundle(
+            group.nodes.map((row) => row.node),
+            pool.maxSelectable
+          );
           return {
             id: group.id,
             name: group.name,
             status: group.status,
             seatsUsed: view.used,
             seatsMax: view.max,
+            nodes: bundle.map((node) => ({
+              id: node.id,
+              name: node.name,
+              ddns: node.ddns,
+              role: node.role === NodeRole.FAILOVER ? ("failover" as const) : ("primary" as const),
+            })),
           };
         }),
       };

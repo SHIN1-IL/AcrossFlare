@@ -7,6 +7,7 @@ from fastapi.responses import PlainTextResponse, Response
 
 from app.config import TRAFFIC_SYNC_INTERVAL, traffic_sync_enabled
 from app.db import fetch_subscription_by_token
+from app.reality_repair import repair_subscription_reality_keys
 from app.subscription import is_vless_format, resolve_subscription
 from app.traffic_sync import run_traffic_sync
 
@@ -54,6 +55,11 @@ def subscription(
     row = fetch_subscription_by_token(resolved)
     if not row:
         raise HTTPException(status_code=404, detail="not_found")
+
+    try:
+        repair_subscription_reality_keys(row)
+    except Exception as exc:
+        logger.warning("reality_key_repair_skipped error=%s", type(exc).__name__)
 
     fmt = _subscription_format(request)
     try:
