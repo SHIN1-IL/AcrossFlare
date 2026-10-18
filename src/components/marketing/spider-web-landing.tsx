@@ -3,7 +3,18 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { HeroGrain } from "@/components/marketing/hero-grain";
+import { SIGNED_IN_COOKIE, SIGNED_IN_COOKIE_VALUE } from "@/lib/auth-cookies";
 import { cn } from "@/lib/utils";
+
+const SIGNED_IN_COOKIE_PAIR = `${SIGNED_IN_COOKIE}=${SIGNED_IN_COOKIE_VALUE}`;
+
+/** Runs while the HTML parses, before either hero paints. The edge caches one document. */
+const SIGNED_IN_BOOT = `(function(){try{if(document.cookie.split(";").some(function(part){return part.trim()==="${SIGNED_IN_COOKIE_PAIR}"}))document.documentElement.setAttribute("data-af-signed-in","")}catch(e){}})()`;
+
+const HERO_SWITCH_CSS = `
+html[data-af-signed-in] .af-guest-hero{display:none!important}
+html:not([data-af-signed-in]) .af-signed-hero{display:none!important}
+`;
 
 const VIDEO_SRC = "/marketing/acrossflare-hero.mp4";
 const POSTER_SRC = "/marketing/acrossflare-hero-poster.png";
@@ -67,16 +78,23 @@ function DarkGreenLanding({ className }: { className?: string }) {
   );
 }
 
-export function SpiderWebLanding({
-  className,
-  signedIn = false,
-}: {
-  className?: string;
-  /** Signed-in visitors get the dark green screen. Guests get the video hero. */
-  signedIn?: boolean;
-}) {
-  if (signedIn) return <DarkGreenLanding className={className} />;
-  return <HeroVideoLanding className={className} />;
+function hasSignedInCookie() {
+  return document.cookie.split(";").some((part) => part.trim() === SIGNED_IN_COOKIE_PAIR);
+}
+
+export function SpiderWebLanding({ className }: { className?: string }) {
+  return (
+    <>
+      <script dangerouslySetInnerHTML={{ __html: SIGNED_IN_BOOT }} />
+      <style dangerouslySetInnerHTML={{ __html: HERO_SWITCH_CSS }} />
+      <div className="af-guest-hero">
+        <HeroVideoLanding className={className} />
+      </div>
+      <div className="af-signed-hero">
+        <DarkGreenLanding className={className} />
+      </div>
+    </>
+  );
 }
 
 function HeroVideoLanding({ className }: { className?: string }) {
@@ -98,6 +116,8 @@ function HeroVideoLanding({ className }: { className?: string }) {
   useEffect(() => {
     const video = videoRef.current;
     if (!video || reduced || failed) return;
+
+    if (hasSignedInCookie()) return;
 
     video.muted = true;
     video.defaultMuted = true;
@@ -167,10 +187,9 @@ function HeroVideoLanding({ className }: { className?: string }) {
         <video
           ref={videoRef}
           className="absolute inset-0 h-full w-full object-cover"
-          autoPlay={!reduced}
           muted
           playsInline
-          preload={reduced ? "none" : "auto"}
+          preload="none"
           poster={POSTER_SRC}
           onError={() => setFailed(true)}
         >

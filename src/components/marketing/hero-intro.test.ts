@@ -9,7 +9,7 @@ describe("hero intro", () => {
       readFile("src/components/marketing/why-buy-ui-story-preview.tsx", "utf8"),
     ]);
 
-    expect(page).toContain("<SpiderWebLanding signedIn={signedIn} />");
+    expect(page).toContain("<SpiderWebLanding />");
     expect(page).toContain("<DeferredWhyBuyLive />");
     expect(page).toContain("<DeferredConsoleKaring />");
     expect(page).toContain("deferred-home-stories");
