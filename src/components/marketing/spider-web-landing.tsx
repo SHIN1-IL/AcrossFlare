@@ -1,9 +1,14 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { HeroGrain } from "@/components/marketing/hero-grain";
 import { cn } from "@/lib/utils";
 
-/** Soft green aurora — top-right. */
+const VIDEO_SRC = "/marketing/acrossflare-hero.mp4";
+const POSTER_SRC = "/marketing/acrossflare-hero-poster.png";
+
+/** Soft green aurora — the signed-in first screen. */
 function LandingAurora() {
   return (
     <>
@@ -37,7 +42,7 @@ function LandingAurora() {
   );
 }
 
-export function SpiderWebLanding({ className }: { className?: string }) {
+function DarkGreenLanding({ className }: { className?: string }) {
   return (
     <section
       data-home-page
@@ -58,6 +63,145 @@ export function SpiderWebLanding({ className }: { className?: string }) {
           Secure Cloud & Network Optimization
         </p>
       </div>
+    </section>
+  );
+}
+
+export function SpiderWebLanding({
+  className,
+  signedIn = false,
+}: {
+  className?: string;
+  /** Signed-in visitors get the dark green screen. Guests get the video hero. */
+  signedIn?: boolean;
+}) {
+  if (signedIn) return <DarkGreenLanding className={className} />;
+  return <HeroVideoLanding className={className} />;
+}
+
+function HeroVideoLanding({ className }: { className?: string }) {
+  const t = useTranslations("heroDeck");
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const frozenRef = useRef(false);
+  const [frozen, setFrozen] = useState(false);
+  const [reduced, setReduced] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const apply = () => setReduced(media.matches);
+    apply();
+    media.addEventListener("change", apply);
+    return () => media.removeEventListener("change", apply);
+  }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || reduced || failed) return;
+
+    video.muted = true;
+    video.defaultMuted = true;
+
+    const play = () => {
+      if (frozenRef.current || video.ended) return;
+      void video.play().catch(() => {});
+    };
+
+    const onEnded = () => {
+      video.pause();
+      frozenRef.current = true;
+      setFrozen(true);
+    };
+
+    video.addEventListener("ended", onEnded);
+    video.addEventListener("loadeddata", play);
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry) return;
+        if (entry.isIntersecting) play();
+        else if (!video.ended) video.pause();
+      },
+      { threshold: 0.2 }
+    );
+    observer.observe(video);
+    play();
+
+    return () => {
+      video.removeEventListener("ended", onEnded);
+      video.removeEventListener("loadeddata", play);
+      observer.disconnect();
+    };
+  }, [reduced, failed]);
+
+  function replay() {
+    const video = videoRef.current;
+    if (!video) return;
+    frozenRef.current = false;
+    setFrozen(false);
+
+    const start = () => {
+      void video.play().catch(() => {});
+    };
+
+    if (video.currentTime < 0.05) {
+      start();
+      return;
+    }
+
+    video.addEventListener("seeked", start, { once: true });
+    video.currentTime = 0;
+  }
+
+  return (
+    <section
+      data-home-page
+      className={cn(
+        "relative -mt-14 h-dvh snap-center snap-always overflow-hidden bg-[#0e1014] max-md:snap-start",
+        className
+      )}
+    >
+      {failed ? (
+        <img src={POSTER_SRC} alt="" className="absolute inset-0 h-full w-full object-cover" />
+      ) : (
+        <video
+          ref={videoRef}
+          className="absolute inset-0 h-full w-full object-cover"
+          autoPlay={!reduced}
+          muted
+          playsInline
+          preload={reduced ? "none" : "auto"}
+          poster={POSTER_SRC}
+          onError={() => setFailed(true)}
+        >
+          <source src={VIDEO_SRC} type="video/mp4" />
+        </video>
+      )}
+
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-28 bg-[linear-gradient(to_bottom,rgba(14,16,20,0.72),transparent)]"
+        aria-hidden="true"
+      />
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-40 bg-[linear-gradient(to_top,rgba(14,16,20,0.78),transparent)]"
+        aria-hidden="true"
+      />
+
+      <div className="pointer-events-none absolute inset-x-0 bottom-[22%] z-[4] flex justify-center px-6 text-center sm:bottom-[20%]">
+        <h1 className="text-[clamp(2.25rem,7vw,3.75rem)] leading-[0.95] font-semibold tracking-[-0.04em] text-[#f4f4f5] drop-shadow-[0_2px_18px_rgba(0,0,0,0.65)]">
+          AcrossFlare
+        </h1>
+      </div>
+
+      {frozen && !failed ? (
+        <button
+          type="button"
+          onClick={replay}
+          className="absolute right-4 bottom-5 z-10 rounded-full border border-white/20 bg-black/55 px-3.5 py-1.5 text-sm text-white transition hover:bg-black/75"
+        >
+          {t("heroReplay")}
+        </button>
+      ) : null}
     </section>
   );
 }
