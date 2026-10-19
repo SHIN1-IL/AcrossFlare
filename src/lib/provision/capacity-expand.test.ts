@@ -62,31 +62,69 @@ describe("occupied seats", () => {
 });
 
 describe("chooseBootstrapTarget", () => {
-  it("attaches to the oldest READY group that still has seats", () => {
+  it("opens the next bundle when the designated primary count is already filled", () => {
     const target = chooseBootstrapTarget({
-      maxSelectable: 1,
+      maxSelectable: 2,
       incomingRole: "PRIMARY",
       groups: [
         {
-          id: "full",
-          status: "READY",
-          seatsUsed: 10,
-          seatsMax: 10,
-          primaryOnline: 1,
-          createdAt: at("2026-01-01T00:00:00Z"),
-        },
-        {
-          id: "room",
+          id: "hybrid",
           status: "READY",
           seatsUsed: 3,
           seatsMax: 10,
-          primaryOnline: 1,
+          primaryOnline: 2,
           createdAt: at("2026-02-01T00:00:00Z"),
         },
       ],
     });
 
-    expect(target).toEqual({ groupId: "room", status: "READY" });
+    expect(target).toEqual({ groupId: null, status: "OPENING" });
+  });
+
+  it("fills the oldest bundle that is still short of the designated count", () => {
+    const target = chooseBootstrapTarget({
+      maxSelectable: 2,
+      incomingRole: "PRIMARY",
+      groups: [
+        {
+          id: "full",
+          status: "READY",
+          seatsUsed: 1,
+          seatsMax: 10,
+          primaryOnline: 2,
+          createdAt: at("2026-01-01T00:00:00Z"),
+        },
+        {
+          id: "opening",
+          status: "OPENING",
+          seatsUsed: 0,
+          seatsMax: 10,
+          primaryOnline: 1,
+          createdAt: at("2026-03-01T00:00:00Z"),
+        },
+      ],
+    });
+
+    expect(target).toEqual({ groupId: "opening", status: "READY" });
+  });
+
+  it("joins a short bundle before opening another when the admin raises the count", () => {
+    const target = chooseBootstrapTarget({
+      maxSelectable: 3,
+      incomingRole: "PRIMARY",
+      groups: [
+        {
+          id: "hybrid",
+          status: "READY",
+          seatsUsed: 3,
+          seatsMax: 10,
+          primaryOnline: 2,
+          createdAt: at("2026-02-01T00:00:00Z"),
+        },
+      ],
+    });
+
+    expect(target).toEqual({ groupId: "hybrid", status: "READY" });
   });
 
   it("starts a READY group when a standard pool is full", () => {
@@ -152,6 +190,16 @@ describe("chooseBootstrapTarget", () => {
     ];
     expect(selectableBundle(nodes, 2).map((node) => node.id)).toEqual(["tokyo", "la"]);
     expect(selectableBundle(nodes, 3).map((node) => node.id)).toEqual(["tokyo", "la", "extra"]);
+  });
+
+  it("skips placeholder nodes when filling the designated count", () => {
+    const nodes = [
+      { id: "seed-tokyo", role: "PRIMARY", status: "ONLINE", host: "10.0.0.22", password: "seed-only" },
+      { id: "tokyo", role: "PRIMARY", status: "ONLINE", host: "203.113.10.8", password: "real" },
+      { id: "seed-la", role: "PRIMARY", status: "ONLINE", host: "10.0.0.66", password: "seed-only" },
+      { id: "la", role: "PRIMARY", status: "ONLINE", host: "203.113.10.9", password: "real" },
+    ];
+    expect(selectableBundle(nodes, 2).map((node) => node.id)).toEqual(["tokyo", "la"]);
   });
 });
 

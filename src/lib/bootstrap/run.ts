@@ -14,6 +14,7 @@ import { sshRunScript, type SshAuth } from "@/lib/bootstrap/ssh";
 import { ensureBootstrapRealityInbound } from "@/lib/bootstrap/xui-inbound";
 import { isProvisionSimulate } from "@/lib/provision/config";
 import { chooseBootstrapTarget, DAILY_BOOTSTRAP_LIMIT, utcDayStart } from "@/lib/provision/capacity-expand";
+import { nodeWiring } from "@/lib/provision/node-wiring";
 import { probeXuiPanel } from "@/lib/provision/xui";
 
 export class BootstrapError extends Error {
@@ -304,7 +305,7 @@ async function attachNodeToGroup(job: NodeBootstrapJob, nodeId: string) {
     include: {
       nodes: {
         include: {
-          node: { select: { role: true, status: true } },
+          node: { select: { role: true, status: true, host: true, password: true } },
         },
       },
     },
@@ -320,7 +321,10 @@ async function attachNodeToGroup(job: NodeBootstrapJob, nodeId: string) {
       seatsMax: group.seatsMax,
       createdAt: group.createdAt,
       primaryOnline: group.nodes.filter(
-        (row) => row.node.role === NodeRole.PRIMARY && row.node.status !== NodeHealth.OFFLINE
+        (row) =>
+          row.node.role === NodeRole.PRIMARY &&
+          row.node.status !== NodeHealth.OFFLINE &&
+          nodeWiring(row.node) !== "placeholder"
       ).length,
     })),
   });

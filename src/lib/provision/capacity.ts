@@ -25,6 +25,7 @@ import {
 } from "@/lib/provision/capacity-expand";
 import { ProvisionError } from "@/lib/provision/errors";
 import { nodeNameMatchesCode } from "@/lib/provision/node-match";
+import { nodeWiring } from "@/lib/provision/node-wiring";
 
 export const POOL_GLOBAL_STANDARD = "global-standard";
 export const POOL_GLOBAL_HYBRID = "global-hybrid";
@@ -95,13 +96,15 @@ export async function assignNodesForPlan(
     });
 
     if (existing?.instanceGroupId && existing.instanceGroup && plan.poolId === existing.instanceGroup.poolId) {
+      const required = Math.max(1, existing.instanceGroup.pool.maxSelectable);
       const nodes = selectableBundle(
         existing.instanceGroup.nodes.map((row) => row.node),
         existing.instanceGroup.pool.maxSelectable
       );
-      if (nodes.length) {
+      if (nodes.length >= required) {
         return { nodes, instanceGroupId: existing.instanceGroupId };
       }
+      await releaseSeat(existing.instanceGroupId, options.subscriptionId);
     }
   }
 
@@ -149,45 +152,19 @@ export async function releaseSeat(groupId: string | null | undefined, subscripti
   });
 }
 
+function completeCustomerBundle(nodes: Node[], maxSelectable: number) {
+  const required = Math.max(1, maxSelectable);
+  const bundle = selectableBundle(nodes, maxSelectable);
+  return bundle.length >= required ? bundle : [];
+}
+
 async function reserveSeatAndLoadNodes(
   poolId: string,
   subscriptionId?: string
 ): Promise<AssignNodesResult> {
-  const reserved = await prisma.$transaction(async (tx) => {
-    const rows = await tx.$queryRaw<Array<{ id: string }>>`
-      UPDATE "InstanceGroup" AS g
-      SET "seatsUsed" = g."seatsUsed" + 1,
-          "updatedAt" = NOW()
-      WHERE g.id = (
-        SELECT id
-        FROM "InstanceGroup"
-        WHERE "poolId" = ${poolId}
-          AND status = 'READY'::"InstanceGroupStatus"
-          AND "seatsUsed" < "seatsMax"
-        ORDER BY "createdAt" ASC
-        FOR UPDATE SKIP LOCKED
-        LIMIT 1
-      )
-      RETURNING g.id
-    `;
-
-    const groupId = rows[0]?.id;
-    if (!groupId) {
-      throw new ProvisionError("capacity_full");
-    }
-
-    if (subscriptionId) {
-      await tx.subscription.update({
-        where: { id: subscriptionId },
-        data: { instanceGroupId: groupId },
-      });
-    }
-
-    return groupId;
-  });
-
-  const group = await prisma.instanceGroup.findUnique({
-    where: { id: reserved },
+  const candidates = await prisma.instanceGroup.findMany({
+    where: { poolId, status: InstanceGroupStatus.READY },
+    orderBy: { createdAt: "asc" },
     include: {
       pool: true,
       nodes: {
@@ -197,24 +174,52 @@ async function reserveSeatAndLoadNodes(
     },
   });
 
-  if (!group) {
-    throw new ProvisionError("node_missing");
-  }
-
-  const nodes = selectableBundle(
-    group.nodes.map((row) => row.node),
-    group.pool.maxSelectable
-  );
-  if (!nodes.length) {
-    if (subscriptionId) {
-      await releaseSeat(group.id, subscriptionId);
-    } else {
-      await releaseSeat(group.id);
+  for (const candidate of candidates) {
+    if (candidate.seatsUsed >= candidate.seatsMax) {
+      continue;
     }
-    throw new ProvisionError("node_missing");
+    const preview = completeCustomerBundle(
+      candidate.nodes.map((row) => row.node),
+      candidate.pool.maxSelectable
+    );
+    if (!preview.length) {
+      continue;
+    }
+
+    const reserved = await prisma.$transaction(async (tx) => {
+      const rows = await tx.$queryRaw<Array<{ id: string }>>`
+        UPDATE "InstanceGroup" AS g
+        SET "seatsUsed" = g."seatsUsed" + 1,
+            "updatedAt" = NOW()
+        WHERE g.id = ${candidate.id}
+          AND g.status = 'READY'::"InstanceGroupStatus"
+          AND g."seatsUsed" < g."seatsMax"
+        RETURNING g.id
+      `;
+
+      const groupId = rows[0]?.id;
+      if (!groupId) {
+        return null;
+      }
+
+      if (subscriptionId) {
+        await tx.subscription.update({
+          where: { id: subscriptionId },
+          data: { instanceGroupId: groupId },
+        });
+      }
+
+      return groupId;
+    });
+
+    if (!reserved) {
+      continue;
+    }
+
+    return { nodes: preview, instanceGroupId: reserved };
   }
 
-  return { nodes, instanceGroupId: group.id };
+  throw new ProvisionError("capacity_full");
 }
 
 async function matchNodesByCodes(product: Product, nodeCodes: string[]) {
@@ -231,7 +236,7 @@ async function matchNodesByCodes(product: Product, nodeCodes: string[]) {
   });
 
   const matched = nodeCodes
-    .map((code) => pool.find((node) => nodeNameMatchesCode(node.name, code)))
+    .map((code) => pool.find((node) => nodeNameMatchesCode(node.name, code) && nodeWiring(node) !== "placeholder"))
     .filter((node): node is Node => Boolean(node));
 
   const unique: Node[] = [];
@@ -249,9 +254,22 @@ async function matchNodesByCodes(product: Product, nodeCodes: string[]) {
 export async function poolHasOpenSeat(poolId: string) {
   const groups = await prisma.instanceGroup.findMany({
     where: { poolId, status: InstanceGroupStatus.READY },
-    select: { seatsUsed: true, seatsMax: true },
+    include: {
+      pool: { select: { maxSelectable: true } },
+      nodes: {
+        orderBy: { sortOrder: "asc" },
+        include: { node: true },
+      },
+    },
   });
-  return groups.some((group) => group.seatsUsed < group.seatsMax);
+  return groups.some(
+    (group) =>
+      group.seatsUsed < group.seatsMax &&
+      completeCustomerBundle(
+        group.nodes.map((row) => row.node),
+        group.pool.maxSelectable
+      ).length > 0
+  );
 }
 
 export async function listPoolCapacity() {
@@ -269,7 +287,17 @@ export async function listPoolCapacity() {
             nodes: {
               orderBy: { sortOrder: "asc" },
               select: {
-                node: { select: { id: true, name: true, ddns: true, role: true, status: true } },
+                node: {
+                  select: {
+                    id: true,
+                    name: true,
+                    ddns: true,
+                    role: true,
+                    status: true,
+                    host: true,
+                    password: true,
+                  },
+                },
               },
             },
           },
@@ -333,7 +361,10 @@ export async function listPoolCapacity() {
       const opening = pool.groups.find((group) => group.status === InstanceGroupStatus.OPENING);
       const openingPrimaryOnline = opening
         ? opening.nodes.filter(
-            (row) => row.node.role === NodeRole.PRIMARY && row.node.status !== NodeHealth.OFFLINE
+            (row) =>
+              row.node.role === NodeRole.PRIMARY &&
+              row.node.status !== NodeHealth.OFFLINE &&
+              nodeWiring(row.node) !== "placeholder"
           ).length
         : null;
 

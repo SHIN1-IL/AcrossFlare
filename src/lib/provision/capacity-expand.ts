@@ -1,3 +1,5 @@
+import { nodeWiring } from "@/lib/provision/node-wiring";
+
 /** How many bootstrap jobs may start in one UTC day. */
 export const DAILY_BOOTSTRAP_LIMIT = 20;
 
@@ -61,12 +63,18 @@ export type BootstrapTarget = {
   status: "READY" | "OPENING";
 };
 
+function excludedFromBundle(node: { host?: string; password?: string | null }) {
+  if (typeof node.host !== "string") {
+    return false;
+  }
+  return nodeWiring({ host: node.host, password: node.password }) === "placeholder";
+}
+
 /** Online nodes a customer actually receives from one group, in group order. */
-export function selectableBundle<T extends { role: string; status: string }>(
-  nodes: readonly T[],
-  maxSelectable: number
-) {
-  const online = nodes.filter((node) => node.status !== "OFFLINE");
+export function selectableBundle<
+  T extends { role: string; status: string; host?: string; password?: string | null },
+>(nodes: readonly T[], maxSelectable: number) {
+  const online = nodes.filter((node) => node.status !== "OFFLINE" && !excludedFromBundle(node));
   const primary = online.filter((node) => node.role === "PRIMARY");
   const ordered = primary.length ? primary : online;
   return ordered.slice(0, Math.max(1, maxSelectable));
@@ -143,8 +151,8 @@ export function neededSlotsForPool(input: {
 
 /**
  * Where a new bootstrapped node should land.
- * A READY group that still has seats keeps the node (no extra seats).
- * When every READY group is full, join an OPENING group or start one.
+ * A group takes another PRIMARY only until its online primary count reaches maxSelectable.
+ * The next PRIMARY opens the following group. Free customer seats do not pull extra nodes into a full bundle.
  * Seats open only after the group has enough online PRIMARY nodes.
  */
 export function chooseBootstrapTarget(input: {
@@ -156,22 +164,28 @@ export function chooseBootstrapTarget(input: {
   const byCreated = (left: BootstrapGroupChoice, right: BootstrapGroupChoice) =>
     left.createdAt.getTime() - right.createdAt.getTime();
 
-  const readyWithRoom = input.groups
-    .filter((group) => group.status === "READY" && group.seatsUsed < group.seatsMax)
+  const filling = input.groups
+    .filter((group) => group.status !== "DRAINING" && group.primaryOnline < required)
     .sort(byCreated);
-  if (readyWithRoom[0]) {
-    return { groupId: readyWithRoom[0].id, status: "READY" };
-  }
 
-  const opening = input.groups.filter((group) => group.status === "OPENING").sort(byCreated);
-  if (opening[0]) {
-    const nextPrimary = opening[0].primaryOnline + (input.incomingRole === "PRIMARY" ? 1 : 0);
+  if (input.incomingRole === "PRIMARY" && filling[0]) {
+    const nextPrimary = filling[0].primaryOnline + 1;
     return {
-      groupId: opening[0].id,
+      groupId: filling[0].id,
       status: nextPrimary >= required ? "READY" : "OPENING",
     };
   }
 
-  const opensNow = input.incomingRole === "PRIMARY" && required <= 1;
-  return { groupId: null, status: opensNow ? "READY" : "OPENING" };
+  if (input.incomingRole === "FAILOVER" && filling[0]) {
+    return {
+      groupId: filling[0].id,
+      status: filling[0].status === "READY" ? "READY" : "OPENING",
+    };
+  }
+
+  if (input.incomingRole === "FAILOVER") {
+    return { groupId: null, status: "OPENING" };
+  }
+
+  return { groupId: null, status: required <= 1 ? "READY" : "OPENING" };
 }

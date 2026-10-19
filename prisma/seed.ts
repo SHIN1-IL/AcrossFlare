@@ -1,4 +1,5 @@
-import { NodeHealth, PrismaClient, Product, Role, SubscriptionStatus, type Node } from "@prisma/client";
+import { PrismaClient, Product, Role, SubscriptionStatus, type Node } from "@prisma/client";
+import { nodeWiring } from "../src/lib/provision/node-wiring";
 import { exitHostFor, issueMarketingSecrets, nextWgAddress, regionFrom } from "../src/lib/marketing/secrets";
 import { hashPassword } from "../src/lib/password";
 import { reviewUserEmail, reviewUserPassword } from "../src/lib/review-user";
@@ -18,16 +19,44 @@ import {
 
 const prisma = new PrismaClient();
 
-const SEED_REALITY = {
-  vlessPort: 443,
-  realityPublicKey:
-    "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-  realityShortId: "0123456789",
-  realityServerName: "www.microsoft.com",
-  realityFingerprint: "chrome",
-} as const;
-
 const DEMO_PASSWORD = "acrossflare";
+
+/** Placeholder rows from early deploys. Live nodes keep their own ids and are not in this list. */
+const RETIRED_SEED_NODE_IDS = [
+  "g-tokyo-bw",
+  "g-la-b-bw",
+  "g-la-a-bw",
+  "g-la-rn",
+  "g-tokyo-rn",
+  "m-use-bw",
+  "m-usw-bw",
+  "g-sg-bw",
+  "g-jp-bw",
+  "g-us-rn",
+];
+
+const RETIRED_SEED_NAMES = new Set([
+  "Tokyo-Bandwagon",
+  "LA(B)-Bandwagon",
+  "LA(A)-Bandwagon",
+  "LA-RackNerd",
+  "Tokyo-RackNerd",
+  "US-East Bandwagon",
+  "US-West Bandwagon",
+]);
+
+const RETIRED_SEED_DDNS = new Set([
+  "node-sg.acrossflare.com",
+  "node-jp.acrossflare.com",
+  "node-us.acrossflare.com",
+  "node-la-b.acrossflare.com",
+  "node-la-rn.acrossflare.com",
+  "node-tokyo-rn.acrossflare.com",
+  "node-use.acrossflare.com",
+  "node-usw.acrossflare.com",
+]);
+
+const RETIRED_SEED_GROUP_IDS = ["ig-global-standard-1", "ig-global-hybrid-1", "ig-marketing-1"];
 
 // Regular USER for PG review and merchant testing. No seeded subscription, so checkout still works.
 const REVIEW_USER = {
@@ -46,106 +75,70 @@ const DEMO_USERS: { email: string; role: Role }[] = [
   { email: "unpaid-user@acrossflare.com", role: Role.USER },
 ];
 
-const SEED_NODES = [
-  {
-    id: "g-tokyo-bw",
-    product: Product.GLOBAL,
-    name: "Tokyo-Bandwagon",
-    ddns: "node-tokyo.acrossflare.com",
-    role: "PRIMARY" as const,
-    provider: "bandwagon",
-    status: "ONLINE" as const,
-    host: "10.0.0.22",
-    port: 2053,
-    username: "admin",
-    password: "seed-only",
-    ...SEED_REALITY,
-  },
-  {
-    id: "g-la-b-bw",
-    product: Product.GLOBAL,
-    name: "LA(B)-Bandwagon",
-    ddns: "node-la-b.acrossflare.com",
-    role: "PRIMARY" as const,
-    provider: "bandwagon",
-    status: "ONLINE" as const,
-    host: "10.0.0.55",
-    port: 2053,
-    username: "admin",
-    password: "seed-only",
-    ...SEED_REALITY,
-  },
-  {
-    id: "g-la-a-bw",
-    product: Product.GLOBAL,
-    name: "LA(A)-Bandwagon",
-    ddns: "node-la-a.acrossflare.com",
-    role: "PRIMARY" as const,
-    provider: "bandwagon",
-    status: "ONLINE" as const,
-    host: "10.0.0.66",
-    port: 2053,
-    username: "admin",
-    password: "seed-only",
-    ...SEED_REALITY,
-  },
-  {
-    id: "g-la-rn",
-    product: Product.GLOBAL,
-    name: "LA-RackNerd",
-    ddns: "node-la-rn.acrossflare.com",
-    role: "FAILOVER" as const,
-    provider: "racknerd",
-    status: "ONLINE" as const,
-    host: "10.0.0.99",
-    port: 2053,
-    username: "admin",
-    password: "seed-only",
-    ...SEED_REALITY,
-  },
-  {
-    id: "g-tokyo-rn",
-    product: Product.GLOBAL,
-    name: "Tokyo-RackNerd",
-    ddns: "node-tokyo-rn.acrossflare.com",
-    role: "FAILOVER" as const,
-    provider: "racknerd",
-    status: "ONLINE" as const,
-    host: "10.0.0.23",
-    port: 2053,
-    username: "admin",
-    password: "seed-only",
-    ...SEED_REALITY,
-  },
-  {
-    id: "m-use-bw",
-    product: Product.MARKETING,
-    name: "US-East Bandwagon",
-    ddns: "node-use.acrossflare.com",
-    role: "PRIMARY" as const,
-    provider: "bandwagon",
-    status: "OFFLINE" as const,
-    host: "10.0.0.10",
-    port: 2053,
-    username: "admin",
-    password: "seed-only",
-    ...SEED_REALITY,
-  },
-  {
-    id: "m-usw-bw",
-    product: Product.MARKETING,
-    name: "US-West Bandwagon",
-    ddns: "node-usw.acrossflare.com",
-    role: "PRIMARY" as const,
-    provider: "bandwagon",
-    status: "OFFLINE" as const,
-    host: "10.0.0.44",
-    port: 2053,
-    username: "admin",
-    password: "seed-only",
-    ...SEED_REALITY,
-  },
-];
+async function retirePlaceholderNodes() {
+  const nodes = await prisma.node.findMany({
+    select: { id: true, name: true, ddns: true, host: true, password: true },
+  });
+  const retiring = nodes.filter((node) => {
+    if (RETIRED_SEED_NODE_IDS.includes(node.id) || RETIRED_SEED_NAMES.has(node.name)) {
+      return true;
+    }
+    if (nodeWiring(node) === "placeholder") {
+      return true;
+    }
+    return RETIRED_SEED_DDNS.has(node.ddns) && nodeWiring(node) !== "ready";
+  });
+  if (!retiring.length) {
+    return;
+  }
+
+  console.log(
+    `retire placeholder nodes: ${retiring.map((node) => `${node.name} (${node.ddns})`).join(", ")}`
+  );
+  await prisma.node.deleteMany({ where: { id: { in: retiring.map((node) => node.id) } } });
+}
+
+async function syncBundleStatus() {
+  const groups = await prisma.instanceGroup.findMany({
+    where: { status: { in: ["READY", "OPENING"] } },
+    include: {
+      pool: true,
+      nodes: { include: { node: true } },
+    },
+  });
+  for (const group of groups) {
+    const primaries = group.nodes.filter(
+      (row) =>
+        row.node.role === "PRIMARY" &&
+        row.node.status !== "OFFLINE" &&
+        nodeWiring(row.node) === "ready"
+    ).length;
+    const required = Math.max(1, group.pool.maxSelectable);
+    const status = primaries >= required ? "READY" : "OPENING";
+    if (group.status === status) {
+      continue;
+    }
+    await prisma.instanceGroup.update({ where: { id: group.id }, data: { status } });
+    console.log(`bundle ${group.name}: ${group.status} -> ${status} (${primaries}/${required})`);
+  }
+}
+
+async function dropEmptySeedGroups() {
+  const groups = await prisma.instanceGroup.findMany({
+    where: { id: { in: RETIRED_SEED_GROUP_IDS } },
+    include: {
+      nodes: { select: { nodeId: true } },
+      subscriptions: { select: { id: true } },
+    },
+  });
+  for (const group of groups) {
+    if (group.nodes.length > 0 || group.subscriptions.length > 0) {
+      continue;
+    }
+    await prisma.instanceGroup.delete({ where: { id: group.id } });
+    console.log(`retire empty seed group: ${group.name}`);
+  }
+}
 
 async function main() {
   const passwordHash = await hashPassword(DEMO_PASSWORD);
@@ -223,56 +216,9 @@ async function main() {
     });
   }
 
-  await prisma.node.deleteMany({
-    where: {
-      OR: [
-        { id: { in: ["g-sg-bw", "g-jp-bw", "g-us-rn"] } },
-        {
-          ddns: {
-            in: ["node-sg.acrossflare.com", "node-jp.acrossflare.com", "node-us.acrossflare.com"],
-          },
-        },
-      ],
-    },
-  });
-
-  for (const node of SEED_NODES) {
-    await prisma.node.upsert({
-      where: { id: node.id },
-      // Do not overwrite host/port/credentials/inbound — admins wire real panels in /admin.
-      update: {
-        product: node.product,
-        name: node.name,
-        ddns: node.ddns,
-        role: node.role,
-        provider: node.provider,
-      },
-      create: node,
-    });
-  }
-
-  async function ensureGroup(id: string, poolId: string, name: string, nodeIds: string[]) {
-    await prisma.instanceGroup.upsert({
-      where: { id },
-      update: { poolId, name, status: "READY" },
-      create: { id, poolId, name, status: "READY", seatsUsed: 0, seatsMax: 10 },
-    });
-    for (const [index, nodeId] of nodeIds.entries()) {
-      const exists = await prisma.node.findUnique({ where: { id: nodeId }, select: { id: true } });
-      if (!exists) {
-        continue;
-      }
-      await prisma.instanceGroupNode.upsert({
-        where: { groupId_nodeId: { groupId: id, nodeId } },
-        update: { sortOrder: index },
-        create: { groupId: id, nodeId, sortOrder: index },
-      });
-    }
-  }
-
-  await ensureGroup("ig-global-standard-1", "global-standard", "Standard G1", ["g-la-b-bw"]);
-  await ensureGroup("ig-global-hybrid-1", "global-hybrid", "Hybrid G1", ["g-tokyo-bw", "g-la-a-bw"]);
-  await ensureGroup("ig-marketing-1", "marketing-default", "Marketing G1", ["m-use-bw"]);
+  await retirePlaceholderNodes();
+  await dropEmptySeedGroups();
+  await syncBundleStatus();
 
   for (const account of DEMO_USERS) {
     await prisma.user.upsert({
@@ -318,15 +264,6 @@ async function reconcileSeedMarketingTrafficSync() {
       status: SubscriptionStatus.FAILED,
       memo: "Seed marketing demo — disabled for traffic sync",
     },
-  });
-
-  await prisma.node.updateMany({
-    where: {
-      id: { in: ["m-use-bw", "m-usw-bw"] },
-      host: { startsWith: "10.0.0." },
-      status: NodeHealth.ONLINE,
-    },
-    data: { status: NodeHealth.OFFLINE },
   });
 }
 
@@ -413,7 +350,10 @@ async function seedDemoSubscriptions() {
           orderBy: { createdAt: "asc" },
         })
       : [];
-  const prefix = row.product === Product.GLOBAL ? "g" : row.product === Product.MARKETING ? "m" : "w";
+    if (row.status === SubscriptionStatus.ACTIVE && row.nodeIds.length > 0 && nodes.length === 0) {
+      continue;
+    }
+    const prefix = row.product === Product.GLOBAL ? "g" : row.product === Product.MARKETING ? "m" : "w";
     const subscriptionId = `seed_${prefix}_${user.id.slice(-10)}`;
     const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
@@ -429,7 +369,7 @@ async function seedDemoSubscriptions() {
         memo: row.memo,
         failover: Boolean(row.failover),
         trafficUsedGb: row.trafficUsedGb ?? 0,
-        nodes: row.nodeIds.length ? { connect: row.nodeIds.map((id) => ({ id })) } : undefined,
+        nodes: nodes.length ? { connect: nodes.map((node) => ({ id: node.id })) } : undefined,
         credentials:
           row.status === SubscriptionStatus.ACTIVE
             ? {
