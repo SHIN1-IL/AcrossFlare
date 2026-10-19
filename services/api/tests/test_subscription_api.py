@@ -81,7 +81,7 @@ def test_subscription_failover_returns_racknerd_yaml(client, monkeypatch):
     assert "node-la-rn.acrossflare.com" in response.text
     assert "node-la-b.acrossflare.com" not in response.text
     assert "reality-opts:" in response.text
-    assert "; total=0;" in response.headers["subscription-userinfo"]
+    assert "total=" not in response.headers["subscription-userinfo"]
 
 
 def test_subscription_vless_flag_returns_uris(client, monkeypatch):

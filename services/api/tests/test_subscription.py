@@ -143,7 +143,7 @@ def test_resolve_subscription_admin_probe_ignores_quota_and_keeps_failover_node(
     body, headers = resolve_subscription(row, fmt="clash")
     assert "node-new" in body
     assert "node-la-b" not in body
-    assert "total=0" in headers["subscription-userinfo"]
+    assert "total=" not in headers["subscription-userinfo"]
 
 
 def test_resolve_subscription_returns_empty_proxies_when_over_limit():
@@ -205,7 +205,7 @@ def test_resolve_subscription_failover_uses_unlimited_total():
     assert "reality-opts:" in plain
     yaml_body, _ = resolve_subscription(row, fmt="clash")
     assert "서브스크립션 수동 업데이트" in yaml_body
-    assert "; total=0;" in headers["subscription-userinfo"]
+    assert "total=" not in headers["subscription-userinfo"]
 
 
 def test_resolve_subscription_failover_uses_pool_nodes():
@@ -223,7 +223,7 @@ def test_resolve_subscription_failover_uses_pool_nodes():
     plain = decoded_sub(body)
     assert "node-la-rn.acrossflare.com" in plain
     assert "node-la-b.acrossflare.com" not in plain
-    assert "; total=0;" in headers["subscription-userinfo"]
+    assert "total=" not in headers["subscription-userinfo"]
 
 
 def test_resolve_subscription_raises_for_missing_uuid():

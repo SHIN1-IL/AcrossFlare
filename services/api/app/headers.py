@@ -17,10 +17,15 @@ def karing_headers(
         expire = int(aware.timestamp())
 
     download = int(used_gb * 1024 * 1024 * 1024)
-    total = 0 if limit_gb is None else int(limit_gb * 1024 * 1024 * 1024)
+    # Karing treats total=0 as an empty quota and refuses the nodes. Omit it when unlimited.
+    total = None if limit_gb is None else int(limit_gb * 1024 * 1024 * 1024)
     title = quote(filename)
     # HTTP headers must stay latin-1; the Korean notice lives in YAML comments too.
     announce = BACKUP_DASHBOARD_URL
+    userinfo = f"upload=0; download={download}"
+    if total is not None:
+        userinfo += f"; total={total}"
+    userinfo += f"; expire={expire}"
     return {
         "Cache-Control": "private, no-store",
         "profile-title": "AcrossFlare",
@@ -29,6 +34,6 @@ def karing_headers(
         "support-url": BACKUP_DASHBOARD_URL,
         "announce": announce,
         "announce-url": BACKUP_DASHBOARD_URL,
-        "subscription-userinfo": f"upload=0; download={download}; total={total}; expire={expire}",
+        "subscription-userinfo": userinfo,
         "content-disposition": f'attachment; filename="{title}"',
     }

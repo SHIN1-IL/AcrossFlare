@@ -40,7 +40,13 @@ export function karingSubscriptionHeaders(input?: {
   const limit = input?.trafficLimitGb;
   const expire = expireUnix(input?.expiresAt);
   const download = Math.round(used * 1024 * 1024 * 1024);
-  const total = limit == null ? 0 : Math.round(limit * 1024 * 1024 * 1024);
+  // Karing treats total=0 as an empty quota and refuses the nodes. Omit it when unlimited.
+  const total = limit == null ? null : Math.round(limit * 1024 * 1024 * 1024);
+  const userinfo = [`upload=0; download=${download}`];
+  if (total != null) {
+    userinfo.push(`total=${total}`);
+  }
+  userinfo.push(`expire=${expire}`);
 
   return {
     "Content-Type": "text/yaml; charset=utf-8",
@@ -51,7 +57,7 @@ export function karingSubscriptionHeaders(input?: {
     "support-url": url,
     announce: backupAnnounce(url),
     "announce-url": url,
-    "subscription-userinfo": `upload=0; download=${download}; total=${total}; expire=${expire}`,
+    "subscription-userinfo": userinfo.join("; "),
   };
 }
 

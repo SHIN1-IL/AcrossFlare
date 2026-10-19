@@ -28,13 +28,13 @@ describe("phase1 scenarios (typescript parity)", () => {
     expect(yaml).not.toContain("node-la-b.acrossflare.com");
   });
 
-  it("failover headers expose unlimited total", () => {
+  it("failover headers leave the quota off so Karing does not treat it as empty", () => {
     const headers = karingSubscriptionHeaders({
       trafficUsedGb: 150,
       trafficLimitGb: null,
       expiresAt: "2030-01-01T00:00:00.000Z",
     });
-    expect(headers["subscription-userinfo"]).toContain("total=0");
+    expect(headers["subscription-userinfo"]).not.toContain("total=");
   });
 
   it("blocked subscription headers still expose usage", () => {
