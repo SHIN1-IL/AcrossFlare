@@ -62,6 +62,7 @@ describe("provision/build", () => {
     expect(yaml).toContain("public-key:");
     expect(yaml).toContain("servername: www.microsoft.com");
     expect(yaml).toContain("client-fingerprint: chrome");
+    expect(yaml).toContain('short-id: "0123456789"');
     expect(yaml).toContain("#profile-web-page-url: https://acrossflare.com/dashboard");
   });
 

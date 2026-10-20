@@ -131,7 +131,7 @@ function buildRealityProxy(node: YamlNode, uuid: string, index: number) {
   ];
 
   if (node.realityShortId?.trim()) {
-    lines.push(`      short-id: ${node.realityShortId.trim()}`);
+    lines.push(`      short-id: "${node.realityShortId.trim()}"`);
   }
   lines.push(`    client-fingerprint: ${node.realityFingerprint?.trim() || "chrome"}`);
 

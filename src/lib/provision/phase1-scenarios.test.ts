@@ -34,7 +34,7 @@ describe("phase1 scenarios (typescript parity)", () => {
       trafficLimitGb: null,
       expiresAt: "2030-01-01T00:00:00.000Z",
     });
-    expect(headers["subscription-userinfo"]).not.toContain("total=");
+    expect(headers["subscription-userinfo"]).toContain("total=10995116277760");
   });
 
   it("blocked subscription headers still expose usage", () => {

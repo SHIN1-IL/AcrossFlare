@@ -32,7 +32,7 @@ def test_scenario_failover_serves_racknerd_only():
     plain = decoded_sub(body)
     assert "node-la-rn.acrossflare.com" in plain
     assert "node-la-b.acrossflare.com" not in plain
-    assert "total=" not in headers["subscription-userinfo"]
+    assert "total=10995116277760" in headers["subscription-userinfo"]
 
 
 def test_scenario_failover_uses_pool_when_racknerd_not_linked():
@@ -54,4 +54,4 @@ def test_scenario_expired_subscription_is_blocked_with_headers():
 def test_scenario_global_pro_never_blocks_on_traffic():
     body, headers = resolve_subscription(GLOBAL_PRO_ROW)
     assert "node-la-b.acrossflare.com" in decoded_sub(body)
-    assert "total=" not in headers["subscription-userinfo"]
+    assert "total=10995116277760" in headers["subscription-userinfo"]

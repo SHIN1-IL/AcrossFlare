@@ -49,7 +49,7 @@ def _build_reality_proxy(node: NodeRow, uuid: str, index: int) -> str:
     ]
     short_id = (node.get("realityShortId") or "").strip()
     if short_id:
-        lines.append(f"      short-id: {short_id}")
+        lines.append(f'      short-id: "{short_id}"')
     fingerprint = (node.get("realityFingerprint") or "").strip() or "chrome"
     lines.append(f"    client-fingerprint: {fingerprint}")
     return "\n".join(lines)

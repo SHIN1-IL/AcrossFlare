@@ -1,6 +1,8 @@
 import { backupDashboardUrl } from "@/lib/provision/config";
 
 export const BACKUP_ANNOUNCE = "보안 백업 공간 바로가기";
+/** Karing treats a missing total, and total=0, as an empty quota and skips the node test. */
+export const UNLIMITED_QUOTA_BYTES = 10 * 1024 * 1024 * 1024 * 1024;
 export const KARING_REFRESH_ANNOUNCE =
   "트래픽 초과·노드 전환 후 Karing [서브스크립션 수동 업데이트]를 눌러 주세요.";
 
@@ -40,13 +42,13 @@ export function karingSubscriptionHeaders(input?: {
   const limit = input?.trafficLimitGb;
   const expire = expireUnix(input?.expiresAt);
   const download = Math.round(used * 1024 * 1024 * 1024);
-  // Karing treats total=0 as an empty quota and refuses the nodes. Omit it when unlimited.
-  const total = limit == null ? null : Math.round(limit * 1024 * 1024 * 1024);
-  const userinfo = [`upload=0; download=${download}`];
-  if (total != null) {
-    userinfo.push(`total=${total}`);
-  }
-  userinfo.push(`expire=${expire}`);
+  const total =
+    limit == null
+      ? download < UNLIMITED_QUOTA_BYTES
+        ? UNLIMITED_QUOTA_BYTES
+        : download + UNLIMITED_QUOTA_BYTES
+      : Math.round(limit * 1024 * 1024 * 1024);
+  const userinfo = `upload=0; download=${download}; total=${total}; expire=${expire}`;
 
   return {
     "Content-Type": "text/yaml; charset=utf-8",
@@ -57,7 +59,7 @@ export function karingSubscriptionHeaders(input?: {
     "support-url": url,
     announce: backupAnnounce(url),
     "announce-url": url,
-    "subscription-userinfo": userinfo.join("; "),
+    "subscription-userinfo": userinfo,
   };
 }
 
