@@ -63,7 +63,7 @@
     "support": "消费者咨询",
     "supplierValue": "{legalName}（服务名 {serviceName}）",
     "standardTerms": "加密网络接入与 1GB 安全云备份，LA 线路，用于出差、旅行、在线会议等合法用途。流量与期限以所选套餐（1 周、1 个月或 12 个月）为准。所有付费套餐均为单次付款，不提供定期扣款、自动续费或自动支付。",
-    "hybridTerms": "加密网络接入与 1GB 安全云备份，东京+LA 线路，用于出差、旅行、在线会议等合法用途。流量与期限以所选套餐（1 周、1 个月或 12 个月）为准。所有付费套餐均为单次付款，不提供定期扣款、自动续费或自动支付。",
+    "hybridTerms": "加密网络接入与 1GB 安全云备份。线路为东京、LA 等加密线路，提供的线路可能变化。用于出差、旅行、在线会议等合法用途。流量与期限以所选套餐（1 周、1 个月或 12 个月）为准。所有付费套餐均为单次付款，不提供定期扣款、自动续费或自动支付。",
     "workspaceTerms": "团队或定制的加密网络接入与安全云备份。A、B、C 套餐均为 1 个月单次付款（¥990），仅人数与每月流量不同。套餐需促销码申请。不提供定期扣款、自动续费或自动支付。",
     "deliveryValue": "无实物配送。付款完成后立即向已登录账户发放接入信息与备份使用信息。",
     "workspaceDeliveryValue": "无实物配送。促销码确认后，向已登录账户发放接入信息与备份使用信息。",
@@ -84,7 +84,7 @@
       },
       {
         "title": "2. 服务内容",
-        "body": "网站公示的付费产品为 Standard、Hybrid、Workspace & Custom。各产品包含加密网络接入与安全云备份；线路（如 LA 或东京+LA）、流量、备份容量、使用期限与人数以产品页和结算页显示为准。\n\n付款完成或公司手动开通后，登录账户将获得接入信息与备份使用信息。Workspace 套餐需促销码申请。产品构成可能随网站公示调整。"
+        "body": "网站公示的付费产品为 Standard、Hybrid、Workspace & Custom。各产品包含加密网络接入与安全云备份；线路（Standard 为 LA；Hybrid 与 Workspace 为东京、LA 等，提供的线路可能变化）、流量、备份容量、使用期限与人数以产品页和结算页显示为准。\n\n付款完成或公司手动开通后，登录账户将获得接入信息与备份使用信息。Workspace 套餐需促销码申请。产品构成可能随网站公示调整。"
       },
       {
         "title": "3. 账户",
@@ -207,8 +207,8 @@
   "heroDeck": {
     "headline": "在中国出差或旅行时",
     "outcomeLines": [
-      "KakaoTalk 和 LINE 保持连接",
-      "酒店公共 Wi-Fi 上的通信也会加密",
+      "通过 Karing 连接加密线路",
+      "Karing 连上后，该接入路径会加密",
       "密码和备忘通过 Vaultwarden 在浏览器里备份"
     ],
     "items": [
@@ -220,7 +220,7 @@
         "q": "YouTube 与 Netflix 能否流畅播放？"
       },
       {
-        "q": "重要资料能否安全备份？"
+        "q": "密码和备忘备份在哪里？"
       },
       {
         "q": "会议期间的连接能否保持稳定？",
@@ -231,7 +231,7 @@
       }
     ],
     "closing": "使用 AcrossFlare，沿用现在的工作环境。",
-    "backupCaption": "重要资料也可以通过 Vaultwarden 安全备份。",
+    "backupCaption": "密码和备忘通过 Vaultwarden 备份。",
     "kakao": "KakaoTalk",
     "lineApp": "LINE",
     "youtube": "YouTube",
@@ -239,12 +239,13 @@
     "zoom": "Zoom",
     "teams": "Teams",
     "webex": "Webex",
-    "dropHint": "把要备份的文件拖到这里",
+    "dropHint": "密码与备忘备份示例",
     "fileName": "资料.pdf",
     "memo": "重要备忘",
     "connected": "已连接",
-    "noError": "没有错误",
-    "playing": "播放中",
+    "noError": "示例",
+    "playing": "示例画面",
+    "demoCaption": "示例画面",
     "inCall": "会议中",
     "ping": "延迟",
     "chats": [
@@ -290,6 +291,10 @@
     "vaultUser": "Vault 用户",
     "replayPreview": "点按重新播放",
     "heroReplay": "再看一次",
+    "heroReplayHint": "点击重新播放",
+    "heroLine1": "咦？怎么不行？",
+    "heroLine2": "啊！得打开 AcrossFlare！",
+    "heroLine3": "现在好了，OK Let's Go!",
     "wifiLabel": "Wi‑Fi",
     "wifiNetwork": "酒店访客",
     "vaultwarden": "保险库",
@@ -318,7 +323,7 @@
       "karingTap": "一键启动 Karing",
       "karingOn": "加密网络已就绪",
       "vaultLogin": "登录保险库",
-      "vaultBackup": "安全备份密码与资料"
+      "vaultBackup": "备份密码与备忘"
     },
     "captions": {
       "consoleClick": "点击首页右上角的控制台，即可进入订阅界面。",
@@ -357,7 +362,7 @@
     "user": "用户",
     "me": "我",
     "backupReady": "安全备份已就绪",
-    "backupReadyHint": "将密码、备忘与资料安全保存在保险库",
+    "backupReadyHint": "将密码和备忘保存在保险库",
     "currentProfile": "当前配置",
     "systemProxy": "系统代理",
     "myProfiles": "我的配置",
@@ -382,7 +387,7 @@
       "eyebrow": "安全云及网络优化",
       "title": "Standard",
       "description": "可在浏览器中使用 Vaultwarden（密码与备忘录备份）。",
-      "line2": "为短期旅行或出差提供适合安全备份的速度。",
+      "line2": "在中国出差或旅行时，安全访问韩国网站",
       "price": "₩9,900 · 1个月",
       "cta": "了解更多"
     },
@@ -390,7 +395,7 @@
       "eyebrow": "安全云及网络优化",
       "title": "Hybrid",
       "description": "可在浏览器中使用 Vaultwarden（密码与备忘录备份）。",
-      "line2": "提供安全备份与更快的网络优化。",
+      "line2": "比 Standard 更快的线路",
       "price": "₩19,900 · 1个月",
       "cta": "了解更多"
     }
@@ -404,15 +409,16 @@
     "cta": "立即申请"
   },
   "services": {
+    "availabilityNote": "不保证特定应用的连接、不中断播放或特定出口 IP。体感速度也会因路径和时间而不同。",
     "trialPlan": "短期体验套餐",
     "standard": {
       "eyebrow": "安全云及网络优化",
       "lead": [
-        "如果不需要特别快的速度",
-        "但还是想流畅看 YouTube"
+        "在中国出差或旅行时，",
+        "如果需要安全访问韩国网站"
       ],
       "title": "Standard",
-      "description": "适合短期旅行或出差时的安全备份与合适速度。提供网络连接，以及 Vaultwarden（密码与备忘录备份）。无需另行下载备份应用。",
+      "description": "在中国出差或旅行时安全访问韩国网站，并提供 Vaultwarden（密码与备忘录备份）。无需另行下载备份应用。",
       "cta": "立即申请",
       "features": [
         "应用 AcrossFlare 基础技术",
@@ -420,27 +426,27 @@
         "Vaultwarden（密码与备忘录备份）— 加密保存密码、卡片与安全备忘录",
         "无需专用应用，用浏览器即可。付款后可在账户中直接打开",
         "支持 Zoom、Webex、Teams 等在线会议",
-        "通过国际专线（LA线路）优化网络",
-        "高级加密打造安全网络环境"
+        "经由 LA 线路的加密接入",
+        "接入路径会加密"
       ]
     },
     "hybrid": {
       "eyebrow": "安全云及网络优化",
       "lead": [
-        "如果需要更快一点的速度",
-        "并且希望视频会议不卡顿"
+        "如果需要比 Standard",
+        "更快的线路"
       ],
       "title": "Hybrid",
-      "description": "提供安全备份与更快的网络优化。提供网络连接，以及 Vaultwarden（密码与备忘录备份）。无需另行下载备份应用。",
+      "description": "提供比 Standard 更快的加密线路，以及 Vaultwarden（密码与备忘录备份）。无需另行下载备份应用。",
       "cta": "立即申请",
       "features": [
         "应用 AcrossFlare 高级技术",
         "1GB 安全云备份",
         "Vaultwarden（密码与备忘录备份）— 加密保存密码、卡片与安全备忘录",
         "无需专用应用，用浏览器即可。付款后可在账户中直接打开",
-        "Zoom、Webex、Teams 等流畅不中断的在线会议",
-        "通过东京+LA线路实现更快网络",
-        "高级加密打造安全网络环境"
+        "可用于 Zoom、Webex、Teams 等在线会议",
+        "目前为洛杉矶 CN2、东京直连。线路可能增加或变更。",
+        "接入路径会加密"
       ]
     },
     "workspace": {
@@ -464,9 +470,9 @@
         "1GB 安全云备份",
         "Vaultwarden（密码与备忘录备份）— 加密保存密码、卡片与安全备忘录",
         "无需专用应用，用浏览器即可。付款后可在账户中直接打开",
-        "Zoom、Webex、Teams 等流畅不中断的在线会议",
-        "通过东京+LA线路实现更快网络",
-        "高级加密打造安全网络环境"
+        "可用于 Zoom、Webex、Teams 等在线会议",
+        "目前为洛杉矶 CN2、东京直连。线路可能增加或变更。",
+        "接入路径会加密"
       ]
     }
   },
@@ -533,7 +539,7 @@
     "globalTitle": "Standard",
     "globalDesc": "加密网络接入与安全云备份。",
     "hybridTitle": "Hybrid",
-    "hybridDesc": "东京+LA 线路的加密网络接入与安全云备份。",
+    "hybridDesc": "东京、LA 等加密网络接入与安全云备份。提供的线路可能变化。",
     "workspaceTitle": "Workspace & Custom",
     "workspaceDesc": "团队或定制的加密网络接入与安全云备份。",
     "pendingCredentials": "接入与备份信息将在开通后显示于此。",
@@ -959,7 +965,7 @@
     "homeSubtitle": "与首页相同的服务划分。",
     "homeGlobalDesc": "Standard 与 Hybrid。加密接入与安全云备份。",
     "homeStandardDesc": "Week、Month、Year。安全备份与网络优化。",
-    "homeHybridDesc": "Week、Month、Year。东京+洛杉矶线路。",
+    "homeHybridDesc": "Week、Month、Year。比 Standard 更快的线路。",
     "homeWorkspaceDesc": "A/B/C 套餐（Workspace 与 Custom）、优惠码、手动开通。",
     "homeMarketingDesc": "代理 URL、WireGuard、轮换记录。",
     "statCustomers": "客户",

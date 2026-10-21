@@ -63,7 +63,7 @@
     "support": "Customer support",
     "supplierValue": "{legalName} (service name {serviceName})",
     "standardTerms": "Encrypted network access and 1GB secure cloud backup on the LA route, for lawful travel, work, and online meetings. Traffic and term follow the plan you choose (1 week, 1 month, or 12 months). All paid plans are one-time purchases only; we do not offer recurring billing or auto-renewal.",
-    "hybridTerms": "Encrypted network access and 1GB secure cloud backup on Tokyo+LA routes, for lawful travel, work, and online meetings. Traffic and term follow the plan you choose (1 week, 1 month, or 12 months). All paid plans are one-time purchases only; we do not offer recurring billing or auto-renewal.",
+    "hybridTerms": "Encrypted network access and 1GB secure cloud backup on Tokyo, LA, and other routes. The routes offered may change. For lawful travel, work, and online meetings. Traffic and term follow the plan you choose (1 week, 1 month, or 12 months). All paid plans are one-time purchases only; we do not offer recurring billing or auto-renewal.",
     "workspaceTerms": "Team or custom encrypted network access and secure cloud backup. Plans A, B, and C are one-time purchases for a 1-month term at $150; they differ only in seats and monthly traffic. Plans require a promotional code. We do not offer recurring billing or auto-renewal.",
     "deliveryValue": "No physical shipment. After payment, access and backup details are issued immediately to the signed-in account.",
     "workspaceDeliveryValue": "No physical shipment. After the promotional code is confirmed, access and backup details are issued to the signed-in account.",
@@ -84,7 +84,7 @@
       },
       {
         "title": "2. The service",
-        "body": "Paid products listed on the site are Standard, Hybrid, and Workspace & Custom. Each includes encrypted network access and encrypted cloud backup. Routes (such as LA or Tokyo+LA), traffic, backup size, term, and seat counts follow the product page and checkout screen.\n\nAfter payment succeeds or the company provisions an account manually, access and backup details are issued to the signed-in account. Workspace plans require a promotional code. The catalog on the homepage may change."
+        "body": "Paid products listed on the site are Standard, Hybrid, and Workspace & Custom. Each includes encrypted network access and encrypted cloud backup. Routes (Standard uses LA; Hybrid and Workspace use Tokyo, LA, and others, and the routes offered may change), traffic, backup size, term, and seat counts follow the product page and checkout screen.\n\nAfter payment succeeds or the company provisions an account manually, access and backup details are issued to the signed-in account. Workspace plans require a promotional code. The catalog on the homepage may change."
       },
       {
         "title": "3. Accounts",
@@ -207,8 +207,8 @@
   "heroDeck": {
     "headline": "For travel and business in China",
     "outcomeLines": [
-      "KakaoTalk and LINE stay connected",
-      "Hotel Wi-Fi traffic stays encrypted",
+      "Connect through an encrypted route in Karing",
+      "When Karing is connected, that path is encrypted",
       "Passwords and notes back up in the browser with Vaultwarden"
     ],
     "items": [
@@ -220,7 +220,7 @@
         "q": "Will YouTube and Netflix play without interruption?"
       },
       {
-        "q": "Will important files stay securely backed up?"
+        "q": "Where do passwords and notes get backed up?"
       },
       {
         "q": "Will call quality hold through the meeting?",
@@ -231,7 +231,7 @@
       }
     ],
     "closing": "Start on AcrossFlare, with your current setup.",
-    "backupCaption": "Important files can also be backed up securely with Vaultwarden.",
+    "backupCaption": "Passwords and notes back up with Vaultwarden.",
     "kakao": "KakaoTalk",
     "lineApp": "LINE",
     "youtube": "YouTube",
@@ -239,12 +239,13 @@
     "zoom": "Zoom",
     "teams": "Teams",
     "webex": "Webex",
-    "dropHint": "Drop a file here to back it up",
+    "dropHint": "Example of password and note backup",
     "fileName": "notes.pdf",
     "memo": "Important note",
     "connected": "Connected",
-    "noError": "No errors",
-    "playing": "Playing",
+    "noError": "Example",
+    "playing": "Example",
+    "demoCaption": "Example",
     "inCall": "In a meeting",
     "ping": "Ping",
     "chats": [
@@ -290,6 +291,10 @@
     "vaultUser": "Vault user",
     "replayPreview": "Tap to replay",
     "heroReplay": "Replay",
+    "heroReplayHint": "Click to replay",
+    "heroLine1": "Huh? Why won't it work?",
+    "heroLine2": "Ah! I should turn on AcrossFlare!",
+    "heroLine3": "It's working now, OK Let's Go!",
     "wifiLabel": "Wi‑Fi",
     "wifiNetwork": "Hotel_Guest",
     "vaultwarden": "Vaultwarden",
@@ -318,7 +323,7 @@
       "karingTap": "Start Karing with one tap",
       "karingOn": "Encrypted network is live",
       "vaultLogin": "Sign in to Vaultwarden",
-      "vaultBackup": "Back up passwords and files securely"
+      "vaultBackup": "Back up passwords and notes"
     },
     "captions": {
       "consoleClick": "Tap Console at the top right of the home screen to open your subscription view.",
@@ -357,7 +362,7 @@
     "user": "User",
     "me": "Me",
     "backupReady": "Secure backup ready",
-    "backupReadyHint": "Keep passwords, notes, and files safe in Vaultwarden",
+    "backupReadyHint": "Keep passwords and notes in Vaultwarden",
     "currentProfile": "Current Profile",
     "systemProxy": "System Proxy",
     "myProfiles": "My Profiles",
@@ -382,7 +387,7 @@
       "eyebrow": "Secure Cloud & Network Optimization",
       "title": "Standard",
       "description": "Use Vaultwarden (password & note backup) in a browser.",
-      "line2": "Right-sized speed for secure backup on short trips and business travel.",
+      "line2": "Secure access to Korean sites during travel in China",
       "price": "₩9,900 · 1 month",
       "cta": "Learn more"
     },
@@ -390,7 +395,7 @@
       "eyebrow": "Secure Cloud & Network Optimization",
       "title": "Hybrid",
       "description": "Use Vaultwarden (password & note backup) in a browser.",
-      "line2": "Secure backup with faster network optimization.",
+      "line2": "A faster route than Standard",
       "price": "₩19,900 · 1 month",
       "cta": "Learn more"
     }
@@ -404,15 +409,16 @@
     "cta": "Get started"
   },
   "services": {
+    "availabilityNote": "Connection to a specific app, uninterrupted playback, and a specific exit IP are not guaranteed. Felt speed can also vary by path and time.",
     "trialPlan": "Short-term trial",
     "standard": {
       "eyebrow": "Secure Cloud & Network Optimization",
       "lead": [
-        "If you don't need very fast speed",
-        "but still want YouTube without stutter"
+        "During travel or a business trip in China,",
+        "when you need secure access to Korean sites"
       ],
       "title": "Standard",
-      "description": "Right-sized speed for short trips and travel backups. Encrypted network access plus Vaultwarden (password & note backup). You do not need a separate backup app.",
+      "description": "Secure access to Korean sites during travel in China, plus Vaultwarden (password & note backup). You do not need a separate backup app.",
       "cta": "Get started",
       "features": [
         "AcrossFlare base technology",
@@ -420,27 +426,27 @@
         "Vaultwarden (password & note backup) — encrypted passwords, cards, and secure notes",
         "Use in a browser with no dedicated app. Opens in your account after payment",
         "Online meetings on Zoom, Webex, Teams, and more",
-        "Network optimization over a dedicated international line (LA)",
-        "Advanced encryption for a secure network"
+        "Encrypted access over the LA route",
+        "The access path is encrypted"
       ]
     },
     "hybrid": {
       "eyebrow": "Secure Cloud & Network Optimization",
       "lead": [
-        "If you need a little more speed",
-        "and want video calls without dropouts"
+        "When you need a faster route",
+        "than Standard"
       ],
       "title": "Hybrid",
-      "description": "Secure backup plus faster network optimization. Encrypted network access plus Vaultwarden (password & note backup). You do not need a separate backup app.",
+      "description": "A faster encrypted route than Standard, plus Vaultwarden (password & note backup). You do not need a separate backup app.",
       "cta": "Get started",
       "features": [
         "AcrossFlare advanced technology",
         "1 GB secure cloud backup",
         "Vaultwarden (password & note backup) — encrypted passwords, cards, and secure notes",
         "Use in a browser with no dedicated app. Opens in your account after payment",
-        "Uninterrupted online meetings on Zoom, Webex, Teams, and more",
-        "Faster network over Tokyo + LA lines",
-        "Advanced encryption for a secure network"
+        "Can be used for online meetings on Zoom, Webex, Teams, and more",
+        "Currently Los Angeles CN2 and Tokyo direct. Routes may be added or changed.",
+        "The access path is encrypted"
       ]
     },
     "workspace": {
@@ -464,9 +470,9 @@
         "1 GB secure cloud backup",
         "Vaultwarden (password & note backup) — encrypted passwords, cards, and secure notes",
         "Use in a browser with no dedicated app. Opens in your account after payment",
-        "Uninterrupted online meetings on Zoom, Webex, Teams, and more",
-        "Faster network over Tokyo + LA lines",
-        "Advanced encryption for a secure network"
+        "Can be used for online meetings on Zoom, Webex, Teams, and more",
+        "Currently Los Angeles CN2 and Tokyo direct. Routes may be added or changed.",
+        "The access path is encrypted"
       ]
     }
   },
@@ -533,7 +539,7 @@
     "globalTitle": "Standard",
     "globalDesc": "Encrypted network access and secure cloud backup.",
     "hybridTitle": "Hybrid",
-    "hybridDesc": "Encrypted network access and secure cloud backup on Tokyo+LA routes.",
+    "hybridDesc": "Encrypted network access and secure cloud backup on Tokyo, LA, and other routes. The routes offered may change.",
     "workspaceTitle": "Workspace & Custom",
     "workspaceDesc": "Team or custom encrypted network access and secure cloud backup.",
     "pendingCredentials": "Access and backup details appear here after issuance.",
@@ -959,7 +965,7 @@
     "homeSubtitle": "Same service split as the homepage.",
     "homeGlobalDesc": "Standard and Hybrid. Encrypted access and secure cloud backup.",
     "homeStandardDesc": "Week, Month, and Year. Secure backup and network optimization.",
-    "homeHybridDesc": "Week, Month, and Year. Tokyo + LA routes.",
+    "homeHybridDesc": "Week, Month, and Year. A faster route than Standard.",
     "homeWorkspaceDesc": "A/B/C plans (Workspace and Custom), promo codes, manual issue.",
     "homeMarketingDesc": "Proxy URLs, WireGuard, rotate history.",
     "statCustomers": "Customers",
