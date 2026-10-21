@@ -350,11 +350,14 @@ function HeroVideoLanding({
   const finishedRef = useRef(false);
   const restartingRef = useRef(false);
   const onFinishedRef = useRef(onFinished);
-  onFinishedRef.current = onFinished;
   const [frozen, setFrozen] = useState(false);
   const [reduced, setReduced] = useState(false);
   const [failed, setFailed] = useState(false);
   const [captionId, setCaptionId] = useState<HeroCaptionId | null>(null);
+
+  useEffect(() => {
+    onFinishedRef.current = onFinished;
+  }, [onFinished]);
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
