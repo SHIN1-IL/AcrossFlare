@@ -9,6 +9,7 @@
  * (script + iframe + API on iamport/portone hosts). `form-action` and
  * `frame-src` stay on https so a new PG host does not blank checkout.
  * `unsafe-eval` is omitted: the current PortOne SDK does not use it.
+ * `media-src` allows the logged-out hero film on Cloudflare Pages.
  */
 export const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
@@ -19,6 +20,7 @@ export const CONTENT_SECURITY_POLICY = [
   "script-src 'self' 'unsafe-inline' https://cdn.portone.io https://static.cloudflareinsights.com https://challenges.cloudflare.com",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
+  "media-src 'self' https://af1-cje.pages.dev",
   "font-src 'self' data:",
   "connect-src 'self' https:",
   "frame-src 'self' https:",

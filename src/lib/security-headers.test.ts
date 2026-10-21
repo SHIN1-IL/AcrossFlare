@@ -23,6 +23,7 @@ describe("security headers", () => {
     expect(csp?.value).toBe(CONTENT_SECURITY_POLICY);
     expect(csp?.value).toContain("https://cdn.portone.io");
     expect(csp?.value).toContain("frame-src 'self' https:");
+    expect(csp?.value).toContain("media-src 'self' https://af1-cje.pages.dev");
     expect(csp?.value).toContain("form-action 'self' https:");
     expect(csp?.value).not.toContain("unsafe-eval");
   });
