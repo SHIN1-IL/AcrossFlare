@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutDashboard, LayoutGrid, LogOut, Menu, Server, Settings, Shield, Ticket, Users, Wallet, X } from "lucide-react";
+import { LayoutDashboard, LayoutGrid, LogOut, Menu, Server, Settings, Shield, Signal, Ticket, Users, Wallet, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { MarginCard } from "@/components/admin/margin-card";
@@ -66,6 +66,9 @@ function NavLinks({
   const staffActive = pathname === staffHref || pathname.startsWith(`${staffHref}/`);
   const settingsHref = "/admin/settings";
   const settingsActive = pathname === settingsHref || pathname.startsWith(`${settingsHref}/`);
+  const esimHref = "/admin/esim";
+  const esimActive = pathname === esimHref || pathname.startsWith(`${esimHref}/`);
+  const showEsim = owner || permissions.includes("customers");
   const itemClass = (active: boolean) =>
     cn(
       "flex items-center gap-2 rounded-[10px] px-3 py-2 text-sm transition-colors",
@@ -101,6 +104,12 @@ function NavLinks({
         >
           <Shield className="size-4" />
           {t("navStaff")}
+        </Link>
+      ) : null}
+      {showEsim ? (
+        <Link href={esimHref} prefetch onClick={onNavigate} className={itemClass(esimActive)}>
+          <Signal className="size-4" />
+          {t("navEsim")}
         </Link>
       ) : null}
       <Link href={settingsHref} prefetch onClick={onNavigate} className={itemClass(settingsActive)}>

@@ -15,10 +15,11 @@ export default async function CheckoutPage({
     paymentId?: string;
     canceled?: string;
     code?: string;
+    data?: string;
   }>;
 }) {
   const locale = await resolveLocale(params);
-  const { product, plan, paymentId, canceled, code } = await searchParams;
+  const { product, plan, paymentId, canceled, code, data } = await searchParams;
   setRequestLocale(locale);
 
   return (
@@ -29,6 +30,7 @@ export default async function CheckoutPage({
         paymentId={paymentId}
         canceled={canceled}
         code={code}
+        data={data}
       />
     </Suspense>
   );

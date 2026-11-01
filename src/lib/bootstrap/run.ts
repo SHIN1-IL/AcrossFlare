@@ -15,12 +15,24 @@ import { ensureBootstrapRealityInbound } from "@/lib/bootstrap/xui-inbound";
 import { isProvisionSimulate } from "@/lib/provision/config";
 import { chooseBootstrapTarget, DAILY_BOOTSTRAP_LIMIT, utcDayStart } from "@/lib/provision/capacity-expand";
 import { nodeWiring } from "@/lib/provision/node-wiring";
-import { probeXuiPanel } from "@/lib/provision/xui";
+import { realityDestHost } from "@/lib/provision/reality";
+import { pinKaringXray, probeXuiPanel } from "@/lib/provision/xui";
 
 export class BootstrapError extends Error {
   constructor(public code: string, message?: string) {
     super(message ?? code);
     this.name = "BootstrapError";
+  }
+}
+
+function bootstrapRealityDest(value?: string | null) {
+  try {
+    return realityDestHost(value);
+  } catch (error) {
+    if (error instanceof Error && error.message === "reality_dest_cloudflare_forbidden") {
+      throw new BootstrapError("reality_dest_cloudflare_forbidden");
+    }
+    throw error;
   }
 }
 
@@ -92,7 +104,7 @@ export async function createBootstrapJob(input: {
       sshUser: (input.sshUser || "root").trim() || "root",
       panelPort: input.panelPort || 2053,
       vlessPort: input.vlessPort || 443,
-      realityDest: (input.realityDest || "www.microsoft.com").trim() || "www.microsoft.com",
+      realityDest: bootstrapRealityDest(input.realityDest),
     },
   });
 }
@@ -196,6 +208,8 @@ export async function runBootstrapJob(jobId: string, secrets: BootstrapSecrets) 
       throw new BootstrapError("panel_probe_failed", probe.error);
     }
 
+    await logLine(jobId, "xui: pin Karing-compatible Xray");
+    await pinKaringXray(panelTarget);
     await logLine(jobId, "xui: ensure REALITY inbound");
     const reality = await ensureBootstrapRealityInbound(panelTarget, {
       vlessPort: job.vlessPort,

@@ -14,12 +14,14 @@ export function CheckoutAuthShell({
   paymentId,
   canceled,
   code,
+  data,
 }: {
   product?: string;
   plan?: string;
   paymentId?: string;
   canceled?: string;
   code?: string;
+  data?: string;
 }) {
   const hydrated = useHydrated();
   const probeDone = useSessionProbeDone();
@@ -36,6 +38,7 @@ export function CheckoutAuthShell({
             checkoutReturnPath({
               product,
               plan,
+              data,
               paymentId,
               canceled: canceledFlag,
               promoCode: code,
@@ -44,7 +47,7 @@ export function CheckoutAuthShell({
         )
       );
     }
-  }, [canceledFlag, code, hydrated, locale, paymentId, plan, probeDone, product, session]);
+  }, [canceledFlag, code, data, hydrated, locale, paymentId, plan, probeDone, product, session]);
 
   if (!hydrated || !probeDone || !session) {
     return (
@@ -59,6 +62,7 @@ export function CheckoutAuthShell({
       initialSession={session}
       product={product}
       planId={plan}
+      initialDataId={data}
       paymentId={paymentId}
       promoCodeHint={code}
       canceled={canceledFlag}

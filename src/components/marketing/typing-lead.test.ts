@@ -2,17 +2,17 @@ import { describe, expect, it } from "vitest";
 import ko from "../../../messages/ko.json";
 import { GAP_MS, LINE_MS, readServiceLead, typingLeadFrame } from "./typing-lead";
 
-const lines = ["아주 빠른 속도가 필요한게 아니라면", "그래도 유튜브 정도는 끊김없이 보고 싶다면"] as const;
+const lines = ["중국 출장이나 여행 중에,", "한국 사이트 보안 접속이 필요하다면"] as const;
 
 describe("service typing lead", () => {
   it("uses the standard and hybrid lines above the product title", () => {
     expect(ko.services.standard.lead).toEqual([
-      "아주 빠른 속도가 필요한게 아니라면",
-      "그래도 유튜브 정도는 끊김없이 보고 싶다면",
+      "중국 출장이나 여행 중에,",
+      "한국 사이트 보안 접속이 필요하다면",
     ]);
     expect(ko.services.hybrid.lead).toEqual([
-      "좀 더 빠른 속도가 필요하다면",
-      "끊김없는 화상회의를 원한다면",
+      "스탠다드보다 빠른",
+      "회선이 필요하다면",
     ]);
     expect(readServiceLead(ko.services.standard.lead)).toEqual(ko.services.standard.lead);
     expect(readServiceLead(ko.services.workspace)).toBeNull();

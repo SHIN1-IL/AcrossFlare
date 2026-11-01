@@ -28,7 +28,7 @@ def sync_row() -> SyncRow:
     )
 
 
-def test_run_traffic_sync_applies_delta_and_checks_failover(monkeypatch, db_url, sync_row):
+def test_run_traffic_sync_applies_delta_without_failover(monkeypatch, db_url, sync_row):
     monkeypatch.setattr("app.traffic_sync.load_sync_rows", lambda: [sync_row])
     monkeypatch.setattr("app.traffic_sync._session_for_node", lambda sessions, entry: object())
     monkeypatch.setattr("app.traffic_sync.fetch_client_traffic", lambda session, email: (1_000, 2_000))
@@ -41,11 +41,6 @@ def test_run_traffic_sync_applies_delta_and_checks_failover(monkeypatch, db_url,
         lambda conn, subscription_id, delta_bytes: incremented.append((subscription_id, delta_bytes)),
     )
 
-    failovers: list[str] = []
-    monkeypatch.setattr(
-        "app.traffic_sync.maybe_failover",
-        lambda conn, subscription_id, sessions: failovers.append(subscription_id) or False,
-    )
     monkeypatch.setattr("app.traffic_sync.psycopg.connect", lambda url: FakeConnection())
     monkeypatch.setattr("app.traffic_sync._record_sync_run", lambda *args: None)
 
@@ -53,7 +48,6 @@ def test_run_traffic_sync_applies_delta_and_checks_failover(monkeypatch, db_url,
 
     assert result == {"subscriptions": 1, "updates": 1, "failovers": 0, "errors": 0}
     assert incremented == [("sub-1", 3_000)]
-    assert failovers == ["sub-1"]
 
 
 def test_run_traffic_sync_marks_degraded_when_all_nodes_fail(monkeypatch, db_url, sync_row):
@@ -65,7 +59,6 @@ def test_run_traffic_sync_marks_degraded_when_all_nodes_fail(monkeypatch, db_url
         raise XuiError("panel_down")
 
     monkeypatch.setattr("app.traffic_sync._session_for_node", raise_panel_error)
-    monkeypatch.setattr("app.traffic_sync.maybe_failover", lambda *args: False)
 
     degraded: list[str] = []
     monkeypatch.setattr(
@@ -81,17 +74,16 @@ def test_run_traffic_sync_marks_degraded_when_all_nodes_fail(monkeypatch, db_url
     assert degraded == ["g-la-b-bw"]
 
 
-def test_run_traffic_sync_records_failover(monkeypatch, db_url, sync_row):
+def test_run_traffic_sync_does_not_record_failover(monkeypatch, db_url, sync_row):
     monkeypatch.setattr("app.traffic_sync.load_sync_rows", lambda: [sync_row])
     monkeypatch.setattr("app.traffic_sync._session_for_node", lambda sessions, entry: object())
     monkeypatch.setattr("app.traffic_sync.fetch_client_traffic", lambda session, email: (0, 0))
     monkeypatch.setattr("app.traffic_sync._apply_snapshot", lambda *args: 0)
     monkeypatch.setattr("app.traffic_sync._increment_traffic_used_gb", lambda *args: None)
     monkeypatch.setattr("app.traffic_sync._mark_node_degraded", lambda *args: None)
-    monkeypatch.setattr("app.traffic_sync.maybe_failover", lambda *args: True)
     monkeypatch.setattr("app.traffic_sync.psycopg.connect", lambda url: FakeConnection())
     monkeypatch.setattr("app.traffic_sync._record_sync_run", lambda *args: None)
 
     result = run_traffic_sync()
 
-    assert result["failovers"] == 1
+    assert result["failovers"] == 0

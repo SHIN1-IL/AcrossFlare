@@ -21,6 +21,8 @@ import { isPublicCheckoutProduct, planPricePeriodKey } from "@/lib/plans";
 import { accountServiceRows, hasActiveService } from "@/lib/owned-service";
 import { publicServiceFromPlanId } from "@/lib/public-service";
 import type { PortOneCheckout } from "@/lib/payments/portone";
+import { EsimCheckout, type EsimCheckoutChoice } from "@/components/esim/esim-checkout";
+import { formatMoney } from "@/lib/format-date";
 import { cn } from "@/lib/utils";
 
 const CHECKOUT_FAILURES = [
@@ -35,6 +37,7 @@ const CHECKOUT_FAILURES = [
   "already_owned",
   "capacity_full",
   "capacity_full_after_pay",
+  "esim_rejected",
 ] as const;
 
 type CheckoutFailure = (typeof CHECKOUT_FAILURES)[number] | "failed" | "agree";
@@ -65,6 +68,7 @@ export function CheckoutView({
   promoCodeHint,
   canceled = false,
   merchant,
+  initialDataId,
 }: {
   initialSession: PublicSession;
   product?: string;
@@ -74,6 +78,7 @@ export function CheckoutView({
   promoCodeHint?: string;
   canceled?: boolean;
   merchant?: React.ReactNode;
+  initialDataId?: string;
 }) {
   const t = useTranslations("checkout");
   const tPricing = useTranslations("pricing");
@@ -84,7 +89,20 @@ export function CheckoutView({
   const { session, account } = useAccount();
   const user = session ?? initialSession;
   const plan = useLivePlan(planId);
-  const validProduct = isPublicCheckoutProduct(product) && plan?.product === product ? product : null;
+  const connectionProduct = isPublicCheckoutProduct(product) && plan?.product === product ? product : null;
+  const dataOnly = !plan && product === "global" && Boolean(initialDataId);
+  const validProduct = connectionProduct ?? (dataOnly ? "global" : null);
+  const ownsConnection = Boolean(plan && account && hasActiveService(accountServiceRows(account), plan.id));
+  const [choice, setChoice] = useState<EsimCheckoutChoice>({
+    ready: false,
+    includeConnection: true,
+    esimProductId: null,
+    chargeAmount: null,
+    currency: "KRW",
+  });
+  const onEsimChoice = useCallback((next: EsimCheckoutChoice) => {
+    setChoice(next);
+  }, []);
   const planPeriod = plan ? tPricing(planPricePeriodKey(plan.id)) : null;
   const [method, setMethod] = useState<PaymentMethod>(locale === "zh" ? "alipay" : "card");
   const [agreed, setAgreed] = useState(false);
@@ -145,10 +163,18 @@ export function CheckoutView({
   );
 
   const finishPaidCheckout = useCallback(
-    async (id: string) => {
+    async (id: string, paidConnection: boolean) => {
       const paid = await waitForPayment(id);
       if (paid.status !== "SUCCEEDED") {
         throw new Error("failed");
+      }
+
+      if (!paidConnection) {
+        if (user) {
+          await refreshRemoteAccount(user.email);
+        }
+        router.push("/app/global");
+        return;
       }
 
       setStep(Math.max(steps.findIndex((item) => item.id === "xui"), 1));
@@ -181,7 +207,10 @@ export function CheckoutView({
   );
 
   async function startPayment() {
-    if (!validProduct || !plan) {
+    const sellingConnection = Boolean(plan) && choice.includeConnection && !ownsConnection;
+    const sellingData = choice.esimProductId;
+    if (!validProduct || (!sellingConnection && !sellingData)) {
+      setError("esim_rejected");
       return;
     }
 
@@ -200,7 +229,7 @@ export function CheckoutView({
       return;
     }
 
-    if (account && hasActiveService(accountServiceRows(account), plan.id)) {
+    if (sellingConnection && plan && account && hasActiveService(accountServiceRows(account), plan.id)) {
       window.alert(t("alreadyOwned"));
       setError("already_owned");
       return;
@@ -218,7 +247,8 @@ export function CheckoutView({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           product: validProduct,
-          planId: plan.id,
+          planId: sellingConnection ? plan?.id : undefined,
+          esimProductId: sellingData,
           method,
           locale,
           promoCode: activePromoCode,
@@ -244,7 +274,9 @@ export function CheckoutView({
             checkout.error === "already_owned" ||
             checkout.error === "capacity_full"
             ? checkout.error
-            : "failed"
+            : checkout.error.startsWith("esim_") || checkout.error === "empty"
+              ? "esim_rejected"
+              : "failed"
         );
       }
       if (!created.ok || !checkout.paymentId) {
@@ -262,7 +294,7 @@ export function CheckoutView({
         if (!simulated.ok) {
           throw new Error("failed");
         }
-        await finishPaidCheckout(checkout.paymentId);
+        await finishPaidCheckout(checkout.paymentId, sellingConnection);
         return;
       }
 
@@ -280,7 +312,7 @@ export function CheckoutView({
         }
         setPayStatus("processing");
         try {
-          await finishPaidCheckout(checkout.paymentId);
+          await finishPaidCheckout(checkout.paymentId, sellingConnection);
         } catch (cause) {
           if (result.detail) {
             throw new Error(`portone:${result.detail}`);
@@ -303,19 +335,42 @@ export function CheckoutView({
   }
 
   useEffect(() => {
-    if (canceled || !paymentId || resumeRef.current || !hydrated || !user || !validProduct || !plan) {
+    if (canceled || !paymentId || resumeRef.current || !hydrated || !user || !validProduct) {
+      return;
+    }
+    if (!plan && !initialDataId) {
       return;
     }
 
     resumeRef.current = true;
-    void finishPaidCheckout(paymentId).catch((cause: unknown) => {
-      setPhase("form");
-      setError(checkoutFailure(cause));
-      setErrorDetail(portoneErrorDetail(cause));
-    });
-  }, [canceled, finishPaidCheckout, hydrated, paymentId, plan, user, validProduct]);
+    let started = false;
+    const timer = window.setTimeout(() => {
+      started = true;
+      void finishPaidCheckout(paymentId, Boolean(plan)).catch((cause: unknown) => {
+        setPhase("form");
+        setError(checkoutFailure(cause));
+        setErrorDetail(portoneErrorDetail(cause));
+      });
+    }, 0);
+    return () => {
+      window.clearTimeout(timer);
+      if (!started) {
+        resumeRef.current = false;
+      }
+    };
+  }, [canceled, finishPaidCheckout, hydrated, initialDataId, paymentId, plan, user, validProduct]);
 
-  if (!validProduct || !plan) {
+  if (dataOnly && !choice.ready) {
+    return (
+      <CheckoutFrame merchant={merchant}>
+        <div className="h-8 w-8 animate-pulse rounded-full bg-primary/20" />
+      </CheckoutFrame>
+    );
+  }
+
+  const sellingConnection = Boolean(plan) && (choice.ready ? choice.includeConnection && !ownsConnection : !ownsConnection);
+  const canPay = sellingConnection || Boolean(choice.esimProductId);
+  if ((!connectionProduct && !dataOnly) || (dataOnly && choice.ready && !choice.esimProductId)) {
     return (
       <CheckoutFrame merchant={merchant}>
         <h1 className="text-3xl tracking-tight">{t("title")}</h1>
@@ -351,17 +406,33 @@ export function CheckoutView({
         <div className="flex items-end justify-between gap-3">
           <div>
             <p className="text-sm text-muted-foreground">
-              {checkoutProductLabel(validProduct, plan.id, t)} · {plan.name}
+              {plan
+                ? `${checkoutProductLabel(validProduct ?? "global", plan.id, t)} · ${plan.name}`
+                : t("esimData")}
             </p>
             <p className="mt-2 font-mono text-3xl tracking-tight">
-              <PriceAmount locale={locale} prices={plan.prices} />
+              {choice.chargeAmount != null || !plan ? (
+                formatMoney(locale, choice.chargeAmount ?? 0, choice.currency)
+              ) : (
+                <PriceAmount locale={locale} prices={plan.prices} />
+              )}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">{t("taxIncluded")}</p>
-            {planPeriod ? <PlanPeriodCaption period={planPeriod} className="mt-1" /> : null}
-            <SecondaryPriceAmount
-              locale={locale}
-              prices={plan.prices}
-              className="mt-1 font-mono text-xs text-muted-foreground"
+            {plan && planPeriod && choice.chargeAmount == null ? (
+              <PlanPeriodCaption period={planPeriod} className="mt-1" />
+            ) : null}
+            {plan && choice.chargeAmount == null ? (
+              <SecondaryPriceAmount
+                locale={locale}
+                prices={plan.prices}
+                className="mt-1 font-mono text-xs text-muted-foreground"
+              />
+            ) : null}
+            <EsimCheckout
+              plan={plan}
+              ownsConnection={ownsConnection}
+              initialDataId={initialDataId}
+              onChange={onEsimChoice}
             />
           </div>
         </div>
@@ -407,6 +478,8 @@ export function CheckoutView({
                                   ? t("capacityFull")
                                   : error === "capacity_full_after_pay"
                                     ? t("capacityFullAfterPay")
+                              : error === "esim_rejected"
+                                ? t("esimRejected")
                               : error === "portone_not_configured" ||
                                   error === "stripe_not_configured" ||
                                   error === "paymentwall_not_configured" ||
@@ -450,6 +523,7 @@ export function CheckoutView({
             <Button
               type="button"
               className="h-10 w-full rounded-[10px]"
+              disabled={!canPay}
               onClick={() => {
                 void startPayment();
               }}

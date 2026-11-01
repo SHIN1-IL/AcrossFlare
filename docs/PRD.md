@@ -46,7 +46,7 @@
 ## 3. 핵심 기능 명세
 
 ### F-1. 사용자 서비스 분리
-* **타겟 A (글로벌 우회/백업):** Karing 연동 VLESS-REALITY(tcp·xtls-rprx-vision) 1초 QR 및 딥링크 발급 (`Content-Type: text/yaml`). 계정과 함께 Vaultwarden(보안 메모/암호) + Syncthing(파일 동기화) 백업 공간이 열린다. 밴드웨곤(150GB) 소진 시 랙너드(무제한) 자동 예비 전환.
+* **타겟 A (글로벌 우회/백업):** Karing 연동 VLESS-REALITY(tcp·xtls-rprx-vision) 1초 QR 및 딥링크 발급 (`Content-Type: text/yaml`). 계정과 함께 Vaultwarden(보안 메모/암호) + Syncthing(파일 동기화) 백업 공간이 열린다. 사용 한도는 그 구독의 플랜 `trafficGb`다.
 * **타겟 B (마케팅 IP):** 별도 앱 설치 없는 HTTP/SOCKS5 프록시 URL(`http://id:pw@ip:port`) 및 WireGuard 설정 정보 제공. 대시보드 내 Mutex Lock 기반 1클릭 IP 변경(Rotate) 지원.
 
 ### F-2. 이원화 결제 및 자동 프로비저닝
@@ -63,6 +63,9 @@
 ### F-4. 보안 및 예비 시스템
 * 오리진은 Caddy가 `acrossflare.com`(PWA/콘솔)과 `vault.acrossflare.com`(Vaultwarden)을 라우팅한다. Syncthing 관리 GUI는 외부에 공개하지 않고 내부 API/SSH 터널로만 운영한다.
 * 노드 차단 대비를 위해 모든 3x-ui 노드는 서브도메인(DDNS)으로 매핑하여 IP 변경 시 고객 설정 유지.
+* **예비 노드 (수동):** 역할이 `FAILOVER`인 노드는 기본 노드가 다운되거나 막혔을 때 쓴다. 관리자가 노드 화면의 고급에서 그 기본 노드의 고객을 예비 노드로 보내거나 되돌린다. 자동 전환은 꺼 두었다. 용량을 다 써도 예비로 넘기지 않는다. 예비로 보낸 뒤에도 플랜 `trafficGb`는 그대로다. 예비 계정의 용량을 비우거나 무제한으로 바꾸는 처리는 하지 않는다.
+
+**취소 (2026-10-23):** “밴드웨건 150GB 소진 시 랙너드 무제한으로 자동 전환”은 폐기다. 다시 넣지 않는다. 용량 소진은 예비 전환의 조건이 아니다.
 
 ---
 

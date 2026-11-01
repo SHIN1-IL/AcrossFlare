@@ -60,6 +60,7 @@ export function AuthForm({
             next: searchParams.get("next"),
             product: searchParams.get("product"),
             plan: searchParams.get("plan"),
+            data: searchParams.get("data"),
           })
         )
       );
@@ -143,6 +144,7 @@ export function AuthForm({
                 next: searchParams.get("next"),
                 product: searchParams.get("product"),
                 plan: searchParams.get("plan"),
+            data: searchParams.get("data"),
               })
             )
           );

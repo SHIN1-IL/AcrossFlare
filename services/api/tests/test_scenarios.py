@@ -27,12 +27,18 @@ def test_scenario_exhausted_standard_returns_empty_proxies():
     assert "subscription-userinfo" in headers
 
 
-def test_scenario_failover_serves_racknerd_only():
+def test_scenario_failover_serves_spare_nodes_and_keeps_plan_quota():
     body, headers = resolve_subscription(FAILOVER_ROW)
     plain = decoded_sub(body)
     assert "node-la-rn.acrossflare.com" in plain
     assert "node-la-b.acrossflare.com" not in plain
-    assert "total=10995116277760" in headers["subscription-userinfo"]
+    assert "total=161061273600" in headers["subscription-userinfo"]
+
+
+def test_scenario_failover_still_blocks_when_plan_quota_is_exhausted():
+    body, headers = resolve_subscription({**FAILOVER_ROW, "traffic_used_gb": 150.0})
+    assert "proxies: []" in body
+    assert "total=161061273600" in headers["subscription-userinfo"]
 
 
 def test_scenario_failover_uses_pool_when_racknerd_not_linked():

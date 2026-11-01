@@ -28,6 +28,7 @@ import {
 } from "@/lib/admin-store";
 import { canRetryProvision, fulfillmentSteps } from "@/lib/admin-queue";
 import { AdminPlanLabel, AdminPlanOption } from "@/components/admin/admin-plan-label";
+import { EsimCustomerOrders } from "@/components/admin/esim-customer-orders";
 import { formatDate, formatDateTime, formatMoney } from "@/lib/format-date";
 import type { AdminServiceId } from "@/lib/admin-service";
 import { cn } from "@/lib/utils";
@@ -359,6 +360,7 @@ export function CustomerDetail({ service, id }: { service: AdminServiceId; id: s
           ) : null}
         </section>
       ) : null}
+      <EsimCustomerOrders customerId={customer.id} />
     </div>
   );
 }

@@ -288,10 +288,9 @@ const DEMO_SUBSCRIPTIONS = [
     email: "exhausted-user@acrossflare.com",
     product: Product.GLOBAL,
     planId: "global-standard",
-    nodeIds: ["g-la-a-bw", "g-la-rn"],
+    nodeIds: ["g-la-b-bw"],
     status: SubscriptionStatus.ACTIVE,
-    memo: "Failed over to Racknerd",
-    failover: true,
+    memo: "Plan quota exhausted",
     trafficUsedGb: 150,
   },
   {
@@ -367,7 +366,7 @@ async function seedDemoSubscriptions() {
         expiresAt,
         provisionStep: row.status === SubscriptionStatus.ACTIVE ? "ready" : "queued",
         memo: row.memo,
-        failover: Boolean(row.failover),
+        failover: false,
         trafficUsedGb: row.trafficUsedGb ?? 0,
         nodes: nodes.length ? { connect: nodes.map((node) => ({ id: node.id })) } : undefined,
         credentials:
@@ -378,7 +377,7 @@ async function seedDemoSubscriptions() {
                     ? globalSeedCredentials(
                         subscriptionId,
                         nodes,
-                        Boolean(row.failover)
+                        false
                       )
                     : marketingSeedCredentials(subscriptionId, nodes, used),
               }

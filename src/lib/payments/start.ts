@@ -9,6 +9,7 @@ import {
   publicAppUrl,
   stripeSecretKey,
 } from "@/lib/payments/config";
+import { checkoutOrderName } from "@/lib/esim/catalog";
 import { getMerchant } from "@/lib/legal/merchant";
 import { md5Hex } from "@/lib/payments/crypto";
 import {
@@ -37,15 +38,21 @@ export type LiveCheckoutSession = {
 export function checkoutReturnUrl(input: {
   locale: AppLocale;
   product: string;
-  planId: string;
+  planId?: string | null;
+  data?: string | null;
   paymentId: string;
   canceled?: boolean;
 }) {
   const params = new URLSearchParams({
     product: input.product,
-    plan: input.planId,
     paymentId: input.paymentId,
   });
+  if (input.planId) {
+    params.set("plan", input.planId);
+  }
+  if (input.data) {
+    params.set("data", input.data);
+  }
   if (input.canceled) {
     params.set("canceled", "1");
   }
@@ -55,7 +62,8 @@ export function checkoutReturnUrl(input: {
 
 export async function startProviderCheckout(input: {
   payment: Payment;
-  plan: Plan;
+  plan: Plan | null;
+  orderName: string;
   email: string;
   product: string;
   phoneNumber?: string | null;
@@ -64,30 +72,49 @@ export async function startProviderCheckout(input: {
   const successUrl = checkoutReturnUrl({
     locale,
     product: input.product,
-    planId: input.plan.id,
+    planId: input.plan?.id,
+    data: input.payment.esimProductId,
     paymentId: input.payment.id,
   });
   const cancelUrl = checkoutReturnUrl({
     locale,
     product: input.product,
-    planId: input.plan.id,
+    planId: input.plan?.id,
+    data: input.payment.esimProductId,
     paymentId: input.payment.id,
     canceled: true,
   });
 
+  if (!input.plan && !input.payment.esimProductId) {
+    throw new CheckoutStartError("portone_not_configured");
+  }
+
+  const productName = input.plan?.name || input.orderName;
+
   if (input.payment.provider === PaymentProvider.STRIPE) {
-    return { redirectUrl: await createStripeCheckout(input, successUrl, cancelUrl) };
+    return {
+      redirectUrl: await createStripeCheckout(
+        { payment: input.payment, productName },
+        successUrl,
+        cancelUrl
+      ),
+    };
   }
 
   if (input.payment.provider === PaymentProvider.PAYMENTWALL) {
-    return { redirectUrl: createPaymentwallCheckout(input, successUrl) };
+    return {
+      redirectUrl: createPaymentwallCheckout(
+        { payment: input.payment, productName, email: input.email },
+        successUrl
+      ),
+    };
   }
 
   return { portone: createPortoneCheckout(input, successUrl) };
 }
 
 async function createStripeCheckout(
-  input: { payment: Payment; plan: Plan },
+  input: { payment: Payment; productName: string },
   successUrl: string,
   cancelUrl: string
 ) {
@@ -109,7 +136,7 @@ async function createStripeCheckout(
     "line_items[0][price_data][unit_amount]",
     String(toStripeMinorUnits(input.payment.amount, input.payment.currency))
   );
-  body.set("line_items[0][price_data][product_data][name]", input.plan.name);
+  body.set("line_items[0][price_data][product_data][name]", input.productName);
   body.set(
     "payment_method_types[0]",
     input.payment.method === PaymentMethod.ALIPAY ? "alipay" : "card"
@@ -132,7 +159,10 @@ async function createStripeCheckout(
   return session.url;
 }
 
-function createPaymentwallCheckout(input: { payment: Payment; plan: Plan; email: string }, pingbackFallback: string) {
+function createPaymentwallCheckout(
+  input: { payment: Payment; productName: string; email: string },
+  pingbackFallback: string
+) {
   const projectKey = paymentwallProjectKey();
   const secret = paymentwallSecret();
   if (!projectKey || !secret) {
@@ -145,7 +175,7 @@ function createPaymentwallCheckout(input: { payment: Payment; plan: Plan; email:
     widget: "p1_1",
     amount: String(input.payment.amount),
     currencyCode: input.payment.currency,
-    ag_name: input.plan.name,
+    ag_name: input.productName,
     ag_external_id: input.payment.id,
     ag_type: "fixed",
     email: input.email,
@@ -163,7 +193,7 @@ function createPaymentwallCheckout(input: { payment: Payment; plan: Plan; email:
 }
 
 function createPortoneCheckout(
-  input: { payment: Payment; plan: Plan; email: string; phoneNumber?: string | null },
+  input: { payment: Payment; orderName: string; email: string; phoneNumber?: string | null },
   redirectUrl: string
 ): PortOneCheckout {
   const storeId = portoneStoreId();
@@ -178,7 +208,11 @@ function createPortoneCheckout(
   }
 
   const merchant = getMerchant();
-  const orderName = `${merchant.serviceName} ${input.plan.name}`.slice(0, 40);
+  const orderName = input.orderName || checkoutOrderName({
+    serviceName: merchant.serviceName,
+    planName: null,
+    esimName: input.payment.esimName,
+  });
 
   return {
     storeId,

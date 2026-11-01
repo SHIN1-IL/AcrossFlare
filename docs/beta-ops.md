@@ -76,8 +76,9 @@ Copy is in:
 | Payment → auto provision | 3x-ui client, Vaultwarden, Syncthing, Karing QR |
 | Subscription URL | `GET /api/v1/subscription/{token}` → YAML + `subscription-userinfo` |
 | Traffic sync | `docker logs acrossflare-api-1 \| grep traffic_sync_complete` |
-| 150GB exceeded | DB `failover=true`, RackNerd-only YAML, dashboard banner |
-| Karing manual refresh | After exceed → manual update → `proxies: []` or RackNerd switch |
+| Plan quota exceeded | Stays on PRIMARY. YAML is empty proxies. `failover` stays false. Quota is not a failover trigger. |
+| Manual spare | Admin → node → advanced → Spare. Customers on that primary move to FAILOVER nodes. Plan `trafficGb` is unchanged. Customer refreshes Karing. |
+| Karing manual refresh | After quota exceed → manual update → `proxies: []`. After a manual spare switch → spare node YAML with the same plan total. |
 
 Optional local E2E with live 3x-ui: `scripts/live-smoke.ts` (`PROVISION_MODE=live`).
 

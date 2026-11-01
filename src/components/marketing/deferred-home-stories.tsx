@@ -28,7 +28,6 @@ function useDeferredStoryMount(rootMargin: string, idleTimeoutMs: number) {
     if (!node || ready) return;
 
     let cancelled = false;
-    let idleHandle = 0;
 
     const arm = () => {
       if (!cancelled) setReady(true);
@@ -45,17 +44,12 @@ function useDeferredStoryMount(rootMargin: string, idleTimeoutMs: number) {
     );
     observer.observe(node);
 
-    const requestIdle =
-      window.requestIdleCallback?.bind(window) ??
-      ((cb: IdleRequestCallback) =>
-        window.setTimeout(() => cb({ didTimeout: false, timeRemaining: () => 0 }), idleTimeoutMs));
-    idleHandle = requestIdle(() => arm(), { timeout: idleTimeoutMs }) as number;
+    const timer = window.setTimeout(arm, idleTimeoutMs);
 
     return () => {
       cancelled = true;
       observer.disconnect();
-      if (window.cancelIdleCallback) window.cancelIdleCallback(idleHandle);
-      else window.clearTimeout(idleHandle);
+      window.clearTimeout(timer);
     };
   }, [ready, rootMargin, idleTimeoutMs]);
 
@@ -84,8 +78,8 @@ function StoryShell({
 }
 
 export function DeferredWhyBuyLive({ className }: { className?: string }) {
-  // 35% — load as user approaches page 2, not during page-1 LCP.
-  const { ref, ready } = useDeferredStoryMount("35% 0px", 2200);
+  // Load when this page enters the screen, or after the hero film.
+  const { ref, ready } = useDeferredStoryMount("0px", 12000);
   const [Comp, setComp] = useState<ComponentType<WhyBuyProps> | null>(null);
 
   useEffect(() => {
@@ -107,8 +101,8 @@ export function DeferredWhyBuyLive({ className }: { className?: string }) {
 }
 
 export function DeferredConsoleKaring({ className }: { className?: string }) {
-  // Later story — wait until nearer; idle fallback still arms within ~3s on long dwell.
-  const { ref, ready } = useDeferredStoryMount("50% 0px", 5000);
+  // Load when this page enters the screen, or after the hero film.
+  const { ref, ready } = useDeferredStoryMount("0px", 15000);
   const [Comp, setComp] = useState<ComponentType<ConsoleProps> | null>(null);
 
   useEffect(() => {

@@ -14,6 +14,7 @@ import { DocumentLink } from "@/components/marketing/cached-marketing-link";
 import { formatDate } from "@/lib/format-date";
 import { publicServiceFromPlanId } from "@/lib/public-service";
 import { SUPPORT_HREF } from "@/lib/support-zone";
+import { EsimConsole } from "@/components/esim/esim-console";
 
 export function GlobalDashboard({ product = "global" }: { product?: "global" | "hybrid" | "workspace" }) {
   const t = useTranslations("app");
@@ -29,10 +30,13 @@ export function GlobalDashboard({ product = "global" }: { product?: "global" | "
 
   if (!lane) {
     return (
-      <ProductEmpty
-        product={product === "workspace" ? "workspace" : "global"}
-        planId={product === "hybrid" ? "hybrid-lite" : undefined}
-      />
+      <div className="mx-auto max-w-4xl space-y-6">
+        {product !== "workspace" ? <EsimConsole showBanner={false} /> : null}
+        <ProductEmpty
+          product={product === "workspace" ? "workspace" : "global"}
+          planId={product === "hybrid" ? "hybrid-lite" : undefined}
+        />
+      </div>
     );
   }
 
@@ -68,6 +72,8 @@ export function GlobalDashboard({ product = "global" }: { product?: "global" | "
         <StatusPill label={statusLabel} tone={lane.failover ? "warn" : "ok"} />
       </div>
 
+      {product !== "workspace" ? <EsimConsole showBanner /> : null}
+
       {lane.failover ? (
         <div className="rounded-[10px] border border-amber-400/25 bg-amber-400/10 px-4 py-3 text-sm text-amber-200">
           <p>{t("failoverBanner")}</p>
@@ -83,10 +89,10 @@ export function GlobalDashboard({ product = "global" }: { product?: "global" | "
 
       <section className="rounded-2xl border border-border bg-card p-5">
         <UsageMeter
-          label={lane.failover ? t("usageUnlimited") : t("usageTraffic")}
+          label={lane.trafficLimitGb == null ? t("usageUnlimited") : t("usageTraffic")}
           used={lane.trafficUsedGb}
-          limit={lane.trafficLimitGb}
-          unlimited={lane.failover}
+          limit={lane.trafficLimitGb ?? 0}
+          unlimited={lane.trafficLimitGb == null}
         />
       </section>
 

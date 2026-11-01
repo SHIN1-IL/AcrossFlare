@@ -1,5 +1,6 @@
 import {
   NodeHealth,
+  NodeRole,
   Product,
   PromoCodeStatus,
   SubscriptionStatus,
@@ -653,6 +654,94 @@ export async function migrateNodeUsers(input: {
   }
 
   return { total: movers.length, done };
+}
+
+/** Point this primary node's customers at spare nodes, or back. Plan quota stays. */
+export async function setNodeSpare(input: {
+  product: ProductId;
+  nodeId: string;
+  enabled: boolean;
+}) {
+  const product = toPrismaProduct(input.product);
+  const node = await prisma.node.findFirst({ where: { id: input.nodeId, product } });
+  if (!node) {
+    throw new AdminActionError("not_found", 404);
+  }
+  if (node.role !== NodeRole.PRIMARY) {
+    throw new AdminActionError("not_primary");
+  }
+
+  const spares = input.enabled
+    ? await prisma.node.findMany({
+        where: { product, role: NodeRole.FAILOVER, status: { not: NodeHealth.OFFLINE } },
+        orderBy: { createdAt: "asc" },
+      })
+    : [];
+  if (input.enabled && !spares.length) {
+    throw new AdminActionError("no_failover_node");
+  }
+
+  const subscriptions = await prisma.subscription.findMany({
+    where: {
+      ...customerOnNodeWhere(node.id),
+      product,
+      status: SubscriptionStatus.ACTIVE,
+    },
+    include: { plan: true, nodes: true, credentials: true },
+  });
+  if (!subscriptions.length) {
+    throw new AdminActionError("no_users");
+  }
+
+  let done = 0;
+  for (const subscription of subscriptions) {
+    const nextNodes = input.enabled ? uniqueById([...subscription.nodes, ...spares]) : subscription.nodes;
+
+    if (input.enabled && !isProvisionSimulate() && subscription.credentials?.uuid && subscription.credentials.xuiEmail) {
+      for (const spare of spares) {
+        try {
+          await addXuiClient(spare, {
+            uuid: subscription.credentials.uuid,
+            email: subscription.credentials.xuiEmail,
+            expiresAt: subscription.expiresAt,
+            trafficGb: subscription.plan.trafficGb,
+          });
+        } catch {
+          throw new AdminActionError("spare_failed", 502);
+        }
+      }
+    }
+
+    const yamlPatch =
+      subscription.product === Product.GLOBAL && subscription.credentials?.uuid && subscription.credentials.yamlToken
+        ? {
+            yamlBody: buildVlessYamlFromNodes(
+              nextNodes.map(prismaNodeToYamlNode),
+              subscription.credentials.uuid,
+              input.enabled
+            ),
+            deepLink: karingDeepLink(yamlUrlFor(subscription.credentials.yamlToken, appUrl())),
+          }
+        : {};
+
+    await prisma.subscription.update({
+      where: { id: subscription.id },
+      data: {
+        failover: input.enabled,
+        ...(input.enabled ? { nodes: { set: nextNodes.map((item) => ({ id: item.id })) } } : {}),
+        ...(Object.keys(yamlPatch).length
+          ? {
+              credentials: {
+                update: yamlPatch,
+              },
+            }
+          : {}),
+      },
+    });
+    done += 1;
+  }
+
+  return { total: subscriptions.length, done };
 }
 
 export async function rotateAdminCustomer(customerId: string) {

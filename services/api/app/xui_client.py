@@ -8,7 +8,7 @@ from urllib.parse import quote
 
 import httpx
 
-from app.config import REALITY_MIN_CLIENT_VER, VLESS_CLIENT_FLOW, XUI_API_TOKEN, XUI_TLS_INSECURE
+from app.config import KARING_XRAY_TAG, REALITY_MIN_CLIENT_VER, VLESS_CLIENT_FLOW, XUI_API_TOKEN, XUI_TLS_INSECURE
 from app.reality_keys import reality_key_for_client
 
 logger = logging.getLogger(__name__)
@@ -42,6 +42,31 @@ def panel_base(node: XuiPanelTarget) -> str:
     return f"{scheme}://{node.host}:{node.port}"
 
 
+def panel_bases(node: XuiPanelTarget) -> list[str]:
+    primary = panel_base(node)
+    if primary.startswith("https://"):
+        return [primary, "http://" + primary.removeprefix("https://")]
+    return [primary]
+
+
+def xray_needs_karing_pin(version: str) -> bool:
+    """Xray 26.9.8+ rejects Karing's REALITY ClientHello."""
+    match = re.match(r"v?(\d+)\.(\d+)\.(\d+)", (version or "").strip())
+    if not match:
+        return False
+    major, minor, patch = (int(match.group(1)), int(match.group(2)), int(match.group(3)))
+    return (major, minor, patch) >= (26, 9, 8)
+
+
+def _tls_protocol_mismatch(error: Exception) -> bool:
+    text = str(error).lower()
+    return (
+        "tlsv1 alert protocol version" in text
+        or "wrong version number" in text
+        or "packet length too long" in text
+    )
+
+
 def _merge_cookies(*parts: str) -> str:
     jar: dict[str, str] = {}
     for part in parts:
@@ -71,11 +96,7 @@ def _http_client() -> httpx.Client:
     return httpx.Client(timeout=10.0, verify=not XUI_TLS_INSECURE, follow_redirects=False)
 
 
-def login(node: XuiPanelTarget) -> XuiSession:
-    if XUI_API_TOKEN:
-        return XuiSession(base_url=panel_base(node), cookie="", csrf="", bearer=XUI_API_TOKEN)
-
-    base_url = panel_base(node)
+def _login_at(base_url: str, node: XuiPanelTarget) -> XuiSession:
     with _http_client() as client:
         bootstrap = client.get(f"{base_url}/")
         bootstrap.raise_for_status()
@@ -105,12 +126,30 @@ def login(node: XuiPanelTarget) -> XuiSession:
         return XuiSession(base_url=base_url, cookie=cookie, csrf=csrf, bearer="")
 
 
+def login(node: XuiPanelTarget) -> XuiSession:
+    if XUI_API_TOKEN:
+        return XuiSession(base_url=panel_base(node), cookie="", csrf="", bearer=XUI_API_TOKEN)
+
+    last_error: Exception | None = None
+    for base_url in panel_bases(node):
+        try:
+            return _login_at(base_url, node)
+        except Exception as error:
+            last_error = error
+            if not _tls_protocol_mismatch(error):
+                raise
+    if last_error:
+        raise last_error
+    raise XuiError(f"login_failed:{node.id}")
+
+
 def panel_request(
     session: XuiSession,
     path: str,
     *,
     method: str = "GET",
     json_body: dict[str, Any] | None = None,
+    timeout: float = 10.0,
 ) -> dict[str, Any] | None:
     headers = {"Accept": "application/json"}
     if json_body is not None:
@@ -122,7 +161,7 @@ def panel_request(
     if session.csrf:
         headers["X-CSRF-Token"] = session.csrf
 
-    with _http_client() as client:
+    with httpx.Client(timeout=timeout, verify=not XUI_TLS_INSECURE, follow_redirects=False) as client:
         response = client.request(
             method,
             f"{session.base_url}{path}",
@@ -297,6 +336,34 @@ def _client_fields(
     }
 
 
+def xray_version_from_status(payload: dict[str, Any] | None) -> str:
+    obj = payload.get("obj") if isinstance(payload, dict) else None
+    if not isinstance(obj, dict):
+        return ""
+    xray = obj.get("xray")
+    if isinstance(xray, dict) and isinstance(xray.get("version"), str):
+        return xray["version"]
+    version = obj.get("xrayVersion")
+    return version if isinstance(version, str) else ""
+
+
+def ensure_karing_xray(session: XuiSession) -> str:
+    """Downgrade panels that ship Xray 26.9.8+, which Karing cannot handshake."""
+    status = panel_request(session, "/panel/api/server/status")
+    current = xray_version_from_status(status)
+    if not xray_needs_karing_pin(current):
+        return current
+    panel_request(
+        session,
+        f"/panel/api/server/installXray/{KARING_XRAY_TAG}",
+        method="POST",
+        json_body={},
+        timeout=180.0,
+    )
+    logger.warning("karing_xray_pinned from=%s to=%s", current, KARING_XRAY_TAG)
+    return KARING_XRAY_TAG
+
+
 def add_xui_client(
     session: XuiSession,
     *,
@@ -305,6 +372,7 @@ def add_xui_client(
     expires_at: datetime,
     traffic_gb: float | None,
 ) -> None:
+    ensure_karing_xray(session)
     listed = panel_request(session, "/panel/api/inbounds/list")
     inbound_id = _inbound_id_from(listed)
     ensure_reality_min_client_ver(session, inbound_id)

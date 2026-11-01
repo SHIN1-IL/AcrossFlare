@@ -7,6 +7,7 @@ import {
   type Payment,
 } from "@prisma/client";
 import { prisma } from "@/lib/db";
+import { connectionPlanForFulfillment } from "@/lib/esim/catalog";
 import { notifyOpsPayment } from "@/lib/ops-notify";
 import { pickSameService } from "@/lib/owned-service";
 import { planPeriodMs } from "@/lib/plans";
@@ -56,7 +57,7 @@ export async function fulfillVerifiedPayment(input: FulfillInput) {
       )?.email ?? "";
     void notifyOpsPayment({
       email,
-      planId: result.payment.planId,
+      planId: [result.payment.planId, result.payment.esimName].filter(Boolean).join(" + "),
       amount: result.payment.amount,
       currency: result.payment.currency,
     }).catch((error) => console.error("ops_notify_payment_failed", error));
@@ -113,7 +114,23 @@ async function applyFulfillment(
     return { payment: failed, newlySucceeded: false };
   }
 
-  const subscription = await upsertPaidSubscription(tx, payment);
+  const connectionPlanId = connectionPlanForFulfillment(payment.planId);
+  const subscription = connectionPlanId ? await upsertPaidSubscription(tx, payment, connectionPlanId) : null;
+  if (payment.esimProductId) {
+    await tx.esimOrder.create({
+      data: {
+        userId: payment.userId,
+        paymentId: payment.id,
+        productId: payment.esimProductId,
+        name: payment.esimName,
+        dataGb: payment.esimDataGb ?? 0,
+        days: payment.esimDays ?? 0,
+        priceKrw: payment.esimPriceKrw ?? 0,
+        currency: payment.currency,
+        chargedAmount: payment.esimChargedAmount ?? payment.esimPriceKrw ?? 0,
+      },
+    });
+  }
 
   await tx.promoCode.updateMany({
     where: { paymentId: payment.id },
@@ -125,31 +142,35 @@ async function applyFulfillment(
     data: {
       status: PaymentStatus.SUCCEEDED,
       externalId: input.externalId,
-      subscriptionId: subscription.id,
+      subscriptionId: subscription?.id,
     },
   });
   return { payment: succeeded, newlySucceeded: true };
 }
 
-async function upsertPaidSubscription(tx: Prisma.TransactionClient, payment: Payment) {
+async function upsertPaidSubscription(
+  tx: Prisma.TransactionClient,
+  payment: Payment,
+  planId: string
+) {
   const sameProduct = await tx.subscription.findMany({
     where: { userId: payment.userId, product: payment.product },
     orderBy: { createdAt: "desc" },
   });
-  const existing = pickSameService(sameProduct, payment.planId);
+  const existing = pickSameService(sameProduct, planId);
 
   const now = new Date();
   const base =
     existing?.status === SubscriptionStatus.ACTIVE && existing.expiresAt.getTime() > now.getTime()
       ? existing.expiresAt
       : now;
-  const expiresAt = new Date(base.getTime() + planPeriodMs(payment.planId));
+  const expiresAt = new Date(base.getTime() + planPeriodMs(planId));
 
   if (!existing) {
     return tx.subscription.create({
       data: {
         userId: payment.userId,
-        planId: payment.planId,
+        planId,
         product: payment.product,
         status: SubscriptionStatus.PROVISIONING,
         expiresAt,
@@ -168,7 +189,7 @@ async function upsertPaidSubscription(tx: Prisma.TransactionClient, payment: Pay
   return tx.subscription.update({
     where: { id: existing.id },
     data: {
-      planId: payment.planId,
+      planId,
       status: nextStatus,
       expiresAt,
       ...(nextStatus === SubscriptionStatus.PROVISIONING

@@ -761,15 +761,15 @@ function AnswerFrame({
   labels: ReturnType<typeof useTranslations>;
 }) {
   if (answer === "chats") return <MessengerPhones local={local} labels={labels} />;
-  if (answer === "youtube") return <Player name={labels("youtube")} tone="youtube" local={local} caption={labels("playing")} />;
-  if (answer === "netflix") return <Player name={labels("netflix")} tone="netflix" local={local} caption={labels("playing")} />;
-  if (answer === "zoom") return <ZoomLecture name={labels("zoom")} caption={labels("inCall")} local={local} />;
-  if (answer === "teams") return <Meeting name={labels("teams")} tone="bg-[#5b5fc7]" caption={labels("inCall")} count={4} local={local} />;
+  if (answer === "youtube") return <Player name={labels("youtube")} tone="youtube" local={local} caption={labels("demoCaption")} />;
+  if (answer === "netflix") return <Player name={labels("netflix")} tone="netflix" local={local} caption={labels("demoCaption")} />;
+  if (answer === "zoom") return <ZoomLecture name={labels("zoom")} caption={labels("demoCaption")} local={local} />;
+  if (answer === "teams") return <Meeting name={labels("teams")} tone="bg-[#5b5fc7]" caption={labels("demoCaption")} count={4} local={local} />;
   if (answer === "webex") {
     return local < 700 ? (
-      <Meeting name={labels("webex")} tone="bg-[#00bceb]" caption={labels("inCall")} count={8} local={local} />
+      <Meeting name={labels("webex")} tone="bg-[#00bceb]" caption={labels("demoCaption")} count={8} local={local} />
     ) : (
-      <WebexTalk name={labels("webex")} caption={labels("inCall")} local={local} />
+      <WebexTalk name={labels("webex")} caption={labels("demoCaption")} local={local} />
     );
   }
   if (answer === "backup") return <BackupDrop local={local} labels={labels} />;

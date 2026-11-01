@@ -157,7 +157,7 @@ function toGlobalAccount(subscription: SubscriptionRow | null): GlobalAccount | 
     planName: subscription.plan.name,
     expiresAt: subscription.expiresAt.toISOString(),
     trafficUsedGb: subscription.trafficUsedGb,
-    trafficLimitGb: subscription.plan.trafficGb ?? 150,
+    trafficLimitGb: subscription.plan.trafficGb,
     failover: subscription.failover,
     nodes: subscription.nodes.map((node) => node.ddns),
     uuid: creds?.uuid ?? "",
@@ -210,6 +210,6 @@ function toReceipt(payment: Payment): Receipt {
     id: payment.id,
     date: payment.createdAt.toISOString(),
     product: toProductId(payment.product),
-    planId: payment.planId,
+    planId: payment.planId ?? payment.esimProductId ?? "",
   };
 }

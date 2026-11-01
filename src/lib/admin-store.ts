@@ -749,6 +749,22 @@ export function clearMigrate() {
   patch({ migrate: null });
 }
 
+export async function setNodeSpare(input: { product: ProductId; nodeId: string; enabled: boolean }) {
+  const response = await fetch("/api/v1/admin/nodes/failover", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  const data = await readJson<{ total?: number; done?: number; error?: string }>(response);
+  if (!response.ok) {
+    return { ok: false as const, error: data.error ?? "failed" };
+  }
+
+  await refreshAdmin();
+  return { ok: true as const, total: data.total ?? 0, done: data.done ?? 0 };
+}
+
 export async function retryProvision(customerId: string) {
   const response = await fetch(`/api/v1/admin/customers/${customerId}/retry`, {
     method: "POST",

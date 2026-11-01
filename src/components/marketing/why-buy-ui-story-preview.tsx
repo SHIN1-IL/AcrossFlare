@@ -39,6 +39,7 @@ export function WhyBuyUiStoryPreview({
   live?: boolean;
 }) {
   const t = useTranslations("heroDeck");
+  const tServices = useTranslations("services");
   const items = readHeroItems(t);
   const outcomeLines = readLines(t.raw("outcomeLines"));
   const {
@@ -151,6 +152,7 @@ export function WhyBuyUiStoryPreview({
                 </li>
               ))}
             </ul>
+            <p className="mt-2 text-left text-[10px] leading-snug text-[#8a8a8a]">{tServices("availabilityNote")}</p>
           </div>
         ) : (
           <>
@@ -382,7 +384,7 @@ function AppsGrid({
         </div>
         {ok ? (
           <p className="mt-2 shrink-0 text-center text-[10px] text-emerald-300">
-            {t("connected")} · {t("noError")}
+            {t("demoCaption")}
           </p>
         ) : (
           <p className="mt-2 shrink-0 text-center text-[10px] text-red-300/90">{items[0]?.note ?? ""}</p>

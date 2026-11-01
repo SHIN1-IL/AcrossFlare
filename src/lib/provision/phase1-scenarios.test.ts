@@ -9,7 +9,7 @@ const reality = (ddns: string, role: NodeRole): YamlNode => ({
   vlessPort: 443,
   realityPublicKey: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
   realityShortId: "0123456789",
-  realityServerName: "www.microsoft.com",
+  realityServerName: "dl.google.com",
   realityFingerprint: "chrome",
 });
 

@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { PriceAmount, SecondaryPriceAmount } from "@/components/marketing/price-amount";
 import { PlanPeriodCaption } from "@/components/marketing/plan-period-caption";
 import { readServiceLead, TypingLead } from "@/components/marketing/typing-lead";
+import { useEsimYearNote } from "@/components/esim/esim-console";
 import { getMarketingService, type MarketingServiceId } from "@/lib/marketing-services";
 import {
   planHasPrice,
@@ -35,6 +36,7 @@ export function ServiceDetail({
   const tPricing = useTranslations("pricing");
   const locale = useLocale() as AppLocale;
   const service = getMarketingService(serviceId);
+  const yearNote = useEsimYearNote(service.id === "standard" || service.id === "hybrid");
   const banners = plans.map((plan) => ({ key: plan.id, plan }));
   const lead =
     service.id === "standard" || service.id === "hybrid"
@@ -100,13 +102,17 @@ export function ServiceDetail({
                 features={t.raw(`${service.id}.features`)}
                 cta={t(`${service.id}.cta`)}
                 needsCode={service.id === "workspace"}
-            period={priced ? tPricing(planPricePeriodKey(plan.id, service.id)) : null}
+                period={priced ? tPricing(planPricePeriodKey(plan.id, service.id)) : null}
                 showPeriodCaption={priced}
+                yearNote={planTerm(plan.id) === "year" ? yearNote : null}
               />
               );
             })}
           </div>
         </div>
+        <p className="mx-auto mt-4 max-w-xl text-balance text-xs leading-relaxed text-muted-foreground">
+          {t("availabilityNote")}
+        </p>
       </div>
     </section>
   );
@@ -127,6 +133,7 @@ function ServicePlanCard({
   needsCode,
   period,
   showPeriodCaption,
+  yearNote,
 }: {
   plan: Plan;
   locale: AppLocale;
@@ -142,6 +149,7 @@ function ServicePlanCard({
   needsCode?: boolean;
   period: string | null;
   showPeriodCaption?: boolean;
+  yearNote?: string | null;
 }) {
   const tPricing = useTranslations("pricing");
   const items = Array.isArray(features) ? features : [];
@@ -183,6 +191,7 @@ function ServicePlanCard({
         </div>
       </div>
       {showAlipay ? <p className="mt-2 text-xs text-primary">{tPricing("alipay")}</p> : null}
+      {yearNote ? <p className="mt-2 text-[10px] leading-snug text-muted-foreground sm:text-xs">{yearNote}</p> : null}
       {items.length ? (
         <ul className="mt-4 w-full min-w-0 flex-1 space-y-2 text-left text-[10px] leading-snug text-muted-foreground sm:text-xs">
           {items.map((item) => (

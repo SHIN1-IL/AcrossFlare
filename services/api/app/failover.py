@@ -44,7 +44,7 @@ def maybe_failover(
                     uuid=subscription.uuid,
                     email=subscription.xui_email,
                     expires_at=subscription.expires_at,
-                    traffic_gb=None,
+                    traffic_gb=subscription.traffic_gb,
                 )
             except XuiError as exc:
                 logger.warning(

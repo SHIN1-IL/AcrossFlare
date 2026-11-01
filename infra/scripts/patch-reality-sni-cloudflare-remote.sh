@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Do not run this. Cloudflare dest causes Karing "reality verification failed".
-# Use align-reality-microsoft-remote.sh instead.
-echo "REFUSED: Cloudflare dest breaks REALITY. Use infra/scripts/align-reality-microsoft-remote.sh" >&2
+# Use align-reality-microsoft-remote.sh instead. That script now targets dl.google.com.
+echo "REFUSED: Cloudflare dest breaks REALITY. The working camouflage host is dl.google.com." >&2
 exit 1
 # original body kept below for history; unreachable
 set -euo pipefail

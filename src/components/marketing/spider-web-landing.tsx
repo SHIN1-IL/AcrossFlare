@@ -7,7 +7,6 @@ import { hasSignedInFlag, subscribeSession } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
 const VIDEO_SRC = "https://af1-cje.pages.dev/hero_compressed.mp4";
-const POSTER_SRC = "https://i.postimg.cc/vBk1MDP3/acrossicon-home-1792307899271.png";
 
 /** Guest home ad plays through this time, then the dust hero returns. */
 export const HERO_AD_SECONDS = 10;
@@ -353,6 +352,7 @@ function HeroVideoLanding({
   const [frozen, setFrozen] = useState(false);
   const [reduced, setReduced] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
   const [captionId, setCaptionId] = useState<HeroCaptionId | null>(null);
 
   useEffect(() => {
@@ -410,7 +410,7 @@ function HeroVideoLanding({
 
     const play = () => {
       if (finishedRef.current || frozenRef.current || video.ended) return;
-      void video.play().catch(() => {});
+      void video.play().then(() => setVideoReady(true)).catch(() => {});
     };
 
     const onEnded = () => {
@@ -424,10 +424,13 @@ function HeroVideoLanding({
       setFrozen(true);
     };
 
+    const markReady = () => setVideoReady(true);
+
     video.addEventListener("ended", onEnded);
     video.addEventListener("timeupdate", tick);
     video.addEventListener("play", watchFrames);
     video.addEventListener("loadeddata", play);
+    video.addEventListener("canplay", markReady);
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -445,6 +448,7 @@ function HeroVideoLanding({
       video.removeEventListener("timeupdate", tick);
       video.removeEventListener("play", watchFrames);
       video.removeEventListener("loadeddata", play);
+      video.removeEventListener("canplay", markReady);
       if (frame && typeof video.cancelVideoFrameCallback === "function") {
         video.cancelVideoFrameCallback(frame);
       }
@@ -482,17 +486,34 @@ function HeroVideoLanding({
         className
       )}
     >
-      {failed ? (
-        <img src={POSTER_SRC} alt="" className="absolute inset-0 h-full w-full object-cover" />
-      ) : (
+      {failed || !videoReady ? (
+        <>
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(226,232,240,0.05),transparent_34%,rgba(0,0,0,0.28)),repeating-linear-gradient(90deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_1px,transparent_1px,transparent_5px)]" />
+          <LandingDust />
+          <HeroGrain />
+          <div className="pointer-events-none absolute inset-0 z-[4] flex items-center justify-center">
+            <div className="relative text-center">
+              <LandingGas />
+              <h1 className="relative text-[clamp(2.5rem,9vw,4.5rem)] leading-[0.95] font-semibold tracking-[-0.04em] text-[#f4f4f5]">
+                {WORDMARK}
+              </h1>
+              <p className="relative mt-4 text-[clamp(0.75rem,2vw,1.125rem)] leading-normal whitespace-nowrap text-[#888888]">
+                {WORDMARK_SUB}
+              </p>
+            </div>
+          </div>
+        </>
+      ) : null}
+      {failed ? null : (
         <video
           ref={videoRef}
-          className="absolute inset-0 h-full w-full object-cover"
-          autoPlay
+          className={cn(
+            "absolute inset-0 h-full w-full object-cover transition-opacity duration-300",
+            videoReady ? "opacity-100" : "opacity-0"
+          )}
           muted
           playsInline
-          preload="auto"
-          poster={POSTER_SRC}
+          preload="metadata"
           onError={() => {
             setFailed(true);
             onFinished?.();
@@ -523,14 +544,18 @@ function HeroVideoLanding({
 
       <div className="pointer-events-none absolute inset-x-0 bottom-[22%] z-[4] flex justify-center px-6 text-center sm:bottom-[20%]">
         <h1
-          className="text-[clamp(2.25rem,7vw,3.75rem)] leading-none font-semibold tracking-[-0.03em] text-[#6ee7b7]"
+          className={cn(
+            "text-[clamp(2.25rem,7vw,3.75rem)] leading-none font-semibold tracking-[-0.03em] text-[#6ee7b7] transition-opacity duration-300",
+            videoReady ? "opacity-100" : "opacity-0"
+          )}
+          aria-hidden={!videoReady}
           style={{ textShadow: "0 1px 2px rgba(0, 0, 0, 0.55)" }}
         >
           AcrossFlare
         </h1>
       </div>
 
-      {captionId && !failed ? (
+      {captionId && videoReady && !failed ? (
         <p
           aria-live="polite"
           className="pointer-events-none absolute inset-x-0 z-[4] px-16 text-center leading-[0.95] font-bold tracking-[-0.04em] text-white"

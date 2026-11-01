@@ -15,7 +15,7 @@ REALITY_NODE = {
     "vlessPort": 443,
     "realityPublicKey": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
     "realityShortId": "0123456789",
-    "realityServerName": "www.microsoft.com",
+    "realityServerName": "dl.google.com",
     "realityFingerprint": "chrome",
 }
 
@@ -38,7 +38,7 @@ EXHAUSTED_STANDARD_ROW = {
 
 FAILOVER_ROW = {
     **ACTIVE_STANDARD_ROW,
-    "traffic_used_gb": 150.0,
+    "traffic_used_gb": 10.0,
     "failover": True,
     "nodes": [
         REALITY_NODE,
@@ -48,7 +48,7 @@ FAILOVER_ROW = {
 
 FAILOVER_POOL_ROW = {
     **ACTIVE_STANDARD_ROW,
-    "traffic_used_gb": 150.0,
+    "traffic_used_gb": 10.0,
     "failover": True,
     "nodes": [REALITY_NODE],
     "pool_nodes": [{**REALITY_NODE, "ddns": "node-la-rn.acrossflare.com", "role": "FAILOVER"}],

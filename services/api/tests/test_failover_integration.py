@@ -4,7 +4,7 @@ from app.failover import FailoverNode, maybe_failover
 from app.failover_rules import FailoverSubscription
 
 
-def test_maybe_failover_provisions_links_and_marks(monkeypatch):
+def test_maybe_failover_does_not_run_when_quota_is_exhausted(monkeypatch):
     subscription = FailoverSubscription(
         id="sub-1",
         product="GLOBAL",
@@ -44,10 +44,10 @@ def test_maybe_failover_provisions_links_and_marks(monkeypatch):
     marked: list[str] = []
     monkeypatch.setattr("app.failover.mark_failover", lambda conn, subscription_id: marked.append(subscription_id))
 
-    assert maybe_failover(object(), "sub-1", {}) is True
-    assert provisioned == ["af_sub1"]
-    assert linked == [("g-la-rn", "sub-1")]
-    assert marked == ["sub-1"]
+    assert maybe_failover(object(), "sub-1", {}) is False
+    assert provisioned == []
+    assert linked == []
+    assert marked == []
 
 
 def test_maybe_failover_skips_when_not_eligible(monkeypatch):

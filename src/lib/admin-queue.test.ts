@@ -26,6 +26,7 @@ function customer(overrides: Partial<AdminCustomer> = {}): AdminCustomer {
     memo: "",
     status: "active",
     nodeIds: [],
+    failover: false,
     createdAt: "2026-08-01T00:00:00.000Z",
     signedUpAt: "2026-07-15T00:00:00.000Z",
     signupOnly: false,

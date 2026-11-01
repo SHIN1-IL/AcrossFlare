@@ -44,6 +44,12 @@ enum PaymentProvider {
   PAYMENTWALL
 }
 
+enum EsimOrderStatus {
+  AWAITING_QR
+  READY
+  CANCELLED
+}
+
 enum PromoCodeStatus {
   UNUSED
   REDEEMED
@@ -85,6 +91,7 @@ model User {
   sessions      Session[]
   subscriptions Subscription[]
   payments      Payment[]
+  esimOrders    EsimOrder[]
 }
 
 model Session {
@@ -293,8 +300,9 @@ model Payment {
   user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   subscriptionId String?
   subscription   Subscription?    @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
-  planId         String
-  plan           Plan             @relation(fields: [planId], references: [id])
+  /// Null when the charge is data only. A data line never creates a subscription.
+  planId         String?
+  plan           Plan?            @relation(fields: [planId], references: [id])
   product        Product
   locale         String
   provider       PaymentProvider
@@ -303,11 +311,18 @@ model Payment {
   amount         Int
   currency       String
   externalId     String?          @unique
+  esimProductId  String?
+  esimName       String           @default("")
+  esimDataGb     Int?
+  esimDays       Int?
+  esimPriceKrw   Int?
+  esimChargedAmount Int?
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
 
   webhookEvents WebhookEvent[]
   promoCode     PromoCode?
+  esimOrder     EsimOrder?
 
   @@index([userId])
   @@index([status])
@@ -425,4 +440,53 @@ model TrafficSyncRun {
   durationMs    Int
 
   @@index([completedAt(sort: Desc)])
+}
+
+/// Owner switch and customer sentences for the China data add-on.
+model EsimSettings {
+  id         String   @id @default("default")
+  enabled    Boolean  @default(false)
+  copyNoWifi String
+  copyRefund String
+  copyKorea  String
+  copyExit   String
+  copyYear   String
+  updatedAt  DateTime @updatedAt
+}
+
+model EsimProduct {
+  id        String      @id
+  name      String
+  dataGb    Int
+  days      Int
+  priceKrw  Int
+  priceUsd  Int         @default(0)
+  priceCny  Int         @default(0)
+  priceJpy  Int         @default(0)
+  sort      Int         @default(0)
+  updatedAt DateTime    @updatedAt
+  orders    EsimOrder[]
+}
+
+model EsimOrder {
+  id        String          @id @default(cuid())
+  userId    String
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  paymentId String          @unique
+  payment   Payment         @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  productId String
+  product   EsimProduct     @relation(fields: [productId], references: [id])
+  name      String
+  dataGb    Int
+  days      Int
+  priceKrw  Int
+  currency  String          @default("KRW")
+  chargedAmount Int         @default(0)
+  status    EsimOrderStatus @default(AWAITING_QR)
+  qrText    String          @default("")
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@index([userId])
+  @@index([status])
 }

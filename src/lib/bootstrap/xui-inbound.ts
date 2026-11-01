@@ -1,7 +1,9 @@
 import { randomBytes } from "node:crypto";
 import {
   DEFAULT_VLESS_PORT,
+  applyRealityDest,
   applyRealityInboundDefaults,
+  realityDestHost,
   realityKeyForClient,
 } from "@/lib/provision/reality";
 import { probeXuiPanel, isTlsProtocolMismatch, type XuiPanelTarget } from "@/lib/provision/xui";
@@ -159,10 +161,7 @@ export async function ensureBootstrapRealityInbound(
     remark?: string;
   }
 ): Promise<BootstrapRealityResult> {
-  const destHost = input.realityDest.trim().replace(/:\d+$/, "") || "www.microsoft.com";
-  if (/cloudflare/i.test(destHost)) {
-    throw new Error("reality_dest_cloudflare_forbidden");
-  }
+  const destHost = realityDestHost(input.realityDest);
 
   const listed = await loginAndRequest(node, "/panel/api/inbounds/list");
   const rows = Array.isArray(listed?.obj) ? listed.obj : [];
@@ -199,16 +198,7 @@ export async function ensureBootstrapRealityInbound(
       reality.shortIds = [...shortIds.filter(Boolean), shortId];
     }
 
-    const serverNames = Array.isArray(reality.serverNames)
-      ? reality.serverNames.map(String)
-      : [destHost];
-    if (!serverNames.includes(destHost)) {
-      serverNames.push(destHost);
-    }
-    reality.serverNames = serverNames;
-    if (!String(reality.dest ?? "").trim()) {
-      reality.dest = `${destHost}:443`;
-    }
+    applyRealityDest(reality, destHost);
 
     stream.realitySettings = reality;
     stream.security = "reality";
@@ -252,20 +242,22 @@ export async function ensureBootstrapRealityInbound(
   const vlessPort = input.vlessPort ?? DEFAULT_VLESS_PORT;
   const remark = input.remark || `af-reality-${randomBytes(2).toString("hex")}`;
 
-  const realitySettings = applyRealityInboundDefaults({
-    show: false,
-    xver: 0,
-    dest: `${destHost}:443`,
-    serverNames: [destHost],
-    privateKey: keys.privateKey,
-    shortIds: ["", shortId],
-    settings: {
-      publicKey: keys.publicKey,
-      fingerprint: "chrome",
-      serverName: "",
-      spiderX: "/",
-    },
-  });
+  const realitySettings = applyRealityInboundDefaults(
+    applyRealityDest(
+      {
+        show: false,
+        xver: 0,
+        privateKey: keys.privateKey,
+        shortIds: ["", shortId],
+        settings: {
+          publicKey: keys.publicKey,
+          fingerprint: "chrome",
+          spiderX: "/",
+        },
+      },
+      destHost
+    )
+  );
 
   const streamSettings = {
     network: "tcp",

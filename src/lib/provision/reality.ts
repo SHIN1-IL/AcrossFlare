@@ -4,6 +4,13 @@ export const VLESS_CLIENT_FLOW = "xtls-rprx-vision";
 /** Karing/mihomo report an old core version; empty minClientVer on Xray 26.7.11+ rejects them. */
 export const REALITY_MIN_CLIENT_VER = "1.0.0";
 
+/**
+ * Camouflage site REALITY splices its handshake from.
+ * www.microsoft.com returns a real certificate, then the splice stops with
+ * "handshake did not complete successfully".
+ */
+export const REALITY_DEST_HOST = "dl.google.com";
+
 export const DEFAULT_VLESS_PORT = 443;
 
 const IPV4 = /(?:https?:\/\/)?(\d{1,3}(?:\.\d{1,3}){3})/;
@@ -37,6 +44,31 @@ export function assertRealityConfigured(nodes: RealityFields[], label = "node") 
 export function applyRealityInboundDefaults(reality: Record<string, unknown>) {
   reality.minClientVer = REALITY_MIN_CLIENT_VER;
   reality.minClient = REALITY_MIN_CLIENT_VER;
+  return reality;
+}
+
+/** Host only. Empty means the working camouflage site. Cloudflare is refused. */
+export function realityDestHost(value?: string | null) {
+  const host = (value ?? "").trim().replace(/:\d+$/, "");
+  if (/cloudflare/i.test(host)) {
+    throw new Error("reality_dest_cloudflare_forbidden");
+  }
+  return host || REALITY_DEST_HOST;
+}
+
+/** dest, target, and serverNames stay the same single host the subscription sends as sni. */
+export function applyRealityDest(reality: Record<string, unknown>, destHost: string) {
+  const host = realityDestHost(destHost);
+  const dest = `${host}:443`;
+  reality.dest = dest;
+  reality.target = dest;
+  reality.serverNames = [host];
+  const settings = nestedRecord(reality.settings) ?? {};
+  settings.serverName = host;
+  if (!String(settings.fingerprint ?? "").trim()) {
+    settings.fingerprint = "chrome";
+  }
+  reality.settings = settings;
   return reality;
 }
 

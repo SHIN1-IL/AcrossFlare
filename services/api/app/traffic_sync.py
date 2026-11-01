@@ -7,7 +7,6 @@ from datetime import UTC, datetime, timedelta
 import psycopg
 
 from app.config import DATABASE_URL
-from app.failover import maybe_failover
 from app.traffic_delta import apply_traffic_reading
 from app.xui_client import XuiError, XuiPanelTarget, XuiSession, fetch_client_traffic, login
 
@@ -81,9 +80,6 @@ def run_traffic_sync() -> dict[str, int]:
             if delta_bytes > 0:
                 _increment_traffic_used_gb(conn, subscription_id, delta_bytes)
                 updates += 1
-
-            if maybe_failover(conn, subscription_id, sessions):
-                failovers += 1
 
             if subscription_errors == len(entries) and entries:
                 _mark_node_degraded(conn, entries[0].node_id)

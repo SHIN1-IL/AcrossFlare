@@ -12,6 +12,7 @@ import { StatusPill } from "@/components/app/status-pill";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useAdmin } from "@/hooks/use-admin";
+import { REALITY_DEST_HOST } from "@/lib/provision/reality";
 import {
   addNode,
   bootstrapNode,
@@ -22,6 +23,7 @@ import {
   issueNodeKaring,
   probeNode,
   runMigrate,
+  setNodeSpare,
   updateNode,
 } from "@/lib/admin-store";
 import type { AdminNode, NodeRole, XuiProbeInbound } from "@/lib/admin";
@@ -60,7 +62,7 @@ const emptyBootstrap = {
   sshPrivateKey: "",
   panelPort: "2053",
   vlessPort: "443",
-  realityDest: "www.microsoft.com",
+  realityDest: REALITY_DEST_HOST,
 };
 
 export function NodeManager({
@@ -73,7 +75,7 @@ export function NodeManager({
   bootstrapRequest?: { poolId: string; role: NodeRole } | null;
 }) {
   const t = useTranslations("admin");
-  const { migrate, migrating, provisionSimulate, capacityPools, bootstrapQuota } = useAdmin();
+  const { migrate, migrating, provisionSimulate, capacityPools, bootstrapQuota, customers } = useAdmin();
   const nodes = listNodes(product);
   const scopedPools = poolsForAdminService(service, capacityPools ?? []);
   const requestedPool = bootstrapRequest?.poolId
@@ -92,6 +94,10 @@ export function NodeManager({
   const [source, setSource] = useState<AdminNode | null>(null);
   const [targetId, setTargetId] = useState("");
   const [error, setError] = useState("");
+  const [spare, setSpare] = useState<AdminNode | null>(null);
+  const [spareBusy, setSpareBusy] = useState(false);
+  const [spareError, setSpareError] = useState("");
+  const [spareNote, setSpareNote] = useState("");
   const [draft, setDraft] = useState(emptyDraft);
   const [formError, setFormError] = useState("");
   const [probing, setProbing] = useState(false);
@@ -136,6 +142,37 @@ export function NodeManager({
       return t("bootstrapDailyLimit", { limit: bootstrapQuota.limit });
     }
     return code;
+  }
+
+  function spareErrorText(code: string) {
+    if (code === "no_failover_node") return t("spareNoNode");
+    if (code === "not_primary") return t("spareNotPrimary");
+    if (code === "no_users") return t("noUsers");
+    if (code === "spare_failed") return t("spareFailed");
+    if (code === "not_found") return t("notFound");
+    return code;
+  }
+
+  const spareCount = spare
+    ? customers.filter((customer) => !customer.signupOnly && customer.nodeIds.includes(spare.id)).length
+    : 0;
+
+  async function runSpare(enabled: boolean) {
+    if (!spare) return;
+    if (spareCount === 0) {
+      setSpareError(t("noUsers"));
+      return;
+    }
+    setSpareBusy(true);
+    setSpareError("");
+    setSpareNote("");
+    const result = await setNodeSpare({ product, nodeId: spare.id, enabled });
+    setSpareBusy(false);
+    if (!result.ok) {
+      setSpareError(spareErrorText(result.error));
+      return;
+    }
+    setSpareNote(t("spareDone", { count: result.done }));
   }
 
   const job = migrate?.product === product ? migrate : null;
@@ -462,6 +499,20 @@ export function NodeManager({
                     >
                       {t("migrate")}
                     </Button>
+                    {node.role === "primary" ? (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSpare(node);
+                          setSpareError("");
+                          setSpareNote("");
+                        }}
+                      >
+                        {t("spare")}
+                      </Button>
+                    ) : null}
                     {users === 0 ? (
                       <Button
                         type="button"
@@ -571,6 +622,51 @@ export function NodeManager({
                 setSource(null);
                 clearMigrate();
                 setError("");
+              }}
+            >
+              {t("close")}
+            </Button>
+          </div>
+        </section>
+      ) : null}
+
+      {advanced && spare ? (
+        <section className="space-y-4 rounded-2xl border border-border bg-card p-5">
+          <p className="text-sm">{t("spareTitle")}</p>
+          <p className="font-mono text-xs text-muted-foreground">{spare.ddns}</p>
+          <p className="text-sm text-muted-foreground">{t("spareConfirm", { count: spareCount })}</p>
+          {spareNote ? <p className="text-sm text-muted-foreground">{spareNote}</p> : null}
+          {spareError ? <p className="text-sm text-destructive">{spareError}</p> : null}
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              className="rounded-[10px]"
+              disabled={spareBusy}
+              onClick={() => {
+                void runSpare(true);
+              }}
+            >
+              {t("spareRun")}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-[10px]"
+              disabled={spareBusy}
+              onClick={() => {
+                void runSpare(false);
+              }}
+            >
+              {t("spareRestore")}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-[10px]"
+              onClick={() => {
+                setSpare(null);
+                setSpareError("");
+                setSpareNote("");
               }}
             >
               {t("close")}
@@ -857,7 +953,7 @@ export function NodeManager({
           <Field label={t("realityServerName")}>
             <input
               className={fieldClass}
-              placeholder="www.microsoft.com"
+              placeholder={REALITY_DEST_HOST}
               value={draft.realityServerName}
               onChange={(event) => setDraft({ ...draft, realityServerName: event.target.value })}
             />

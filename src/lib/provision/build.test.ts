@@ -22,7 +22,7 @@ const realityNode = (ddns: string, role: NodeRole): YamlNode => ({
   vlessPort: 443,
   realityPublicKey: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
   realityShortId: "0123456789",
-  realityServerName: "www.microsoft.com",
+  realityServerName: "dl.google.com",
   realityFingerprint: "chrome",
 });
 
@@ -38,13 +38,13 @@ describe("provision/build", () => {
     );
     expect(share.startsWith("vless://uuid-1@74.82.221.67:443?")).toBe(true);
     expect(share).toContain("security=reality");
-    expect(share).toContain("sni=www.microsoft.com");
+    expect(share).toContain("sni=dl.google.com");
     expect(previewSubscriptionProxies([realityNode("node-tokyo.acrossflare.com", NodeRole.PRIMARY)], false)).toEqual([
       {
         name: "node-tokyo",
         server: "node-tokyo.acrossflare.com",
         port: 443,
-        servername: "www.microsoft.com",
+        servername: "dl.google.com",
       },
     ]);
   });
@@ -60,7 +60,7 @@ describe("provision/build", () => {
     expect(yaml).toContain(`flow: ${VLESS_CLIENT_FLOW}`);
     expect(yaml).toContain("reality-opts:");
     expect(yaml).toContain("public-key:");
-    expect(yaml).toContain("servername: www.microsoft.com");
+    expect(yaml).toContain("servername: dl.google.com");
     expect(yaml).toContain("client-fingerprint: chrome");
     expect(yaml).toContain('short-id: "0123456789"');
     expect(yaml).toContain("#profile-web-page-url: https://acrossflare.com/dashboard");

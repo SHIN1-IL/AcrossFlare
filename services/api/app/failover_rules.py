@@ -15,10 +15,10 @@ class FailoverSubscription:
 
 
 def should_failover(subscription: FailoverSubscription) -> bool:
-    if subscription.product != "GLOBAL":
-        return False
-    if subscription.failover:
-        return False
-    if subscription.traffic_gb is None:
-        return False
-    return subscription.traffic_used_gb >= float(subscription.traffic_gb)
+    """Quota use never switches a customer onto spare nodes.
+
+    Spare nodes are a manual outage tool. Automatic failover stays off.
+    The argument stays so callers and tests keep a single signature.
+    """
+    del subscription
+    return False

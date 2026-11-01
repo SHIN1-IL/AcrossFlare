@@ -2,6 +2,7 @@ import type { Node } from "@prisma/client";
 import { Agent } from "undici";
 import { xuiApiToken, xuiTlsInsecure } from "@/lib/provision/config";
 import { canonicalizeRealityInbound, VLESS_CLIENT_FLOW } from "@/lib/provision/reality";
+import { KARING_XRAY_TAG, xrayNeedsKaringPin, xrayVersionFromStatus } from "@/lib/provision/xray-pin";
 
 export class XuiError extends Error {
   constructor(message: string) {
@@ -442,8 +443,29 @@ export async function addWireGuardPeer(
   return inboundId;
 }
 
+async function ensureKaringXray(session: XuiSession) {
+  const status = await panelRequest(session, "/panel/api/server/status");
+  const current = xrayVersionFromStatus(status);
+  if (!xrayNeedsKaringPin(current)) {
+    return current;
+  }
+  await panelRequest(session, `/panel/api/server/installXray/${KARING_XRAY_TAG}`, {
+    method: "POST",
+    body: "{}",
+    headers: { "Content-Type": "application/json" },
+    signal: AbortSignal.timeout(180_000),
+  });
+  return KARING_XRAY_TAG;
+}
+
+export async function pinKaringXray(node: XuiPanelTarget) {
+  const session = await login(node);
+  return ensureKaringXray(session);
+}
+
 export async function addXuiClient(node: Node, input: XuiClientInput) {
   const session = await login(node);
+  await ensureKaringXray(session);
   const listed = await panelRequest(session, "/panel/api/inbounds/list");
   const inboundId = inboundIdFrom(node, listed?.obj);
   await ensureRealityMinClientVer(session, inboundId);

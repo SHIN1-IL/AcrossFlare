@@ -47,7 +47,21 @@ export async function getMarginSnapshot(month: string): Promise<MarginSnapshot> 
     prisma.marginAdjustment.findMany({ orderBy: { createdAt: "asc" } }),
   ]);
 
-  return buildMarginSnapshot({ month: key, nodes, payments, adjustments });
+  return buildMarginSnapshot({
+    month: key,
+    nodes,
+    payments: payments.map((payment) => ({
+      amount: payment.amount,
+      currency: payment.currency,
+      plan: payment.plan ?? {
+        priceKrw: payment.amount,
+        priceUsd: 0,
+        priceCny: 0,
+        priceJpy: 0,
+      },
+    })),
+    adjustments,
+  });
 }
 
 export async function updateNodeMonthlyCosts(rows: Array<{ id: string; monthlyCostKrw: number }>) {

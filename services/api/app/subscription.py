@@ -32,18 +32,13 @@ def resolve_subscription(
 
     current = now or datetime.now(timezone.utc)
     expired = bool(expires_at and _as_utc(expires_at) < current)
-    over_limit = (
-        not probe
-        and limit_gb is not None
-        and not failover
-        and used_gb >= float(limit_gb)
-    )
+    over_limit = not probe and limit_gb is not None and used_gb >= float(limit_gb)
 
     attachment = "AcrossFlare.yaml" if fmt in {"clash", "clash-meta", "yaml"} else "AcrossFlare.txt"
     headers = karing_headers(
         expire_at=expires_at,
         used_gb=used_gb,
-        limit_gb=None if probe or failover else limit_gb,
+        limit_gb=None if probe else limit_gb,
         filename=attachment,
     )
 

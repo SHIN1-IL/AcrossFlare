@@ -42,7 +42,8 @@ export type GlobalAccount = {
   planName: string;
   expiresAt: string;
   trafficUsedGb: number;
-  trafficLimitGb: number;
+  /** Null when the plan itself has no traffic cap. */
+  trafficLimitGb: number | null;
   failover: boolean;
   nodes: string[];
   uuid: string;
@@ -200,7 +201,7 @@ function buildGlobal(email: string, planId: string, scenario: ScenarioId): Globa
   const nodes = (plan?.nodes.length ? plan.nodes : ["LA(B)"]).map(
     (code) => `node-${code.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.acrossflare.com`
   );
-  const failover = scenario === "exhausted-user";
+  const exhausted = scenario === "exhausted-user";
   const yamlUrl = `https://acrossflare.com/api/v1/subscription/${token}?flag=clash`;
 
   return {
@@ -208,9 +209,9 @@ function buildGlobal(email: string, planId: string, scenario: ScenarioId): Globa
     planId,
     planName: plan?.name ?? "Standard",
     expiresAt: "2026-09-21T00:00:00.000Z",
-    trafficUsedGb: failover ? 150 : 98,
+    trafficUsedGb: exhausted ? 150 : 98,
     trafficLimitGb: 150,
-    failover,
+    failover: false,
     nodes,
     uuid,
     deepLink: yamlUrl,
@@ -220,7 +221,7 @@ function buildGlobal(email: string, planId: string, scenario: ScenarioId): Globa
     vaultUser: `af_${tokenFrom(`${email}:vault`, 8)}`,
     syncthingUrl: "https://sync.acrossflare.com",
     syncthingFolderId: `af-${tokenFrom(`${email}:sync`, 8)}`,
-    backupUsedGb: failover ? 8.4 : 6.1,
+    backupUsedGb: exhausted ? 8.4 : 6.1,
     backupLimitGb: plan?.backupGb ?? 1,
   };
 }

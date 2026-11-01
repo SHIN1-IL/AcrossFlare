@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
-# Align Tokyo + LA(A) REALITY dest/SNI to www.microsoft.com and sync keys from 3x-ui into Node.
+# Align Tokyo + LA(A) REALITY dest/SNI to dl.google.com and sync keys from 3x-ui into Node.
+# www.microsoft.com finishes a normal TLS handshake, then REALITY stops.
 # Run on origin VPS. Does not print full keys.
 set -euo pipefail
 PG_CONTAINER="${PG_CONTAINER:-acrossflare-postgres}"
 PG_USER="${POSTGRES_USER:-acrossflare}"
 PG_DB="${POSTGRES_DB:-acrossflare}"
 API="${API_CONTAINER:-acrossflare-api-1}"
-SNI="${REALITY_SNI:-www.microsoft.com}"
+SNI="${REALITY_SNI:-dl.google.com}"
 
 docker exec -i "$PG_CONTAINER" psql -U "$PG_USER" -d "$PG_DB" -tA <<'SQL' > /tmp/af-nodes.json
 SELECT json_agg(json_build_object(
@@ -23,10 +24,11 @@ docker cp /tmp/af-nodes.json "$API:/tmp/af-nodes.json"
 cat > /tmp/af-align-reality.py <<'PY'
 import hashlib
 import json
+import os
 from copy import deepcopy
 from app.xui_client import XuiPanelTarget, login, panel_request
 
-sni = "www.microsoft.com"
+sni = os.environ.get("REALITY_SNI", "dl.google.com").strip() or "dl.google.com"
 dest = f"{sni}:443"
 
 def as_obj(value):
@@ -131,7 +133,7 @@ print("panel_patch_done", len(sync_rows))
 PY
 
 docker cp /tmp/af-align-reality.py "$API:/tmp/af-align-reality.py"
-docker exec -w /app -e PYTHONPATH=/app "$API" python /tmp/af-align-reality.py
+docker exec -w /app -e PYTHONPATH=/app -e REALITY_SNI="$SNI" "$API" python /tmp/af-align-reality.py
 docker cp "$API:/tmp/af-reality-sync.json" /tmp/af-reality-sync.json
 
 python3 - <<'PY'

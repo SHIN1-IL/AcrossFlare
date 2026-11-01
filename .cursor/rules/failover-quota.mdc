@@ -1,0 +1,14 @@
+---
+description: Spare nodes are a manual outage tool. Quota exhaustion must not failover or clear the plan cap.
+alwaysApply: true
+---
+
+# Failover and plan quota
+
+Cancelled on 2026-10-23: do not restore “Bandwagon 150GB used up → Racknerd unlimited” or any quota-triggered failover.
+
+- A customer’s cap is `Plan.trafficGb`. Using it up does not set `Subscription.failover` and does not move them to `FAILOVER` nodes.
+- `should_failover` stays false. Traffic sync must not call failover. Do not provision a spare client with `traffic_gb=None` because the plan cap was reached.
+- Karing `subscription-userinfo` keeps that plan total while the customer is on a spare node. A null plan cap is the only unlimited case, and it uses the large total so Karing does not treat the quota as empty.
+- Spare nodes are for a primary that is down or blocked. An operator sends that node’s customers from the node screen, and can send them back. Automatic failover stays off until the operator asks for it.
+- Do not hardcode Bandwagon or Racknerd in the usage meter, failover banner, or this rule’s replacement behavior.

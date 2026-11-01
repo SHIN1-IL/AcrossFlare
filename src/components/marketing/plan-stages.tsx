@@ -27,12 +27,14 @@ export async function PlanStages({
   locale: AppLocale;
   showAlipay: boolean;
 }) {
-  const [slides, t, tSlides, tWorkspace] = await Promise.all([
+  const [slides, t, tSlides, tWorkspace, tServices] = await Promise.all([
     loadHomeSlidePlans(),
     getTranslations("pricing"),
     getTranslations("planSlides"),
     getTranslations("workspace"),
+    getTranslations("services"),
   ]);
+  const availabilityNote = tServices("availabilityNote");
 
   return (
     <div>
@@ -44,12 +46,18 @@ export async function PlanStages({
           showAlipay={showAlipay}
           isFirst={index === 0}
           locale={locale}
+          availabilityNote={availabilityNote}
           t={t}
           tSlides={tSlides}
           tWorkspace={tWorkspace}
         />
       ))}
-      <WorkspaceStage index={slides.length} locale={locale} t={tWorkspace} />
+      <WorkspaceStage
+        index={slides.length}
+        locale={locale}
+        availabilityNote={availabilityNote}
+        t={tWorkspace}
+      />
     </div>
   );
 }
@@ -60,6 +68,7 @@ function PlanStage({
   showAlipay,
   isFirst,
   locale,
+  availabilityNote,
   t,
   tSlides,
   tWorkspace,
@@ -69,6 +78,7 @@ function PlanStage({
   showAlipay: boolean;
   isFirst: boolean;
   locale: AppLocale;
+  availabilityNote: string;
   t: Awaited<ReturnType<typeof getTranslations>>;
   tSlides: Awaited<ReturnType<typeof getTranslations>>;
   tWorkspace: Awaited<ReturnType<typeof getTranslations>>;
@@ -121,6 +131,7 @@ function PlanStage({
         {custom?.line2 ? (
           <p className="mt-2 text-sm text-muted-foreground md:text-base">{custom.line2}</p>
         ) : null}
+        <p className="mt-3 max-w-xl text-xs leading-relaxed text-muted-foreground">{availabilityNote}</p>
         <div className="mt-6 w-full max-w-md">
           <p className="font-mono text-3xl tracking-tight md:text-4xl">
             <PriceAmount locale={locale} prices={prices} compact />
@@ -149,10 +160,12 @@ function PlanStage({
 function WorkspaceStage({
   index,
   locale,
+  availabilityNote,
   t,
 }: {
   index: number;
   locale: AppLocale;
+  availabilityNote: string;
   t: Awaited<ReturnType<typeof getTranslations>>;
 }) {
   return (
@@ -167,6 +180,7 @@ function WorkspaceStage({
         </h2>
         <p className="mt-4 text-sm text-muted-foreground md:text-base">{t("description")}</p>
         <p className="mt-2 text-sm text-muted-foreground md:text-base">{t("hint")}</p>
+        <p className="mt-3 max-w-xl text-xs leading-relaxed text-muted-foreground">{availabilityNote}</p>
         <a
           href={cachedMarketingHref(locale, "/workspace")}
           className={cn(buttonVariants({ size: "lg" }), "mt-8 rounded-[10px] px-8")}

@@ -9,6 +9,11 @@ KARING_REFRESH_ANNOUNCE = (
 )
 VLESS_CLIENT_FLOW = "xtls-rprx-vision"
 REALITY_MIN_CLIENT_VER = "1.0.0"
+# www.microsoft.com completes a normal TLS handshake, then REALITY stops with
+# "handshake did not complete successfully".
+REALITY_DEST_HOST = "dl.google.com"
+# Xray 26.9.8+ requires an ML-KEM key share Karing does not send.
+KARING_XRAY_TAG = "v26.7.28"
 DEFAULT_VLESS_PORT = 443
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
 

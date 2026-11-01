@@ -14,7 +14,7 @@ REALITY_NODE = {
     "vlessPort": 443,
     "realityPublicKey": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
     "realityShortId": "0123456789",
-    "realityServerName": "www.microsoft.com",
+    "realityServerName": "dl.google.com",
     "realityFingerprint": "chrome",
 }
 
@@ -63,7 +63,7 @@ def test_build_vless_yaml_matches_karing_reality_shape():
     assert f"flow: {VLESS_CLIENT_FLOW}" in yaml
     assert "reality-opts:" in yaml
     assert "public-key:" in yaml
-    assert "servername: www.microsoft.com" in yaml
+    assert "servername: dl.google.com" in yaml
     assert "client-fingerprint: chrome" in yaml
     assert 'short-id: "0123456789"' in yaml
     assert "#profile-web-page-url:" in yaml
@@ -75,7 +75,7 @@ def test_build_vless_uri_list_enables_reality():
     body = build_vless_uri_list([REALITY_NODE], "uuid-1")
     assert body.startswith("vless://uuid-1@node-la-b.acrossflare.com:443?")
     assert "security=reality" in body
-    assert "sni=www.microsoft.com" in body
+    assert "sni=dl.google.com" in body
     assert f"flow={VLESS_CLIENT_FLOW}" in body
     assert "pbk=" in body
 
@@ -185,12 +185,12 @@ def test_resolve_subscription_returns_yaml_when_active():
     assert "subscription-userinfo" in headers
 
 
-def test_resolve_subscription_failover_uses_unlimited_total():
+def test_resolve_subscription_failover_keeps_plan_quota():
     row = {
         "uuid": "uuid-1",
         "status": "ACTIVE",
         "expires_at": datetime(2030, 1, 1, tzinfo=timezone.utc),
-        "traffic_used_gb": 150.0,
+        "traffic_used_gb": 10.0,
         "failover": True,
         "traffic_gb": 150.0,
         "nodes": [
@@ -206,7 +206,7 @@ def test_resolve_subscription_failover_uses_unlimited_total():
     assert "reality-opts:" in plain
     yaml_body, _ = resolve_subscription(row, fmt="clash")
     assert "서브스크립션 수동 업데이트" in yaml_body
-    assert "total=10995116277760" in headers["subscription-userinfo"]
+    assert "total=161061273600" in headers["subscription-userinfo"]
 
 
 def test_resolve_subscription_failover_uses_pool_nodes():
@@ -214,7 +214,7 @@ def test_resolve_subscription_failover_uses_pool_nodes():
         "uuid": "uuid-1",
         "status": "ACTIVE",
         "expires_at": datetime(2030, 1, 1, tzinfo=timezone.utc),
-        "traffic_used_gb": 150.0,
+        "traffic_used_gb": 10.0,
         "failover": True,
         "traffic_gb": 150.0,
         "nodes": [REALITY_NODE],
@@ -224,7 +224,7 @@ def test_resolve_subscription_failover_uses_pool_nodes():
     plain = decoded_sub(body)
     assert "node-la-rn.acrossflare.com" in plain
     assert "node-la-b.acrossflare.com" not in plain
-    assert "total=10995116277760" in headers["subscription-userinfo"]
+    assert "total=161061273600" in headers["subscription-userinfo"]
 
 
 def test_resolve_subscription_raises_for_missing_uuid():

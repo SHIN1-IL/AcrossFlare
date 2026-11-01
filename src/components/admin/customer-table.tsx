@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { AdminPlanLabel } from "@/components/admin/admin-plan-label";
 import { StatusPill } from "@/components/app/status-pill";
@@ -87,7 +87,31 @@ export function CustomerTable({
   const [retryError, setRetryError] = useState("");
   const [page, setPage] = useState(1);
   const [pageScope, setPageScope] = useState(`${filter}\0`);
+  const [dataByEmail, setDataByEmail] = useState<Record<string, string>>({});
 
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/v1/admin/esim/orders", { credentials: "include" })
+      .then(async (response) => (response.ok ? response.json() : null))
+      .then((data: { orders: { email: string; name: string; status: string }[] } | null) => {
+        if (cancelled || !data) {
+          return;
+        }
+        const next: Record<string, string> = {};
+        for (const order of data.orders) {
+          if (order.status === "CANCELLED" || next[order.email]) {
+            continue;
+          }
+          next[order.email] = order.name;
+        }
+        setDataByEmail(next);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const showDataColumn = customers.some((customer) => dataByEmail[customer.email]);
   const stepLabels: Record<string, string> = {
     payment: t("stepPayment"),
     xui: t("stepXui"),
@@ -183,6 +207,11 @@ export function CustomerTable({
                     <th scope="col" className="px-4 py-3 font-medium">
                       {t("plan")}
                     </th>
+                    {showDataColumn ? (
+                      <th scope="col" className="px-4 py-3 font-medium">
+                        {t("esimColumn")}
+                      </th>
+                    ) : null}
                     <th scope="col" className="px-4 py-3 font-medium">
                       {t("price")}
                     </th>
@@ -237,6 +266,11 @@ export function CustomerTable({
                             <AdminPlanLabel planId={customer.planId} fallback={customer.planName} />
                           )}
                         </td>
+                        {showDataColumn ? (
+                          <td className="px-4 py-3 text-xs text-muted-foreground">
+                            {dataByEmail[customer.email] ?? "—"}
+                          </td>
+                        ) : null}
                         <td className="px-4 py-3 text-xs text-muted-foreground">
                           {plan ? (
                             <PriceAmount locale={locale as AppLocale} prices={plan.prices} compact className="text-xs" />

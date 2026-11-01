@@ -96,6 +96,8 @@ export type AdminCustomer = {
   memo: string;
   status: CustomerStatus;
   nodeIds: string[];
+  /** True while an operator has this subscription on spare nodes. */
+  failover: boolean;
   /** Subscription start (or account createdAt for signup-only rows). */
   createdAt: string;
   /** Account signup time from User.createdAt. */

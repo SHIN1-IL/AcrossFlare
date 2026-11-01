@@ -1,7 +1,12 @@
 import base64
 
 from app.config import REALITY_MIN_CLIENT_VER
-from app.xui_client import apply_karing_reality_settings, apply_reality_inbound_defaults, parse_client_traffic
+from app.xui_client import (
+    apply_karing_reality_settings,
+    apply_reality_inbound_defaults,
+    parse_client_traffic,
+    xray_needs_karing_pin,
+)
 
 
 def test_parse_client_traffic_from_obj_wrapper():
@@ -48,3 +53,12 @@ def test_apply_karing_reality_settings_strips_base64_padding():
     assert reality["settings"]["publicKey"] == client_key
     assert reality["settings"]["fingerprint"] == "chrome"
     assert apply_karing_reality_settings(reality) is False
+
+
+def test_xray_needs_karing_pin_only_for_mlkem_cores():
+    assert xray_needs_karing_pin("26.9.8") is True
+    assert xray_needs_karing_pin("v26.9.11") is True
+    assert xray_needs_karing_pin("26.10.0") is True
+    assert xray_needs_karing_pin("26.7.28") is False
+    assert xray_needs_karing_pin("v26.9.7") is False
+    assert xray_needs_karing_pin("") is False

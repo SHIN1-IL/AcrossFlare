@@ -4,7 +4,7 @@ from app.failover_rules import FailoverSubscription, should_failover
 from app.nodes import pick_hosts
 
 
-def test_should_failover_only_for_global_with_limit():
+def test_should_failover_stays_off_when_quota_is_exhausted():
     base = FailoverSubscription(
         id="sub-1",
         product="GLOBAL",
@@ -15,12 +15,10 @@ def test_should_failover_only_for_global_with_limit():
         uuid="uuid-1",
         xui_email="af_test",
     )
-    assert should_failover(base) is True
-
+    assert should_failover(base) is False
     assert should_failover(FailoverSubscription(**{**base.__dict__, "product": "MARKETING"})) is False
-    assert should_failover(FailoverSubscription(**{**base.__dict__, "failover": True})) is False
     assert should_failover(FailoverSubscription(**{**base.__dict__, "traffic_gb": None})) is False
-    assert should_failover(FailoverSubscription(**{**base.__dict__, "traffic_used_gb": 149.0})) is False
+    assert should_failover(FailoverSubscription(**{**base.__dict__, "traffic_used_gb": 999.0})) is False
 
 
 def test_pick_hosts_uses_pool_when_failover_without_assigned_racknerd():
