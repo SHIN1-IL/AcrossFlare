@@ -654,9 +654,9 @@ function projectOrbit(
   obliquity = EARTH_OBLIQUITY
 ): { x: number; y: number; z: number } | null {
   // ECEF-ish: +Y north, +Z toward initial prime-facing camera.
-  let x = Math.cos(lat) * Math.sin(lon);
-  let y = Math.sin(lat);
-  let z = Math.cos(lat) * Math.cos(lon);
+  const x = Math.cos(lat) * Math.sin(lon);
+  const y = Math.sin(lat);
+  const z = Math.cos(lat) * Math.cos(lon);
 
   // Sidereal spin around the geographic polar axis.
   const cr = Math.cos(rot);
@@ -906,7 +906,7 @@ function LandingNightFlight() {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
 
-    const paintCity = (width: number, height: number, now: number, _reveal: number) => {
+    const paintCity = (width: number, height: number, now: number) => {
       cityCtx.clearRect(0, 0, width, height);
 
       // Rigid body spin; light alpha is fixed so points don't shimmer with cloud cover.
@@ -1051,10 +1051,10 @@ function LandingNightFlight() {
               na = na * (1 - k) + nLandA * k;
             }
 
-            let r = dr * day + nr * night;
-            let g = dg * day + ng * night;
-            let b = db * day + nb * night;
-            let a = (da * day + na * night) * lit * edgeFade * (0.72 + geo.z * 0.28);
+            const r = dr * day + nr * night;
+            const g = dg * day + ng * night;
+            const b = db * day + nb * night;
+            const a = (da * day + na * night) * lit * edgeFade * (0.72 + geo.z * 0.28);
             const ai = Math.min(255, Math.floor(a * 255));
             if (ai < 6) continue;
             const i = (sy * width + sx) * 4;
@@ -1247,8 +1247,8 @@ function LandingNightFlight() {
       resize(cloudCanvas, cloudCtx, width, height);
 
       const moving = !reduced.matches;
-      const reveal = paintClouds(width, height, now, dt, moving);
-      paintCity(width, height, now, reduced.matches ? 0.8 : reveal);
+      paintClouds(width, height, now, dt, moving);
+      paintCity(width, height, now);
     };
 
     const tick = (now: number) => {
