@@ -29,12 +29,14 @@ function NavLinks({
   const t = useTranslations("app");
   const pathname = usePathname();
   const { account } = useAccount();
-  const network = [
-    ...(account?.global || !account?.hybrid
-      ? ([{ href: "/app/global", key: "standard", icon: Globe }] as const)
-      : []),
-    ...(account?.hybrid ? ([{ href: "/app/hybrid", key: "hybrid", icon: Globe }] as const) : []),
-  ];
+  const network = account
+    ? [
+        ...(account.global || !account.hybrid
+          ? ([{ href: "/app/global", key: "standard", icon: Globe }] as const)
+          : []),
+        ...(account.hybrid ? ([{ href: "/app/hybrid", key: "hybrid", icon: Globe }] as const) : []),
+      ]
+    : [];
   const items = [
     ...BASE_NAV.slice(0, 2),
     ...network,
@@ -108,7 +110,7 @@ export function AppShell({
     }
   }, [hydrated, pathname, probeDone, router, session]);
 
-  if (!hydrated || !probeDone || !session || isAdminSession(session) || !accountReady) {
+  if (!hydrated || !probeDone || !session || isAdminSession(session)) {
     return (
       <div className="flex min-h-dvh items-center justify-center bg-background">
         <div className="h-8 w-8 animate-pulse rounded-full bg-primary/20" />
@@ -173,7 +175,15 @@ export function AppShell({
             </button>
           </div>
         ) : null}
-        <main className="flex-1 px-4 py-8 md:px-8">{children}</main>
+        <main className="flex-1 px-4 py-8 md:px-8">
+          {accountReady ? (
+            children
+          ) : (
+            <div className="flex min-h-[40vh] items-center justify-center">
+              <div className="h-8 w-8 animate-pulse rounded-full bg-primary/20" />
+            </div>
+          )}
+        </main>
         {merchant ? (
           <footer className="border-t border-border px-4 py-6 md:px-8">
             <LegalFooterLinks className="text-xs" />

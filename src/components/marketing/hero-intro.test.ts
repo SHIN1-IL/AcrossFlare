@@ -9,7 +9,11 @@ describe("hero intro", () => {
       readFile("src/components/marketing/why-buy-ui-story-preview.tsx", "utf8"),
     ]);
 
-    expect(page).toContain("<SpiderWebLanding />");
+    expect(page).toContain('<SpiderWebLanding variant="dust" />');
+    expect(page.indexOf('variant="dust"')).toBeLessThan(page.indexOf("<DeferredWhyBuyLive />"));
+    expect(page.indexOf("<PlanStages")).toBeLessThan(page.indexOf('variant="video"'));
+    expect(page).toContain('<SpiderWebLanding variant="video" compact />');
+    expect(page).toContain("<MarketingFooter compact />");
     expect(page).toContain("<DeferredWhyBuyLive />");
     expect(page).toContain("<DeferredConsoleKaring />");
     expect(page).toContain("deferred-home-stories");

@@ -204,6 +204,31 @@
     "featured": "人気",
     "alipay": "Alipay"
   },
+  "esimCompare": {
+    "title": "eSIMデータプラン",
+    "lead": "eSIMデータだけ、またはグローバルネットワーク接続プランと一緒に選べます。",
+    "dataHeading": "eSIMデータのみ",
+    "setHeading": "グローバルネットワーク接続 + eSIMデータ",
+    "standard": "スタンダード",
+    "hybrid": "ハイブリッド",
+    "week": "7日",
+    "month": "1か月",
+    "days": "{days}日",
+    "guide": "外出時はeSIMデータで、Wi-Fi環境ではグローバルネットワーク接続で解決しましょう！"
+  },
+  "networkCompare": {
+    "title": "グローバルネットワークプラン",
+    "lead": "グローバルネットワーク接続だけ、またはeSIMデータと一緒に選べます。",
+    "networkHeading": "グローバルネットワーク接続のみ",
+    "setHeading": "グローバルネットワーク接続 + eSIMデータ",
+    "standard": "スタンダード",
+    "standardLine": "中国への旅行や出張中も、使い慣れたメッセンジャーとアプリにそのまま接続",
+    "hybrid": "ハイブリッド",
+    "week": "7日",
+    "month": "1か月",
+    "year": "12か月",
+    "traffic": "{gb}GB"
+  },
   "heroDeck": {
     "headline": "中国への出張と旅行で",
     "outcomeLines": [
@@ -295,6 +320,14 @@
     "heroLine1": "え？なんでダメ？",
     "heroLine2": "あ！AcrossFlareをオンにしなきゃ！",
     "heroLine3": "もう大丈夫、OK Let's Go!",
+    "pitchLead": "",
+    "pitchPlace": "中国",
+    "pitchTail": "旅行・出張のとき ",
+    "pitchMust": "必ず",
+    "pitchAfter": " 必要な二つ！",
+    "pitchItem1": "<accent>eSIM</accent>データプラン",
+    "pitchItem2": "速く安全な<accent>グローバルネットワーク</accent>プラン",
+    "pitchCompare": "↓ 比較",
     "wifiLabel": "Wi‑Fi",
     "wifiNetwork": "ホテル_ゲスト",
     "vaultwarden": "ボルトワーデン",

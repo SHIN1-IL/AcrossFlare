@@ -7,6 +7,8 @@ export const MARKETING_MESSAGE_KEYS = [
   "legal",
   "pricing",
   "heroDeck",
+  "esimCompare",
+  "networkCompare",
   "consoleStory",
   "planSlides",
   "workspace",

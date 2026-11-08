@@ -40,14 +40,14 @@ export function MarketingHeader() {
   return (
     <header className="sticky top-0 z-40 bg-transparent">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-3 sm:px-4">
-        <div className="flex min-w-0 items-center gap-2.5 md:gap-4">
-          <Logo showWordmark={false} />
-          <ServiceNav />
+        <div className="flex min-w-0 items-center gap-2.5">
+          <Logo wordmarkClassName="font-bold" />
           {signedIn ? <SupportNav /> : null}
-          <LocaleSwitcher />
         </div>
 
-        <div className="flex shrink-0 items-center gap-1 md:gap-2">
+        <div className="flex shrink-0 items-center gap-2 md:gap-3">
+          <ServiceNav align="end" />
+          <LocaleSwitcher align="end" />
           {signedIn ? (
             <>
               <button

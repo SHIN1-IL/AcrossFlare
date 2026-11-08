@@ -1,13 +1,27 @@
 import { CachedMarketingLink } from "@/components/marketing/cached-marketing-link";
+import { cn } from "@/lib/utils";
 
-export function Logo({ showWordmark = true }: { showWordmark?: boolean }) {
+export function Logo({
+  showWordmark = true,
+  wordmarkClassName,
+  markClassName,
+}: {
+  showWordmark?: boolean;
+  wordmarkClassName?: string;
+  markClassName?: string;
+}) {
   return (
     <CachedMarketingLink
       href="/"
       aria-label="AcrossFlare"
       className="group flex items-center gap-2.5 text-sm font-medium tracking-tight"
     >
-      <span className="relative size-9 shrink-0 overflow-hidden rounded-[6px] bg-primary transition-transform duration-200 group-hover:scale-105">
+      <span
+        className={cn(
+          "relative size-9 shrink-0 overflow-hidden rounded-[6px] bg-primary transition-transform duration-200 group-hover:scale-105",
+          markClassName
+        )}
+      >
         <svg viewBox="0 0 64 64" className="size-full" aria-hidden="true">
           <rect
             x="1.5"
@@ -41,7 +55,7 @@ export function Logo({ showWordmark = true }: { showWordmark?: boolean }) {
           </text>
         </svg>
       </span>
-      {showWordmark ? "AcrossFlare" : null}
+      {showWordmark ? <span className={wordmarkClassName}>AcrossFlare</span> : null}
     </CachedMarketingLink>
   );
 }

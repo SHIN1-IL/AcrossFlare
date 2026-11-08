@@ -204,6 +204,31 @@
     "featured": "热门",
     "alipay": "支付宝"
   },
+  "esimCompare": {
+    "title": "eSIM 流量套餐",
+    "lead": "可以只买 eSIM 流量，也可以和全球网络连接套餐一起买。",
+    "dataHeading": "仅 eSIM 流量",
+    "setHeading": "全球网络连接 + eSIM 流量",
+    "standard": "标准",
+    "hybrid": "混合",
+    "week": "7天",
+    "month": "1个月",
+    "days": "{days}天",
+    "guide": "外出时用 eSIM 流量，Wi-Fi 环境下用全球网络连接来解决！"
+  },
+  "networkCompare": {
+    "title": "全球网络套餐",
+    "lead": "可以只买全球网络连接，也可以和 eSIM 流量一起买。",
+    "networkHeading": "仅全球网络连接",
+    "setHeading": "全球网络连接 + eSIM 流量",
+    "standard": "标准",
+    "standardLine": "在中国旅行或出差时，也能继续使用原来的聊天软件和应用",
+    "hybrid": "混合",
+    "week": "7天",
+    "month": "1个月",
+    "year": "12个月",
+    "traffic": "{gb}GB"
+  },
   "heroDeck": {
     "headline": "在中国出差或旅行时",
     "outcomeLines": [
@@ -295,6 +320,14 @@
     "heroLine1": "咦？怎么不行？",
     "heroLine2": "啊！得打开 AcrossFlare！",
     "heroLine3": "现在好了，OK Let's Go!",
+    "pitchLead": "",
+    "pitchPlace": "中国",
+    "pitchTail": "旅行·出差时 ",
+    "pitchMust": "一定",
+    "pitchAfter": " 需要的两样！",
+    "pitchItem1": "<accent>eSIM</accent> 流量套餐",
+    "pitchItem2": "快速安全的<accent>全球网络</accent>套餐",
+    "pitchCompare": "↓ 对比",
     "wifiLabel": "Wi‑Fi",
     "wifiNetwork": "酒店访客",
     "vaultwarden": "保险库",

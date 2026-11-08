@@ -190,6 +190,11 @@ html:has(.home-deck) {
   scroll-snap-type: y mandatory;
 }
 
+.home-deck > header {
+  position: fixed;
+  inset-inline: 0;
+}
+
 @media (max-width: 479px) {
   html:has(.home-deck),
   html:has(.home-deck) body {

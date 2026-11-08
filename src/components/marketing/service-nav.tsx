@@ -9,7 +9,13 @@ import { usePathname } from "@/i18n/navigation";
 import { MARKETING_SERVICES } from "@/lib/marketing-services";
 import { cn } from "@/lib/utils";
 
-export function ServiceNav({ onNavigate }: { onNavigate?: () => void }) {
+export function ServiceNav({
+  onNavigate,
+  align = "start",
+}: {
+  onNavigate?: () => void;
+  align?: "start" | "end";
+}) {
   const t = useTranslations("nav");
   const tServices = useTranslations("services");
   const pathname = usePathname();
@@ -88,7 +94,11 @@ export function ServiceNav({ onNavigate }: { onNavigate?: () => void }) {
       </button>
       {open ? (
         <div
-          className={cn("absolute left-0 z-50", dropUp ? "bottom-full pb-1" : "top-full pt-1")}
+          className={cn(
+            "absolute z-50",
+            align === "end" ? "right-0" : "left-0",
+            dropUp ? "bottom-full pb-1" : "top-full pt-1"
+          )}
         >
           <ul
             id={menuId}

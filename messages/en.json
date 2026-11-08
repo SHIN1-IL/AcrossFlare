@@ -204,6 +204,31 @@
     "featured": "Popular",
     "alipay": "Alipay"
   },
+  "esimCompare": {
+    "title": "eSIM data plans",
+    "lead": "Use eSIM data on its own, or add it to a global network connection plan.",
+    "dataHeading": "eSIM data only",
+    "setHeading": "Global network connection + eSIM data",
+    "standard": "Standard",
+    "hybrid": "Hybrid",
+    "week": "7 days",
+    "month": "1 month",
+    "days": "{days} days",
+    "guide": "When you're out, use eSIM data. On Wi-Fi, use a global network connection!"
+  },
+  "networkCompare": {
+    "title": "Global network plans",
+    "lead": "Use a global network connection on its own, or add eSIM data.",
+    "networkHeading": "Global network connection only",
+    "setHeading": "Global network connection + eSIM data",
+    "standard": "Standard",
+    "standardLine": "Keep using your messengers and apps, even on trips and business travel to China",
+    "hybrid": "Hybrid",
+    "week": "7 days",
+    "month": "1 month",
+    "year": "12 months",
+    "traffic": "{gb}GB"
+  },
   "heroDeck": {
     "headline": "For travel and business in China",
     "outcomeLines": [
@@ -295,6 +320,14 @@
     "heroLine1": "Huh? Why won't it work?",
     "heroLine2": "Ah! I should turn on AcrossFlare!",
     "heroLine3": "It's working now, OK Let's Go!",
+    "pitchLead": "For trips and business travel to ",
+    "pitchPlace": "China",
+    "pitchTail": ",\nyou ",
+    "pitchMust": "must",
+    "pitchAfter": " have these two!",
+    "pitchItem1": "An <accent>eSIM</accent> data plan",
+    "pitchItem2": "A fast, secure <accent>global network</accent> plan",
+    "pitchCompare": "↓ compare",
     "wifiLabel": "Wi‑Fi",
     "wifiNetwork": "Hotel_Guest",
     "vaultwarden": "Vaultwarden",

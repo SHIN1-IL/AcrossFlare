@@ -14,7 +14,7 @@ const LOCALE_ORDER: AppLocale[] = ["ko", "zh", "ja", "en"];
 const itemClassName =
   "inline-flex w-full items-start gap-2 whitespace-nowrap px-3 py-1.5 text-left text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground";
 
-export function LocaleSwitcher() {
+export function LocaleSwitcher({ align = "start" }: { align?: "start" | "end" }) {
   const t = useTranslations("nav");
   const locale = useLocale();
   const pathname = usePathname();
@@ -105,7 +105,11 @@ export function LocaleSwitcher() {
       </button>
       {open ? (
         <div
-          className={cn("absolute left-0 z-50", dropUp ? "bottom-full pb-1" : "top-full pt-1")}
+          className={cn(
+            "absolute z-50",
+            align === "end" ? "right-0" : "left-0",
+            dropUp ? "bottom-full pb-1" : "top-full pt-1"
+          )}
         >
           <ul
             id={menuId}
