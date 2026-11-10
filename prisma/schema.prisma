@@ -444,14 +444,17 @@ model TrafficSyncRun {
 
 /// Owner switch and customer sentences for the China data add-on.
 model EsimSettings {
-  id         String   @id @default("default")
-  enabled    Boolean  @default(false)
-  copyNoWifi String
-  copyRefund String
-  copyKorea  String
-  copyExit   String
-  copyYear   String
-  updatedAt  DateTime @updatedAt
+  id            String   @id @default("default")
+  enabled         Boolean  @default(false)
+  enabledLocked   Boolean  @default(false)
+  autoIssue       Boolean  @default(false)
+  autoIssueLocked Boolean  @default(false)
+  copyNoWifi    String
+  copyRefund    String
+  copyKorea     String
+  copyExit      String
+  copyYear      String
+  updatedAt     DateTime @updatedAt
 }
 
 model EsimProduct {
@@ -481,9 +484,13 @@ model EsimOrder {
   days      Int
   priceKrw  Int
   currency  String          @default("KRW")
-  chargedAmount Int         @default(0)
-  status    EsimOrderStatus @default(AWAITING_QR)
-  qrText    String          @default("")
+  chargedAmount    Int             @default(0)
+  status           EsimOrderStatus @default(AWAITING_QR)
+  qrText           String          @default("")
+  supplierOrderNo  String          @default("")
+  supplierIccid    String          @default("")
+  supplierAttempts Int             @default(0)
+  supplierError    String          @default("")
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { DocumentLink } from "@/components/marketing/cached-marketing-link";
 import { StageBackdrop } from "@/components/marketing/plan-stage-bg";
 import { localePath } from "@/i18n/path";
@@ -11,7 +11,10 @@ import { Input } from "@/components/ui/input";
 import { PriceAmount, SecondaryPriceAmount } from "@/components/marketing/price-amount";
 import { PlanPeriodCaption } from "@/components/marketing/plan-period-caption";
 import { readServiceLead, TypingLead } from "@/components/marketing/typing-lead";
-import { useEsimYearNote } from "@/components/esim/esim-console";
+import { esimAmountForLocale } from "@/lib/esim/catalog";
+import { detailCardOffer, type AddonChoice, type AddonData } from "@/lib/esim/detail-offer";
+import { currencyForLocale } from "@/lib/payments/quote";
+import { formatMoney } from "@/lib/format-date";
 import { getMarketingService, type MarketingServiceId } from "@/lib/marketing-services";
 import {
   planHasPrice,
@@ -19,9 +22,46 @@ import {
   planTerm,
   planTrafficQuota,
   type Plan,
+  type PlanPrices,
 } from "@/lib/plans";
 import { cn } from "@/lib/utils";
 import type { AppLocale } from "@/i18n/routing";
+
+type EsimProduct = {
+  id: string;
+  name: string;
+  dataGb: number;
+  days: number;
+  priceKrw: number;
+  priceUsd: number;
+  priceCny: number;
+  priceJpy: number;
+};
+
+type EsimOffer = {
+  enabled: true;
+  products: EsimProduct[];
+  copy: {
+    copyNoWifi: string;
+    copyRefund: string;
+    copyKorea: string;
+    copyExit: string;
+    copyYear: string;
+  };
+};
+
+function toAddonData(product: EsimProduct): AddonData {
+  return {
+    id: product.id,
+    days: product.days,
+    prices: {
+      krw: product.priceKrw,
+      usd: product.priceUsd,
+      cny: product.priceCny,
+      jpy: product.priceJpy,
+    },
+  };
+}
 
 export function ServiceDetail({
   service: serviceId,
@@ -33,15 +73,56 @@ export function ServiceDetail({
   showAlipay: boolean;
 }) {
   const t = useTranslations("services");
+  const tCompare = useTranslations("esimCompare");
   const tPricing = useTranslations("pricing");
   const locale = useLocale() as AppLocale;
   const service = getMarketingService(serviceId);
-  const yearNote = useEsimYearNote(service.id === "standard" || service.id === "hybrid");
+  const bundle = service.id === "standard" || service.id === "hybrid";
+  const [offer, setOffer] = useState<EsimOffer | null>(null);
+  const [networkOn, setNetworkOn] = useState(true);
+  const [dataOn, setDataOn] = useState(false);
+  const [dataId, setDataId] = useState("");
   const banners = plans.map((plan) => ({ key: plan.id, plan }));
   const lead =
     service.id === "standard" || service.id === "hybrid"
       ? readServiceLead(t.raw(`${service.id}.lead`))
       : null;
+  const pricedData = (offer?.products ?? []).filter((product) => esimAmountForLocale(product, locale) > 0);
+  const selectedData = pricedData.find((product) => product.id === dataId) ?? pricedData[0] ?? null;
+  const choice: AddonChoice = {
+    networkOn,
+    dataOn: dataOn && Boolean(selectedData),
+    data: selectedData ? toAddonData(selectedData) : null,
+  };
+  const yearNote =
+    offer && pricedData.length > 0 ? (locale === "ko" ? offer.copy.copyYear : t("addonCopyYear")) : null;
+  const copy =
+    locale === "ko" && offer
+      ? offer.copy
+      : {
+          copyRefund: t("addonCopyRefund"),
+          copyKorea: t("addonCopyKorea"),
+          copyExit: t("addonCopyExit"),
+        };
+
+  useEffect(() => {
+    if (!bundle) {
+      return;
+    }
+    let cancelled = false;
+    void fetch("/api/v1/esim")
+      .then(async (response) => (response.ok ? response.json() : null))
+      .then((data: EsimOffer | { enabled: false } | null) => {
+        if (cancelled || !data || !("products" in data) || !data.enabled) {
+          return;
+        }
+        setOffer(data);
+        setDataId((current) => current || data.products[0]?.id || "");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [bundle]);
 
   return (
     <section className="relative min-h-dvh">
@@ -60,7 +141,32 @@ export function ServiceDetail({
         <p className="mx-auto mt-4 max-w-xl text-balance text-sm leading-relaxed text-muted-foreground md:text-base">
           {t(`${service.id}.description`)}
         </p>
-        <div className={cn("w-full", banners.length === 1 ? "mt-8 min-h-16 max-w-2xl" : "mt-6")} />
+        {bundle && pricedData.length > 0 ? (
+          <ServiceAddonPicker
+            networkOn={networkOn}
+            dataOn={dataOn}
+            products={pricedData}
+            selectedId={selectedData?.id ?? ""}
+            locale={locale}
+            guide={dataOn ? t("addonGuide") : null}
+            dataTerm={!networkOn && dataOn ? t("addonDataTerm") : null}
+            pick={!networkOn && !dataOn ? t("addonPick") : null}
+            copyExit={dataOn ? copy.copyExit : null}
+            copyRefund={dataOn ? copy.copyRefund : null}
+            copyKorea={dataOn ? copy.copyKorea : null}
+            labels={{
+              network: t("addonNetwork"),
+              data: t("addonData"),
+              days: (days) => tCompare("days", { days }),
+            }}
+            productLabel={(id) => (id === "cn-10gb" ? t("addonProduct10") : t("addonProduct5"))}
+            onNetwork={setNetworkOn}
+            onData={setDataOn}
+            onDataId={setDataId}
+          />
+        ) : (
+          <div className={cn("w-full", banners.length === 1 ? "mt-8 min-h-16 max-w-2xl" : "mt-6")} />
+        )}
         <div className="mt-4 flex w-full justify-center">
           <div
             className={cn(
@@ -72,15 +178,19 @@ export function ServiceDetail({
             {banners.map(({ key, plan }) => {
               const priced = planHasPrice(plan);
               const inquire = service.id === "workspace" && !priced;
-              const quota = priced ? planTrafficQuota(plan) : null;
+              const card = bundle ? detailCardOffer(plan, choice) : null;
+              const sellingNetwork = card ? card.includeNetwork : priced;
+              const quota = sellingNetwork ? planTrafficQuota(plan) : null;
+              const displayPrices = card?.prices ?? plan.prices;
               return (
               <ServicePlanCard
                 key={key}
                 plan={plan}
                 locale={locale}
-                showAlipay={showAlipay && priced}
+                prices={displayPrices}
+                showAlipay={showAlipay && (card ? Boolean(card.prices) : priced)}
                 compactPrice
-                hidePrice={!priced}
+                hidePrice={card ? !card.prices : !priced}
                 badge={planTerm(plan.id) === "week" ? t("trialPlan") : null}
                 heading={
                   t.has(`${service.id}.headings.${plan.id}`)
@@ -102,8 +212,26 @@ export function ServiceDetail({
                 features={t.raw(`${service.id}.features`)}
                 cta={t(`${service.id}.cta`)}
                 needsCode={service.id === "workspace"}
-                period={priced ? tPricing(planPricePeriodKey(plan.id, service.id)) : null}
-                showPeriodCaption={priced}
+                checkoutHref={
+                  card
+                    ? card.checkout
+                      ? checkoutReturnPath(card.checkout)
+                      : null
+                    : checkoutReturnPath({ product: plan.product, plan: plan.id })
+                }
+                period={sellingNetwork ? tPricing(planPricePeriodKey(plan.id, service.id)) : null}
+                showPeriodCaption={sellingNetwork}
+                dataCaption={card?.includeData && !card.includeNetwork && selectedData ? tCompare("days", { days: selectedData.days }) : null}
+                breakdown={
+                  card?.breakdown
+                    ? {
+                        networkLabel: t("addonLineNetwork"),
+                        dataLabel: t("addonLineData"),
+                        network: card.breakdown.network,
+                        data: card.breakdown.data,
+                      }
+                    : null
+                }
                 yearNote={planTerm(plan.id) === "year" ? yearNote : null}
               />
               );
@@ -121,6 +249,7 @@ export function ServiceDetail({
 function ServicePlanCard({
   plan,
   locale,
+  prices,
   showAlipay,
   compactPrice,
   hidePrice,
@@ -131,12 +260,16 @@ function ServicePlanCard({
   features,
   cta,
   needsCode,
+  checkoutHref,
   period,
   showPeriodCaption,
+  dataCaption,
+  breakdown,
   yearNote,
 }: {
   plan: Plan;
   locale: AppLocale;
+  prices: PlanPrices;
   showAlipay: boolean;
   compactPrice?: boolean;
   hidePrice?: boolean;
@@ -147,8 +280,11 @@ function ServicePlanCard({
   features?: string[] | null;
   cta: string;
   needsCode?: boolean;
+  checkoutHref: string | null;
   period: string | null;
   showPeriodCaption?: boolean;
+  dataCaption?: string | null;
+  breakdown?: { networkLabel: string; dataLabel: string; network: PlanPrices; data: PlanPrices } | null;
   yearNote?: string | null;
 }) {
   const tPricing = useTranslations("pricing");
@@ -180,13 +316,15 @@ function ServicePlanCard({
         <div className="w-full">
           <PriceLine
             locale={locale}
-            prices={plan.prices}
+            prices={prices}
             period={period}
             compact={compactPrice}
             quota={quota}
             hidePrice={hidePrice}
             inquire={inquire}
             showPeriodCaption={showPeriodCaption}
+            dataCaption={dataCaption}
+            breakdown={breakdown}
           />
         </div>
       </div>
@@ -205,13 +343,14 @@ function ServicePlanCard({
       <div className={cn("w-full", items.length ? "mt-auto pt-6" : "mt-6")}>
         {needsCode ? (
           <PromoCta planId={plan.id} product={plan.product} cta={cta} buttonClass={buttonClass} />
-        ) : (
-          <DocumentLink
-            href={checkoutReturnPath({ product: plan.product, plan: plan.id })}
-            className={buttonClass}
-          >
+        ) : checkoutHref ? (
+          <DocumentLink href={checkoutHref} className={buttonClass}>
             {cta}
           </DocumentLink>
+        ) : (
+          <button type="button" className={buttonClass} disabled>
+            {cta}
+          </button>
         )}
       </div>
     </article>
@@ -306,6 +445,8 @@ function PriceLine({
   hidePrice,
   inquire,
   showPeriodCaption,
+  dataCaption,
+  breakdown,
 }: {
   locale: AppLocale;
   prices: Plan["prices"];
@@ -315,6 +456,8 @@ function PriceLine({
   hidePrice?: boolean;
   inquire?: string | null;
   showPeriodCaption?: boolean;
+  dataCaption?: string | null;
+  breakdown?: { networkLabel: string; dataLabel: string; network: PlanPrices; data: PlanPrices } | null;
 }) {
   if (inquire) {
     return (
@@ -346,8 +489,23 @@ function PriceLine({
             prices={prices}
             className="justify-center text-[10px] text-muted-foreground sm:text-xs"
           />
+          {breakdown ? (
+            <div className="mt-1 space-y-0.5 text-[10px] font-normal tracking-normal text-muted-foreground sm:text-xs">
+              <p className="flex items-baseline justify-center gap-1">
+                <span>{breakdown.networkLabel}</span>
+                <PriceAmount locale={locale} prices={breakdown.network} compact className="text-foreground" />
+              </p>
+              <p className="flex items-baseline justify-center gap-1">
+                <span>{breakdown.dataLabel}</span>
+                <PriceAmount locale={locale} prices={breakdown.data} compact className="text-foreground" />
+              </p>
+            </div>
+          ) : null}
         </>
       )}
+      {dataCaption ? (
+        <p className="max-w-full text-[10px] font-medium leading-none text-muted-foreground sm:text-xs">{dataCaption}</p>
+      ) : null}
       {period && showPeriodCaption ? (
         <PlanPeriodCaption period={period} compact={compact} className="max-w-full text-center" />
       ) : period ? (
@@ -360,6 +518,92 @@ function PriceLine({
           {quota.prefix} {quota.amount}
         </p>
       )}
+    </div>
+  );
+}
+
+function ServiceAddonPicker({
+  networkOn,
+  dataOn,
+  products,
+  selectedId,
+  locale,
+  guide,
+  dataTerm,
+  pick,
+  copyExit,
+  copyRefund,
+  copyKorea,
+  labels,
+  productLabel,
+  onNetwork,
+  onData,
+  onDataId,
+}: {
+  networkOn: boolean;
+  dataOn: boolean;
+  products: EsimProduct[];
+  selectedId: string;
+  locale: AppLocale;
+  guide: string | null;
+  dataTerm: string | null;
+  pick: string | null;
+  copyExit: string | null;
+  copyRefund: string | null;
+  copyKorea: string | null;
+  labels: { network: string; data: string; days: (days: number) => string };
+  productLabel: (id: string) => string;
+  onNetwork: (on: boolean) => void;
+  onData: (on: boolean) => void;
+  onDataId: (id: string) => void;
+}) {
+  const currency = currencyForLocale(locale);
+
+  return (
+    <div className="mx-auto mt-6 w-full max-w-md space-y-3 text-left text-sm">
+      <label className="flex items-start gap-2">
+        <input
+          type="checkbox"
+          className="mt-1 size-3.5 accent-primary"
+          checked={networkOn}
+          onChange={(event) => onNetwork(event.target.checked)}
+        />
+        <span>{labels.network}</span>
+      </label>
+      <div>
+        <label className="flex items-start gap-2">
+          <input
+            type="checkbox"
+            className="mt-1 size-3.5 accent-primary"
+            checked={dataOn}
+            onChange={(event) => onData(event.target.checked)}
+          />
+          <span>{labels.data}</span>
+        </label>
+        {dataOn ? (
+          <div className="mt-2 ml-6 flex flex-col gap-1">
+            {products.map((product) => (
+              <label key={product.id} className="flex items-center gap-2 text-xs text-muted-foreground">
+                <input
+                  type="radio"
+                  name="service-esim-data"
+                  className="size-3.5 accent-primary"
+                  checked={selectedId === product.id}
+                  onChange={() => onDataId(product.id)}
+                />
+                {productLabel(product.id)} · {formatMoney(locale, esimAmountForLocale(product, locale), currency)} ·{" "}
+                {labels.days(product.days)}
+              </label>
+            ))}
+          </div>
+        ) : null}
+      </div>
+      {guide ? <p className="text-xs leading-5 text-muted-foreground">{guide}</p> : null}
+      {dataTerm ? <p className="text-xs leading-5 text-muted-foreground">{dataTerm}</p> : null}
+      {copyExit ? <p className="text-xs leading-5 text-muted-foreground">{copyExit}</p> : null}
+      {copyRefund ? <p className="text-xs leading-5 text-muted-foreground">{copyRefund}</p> : null}
+      {copyKorea ? <p className="text-xs leading-5 text-muted-foreground">{copyKorea}</p> : null}
+      {pick ? <p className="text-xs leading-5 text-muted-foreground">{pick}</p> : null}
     </div>
   );
 }

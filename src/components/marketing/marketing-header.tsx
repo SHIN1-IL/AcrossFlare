@@ -16,7 +16,7 @@ import { signedInHomeHref } from "@/lib/auth-types";
 import { clearSession, refreshSession } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
-export function MarketingHeader() {
+export function MarketingHeader({ className }: { className?: string }) {
   const t = useTranslations("nav");
   const locale = useLocale();
   const hydrated = useHydrated();
@@ -38,7 +38,7 @@ export function MarketingHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-40 bg-transparent">
+    <header className={cn("sticky top-0 z-40 bg-transparent", className)}>
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-3 sm:px-4">
         <div className="flex min-w-0 items-center gap-2.5">
           <Logo wordmarkClassName="font-bold" />

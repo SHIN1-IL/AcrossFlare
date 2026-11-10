@@ -25,18 +25,20 @@ describe("afterLoginHref", () => {
     expect(afterLoginHref(session("STAFF"))).toBe("/admin");
   });
 
-  it("sends customers and the review account to the marketing home", () => {
-    expect(afterLoginHref(session("USER"))).toBe("/");
-    expect(afterLoginHref(null)).toBe("/");
+  it("sends email customers to the console", () => {
+    expect(afterLoginHref(session("USER"))).toBe("/app");
+    expect(afterLoginHref(null)).toBe("/app");
   });
 });
 
 describe("loginRedirectHref", () => {
-  it("keeps customers on the homepage even when next points at the console", () => {
-    expect(loginRedirectHref(session("USER"), "/app")).toBe("/");
-    expect(loginRedirectHref(session("USER"), "/app/global")).toBe("/");
-    expect(loginRedirectHref(session("USER"), "/dashboard")).toBe("/");
-    expect(loginRedirectHref(session("USER"), null)).toBe("/");
+  it("opens the console for email customers", () => {
+    expect(loginRedirectHref(session("USER"), "/app")).toBe("/app");
+    expect(loginRedirectHref(session("USER"), "/app/global")).toBe("/app/global");
+    expect(loginRedirectHref(session("USER"), "/dashboard")).toBe("/dashboard");
+    expect(loginRedirectHref(session("USER"), null)).toBe("/app");
+    expect(loginRedirectHref(session("USER"), "/")).toBe("/app");
+    expect(loginRedirectHref(session("USER"), "/en/app")).toBe("/app");
   });
 
   it("still returns customers to checkout", () => {
@@ -44,13 +46,15 @@ describe("loginRedirectHref", () => {
       "/checkout?product=global&plan=global-lite"
     );
     expect(loginRedirectHref(session("USER"), "/support")).toBe("/support");
+    expect(loginRedirectHref(session("USER"), "/standard")).toBe("/standard");
+    expect(loginRedirectHref(session("USER"), "/hybrid")).toBe("/hybrid");
   });
 
   it("returns staff to admin, not the customer console", () => {
     expect(loginRedirectHref(session("ADMIN"), "/admin/standard/customers")).toBe("/admin/standard/customers");
     expect(loginRedirectHref(session("OWNER"), "/app")).toBe("/admin");
     expect(loginRedirectHref(session("STAFF"), null)).toBe("/admin");
-    expect(loginRedirectHref(session("USER"), "/en/app")).toBe("/");
+    expect(loginRedirectHref(session("USER"), "/en")).toBe("/app");
     expect(loginRedirectHref(session("USER"), "/en/checkout?product=global&plan=global-lite")).toBe(
       "/checkout?product=global&plan=global-lite"
     );

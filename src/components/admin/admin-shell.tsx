@@ -1,10 +1,9 @@
 "use client";
 
-import { LayoutDashboard, LayoutGrid, LogOut, Menu, Server, Settings, Shield, Signal, Ticket, Users, Wallet, X } from "lucide-react";
+import { LayoutDashboard, LayoutGrid, Lock, LogOut, Menu, Server, Settings, Shield, Signal, Ticket, Users, Wallet, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { MarginCard } from "@/components/admin/margin-card";
-import { Phase2OpsBanner } from "@/components/admin/ops-health";
 import { AdminTabSwitch } from "@/components/admin/admin-tab-switch";
 import { Logo } from "@/components/marketing/logo";
 import { buttonVariants } from "@/components/ui/button";
@@ -29,6 +28,35 @@ const NAV_ICONS = {
 function serviceFromPath(pathname: string): AdminServiceId {
   const part = pathname.split("/").find((item) => canonicalAdminService(item));
   return canonicalAdminService(part) ?? "standard";
+}
+
+function useEsimIssueLocked(enabled: boolean) {
+  const [locked, setLocked] = useState(false);
+
+  useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+    let cancelled = false;
+    void fetch("/api/v1/admin/esim/issue", { credentials: "include" })
+      .then(async (response) => (response.ok ? response.json() : null))
+      .then((data: { autoIssueLocked?: boolean } | null) => {
+        if (!cancelled && data) {
+          setLocked(Boolean(data.autoIssueLocked));
+        }
+      });
+    function onChange(event: Event) {
+      const detail = (event as CustomEvent<{ locked?: boolean }>).detail;
+      setLocked(Boolean(detail?.locked));
+    }
+    window.addEventListener("esim-issue-lock", onChange);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("esim-issue-lock", onChange);
+    };
+  }, [enabled]);
+
+  return locked;
 }
 
 function SessionRole({ owner, className }: { owner: boolean; className?: string }) {
@@ -69,6 +97,8 @@ function NavLinks({
   const esimHref = "/admin/esim";
   const esimActive = pathname === esimHref || pathname.startsWith(`${esimHref}/`);
   const showEsim = owner || permissions.includes("customers");
+  const issueLocked = useEsimIssueLocked(showEsim);
+  const EsimIcon = issueLocked ? Lock : Signal;
   const itemClass = (active: boolean) =>
     cn(
       "flex items-center gap-2 rounded-[10px] px-3 py-2 text-sm transition-colors",
@@ -108,7 +138,7 @@ function NavLinks({
       ) : null}
       {showEsim ? (
         <Link href={esimHref} prefetch onClick={onNavigate} className={itemClass(esimActive)}>
-          <Signal className="size-4" />
+          <EsimIcon className="size-4" />
           {t("navEsim")}
         </Link>
       ) : null}
@@ -220,7 +250,6 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             <MarginCard />
           </div>
         ) : null}
-        <Phase2OpsBanner owner={owner} />
         <main className={cn("min-h-0 flex-1 overflow-y-auto px-4 py-8 md:px-8", owner && "max-md:pb-44")}>{children}</main>
       </div>
     </div>

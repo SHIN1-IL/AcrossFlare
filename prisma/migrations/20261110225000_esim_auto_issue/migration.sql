@@ -1,0 +1,2 @@
+ALTER TABLE "EsimSettings" ADD COLUMN "autoIssue" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "EsimSettings" ADD COLUMN "autoIssueLocked" BOOLEAN NOT NULL DEFAULT false;

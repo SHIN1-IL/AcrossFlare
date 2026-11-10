@@ -77,4 +77,19 @@ describe("computeOpsHealth", () => {
     expect(health.signals.find((item) => item.id === "provision_simulate")?.level).toBe("alert");
     expect(health.signals.find((item) => item.id === "traffic_sync_disabled")?.level).toBe("alert");
   });
+
+  it("does not alert when this server is not the sync process and no run exists yet", () => {
+    const health = computeOpsHealth({
+      activeGlobalUsers: 5,
+      syncRuns: [],
+      provisionSimulate: false,
+      trafficSyncEnabled: true,
+      trafficSyncIntervalSeconds: 300,
+      expectSyncRuns: false,
+      now: baseNow,
+    });
+
+    expect(health.signals.find((item) => item.id === "traffic_sync_never_ran")?.level).toBe("ok");
+    expect(health.overall).toBe("ok");
+  });
 });

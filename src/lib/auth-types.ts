@@ -23,7 +23,7 @@ export function signedInHomeHref(session: PublicSession | null | undefined) {
 }
 
 export function afterLoginHref(session: PublicSession | null | undefined) {
-  return isAdminSession(session) ? "/admin" : "/";
+  return isAdminSession(session) ? "/admin" : "/app";
 }
 
 export function isSafeNextPath(value: string | null | undefined): value is string {
@@ -40,14 +40,8 @@ function unprefixedPath(path: string) {
   return search ? `${stripped}?${search}` : stripped;
 }
 
-function isConsoleReturnPath(path: string) {
-  const pathname = stripLocalePrefix(pathnameOf(path));
-  return (
-    pathname === "/app" ||
-    pathname.startsWith("/app/") ||
-    pathname === "/dashboard" ||
-    pathname.startsWith("/dashboard")
-  );
+function isMarketingHomePath(path: string) {
+  return stripLocalePrefix(pathnameOf(path)) === "/";
 }
 
 function isAdminReturnPath(path: string) {
@@ -55,7 +49,7 @@ function isAdminReturnPath(path: string) {
   return pathname === "/admin" || pathname.startsWith("/admin/");
 }
 
-/** Where to send a user after email login. Console `next=/app` is ignored for customers. */
+/** Where to send a user after email login. Customers land on the console unless a specific page was requested. */
 export function loginRedirectHref(session: PublicSession, next?: string | null) {
   if (isAdminSession(session)) {
     if (isSafeNextPath(next) && isAdminReturnPath(next)) {
@@ -64,11 +58,11 @@ export function loginRedirectHref(session: PublicSession, next?: string | null) 
     return "/admin";
   }
 
-  if (isSafeNextPath(next) && !isConsoleReturnPath(next)) {
+  if (isSafeNextPath(next) && !isMarketingHomePath(next)) {
     return unprefixedPath(next);
   }
 
-  return "/";
+  return "/app";
 }
 
 export function toPublicSession(user: {

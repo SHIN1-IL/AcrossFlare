@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth";
+import { retryPendingEsimOrders } from "@/lib/esim/supplier-order";
 import { prisma } from "@/lib/db";
 
 export async function GET() {
@@ -8,6 +9,7 @@ export async function GET() {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
+  await retryPendingEsimOrders(user.id);
   const orders = await prisma.esimOrder.findMany({
     where: { userId: user.id, status: { not: "CANCELLED" } },
     orderBy: { createdAt: "desc" },

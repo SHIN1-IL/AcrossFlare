@@ -41,7 +41,6 @@ export function WhyBuyUiStoryPreview({
   const t = useTranslations("heroDeck");
   const tServices = useTranslations("services");
   const items = readHeroItems(t);
-  const outcomeLines = readLines(t.raw("outcomeLines"));
   const {
     sectionRef,
     step: liveStep,
@@ -132,28 +131,17 @@ export function WhyBuyUiStoryPreview({
 
       <div
         className={cn(
-          "relative z-10 flex shrink-0 flex-col items-center px-4 text-center",
+          "relative z-20 flex shrink-0 flex-col items-center px-4 pb-1 text-center",
           live ? "pt-[4.5rem] max-[479px]:pt-16" : "pt-8 max-[479px]:pt-5 sm:pt-10"
         )}
       >
         {live ? (
-          <div className="w-full max-w-md text-left">
-            <h1 className="text-center text-[clamp(0.95rem,2.2vw,1.2rem)] font-medium text-emerald-300/90">
-              {t("headline")}
-            </h1>
-            <ul className="mt-2 space-y-1">
-              {outcomeLines.map((line) => (
-                <li
-                  key={line}
-                  className="flex gap-2 text-left text-[clamp(0.72rem,1.45vw,0.85rem)] leading-snug text-[#c8c8c8]"
-                >
-                  <span className="mt-[0.45em] size-1 shrink-0 rounded-full bg-emerald-400" aria-hidden="true" />
-                  <span>{line}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-2 text-left text-[10px] leading-snug text-[#8a8a8a]">{tServices("availabilityNote")}</p>
-          </div>
+          <StoryCaption
+            caption={captions[stepId]}
+            closing={closing ? t("closing") : null}
+            note={tServices("availabilityNote")}
+            animate={animate}
+          />
         ) : (
           <>
             <h1 className="text-[clamp(1.55rem,4.5vw,2.5rem)] leading-[0.95] font-semibold tracking-[-0.04em] text-[#f4f4f5] max-[479px]:text-[1.35rem]">
@@ -162,14 +150,17 @@ export function WhyBuyUiStoryPreview({
             <p className="mt-1.5 text-[clamp(0.68rem,1.6vw,0.9rem)] whitespace-nowrap text-[#888888] max-[479px]:hidden">
               {t("brandTagline")}
             </p>
-            <p className="mt-2 text-[clamp(0.75rem,1.5vw,0.95rem)] font-medium text-emerald-300/90 max-[479px]:mt-1 max-[479px]:text-[0.75rem]">
-              {t("headline")}
-            </p>
+            <StoryCaption
+              caption={captions[stepId]}
+              closing={closing ? t("closing") : null}
+              animate={animate}
+              className="mt-2"
+            />
           </>
         )}
       </div>
 
-      <div className="relative z-10 mx-auto mt-3 min-h-0 w-full max-w-2xl flex-1 px-3 max-[479px]:mt-2 max-[479px]:max-w-none">
+      <div className="relative z-10 mx-auto mt-5 min-h-0 w-full max-w-2xl flex-1 px-3 max-[479px]:mt-4 max-[479px]:max-w-none">
         <div
           key={`${runId}-${stepId}-${armed ? "on" : "off"}`}
           className="h-full w-full"
@@ -188,11 +179,8 @@ export function WhyBuyUiStoryPreview({
         </div>
       </div>
 
-      <div className="relative z-10 flex shrink-0 flex-col items-center px-4 pt-3 pb-5 max-[479px]:pt-2 max-[479px]:pb-4">
-        <p className="max-w-xl text-center text-[clamp(0.78rem,1.5vw,0.95rem)] leading-snug text-[#c8c8c8] max-[479px]:text-[0.78rem]">
-          {captions[stepId]}
-        </p>
-        <div className="mt-3 flex gap-2 max-[479px]:mt-2">
+      <div className="relative z-10 flex shrink-0 items-center justify-center px-4 pt-3 pb-5 max-[479px]:pt-2 max-[479px]:pb-4">
+        <div className="flex gap-2" aria-hidden="true">
           {STEPS.map((id, i) => (
             <span
               key={id}
@@ -203,14 +191,6 @@ export function WhyBuyUiStoryPreview({
             />
           ))}
         </div>
-        <p
-          className={cn(
-            "mt-2 text-center text-[clamp(0.75rem,1.4vw,0.9rem)] font-medium text-emerald-300 transition-all duration-500 max-[479px]:text-[0.75rem]",
-            closing ? "translate-y-0 opacity-100" : "h-0 overflow-hidden opacity-0"
-          )}
-        >
-          {t("closing")}
-        </p>
       </div>
     </div>
   );
@@ -230,7 +210,7 @@ export function WhyBuyUiStoryPreview({
           className="h-dvh cursor-pointer overflow-hidden"
           role="button"
           tabIndex={0}
-          aria-label={finished ? t("replayPreview") : t("headline")}
+          aria-label={finished ? t("replayPreview") : captions[stepId]}
           onClick={() => {
             if (finished) replay();
           }}
@@ -287,13 +267,65 @@ function DeviceMock({
 
   return (
     <StoryDeviceFrame shineKey={shineKey}>
-      {step === "apps-blocked" && (
-        <AppsGrid t={t} items={items} ok={false} animate={animate} touch={touch} />
-      )}
-      {step === "wifi-risk" && <WifiPanel t={t} animate={animate} touch={touch} />}
-      {step === "apps-ok" && <AppsGrid t={t} items={items} ok animate={animate} touch={touch} />}
-      {step === "backup" && <BackupPanel t={t} animate={animate} touch={touch} />}
+      <StepBody step={step} t={t} items={items} animate={animate} touch={touch} />
     </StoryDeviceFrame>
+  );
+}
+
+function StepBody({
+  step,
+  t,
+  items,
+  animate,
+  touch,
+}: {
+  step: StepId;
+  t: ReturnType<typeof useTranslations>;
+  items: HeroItem[];
+  animate: boolean;
+  touch: TouchCycle;
+}) {
+  if (step === "apps-blocked") {
+    return <AppsGrid t={t} items={items} ok={false} animate={animate} touch={touch} />;
+  }
+  if (step === "wifi-risk") return <WifiPanel t={t} animate={animate} touch={touch} />;
+  if (step === "apps-ok") return <AppsGrid t={t} items={items} ok animate={animate} touch={touch} />;
+  return <BackupPanel t={t} animate={animate} touch={touch} />;
+}
+
+function StoryCaption({
+  caption,
+  closing,
+  note,
+  animate,
+  className,
+}: {
+  caption: string;
+  closing: string | null;
+  note?: string;
+  animate: boolean;
+  className?: string;
+}) {
+  return (
+    <div className={cn("flex w-full max-w-2xl flex-col items-center gap-2", className)}>
+      <p
+        key={caption}
+        className="text-center text-[clamp(1.05rem,2.3vw,1.4rem)] leading-snug font-medium text-[#f4f4f5]"
+        style={animate ? { animation: "af-ui-fade-in 0.45s ease-out both" } : undefined}
+      >
+        {caption}
+      </p>
+      {closing ? (
+        <p className="text-center text-[clamp(0.85rem,1.7vw,1.05rem)] leading-snug font-medium text-emerald-300">
+          {closing}
+        </p>
+      ) : null}
+      {note ? (
+        <p className="max-w-xl text-center text-[clamp(0.68rem,1.3vw,0.8rem)] leading-relaxed text-[#9a9a9a]">
+          {note}
+        </p>
+      ) : null}
+    </div>
   );
 }
 
@@ -315,11 +347,6 @@ function readHeroItems(t: ReturnType<typeof useTranslations>): HeroItem[] {
       } satisfies HeroItem;
     })
     .filter((item): item is HeroItem => item !== null);
-}
-
-function readLines(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
-  return value.filter((item): item is string => typeof item === "string" && item.length > 0);
 }
 
 function readExtraSites(t: ReturnType<typeof useTranslations>): string[] {

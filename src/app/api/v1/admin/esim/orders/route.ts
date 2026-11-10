@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requirePermission } from "@/lib/admin-auth";
+import { retryPendingEsimOrders } from "@/lib/esim/supplier-order";
 import { prisma } from "@/lib/db";
 
 export async function GET() {
@@ -8,6 +9,7 @@ export async function GET() {
     return auth.response;
   }
 
+  await retryPendingEsimOrders();
   const orders = await prisma.esimOrder.findMany({
     orderBy: { createdAt: "desc" },
     take: 200,
@@ -26,6 +28,8 @@ export async function GET() {
       chargedAmount: order.chargedAmount,
       status: order.status,
       qrText: order.qrText,
+      supplierOrderNo: order.supplierOrderNo,
+      supplierError: order.supplierError,
       createdAt: order.createdAt.toISOString(),
     })),
   });

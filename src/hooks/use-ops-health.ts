@@ -48,18 +48,3 @@ export function useOpsHealth(enabled: boolean) {
 
   return enabled ? health : null;
 }
-
-export function opsBannerDismissKey(date = new Date()) {
-  return `ops-banner-dismissed-${date.toISOString().slice(0, 10)}`;
-}
-
-export function isOpsBannerDismissedToday() {
-  if (typeof window === "undefined") {
-    return false;
-  }
-  return window.localStorage.getItem(opsBannerDismissKey()) === "1";
-}
-
-export function dismissOpsBannerForToday() {
-  window.localStorage.setItem(opsBannerDismissKey(), "1");
-}

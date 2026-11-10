@@ -45,6 +45,8 @@ export type OpsHealthInputs = {
   provisionSimulate: boolean;
   trafficSyncEnabled: boolean;
   trafficSyncIntervalSeconds: number;
+  /** The sync process records runs. Local and preview servers do not run it. */
+  expectSyncRuns?: boolean;
   now?: Date;
 };
 
@@ -159,7 +161,7 @@ export function computeOpsHealth(inputs: OpsHealthInputs): OpsHealth {
       messageKey: "ops.signal.syncLag",
     });
   } else if (inputs.trafficSyncEnabled) {
-    const shouldHaveRun = inputs.activeGlobalUsers > 0;
+    const shouldHaveRun = inputs.expectSyncRuns !== false && inputs.activeGlobalUsers > 0;
     signals.push({
       id: "traffic_sync_never_ran",
       level: shouldHaveRun ? "alert" : "ok",
@@ -168,10 +170,6 @@ export function computeOpsHealth(inputs: OpsHealthInputs): OpsHealth {
   }
 
   const overall = overallFromSignals(signals);
-  const phase2Signals = signals.filter((signal) =>
-    ["active_global_users", "traffic_sync_error_rate", "traffic_sync_lag"].includes(signal.id)
-  );
-  const phase2Level = overallFromSignals(phase2Signals);
 
   return {
     phase: 1,
@@ -182,8 +180,7 @@ export function computeOpsHealth(inputs: OpsHealthInputs): OpsHealth {
     trafficSyncIntervalSeconds: inputs.trafficSyncIntervalSeconds,
     lastSyncAt,
     nextSyncAt,
-    recommendationKey:
-      phase2Level !== "ok" ? "ops.recommend.phase2" : overall !== "ok" ? "ops.recommend.infra" : null,
+    recommendationKey: overall !== "ok" ? "ops.recommend.infra" : null,
   };
 }
 
@@ -217,6 +214,7 @@ export async function getOpsHealth(): Promise<OpsHealth> {
     provisionSimulate: isProvisionSimulate(),
     trafficSyncEnabled: isTrafficSyncEnabled(),
     trafficSyncIntervalSeconds: trafficSyncIntervalSeconds(),
+    expectSyncRuns: process.env.NODE_ENV === "production",
   });
 }
 

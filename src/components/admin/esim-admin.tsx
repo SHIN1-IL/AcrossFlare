@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Lock } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { fieldClass } from "@/components/admin/admin-drawer";
@@ -28,6 +29,8 @@ type Order = {
   chargedAmount: number;
   status: string;
   qrText: string;
+  supplierOrderNo: string;
+  supplierError: string;
   createdAt: string;
 };
 
@@ -52,6 +55,11 @@ export function EsimAdmin() {
   const session = useSession();
   const owner = isOwnerSession(session);
   const [enabled, setEnabled] = useState(false);
+  const [locked, setLocked] = useState(false);
+  const [step, setStep] = useState<LockStep>("idle");
+  const [autoIssue, setAutoIssue] = useState(false);
+  const [issueLocked, setIssueLocked] = useState(false);
+  const [issueStep, setIssueStep] = useState<LockStep>("idle");
   const [copy, setCopy] = useState<Copy>(EMPTY_COPY);
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -63,11 +71,14 @@ export function EsimAdmin() {
     if (owner) {
       void fetch("/api/v1/admin/esim", { credentials: "include" })
         .then(async (response) => (response.ok ? response.json() : null))
-        .then((data: { enabled: boolean; copy: Copy; products: Product[] } | null) => {
+        .then((data: { enabled: boolean; enabledLocked?: boolean; autoIssue?: boolean; autoIssueLocked?: boolean; copy: Copy; products: Product[] } | null) => {
           if (!data) {
             return;
           }
           setEnabled(data.enabled);
+          setLocked(Boolean(data.enabledLocked));
+          setAutoIssue(Boolean(data.autoIssue));
+          setIssueLocked(Boolean(data.autoIssueLocked));
           setCopy(data.copy);
           setProducts(data.products);
         });
@@ -92,9 +103,62 @@ export function EsimAdmin() {
         method: "PATCH",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ enabled, ...copy }),
+        body: JSON.stringify(copy),
       });
       setMessage(response.ok ? t("esimSaved") : t("esimSaveFailed"));
+    } finally {
+      setPending(false);
+    }
+  }
+
+  async function commitLock(action: "lock" | "unlock") {
+    setPending(true);
+    setMessage("");
+    try {
+      const response = await fetch("/api/v1/admin/esim", {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(action === "lock" ? { action, enabled } : { action }),
+      });
+      const data = (await response.json().catch(() => null)) as { enabled?: boolean; enabledLocked?: boolean; error?: string } | null;
+      if (!response.ok || !data || typeof data.enabled !== "boolean") {
+        setMessage(data?.error === "locked" ? t("esimLockFailed") : t("esimSaveFailed"));
+        return;
+      }
+      setEnabled(data.enabled);
+      setLocked(Boolean(data.enabledLocked));
+      setStep("idle");
+      setMessage(t("esimSaved"));
+    } finally {
+      setPending(false);
+    }
+  }
+
+  async function commitIssue(action: "issue_lock" | "issue_unlock") {
+    setPending(true);
+    setMessage("");
+    try {
+      const response = await fetch("/api/v1/admin/esim", {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(action === "issue_lock" ? { action, autoIssue } : { action }),
+      });
+      const data = (await response.json().catch(() => null)) as {
+        autoIssue?: boolean;
+        autoIssueLocked?: boolean;
+        error?: string;
+      } | null;
+      if (!response.ok || !data || typeof data.autoIssue !== "boolean") {
+        setMessage(data?.error === "locked" ? t("esimLockFailed") : t("esimSaveFailed"));
+        return;
+      }
+      setAutoIssue(data.autoIssue);
+      setIssueLocked(Boolean(data.autoIssueLocked));
+      setIssueStep("idle");
+      window.dispatchEvent(new CustomEvent("esim-issue-lock", { detail: { locked: Boolean(data.autoIssueLocked) } }));
+      setMessage(t("esimSaved"));
     } finally {
       setPending(false);
     }
@@ -150,7 +214,8 @@ export function EsimAdmin() {
         body: JSON.stringify({ cancel: true }),
       });
       if (!response.ok) {
-        setMessage(t("esimSaveFailed"));
+        const data = (await response.json().catch(() => null)) as { error?: string } | null;
+        setMessage(data?.error === "already_issued" ? t("esimCancelBlocked") : t("esimSaveFailed"));
         return;
       }
       setOrders((current) =>
@@ -167,27 +232,58 @@ export function EsimAdmin() {
       <AdminPageHeader title={t("esimTitle")} subtitle={t("esimSubtitle")} />
       {owner ? (
         <section className="space-y-4 rounded-2xl border border-border bg-card p-5">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-sm font-medium">{t("esimEnabled")}</h2>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant={enabled ? "default" : "outline"}
-                className="rounded-[10px]"
-                onClick={() => setEnabled(true)}
-              >
-                {t("esimOn")}
-              </Button>
-              <Button
-                type="button"
-                variant={!enabled ? "default" : "outline"}
-                className="rounded-[10px]"
-                onClick={() => setEnabled(false)}
-              >
-                {t("esimOff")}
-              </Button>
-            </div>
-          </div>
+          <LockSwitch
+            title={t("esimEnabled")}
+            hint={locked ? t("esimLockedHint") : t("esimLockHint")}
+            locked={locked}
+            enabled={enabled}
+            pending={pending}
+            step={step}
+            onLabel={t("esimOn")}
+            offLabel={t("esimOff")}
+            lockLabel={t("esimLock")}
+            unlockLabel={t("esimUnlock")}
+            confirmLabel={t("esimConfirm")}
+            cancelLabel={t("esimStepCancel")}
+            confirmText={
+              step === "lock1"
+                ? t("esimLockConfirm1", { state: enabled ? t("esimOn") : t("esimOff") })
+                : step === "lock2"
+                  ? t("esimLockConfirm2")
+                  : step === "unlock1"
+                    ? t("esimUnlockConfirm1")
+                    : t("esimUnlockConfirm2")
+            }
+            onEnable={setEnabled}
+            onStep={setStep}
+            onCommit={(action) => void commitLock(action)}
+          />
+          <LockSwitch
+            title={t("esimIssue")}
+            hint={issueLocked ? t("esimIssueLockedHint") : t("esimIssueHint")}
+            locked={issueLocked}
+            enabled={autoIssue}
+            pending={pending}
+            step={issueStep}
+            onLabel={t("esimOn")}
+            offLabel={t("esimOff")}
+            lockLabel={t("esimLock")}
+            unlockLabel={t("esimUnlock")}
+            confirmLabel={t("esimConfirm")}
+            cancelLabel={t("esimStepCancel")}
+            confirmText={
+              issueStep === "lock1"
+                ? t("esimIssueLockConfirm1", { state: autoIssue ? t("esimOn") : t("esimOff") })
+                : issueStep === "lock2"
+                  ? t("esimIssueLockConfirm2")
+                  : issueStep === "unlock1"
+                    ? t("esimIssueUnlockConfirm1")
+                    : t("esimIssueUnlockConfirm2")
+            }
+            onEnable={setAutoIssue}
+            onStep={setIssueStep}
+            onCommit={(action) => void commitIssue(action === "lock" ? "issue_lock" : "issue_unlock")}
+          />
           {(
             [
               ["copyNoWifi", "esimCopyNoWifi"],
@@ -303,6 +399,9 @@ export function EsimAdmin() {
             <p className="text-sm">
               {order.email} · {order.name} · {order.chargedAmount || order.priceKrw} {order.currency || "KRW"} · {order.status}
             </p>
+            {order.supplierError ? (
+              <p className="text-xs text-muted-foreground">{t("esimSupplierNote", { detail: order.supplierError })}</p>
+            ) : null}
             {order.status !== "CANCELLED" ? (
               <>
                 <textarea
@@ -316,7 +415,7 @@ export function EsimAdmin() {
                   <Button type="button" className="rounded-[10px]" disabled={pending} onClick={() => void saveQr(order.id)}>
                     {t("esimQrSave")}
                   </Button>
-                  {order.status === "AWAITING_QR" ? (
+                  {order.status === "AWAITING_QR" || order.supplierOrderNo ? (
                     <Button
                       type="button"
                       variant="outline"
@@ -334,6 +433,117 @@ export function EsimAdmin() {
         ))}
       </section>
       {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}
+    </div>
+  );
+}
+
+type LockStep = "idle" | "lock1" | "lock2" | "unlock1" | "unlock2";
+
+function LockSwitch({
+  title,
+  hint,
+  locked,
+  enabled,
+  pending,
+  step,
+  onLabel,
+  offLabel,
+  lockLabel,
+  unlockLabel,
+  confirmLabel,
+  cancelLabel,
+  confirmText,
+  onEnable,
+  onStep,
+  onCommit,
+}: {
+  title: string;
+  hint: string;
+  locked: boolean;
+  enabled: boolean;
+  pending: boolean;
+  step: LockStep;
+  onLabel: string;
+  offLabel: string;
+  lockLabel: string;
+  unlockLabel: string;
+  confirmLabel: string;
+  cancelLabel: string;
+  confirmText: string;
+  onEnable: (value: boolean) => void;
+  onStep: (step: LockStep) => void;
+  onCommit: (action: "lock" | "unlock") => void;
+}) {
+  return (
+    <div className="space-y-3 border-t border-border pt-4 first:border-t-0 first:pt-0">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="flex items-center gap-1.5 text-sm font-medium">
+            {locked ? <Lock className="size-4 text-primary" aria-hidden /> : null}
+            {title}
+          </h2>
+          <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant={enabled ? "default" : "outline"}
+            className="rounded-[10px]"
+            disabled={locked || pending || step !== "idle"}
+            onClick={() => onEnable(true)}
+          >
+            {onLabel}
+          </Button>
+          <Button
+            type="button"
+            variant={!enabled ? "default" : "outline"}
+            className="rounded-[10px]"
+            disabled={locked || pending || step !== "idle"}
+            onClick={() => onEnable(false)}
+          >
+            {offLabel}
+          </Button>
+        </div>
+      </div>
+      {step === "idle" ? (
+        <Button
+          type="button"
+          variant="outline"
+          className="rounded-[10px]"
+          disabled={pending}
+          onClick={() => onStep(locked ? "unlock1" : "lock1")}
+        >
+          {locked ? <Lock className="size-3.5" aria-hidden /> : null}
+          {locked ? unlockLabel : lockLabel}
+        </Button>
+      ) : (
+        <div className="space-y-2 rounded-[10px] border border-border p-3">
+          <p className="text-sm">{confirmText}</p>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              className="rounded-[10px]"
+              disabled={pending}
+              onClick={() => {
+                if (step === "lock1") {
+                  onStep("lock2");
+                  return;
+                }
+                if (step === "unlock1") {
+                  onStep("unlock2");
+                  return;
+                }
+                onCommit(step === "lock2" ? "lock" : "unlock");
+              }}
+            >
+              {confirmLabel}
+            </Button>
+            <Button type="button" variant="outline" className="rounded-[10px]" disabled={pending} onClick={() => onStep("idle")}>
+              {cancelLabel}
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

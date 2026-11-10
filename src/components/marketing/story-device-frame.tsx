@@ -16,8 +16,8 @@ export const STORY_DEVICE = {
   /** Angular corners (sharper than soft phone curves). */
   outerRadius: "rounded-[6px]",
   innerRadius: "rounded-[3px]",
-  border: "border-[3px]",
-  pad: "p-[3px]",
+  border: "border-[1.5px]",
+  pad: "p-[2px]",
 } as const;
 
 export function StoryDeviceFrame({
@@ -33,13 +33,13 @@ export function StoryDeviceFrame({
   return (
     <div
       className={cn(
-        "mx-auto flex h-full w-full items-center justify-center",
+        "mx-auto flex h-full w-full items-center justify-center [container-type:size]",
         className
       )}
     >
       <div
         className={cn(
-          "relative w-full border-[#f4f4f5]/90 bg-[#0c0e14] shadow-[0_22px_56px_rgba(0,0,0,0.5)]",
+          "relative w-[min(100cqw,calc(92cqh*1646/1178))] max-[479px]:w-[min(100cqw,calc(92cqh*1178/1646))] border-[#f4f4f5]/90 bg-[#0c0e14] shadow-[0_22px_56px_rgba(0,0,0,0.5)]",
           STORY_DEVICE.shellMax,
           STORY_DEVICE.aspect,
           STORY_DEVICE.outerRadius,
@@ -205,7 +205,7 @@ export function StoryDevicePanes({
 /** Class string for non-StoryDeviceFrame phone shells that should match the duo chrome. */
 export function storyDeviceShellClassName(className?: string) {
   return cn(
-    "relative w-full overflow-hidden border-[3px] border-[#f4f4f5]/90 bg-[#0c0e14] shadow-[0_16px_36px_rgba(0,0,0,0.34)]",
+    "relative w-full overflow-hidden border-[1.5px] border-[#f4f4f5]/90 bg-[#0c0e14] shadow-[0_16px_36px_rgba(0,0,0,0.34)]",
     STORY_DEVICE.aspect,
     STORY_DEVICE.outerRadius,
     className

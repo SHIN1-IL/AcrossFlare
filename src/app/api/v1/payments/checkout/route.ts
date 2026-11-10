@@ -11,6 +11,7 @@ import { poolHasOpenSeat } from "@/lib/provision/capacity";
 import { isPublicCheckoutProduct } from "@/lib/plans";
 import { lookupPromoCode } from "@/lib/promo";
 import { checkoutOrderName, quoteEsimAddon } from "@/lib/esim/catalog";
+import { guardNewEsimSale } from "@/lib/esim/supplier-order";
 import { ensureEsimCatalog, toProduct } from "@/lib/esim/store";
 import { getMerchant } from "@/lib/legal/merchant";
 import { toPrismaProduct } from "@/lib/product";
@@ -80,6 +81,13 @@ export async function POST(request: Request) {
   if (!quote.ok) {
     const status = quote.error === "already_owned" ? 409 : 400;
     return NextResponse.json({ error: quote.error === "empty" ? "invalid_request" : quote.error }, { status });
+  }
+
+  if (quote.esim) {
+    const gate = await guardNewEsimSale(quote.esim.id, quote.esim.priceKrw);
+    if (!gate.ok) {
+      return NextResponse.json({ error: "esim_unavailable" }, { status: 409 });
+    }
   }
 
   let promoId: string | null = null;

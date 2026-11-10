@@ -58,7 +58,7 @@ export function EsimCheckout({
   const [offer, setOffer] = useState<Offer | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [connectionOn, setConnectionOn] = useState(!ownsConnection);
-  const [dataOn, setDataOn] = useState(true);
+  const [dataOn, setDataOn] = useState(Boolean(initialDataId));
   const [dataId, setDataId] = useState(initialDataId ?? "");
 
   useEffect(() => {

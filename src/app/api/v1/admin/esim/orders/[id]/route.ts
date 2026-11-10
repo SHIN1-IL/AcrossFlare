@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { EsimOrderStatus } from "@prisma/client";
 import { requirePermission } from "@/lib/admin-auth";
 import { writeAdminAudit } from "@/lib/admin-audit";
+import { cancelSupplierOrder } from "@/lib/esim/supplier-order";
 import { prisma } from "@/lib/db";
 
 export async function PATCH(
@@ -25,12 +26,19 @@ export async function PATCH(
   }
 
   if (body.cancel === true) {
-    if (order.status !== EsimOrderStatus.AWAITING_QR) {
+    const supplier = await cancelSupplierOrder(order);
+    if (supplier === "blocked") {
+      return NextResponse.json({ error: "already_issued" }, { status: 409 });
+    }
+    if (supplier === "failed") {
+      return NextResponse.json({ error: "supplier_failed" }, { status: 502 });
+    }
+    if (supplier === "local" && order.status !== EsimOrderStatus.AWAITING_QR) {
       return NextResponse.json({ error: "already_issued" }, { status: 409 });
     }
     const cancelled = await prisma.esimOrder.update({
       where: { id },
-      data: { status: EsimOrderStatus.CANCELLED },
+      data: { status: EsimOrderStatus.CANCELLED, supplierError: "" },
     });
     await writeAdminAudit({
       actor: auth.user,

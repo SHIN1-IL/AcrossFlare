@@ -62,6 +62,10 @@ export function notifyOpsSignup(email: string) {
   );
 }
 
+export function notifyOpsEsim(subject: string, lines: string[]) {
+  return sendOpsEmail(`[AcrossFlare] eSIM ${subject}`, [...lines, "", `시각: ${new Date().toISOString()}`, ""].join("\n"));
+}
+
 export function notifyOpsPayment(input: {
   email: string;
   planId: string;

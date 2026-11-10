@@ -8,6 +8,7 @@ import {
 } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { connectionPlanForFulfillment } from "@/lib/esim/catalog";
+import { placePaidEsimOrder } from "@/lib/esim/supplier-order";
 import { notifyOpsPayment } from "@/lib/ops-notify";
 import { pickSameService } from "@/lib/owned-service";
 import { planPeriodMs } from "@/lib/plans";
@@ -61,6 +62,14 @@ export async function fulfillVerifiedPayment(input: FulfillInput) {
       amount: result.payment.amount,
       currency: result.payment.currency,
     }).catch((error) => console.error("ops_notify_payment_failed", error));
+
+    if (result.payment.esimProductId) {
+      try {
+        await placePaidEsimOrder(result.payment.id);
+      } catch (error) {
+        console.error("esim_supplier_place_failed", error);
+      }
+    }
   }
 
   return result.payment;
