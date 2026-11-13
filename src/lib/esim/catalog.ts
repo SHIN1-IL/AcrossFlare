@@ -34,7 +34,7 @@ export const DEFAULT_ESIM_COPY = {
   copyRefund: "설치 전에는 취소할 수 있고, 설치 후에는 환불되지 않습니다.",
   copyKorea: "대한민국 안에서는 데이터 통신이 되지 않으며, 중국 현지 통신망에 접속할 때만 사용할 수 있습니다.",
   copyExit: "홍콩이 아닌 해외 출구.",
-  copyYear: "데이터는 포함되지 않습니다. 구독 후 매달 따로 살 수 있습니다.",
+  copyYear: "eSIM 데이터는 포함되지 않습니다. 구독 후 매달 따로 살 수 있습니다.",
 } as const;
 
 export const ESIM_GUIDE =

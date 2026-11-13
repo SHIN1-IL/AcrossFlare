@@ -148,12 +148,8 @@ export function ServiceDetail({
             products={pricedData}
             selectedId={selectedData?.id ?? ""}
             locale={locale}
-            guide={dataOn ? t("addonGuide") : null}
             dataTerm={!networkOn && dataOn ? t("addonDataTerm") : null}
             pick={!networkOn && !dataOn ? t("addonPick") : null}
-            copyExit={dataOn ? copy.copyExit : null}
-            copyRefund={dataOn ? copy.copyRefund : null}
-            copyKorea={dataOn ? copy.copyKorea : null}
             labels={{
               network: t("addonNetwork"),
               data: t("addonData"),
@@ -164,21 +160,31 @@ export function ServiceDetail({
             onData={setDataOn}
             onDataId={setDataId}
           />
-        ) : (
+        ) : null}
+        {dataOn ? (
+          <EsimConditionBanner
+            guide={t("addonGuide")}
+            lines={[copy.copyExit, copy.copyRefund, copy.copyKorea]}
+          />
+        ) : null}
+        {bundle && pricedData.length > 0 ? null : (
           <div className={cn("w-full", banners.length === 1 ? "mt-8 min-h-16 max-w-2xl" : "mt-6")} />
         )}
         <div className="mt-4 flex w-full justify-center">
-          <div
-            className={cn(
-              "grid w-full gap-x-4 gap-y-3 sm:gap-4 md:gap-5",
-              banners.length > 1 && "max-w-5xl grid-cols-3",
-              banners.length === 1 && "max-w-sm"
-            )}
-          >
+          <div className={cn("w-full", banners.length > 1 && "max-w-5xl", banners.length === 1 && "max-w-sm")}>
+            <div
+              className={cn(
+                "grid w-full gap-x-4 gap-y-3 sm:gap-4 md:gap-5",
+                banners.length > 1 && "grid-cols-3"
+              )}
+            >
             {banners.map(({ key, plan }) => {
               const priced = planHasPrice(plan);
               const inquire = service.id === "workspace" && !priced;
               const card = bundle ? detailCardOffer(plan, choice) : null;
+              const term = planTerm(plan.id);
+              const yearLocked = bundle && dataOn && term === "year";
+              const dataActive = bundle && dataOn && term !== "year";
               const sellingNetwork = card ? card.includeNetwork : priced;
               const quota = sellingNetwork ? planTrafficQuota(plan) : null;
               const displayPrices = card?.prices ?? plan.prices;
@@ -213,12 +219,15 @@ export function ServiceDetail({
                 cta={t(`${service.id}.cta`)}
                 needsCode={service.id === "workspace"}
                 checkoutHref={
-                  card
-                    ? card.checkout
-                      ? checkoutReturnPath(card.checkout)
-                      : null
-                    : checkoutReturnPath({ product: plan.product, plan: plan.id })
+                  yearLocked
+                    ? null
+                    : card
+                      ? card.checkout
+                        ? checkoutReturnPath(card.checkout)
+                        : null
+                      : checkoutReturnPath({ product: plan.product, plan: plan.id })
                 }
+                dataActive={dataActive}
                 period={sellingNetwork ? tPricing(planPricePeriodKey(plan.id, service.id)) : null}
                 showPeriodCaption={sellingNetwork}
                 dataCaption={card?.includeData && !card.includeNetwork && selectedData ? tCompare("days", { days: selectedData.days }) : null}
@@ -236,6 +245,7 @@ export function ServiceDetail({
               />
               );
             })}
+            </div>
           </div>
         </div>
         <p className="mx-auto mt-4 max-w-xl text-balance text-xs leading-relaxed text-muted-foreground">
@@ -266,6 +276,7 @@ function ServicePlanCard({
   dataCaption,
   breakdown,
   yearNote,
+  dataActive,
 }: {
   plan: Plan;
   locale: AppLocale;
@@ -286,6 +297,7 @@ function ServicePlanCard({
   dataCaption?: string | null;
   breakdown?: { networkLabel: string; dataLabel: string; network: PlanPrices; data: PlanPrices } | null;
   yearNote?: string | null;
+  dataActive?: boolean;
 }) {
   const tPricing = useTranslations("pricing");
   const items = Array.isArray(features) ? features : [];
@@ -299,6 +311,7 @@ function ServicePlanCard({
     <article
       className={cn(
         "relative flex min-w-0 flex-col items-center overflow-hidden rounded-2xl border border-border bg-card/80 px-2 py-4 text-center backdrop-blur-sm sm:px-3 sm:py-5",
+        dataActive && "border-emerald-400/55 bg-emerald-400/[0.09]",
         badge && "pt-6 sm:pt-7"
       )}
     >
@@ -522,18 +535,50 @@ function PriceLine({
   );
 }
 
+function readableLines(value: string) {
+  const trimmed = value.trim();
+  const parts = trimmed.includes("\n") ? trimmed.split(/\n+/) : trimmed.split(/(?<=[.。])\s+/);
+  return parts.map((line) => line.trim()).filter(Boolean);
+}
+
+function EsimConditionBanner({ guide, lines }: { guide: string; lines: string[] }) {
+  const lead = readableLines(guide);
+  const notes = lines.flatMap(readableLines);
+  if (!lead.length && !notes.length) {
+    return null;
+  }
+
+  return (
+    <div className="mt-4 grid w-full gap-3 rounded-2xl border border-[#071a24] bg-[#071a24] px-4 py-3 text-left text-xs leading-6 text-muted-foreground sm:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] sm:gap-8 sm:px-5">
+      {lead.length ? (
+        <div className="space-y-1">
+          {lead.map((line) => (
+            <p key={line}>{line}</p>
+          ))}
+        </div>
+      ) : null}
+      {notes.length ? (
+        <ul className="space-y-1">
+          {notes.map((line) => (
+            <li key={line} className="flex gap-2">
+              <span aria-hidden className="mt-[0.55em] size-1 shrink-0 rounded-full bg-primary/70" />
+              <span>{line}</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
+
 function ServiceAddonPicker({
   networkOn,
   dataOn,
   products,
   selectedId,
   locale,
-  guide,
   dataTerm,
   pick,
-  copyExit,
-  copyRefund,
-  copyKorea,
   labels,
   productLabel,
   onNetwork,
@@ -545,12 +590,8 @@ function ServiceAddonPicker({
   products: EsimProduct[];
   selectedId: string;
   locale: AppLocale;
-  guide: string | null;
   dataTerm: string | null;
   pick: string | null;
-  copyExit: string | null;
-  copyRefund: string | null;
-  copyKorea: string | null;
   labels: { network: string; data: string; days: (days: number) => string };
   productLabel: (id: string) => string;
   onNetwork: (on: boolean) => void;
@@ -598,11 +639,7 @@ function ServiceAddonPicker({
           </div>
         ) : null}
       </div>
-      {guide ? <p className="text-xs leading-5 text-muted-foreground">{guide}</p> : null}
       {dataTerm ? <p className="text-xs leading-5 text-muted-foreground">{dataTerm}</p> : null}
-      {copyExit ? <p className="text-xs leading-5 text-muted-foreground">{copyExit}</p> : null}
-      {copyRefund ? <p className="text-xs leading-5 text-muted-foreground">{copyRefund}</p> : null}
-      {copyKorea ? <p className="text-xs leading-5 text-muted-foreground">{copyKorea}</p> : null}
       {pick ? <p className="text-xs leading-5 text-muted-foreground">{pick}</p> : null}
     </div>
   );
