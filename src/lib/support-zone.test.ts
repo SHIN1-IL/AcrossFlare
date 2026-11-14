@@ -6,6 +6,7 @@ import zh from "../../messages/zh.json";
 import {
   BACKUP_FAQ_ITEMS,
   BACKUP_SETUP_STEPS,
+  ESIM_FAQ_ITEMS,
   KARING_FAQ_ITEMS,
   KARING_INSTALL_PLATFORMS,
   KARING_SETUP_STEPS,
@@ -59,6 +60,27 @@ describe("support zone", () => {
     expect(karingInstallPlatformFor("macos")).toBe("macos");
     expect(karingInstallPlatformFor("ios")).toBe("ios");
     expect(karingInstallPlatformFor("other")).toBeNull();
+  });
+
+  it("keeps eSIM off the Karing installer and repeats the agreed limits", () => {
+    expect(ESIM_FAQ_ITEMS.map((item) => item.id)).toEqual([
+      "esimWhere",
+      "esimUse",
+      "esimKorea",
+      "esimRefund",
+    ]);
+    expect(ko.support.downloads.esimNote).toContain("따로 받을 파일");
+    expect(ko.support.downloads.esimNote).toContain("콘솔");
+    expect(ko.support.setup.esimNote).toContain("Karing에 넣지 않습니다");
+    expect(ko.support.faq.items.esimWhere.a).toContain("QR 준비 중");
+    expect(ko.support.faq.items.esimWhere.a).toContain("Karing 구독 QR");
+    expect(ko.support.faq.items.esimUse.a).toContain("5GB");
+    expect(ko.support.faq.items.esimUse.a).toContain("10GB");
+    expect(ko.support.faq.items.esimUse.a).toContain("30일");
+    expect(ko.support.faq.items.esimUse.a).toContain("12개월");
+    expect(ko.support.faq.items.esimUse.a).toContain("구독 후 매달 따로 살 수 있습니다");
+    expect(ko.support.faq.items.esimKorea.a).toBe(ko.checkout.esimCopyKorea);
+    expect(ko.support.faq.items.esimRefund.a).toBe(ko.checkout.esimCopyRefund);
   });
 
   it("explains Console QR setup without showing issued credentials on the support page", () => {

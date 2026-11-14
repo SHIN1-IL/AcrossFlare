@@ -1488,12 +1488,12 @@ function DarkGreenLanding({ className, compact = false }: { className?: string; 
     <section
       data-home-page={compact ? undefined : ""}
       className={cn(
-        "relative overflow-hidden bg-[#0e1014]",
+        "relative overflow-hidden bg-[#14181e]",
         compact ? "min-h-0 flex-1" : "h-dvh snap-center snap-always max-md:snap-start",
         className
       )}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(226,232,240,0.05),transparent_34%,rgba(0,0,0,0.28)),repeating-linear-gradient(90deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_1px,transparent_1px,transparent_5px)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(226,232,240,0.05),transparent_34%,rgba(0,0,0,0.28))]" />
       <HeroGrain />
       <LandingDust />
       <LandingNightFlight />

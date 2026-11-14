@@ -36,6 +36,13 @@ export const KARING_FAQ_ITEMS = [
   { id: "manualRefresh" },
 ] as const;
 
+export const ESIM_FAQ_ITEMS = [
+  { id: "esimWhere" },
+  { id: "esimUse" },
+  { id: "esimKorea" },
+  { id: "esimRefund" },
+] as const;
+
 export const BACKUP_FAQ_ITEMS = [
   { id: "backupApp" },
   { id: "backupFromKaring" },
@@ -48,6 +55,7 @@ export type KaringSetupStepId = (typeof KARING_SETUP_STEPS)[number]["id"];
 export type BackupSetupStepId = (typeof BACKUP_SETUP_STEPS)[number]["id"];
 export type KaringInstallPlatformId = (typeof KARING_INSTALL_PLATFORMS)[number]["id"];
 export type KaringFaqId = (typeof KARING_FAQ_ITEMS)[number]["id"];
+export type EsimFaqId = (typeof ESIM_FAQ_ITEMS)[number]["id"];
 export type BackupFaqId = (typeof BACKUP_FAQ_ITEMS)[number]["id"];
 
 export function karingInstallPlatformFor(osId: string): KaringInstallPlatformId | null {

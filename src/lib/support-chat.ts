@@ -6,6 +6,7 @@ import { routing, type AppLocale } from "@/i18n/routing";
 import {
   BACKUP_FAQ_ITEMS,
   BACKUP_SETUP_STEPS,
+  ESIM_FAQ_ITEMS,
   KARING_FAQ_ITEMS,
   KARING_INSTALL_PLATFORMS,
   KARING_SETUP_STEPS,
@@ -59,15 +60,15 @@ export function supportKnowledge(locale: AppLocale) {
     (step, index) =>
       `${index + 1}. ${support.backup.steps[step.id].title}\n${support.backup.steps[step.id].body}`,
   ).join("\n");
-  const faq = [...KARING_FAQ_ITEMS, ...BACKUP_FAQ_ITEMS]
+  const faq = [...KARING_FAQ_ITEMS, ...ESIM_FAQ_ITEMS, ...BACKUP_FAQ_ITEMS]
     .map((item) => `Q: ${support.faq.items[item.id].q}\nA: ${support.faq.items[item.id].a}`)
     .join("\n");
 
   return [
     support.title,
     support.lead,
-    `${support.downloads.title}\n${support.downloads.lead}`,
-    `${support.setup.title}\n${support.setup.heading}\n${install}\n${setup}`,
+    `${support.downloads.title}\n${support.downloads.lead}\n${support.downloads.esimNote}`,
+    `${support.setup.title}\n${support.setup.heading}\n${support.setup.esimNote}\n${install}\n${setup}`,
     `${support.backup.title}\n${support.backup.heading}\n${backup}`,
     `${support.faq.title}\n${support.faq.helpTitle}\n${support.faq.helpBody}\n${faq}`,
   ].join("\n\n");
@@ -76,7 +77,7 @@ export function supportKnowledge(locale: AppLocale) {
 export function supportChatSystem(locale: AppLocale) {
   return [
     "You are the AcrossFlare support assistant on the public support page.",
-    "Answer only from the support text below. It covers downloads, Karing setup, backup, and the FAQ.",
+    "Answer only from the support text below. It covers downloads, Karing setup, eSIM data, backup, and the FAQ.",
     "If the question is not covered, say you can only help with those topics and point to the matching section on this page.",
     "Never invent subscription URLs, passwords, node addresses, payment status, or account details.",
     "Never ask the visitor to paste a subscription link, password, or QR content.",

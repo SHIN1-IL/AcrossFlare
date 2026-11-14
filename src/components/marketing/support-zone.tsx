@@ -39,16 +39,26 @@ export function SupportZone() {
         </div>
       </div>
       <div className="relative z-10 mx-auto max-w-4xl px-4 py-16 md:py-24">
-        <p className="text-xs font-medium tracking-[0.22em] text-primary uppercase">
-          AcrossFlare
-        </p>
-        <div className="mt-4 flex items-center gap-3">
-          <span className="inline-flex size-10 items-center justify-center rounded-xl bg-primary/15 text-primary">
-            <LifeBuoy aria-hidden="true" className="size-5" />
-          </span>
-          <h1 className="text-3xl font-semibold tracking-tight md:text-5xl">{t("title")}</h1>
+        <div className="relative">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute top-[-4rem] -bottom-6 left-1/2 w-screen -translate-x-1/2 bg-[repeating-linear-gradient(90deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_1px,transparent_1px,transparent_5px)] md:top-[-6rem]"
+            style={{
+              maskImage: "linear-gradient(to bottom, #000 0%, #000 78%, transparent 100%)",
+              WebkitMaskImage: "linear-gradient(to bottom, #000 0%, #000 78%, transparent 100%)",
+            }}
+          />
+          <p className="text-xs font-medium tracking-[0.22em] text-primary uppercase">
+            AcrossFlare
+          </p>
+          <div className="mt-4 flex items-center gap-3">
+            <span className="inline-flex size-10 items-center justify-center rounded-xl bg-primary/15 text-primary">
+              <LifeBuoy aria-hidden="true" className="size-5" />
+            </span>
+            <h1 className="text-3xl font-semibold tracking-tight md:text-5xl">{t("title")}</h1>
+          </div>
+          <p className="mt-4 max-w-lg text-sm leading-6 text-muted-foreground">{t("lead")}</p>
         </div>
-        <p className="mt-4 max-w-lg text-sm leading-6 text-muted-foreground">{t("lead")}</p>
 
         <ol className="mt-12 space-y-5">
           {SUPPORT_SECTIONS.map((section, index) => {
@@ -74,17 +84,20 @@ export function SupportZone() {
                         </h2>
                       </div>
                       {section.id === "downloads" ? (
-                        <div className="mt-5 rounded-2xl border border-primary/25 bg-primary/[0.07] p-6 text-center md:p-8">
-                          <p className="mx-auto max-w-lg text-sm leading-6 text-muted-foreground">
-                            {t("downloads.lead")}
-                          </p>
-                          <KaringDownloadCta
-                            assets={[]}
-                            initialOs={initialOs}
-                            tagName=""
-                            className="mt-5 flex flex-col items-center"
-                          />
-                        </div>
+                        <>
+                          <div className="mt-5 rounded-2xl border border-primary/25 bg-primary/[0.07] p-6 text-center md:p-8">
+                            <p className="mx-auto max-w-lg text-sm leading-6 text-muted-foreground">
+                              {t("downloads.lead")}
+                            </p>
+                            <KaringDownloadCta
+                              assets={[]}
+                              initialOs={initialOs}
+                              tagName=""
+                              className="mt-5 flex flex-col items-center"
+                            />
+                          </div>
+                          <p className="mt-4 text-sm leading-6 text-muted-foreground">{t("downloads.esimNote")}</p>
+                        </>
                       ) : null}
                       {section.id === "setup" ? (
                         <KaringSetupGuide activePlatform={karingInstallPlatformFor(initialOs.id)} />

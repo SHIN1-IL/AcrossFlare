@@ -752,6 +752,7 @@
       "ctaLoading": "Checking the latest version...",
       "environment": "Current environment: {os}",
       "otherOs": "Find files for another OS",
+      "esimNote": "This button is Karing for the global network connection. eSIM data has no file to download. After payment, when an activation code appears in Console at the top right, install it from your phone's Add eSIM screen.",
       "os": {
         "windows": "Windows",
         "macos": "macOS",
@@ -767,6 +768,7 @@
     "setup": {
       "title": "Setup Guide",
       "heading": "Finish setup in five steps",
+      "esimNote": "The five steps below set up Karing for the global network connection. Do not add eSIM data in Karing. Install the activation code from Console on your phone's Add eSIM screen.",
       "install": {
         "windows": "Run the .exe installer. If SmartScreen appears, choose More info → Run anyway.",
         "macos": "Open the .dmg and drag Karing to Applications. If macOS warns about an unidentified developer, go to System Settings → Privacy & Security and choose Open Anyway.",
@@ -915,6 +917,22 @@
         "manualRefresh": {
           "q": "What should I do after a traffic limit notice or when nodes disappear?",
           "a": "The server refreshes usage about every 5 minutes, but Karing may auto-fetch the subscription only once every 24 hours. If you see a traffic limit notice or nodes are missing, tap Manual subscription update at the top of the Karing app."
+        },
+        "esimWhere": {
+          "q": "Where do I get the eSIM activation code?",
+          "a": "After payment it appears in Console at the top right of the screen. When it is ready, the activation code is shown. Until then it says the QR is being prepared. It is not the Karing subscription QR, and there is no separate app to download."
+        },
+        "esimUse": {
+          "q": "What do I use when I am out, and what do I use on Wi-Fi?",
+          "a": "Away from Wi-Fi, use eSIM data. On hotel or office Wi-Fi, use the global network connection. Maps and chat fit in 5GB. Tethering a laptop fits in 10GB. eSIM data stays available for 30 days until it is used up, separate from the connection term. A 12-month connection does not include it. After you subscribe, you can buy it separately each month."
+        },
+        "esimKorea": {
+          "q": "Does eSIM data work in South Korea?",
+          "a": "Data does not work inside South Korea. It works only on a local network in China."
+        },
+        "esimRefund": {
+          "q": "Can I cancel an eSIM after I install it?",
+          "a": "You can cancel before installation. After installation it is not refunded."
         },
         "backupApp": {
           "q": "Do I have to install an app to use backup?",
