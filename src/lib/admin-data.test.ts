@@ -54,7 +54,8 @@ describe("toAdminCustomer", () => {
     expect(customer.signedUpAt).toBe("2026-07-15T00:00:00.000Z");
     expect(customer.signupOnly).toBe(false);
     expect(customer.demo).toBe(false);
-    expect(toAdminCustomer({ ...row, id: "seed_g_demo" } as never, false).demo).toBe(true);
+    const seedRow = { ...(row as object), id: "seed_g_demo" };
+    expect(toAdminCustomer(seedRow as never, false).demo).toBe(true);
   });
 
   it("maps signup-only users without a subscription", () => {
