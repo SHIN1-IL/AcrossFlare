@@ -66,6 +66,21 @@ export function notifyOpsEsim(subject: string, lines: string[]) {
   return sendOpsEmail(`[AcrossFlare] eSIM ${subject}`, [...lines, "", `시각: ${new Date().toISOString()}`, ""].join("\n"));
 }
 
+export function notifyOpsChinaBlock(input: { name: string; ddns: string; probeUrl: string }) {
+  return sendOpsEmail(
+    `[AcrossFlare] 중국에서 노드 차단: ${input.name}`,
+    [
+      `중국 관측에서는 VLESS 포트가 열리지 않고, 해외 관측에서는 열립니다.`,
+      ``,
+      `노드: ${input.name}`,
+      `DDNS: ${input.ddns}`,
+      `확인: ${input.probeUrl}`,
+      `시각: ${new Date().toISOString()}`,
+      ``,
+    ].join("\n")
+  );
+}
+
 export function notifyOpsPayment(input: {
   email: string;
   planId: string;

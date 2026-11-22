@@ -8,7 +8,7 @@ import {
   type Plan,
 } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import { customerSubscriptionWhere } from "@/lib/subscription-scope";
+import { customerSubscriptionWhere, isDemoSubscription } from "@/lib/subscription-scope";
 import {
   DAILY_BOOTSTRAP_LIMIT,
   HYBRID_POOL_ID,
@@ -331,30 +331,38 @@ export async function listPoolCapacity() {
   const linked = nodeIds.length
     ? await prisma.subscription.findMany({
         where: { ...customerSubscriptionWhere, nodes: { some: { id: { in: nodeIds } } } },
-        select: { instanceGroupId: true, nodes: { select: { id: true } } },
+        select: { id: true, instanceGroupId: true, nodes: { select: { id: true } } },
       })
     : [];
-  const attachments = linked.map((subscription) => ({
+  const toAttachment = (subscription: (typeof linked)[number]) => ({
     instanceGroupId: subscription.instanceGroupId,
     nodeIds: subscription.nodes.map((node) => node.id),
-  }));
+  });
+  // Seed demos stay visible as tests. Only paying customers consume a seat.
+  const attachments = linked.filter((subscription) => !isDemoSubscription(subscription.id)).map(toAttachment);
+  const demoAttachments = linked.filter((subscription) => isDemoSubscription(subscription.id)).map(toAttachment);
 
   return {
     pools: pools.map((pool) => {
+      const groupNodes = (group: (typeof pool.groups)[number]) => ({
+        id: group.id,
+        nodeIds: group.nodes.map((row) => row.node.id),
+      });
       const seatView = (group: (typeof pool.groups)[number]) =>
         groupSeatView({
           seatsUsed: group.seatsUsed,
           seatsMax: group.seatsMax,
-          attached: attachedSeatCount(
-            { id: group.id, nodeIds: group.nodes.map((row) => row.node.id) },
-            attachments
-          ),
+          attached: attachedSeatCount(groupNodes(group), attachments),
         });
       const ready = pool.groups.filter((group) => group.status === InstanceGroupStatus.READY);
       const readyViews = ready.map(seatView);
       const seatsUsed = readyViews.reduce((sum, view) => sum + view.used, 0);
       const seatsMax = readyViews.reduce((sum, view) => sum + view.max, 0);
       const seatsRemaining = readyViews.reduce((sum, view) => sum + view.remaining, 0);
+      const seatsTest = ready.reduce(
+        (sum, group) => sum + attachedSeatCount(groupNodes(group), demoAttachments),
+        0,
+      );
       const team =
         pool.groups.find((group) => group.status === InstanceGroupStatus.READY) ??
         pool.groups.find((group) => group.status === InstanceGroupStatus.OPENING);
@@ -377,6 +385,7 @@ export async function listPoolCapacity() {
         seatsUsed,
         seatsMax,
         seatsRemaining,
+        seatsTest,
         full: seatsRemaining === 0,
         neededSlots: neededSlotsForPool({
           maxSelectable: pool.maxSelectable,
@@ -442,13 +451,15 @@ export async function updateHybridTeamLimits(input: { maxSelectable: unknown; se
   const linked = nodeIds.length
     ? await prisma.subscription.findMany({
         where: { ...customerSubscriptionWhere, nodes: { some: { id: { in: nodeIds } } } },
-        select: { instanceGroupId: true, nodes: { select: { id: true } } },
+        select: { id: true, instanceGroupId: true, nodes: { select: { id: true } } },
       })
     : [];
-  const attachments = linked.map((subscription) => ({
-    instanceGroupId: subscription.instanceGroupId,
-    nodeIds: subscription.nodes.map((node) => node.id),
-  }));
+  const attachments = linked
+    .filter((subscription) => !isDemoSubscription(subscription.id))
+    .map((subscription) => ({
+      instanceGroupId: subscription.instanceGroupId,
+      nodeIds: subscription.nodes.map((node) => node.id),
+    }));
   const measured = pool.groups.map((group) => ({
     id: group.id,
     status: group.status,

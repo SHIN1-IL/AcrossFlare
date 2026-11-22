@@ -1,6 +1,6 @@
 import { PaymentMethod, PaymentProvider, type Plan } from "@prisma/client";
 import { routing, type AppLocale } from "@/i18n/routing";
-import { alipayProvider } from "@/lib/payments/config";
+import { settlementCurrency, usesLemonCheckout } from "@/lib/payments/settlement";
 
 export function parseAppLocale(value: unknown): AppLocale | null {
   if (typeof value !== "string") {
@@ -26,21 +26,18 @@ export function defaultPaymentMethod(locale: AppLocale): PaymentMethod {
   return locale === "zh" ? PaymentMethod.ALIPAY : PaymentMethod.CARD;
 }
 
+export function checkoutProvider(locale: AppLocale, method: PaymentMethod) {
+  return usesLemonCheckout(locale, method) ? PaymentProvider.LEMONSQUEEZY : PaymentProvider.PORTONE;
+}
+
 export function quotePayment(locale: AppLocale, method: PaymentMethod, plan: Plan) {
-  const currency = currencyForLocale(locale);
-  const amount =
-    currency === "KRW"
-      ? plan.priceKrw
-      : currency === "CNY"
-        ? plan.priceCny
-        : currency === "JPY"
-          ? plan.priceJpy
-          : plan.priceUsd;
+  const currency = settlementCurrency(locale, method);
+  const amount = currency === "KRW" ? plan.priceKrw : plan.priceUsd;
 
   return {
     amount,
     currency,
-    provider: method === PaymentMethod.ALIPAY ? alipayProvider() : PaymentProvider.PORTONE,
+    provider: checkoutProvider(locale, method),
   };
 }
 

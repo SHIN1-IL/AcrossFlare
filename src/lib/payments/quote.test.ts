@@ -29,9 +29,19 @@ describe("payments/quote", () => {
       provider: PaymentProvider.PORTONE,
     });
     expect(quotePayment("zh", PaymentMethod.ALIPAY, plan as never)).toMatchObject({
-      amount: 99,
-      currency: "CNY",
-      provider: PaymentProvider.STRIPE,
+      amount: 15,
+      currency: "USD",
+      provider: PaymentProvider.LEMONSQUEEZY,
+    });
+    expect(quotePayment("en", PaymentMethod.CARD, plan as never)).toMatchObject({
+      amount: 15,
+      currency: "USD",
+      provider: PaymentProvider.LEMONSQUEEZY,
+    });
+    expect(quotePayment("ko", PaymentMethod.ALIPAY, plan as never)).toMatchObject({
+      amount: 15,
+      currency: "USD",
+      provider: PaymentProvider.LEMONSQUEEZY,
     });
   });
 

@@ -88,6 +88,37 @@ def test_build_vless_uri_uses_panel_ipv4():
     assert "node-la-b.acrossflare.com" not in body.split("?", 1)[0]
 
 
+def test_build_vless_yaml_prefers_entry_host_and_port():
+    from app.yaml_builder import build_vless_uri_list
+
+    node = {
+        **REALITY_NODE,
+        "host": "https://45.78.71.200:2053",
+        "entryHost": "gz-relay.example.com",
+        "entryPort": 24443,
+    }
+    yaml = build_vless_yaml([node], "uuid-1")
+    uri = build_vless_uri_list([node], "uuid-1")
+    assert "server: gz-relay.example.com" in yaml
+    assert "port: 24443" in yaml
+    assert "servername: dl.google.com" in yaml
+    assert "45.78.71.200" not in yaml.split("servername:", 1)[0]
+    assert uri.startswith("vless://uuid-1@gz-relay.example.com:24443?")
+
+
+def test_build_vless_yaml_keeps_vless_port_when_entry_port_missing():
+    node = {
+        **REALITY_NODE,
+        "host": "https://45.78.71.200:2053",
+        "entryHost": "1.2.3.4",
+        "entryPort": None,
+        "vlessPort": 443,
+    }
+    yaml = build_vless_yaml([node], "uuid-1")
+    assert "server: 1.2.3.4" in yaml
+    assert "port: 443" in yaml
+
+
 def test_resolve_subscription_vless_flag_returns_uris():
     row = {
         "uuid": "uuid-1",

@@ -33,6 +33,8 @@ def fetch_subscription_by_token(token: str) -> dict[str, Any] | None:
                         'host', n.host,
                         'role', n.role::text,
                         'vlessPort', n."vlessPort",
+                        'entryHost', n."entryHost",
+                        'entryPort', n."entryPort",
                         'realityPublicKey', n."realityPublicKey",
                         'realityShortId', n."realityShortId",
                         'realityServerName', n."realityServerName",

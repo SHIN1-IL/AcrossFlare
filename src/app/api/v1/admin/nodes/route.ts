@@ -24,6 +24,8 @@ export async function POST(request: Request) {
         password?: string;
         inboundId?: string | number | null;
         vlessPort?: string | number;
+        entryHost?: string | null;
+        entryPort?: string | number | null;
         realityPublicKey?: string;
         realityShortId?: string;
         realityServerName?: string;
@@ -49,6 +51,8 @@ export async function POST(request: Request) {
       password: body.password ?? "",
       inboundId: body.inboundId == null || body.inboundId === "" ? null : Number(body.inboundId),
       vlessPort: Number(body.vlessPort) || 443,
+      entryHost: body.entryHost ?? "",
+      entryPort: body.entryPort ?? "",
       realityPublicKey: body.realityPublicKey,
       realityShortId: body.realityShortId,
       realityServerName: body.realityServerName,

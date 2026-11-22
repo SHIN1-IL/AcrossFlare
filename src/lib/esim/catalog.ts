@@ -1,5 +1,6 @@
 import type { AppLocale } from "@/i18n/routing";
 import { currencyForLocale } from "@/lib/payments/quote";
+import { settlementCurrency } from "@/lib/payments/settlement";
 import { planTerm, type PublicCheckoutProduct } from "@/lib/plans";
 
 export const ESIM_SETTINGS_ID = "default";
@@ -152,7 +153,7 @@ export function quoteEsimAddon(input: {
       return { ok: false, error: "esim_year" };
     }
     const found = input.products.find((item) => item.id === esimId);
-    const chargedAmount = found ? esimAmountForLocale(found, input.locale) : 0;
+    const chargedAmount = found ? amountForSettlement(found, input.locale, input.method) : 0;
     if (!found || chargedAmount <= 0 || found.dataGb <= 0 || found.days <= 0) {
       return { ok: false, error: found ? "esim_locale" : "invalid_esim" };
     }
@@ -169,14 +170,22 @@ export function quoteEsimAddon(input: {
     };
   }
 
-  const currency = currencyForLocale(input.locale);
+  const currency = settlementCurrency(input.locale, input.method);
   return {
     ok: true,
     planId: plan?.id ?? null,
     esim,
-    amount: esim ? (plan ? planAmountForLocale(plan, input.locale) : 0) + esim.chargedAmount : null,
+    amount: esim ? (plan ? amountForSettlement(plan, input.locale, input.method) : 0) + esim.chargedAmount : null,
     currency: esim ? currency : null,
   };
+}
+
+function amountForSettlement(
+  prices: { priceKrw: number; priceUsd: number },
+  locale: AppLocale,
+  method: "card" | "alipay"
+) {
+  return settlementCurrency(locale, method) === "KRW" ? prices.priceKrw : prices.priceUsd;
 }
 
 export function parseEsimProductPatch(

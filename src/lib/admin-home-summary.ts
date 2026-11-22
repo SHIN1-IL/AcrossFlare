@@ -28,6 +28,8 @@ export type AdminHomeSummary = {
   services: Record<AdminServiceId, AdminHomeServiceSummary>;
   capacityPools: AdminPoolCapacity[];
   bootstrapQuota: BootstrapQuota;
+  chinaBlockedGlobal: number;
+  chinaBlockedWorkspace: number;
 };
 
 type SummarySubscription = {
@@ -86,6 +88,8 @@ export function buildAdminHomeSummary(input: {
   workspaceNodeCount: number;
   capacityPools: AdminPoolCapacity[];
   bootstrapQuota: BootstrapQuota;
+  chinaBlockedGlobal?: number;
+  chinaBlockedWorkspace?: number;
   now?: number;
 }): AdminHomeSummary {
   const planIds = new Set(input.planIds);
@@ -112,6 +116,8 @@ export function buildAdminHomeSummary(input: {
     services,
     capacityPools: pools,
     bootstrapQuota: input.bootstrapQuota,
+    chinaBlockedGlobal: input.chinaBlockedGlobal ?? 0,
+    chinaBlockedWorkspace: input.chinaBlockedWorkspace ?? 0,
   };
 }
 
@@ -136,12 +142,15 @@ export function presentAdminHomeSummary(
     };
   }
 
+  const showChina = nodes;
   return {
     services,
     capacityPools: capacity ? summary.capacityPools : [],
     bootstrapQuota: capacity
       ? summary.bootstrapQuota
       : { ...summary.bootstrapQuota, used: 0, recentFailures: 0 },
+    chinaBlockedGlobal: showChina ? summary.chinaBlockedGlobal : 0,
+    chinaBlockedWorkspace: showChina ? summary.chinaBlockedWorkspace : 0,
   };
 }
 
@@ -153,7 +162,7 @@ export async function loadAdminHomeSummary(): Promise<AdminHomeSummary> {
       select: { status: true, expiresAt: true, planId: true },
     }),
     prisma.plan.findMany({ select: { id: true } }),
-    prisma.node.findMany({ select: { product: true } }),
+    prisma.node.findMany({ select: { product: true, chinaReachability: true } }),
     prisma.user.count({
       where: {
         role: "USER",
@@ -174,6 +183,12 @@ export async function loadAdminHomeSummary(): Promise<AdminHomeSummary> {
     planIds: plans.map((plan) => plan.id),
     globalNodeCount: nodes.filter((node) => node.product === Product.GLOBAL).length,
     workspaceNodeCount: nodes.filter((node) => node.product === Product.WORKSPACE).length,
+    chinaBlockedGlobal: nodes.filter(
+      (node) => node.product === Product.GLOBAL && node.chinaReachability === "BLOCKED"
+    ).length,
+    chinaBlockedWorkspace: nodes.filter(
+      (node) => node.product === Product.WORKSPACE && node.chinaReachability === "BLOCKED"
+    ).length,
     capacityPools: capacity?.pools ?? [],
     bootstrapQuota: capacity?.bootstrap ?? {
       used: 0,

@@ -85,11 +85,16 @@ export function AdminOverview({ service }: { service: AdminServiceId }) {
               <article key={pool.id} className="rounded-2xl border border-border bg-card p-4 text-sm">
                 <p className="font-medium">{pool.name}</p>
                 <p className="mt-1 text-muted-foreground">
-                  {t("capacitySeats", {
-                    remaining: pool.seatsRemaining,
-                    used: pool.seatsUsed,
-                    max: pool.seatsMax,
-                  })}
+                  <span className="block">
+                    {t("capacityRemaining", { remaining: pool.seatsRemaining })}
+                  </span>
+                  <span className="mt-0.5 block text-xs">
+                    {t("capacitySplit", {
+                      used: pool.seatsUsed,
+                      max: pool.seatsMax,
+                      test: pool.seatsTest,
+                    })}
+                  </span>
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   {t("capacitySelectable", { count: pool.maxSelectable })}

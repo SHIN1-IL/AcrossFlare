@@ -1,8 +1,8 @@
 from base64 import b64encode
 from urllib.parse import quote, urlencode
 
-from app.config import BACKUP_ANNOUNCE, BACKUP_DASHBOARD_URL, DEFAULT_VLESS_PORT, KARING_REFRESH_ANNOUNCE, VLESS_CLIENT_FLOW
-from app.nodes import NodeRow, has_reality_config, vless_connect_host
+from app.config import BACKUP_ANNOUNCE, BACKUP_DASHBOARD_URL, KARING_REFRESH_ANNOUNCE, VLESS_CLIENT_FLOW
+from app.nodes import NodeRow, customer_connect_host, customer_connect_port, has_reality_config
 from app.reality_keys import reality_key_for_client
 
 
@@ -32,11 +32,11 @@ def _proxy_name(node: NodeRow, index: int) -> str:
 
 
 def _build_reality_proxy(node: NodeRow, uuid: str, index: int) -> str:
-    port = int(node.get("vlessPort") or DEFAULT_VLESS_PORT)
+    port = customer_connect_port(node)
     lines = [
         f"  - name: {_proxy_name(node, index)}",
         "    type: vless",
-        f"    server: {vless_connect_host(node)}",
+        f"    server: {customer_connect_host(node)}",
         f"    port: {port}",
         f"    uuid: {uuid}",
         "    network: tcp",
@@ -60,7 +60,7 @@ def _proxy_remark(node: NodeRow, index: int) -> str:
 
 
 def _build_reality_uri(node: NodeRow, uuid: str, index: int) -> str:
-    port = int(node.get("vlessPort") or DEFAULT_VLESS_PORT)
+    port = customer_connect_port(node)
     query = urlencode(
         {
             "encryption": "none",
@@ -73,7 +73,7 @@ def _build_reality_uri(node: NodeRow, uuid: str, index: int) -> str:
             "type": "tcp",
         }
     )
-    host = vless_connect_host(node)
+    host = customer_connect_host(node)
     name = quote(_proxy_remark(node, index))
     return f"vless://{uuid}@{host}:{port}?{query}#{name}"
 
@@ -95,12 +95,12 @@ def build_vless_sub_base64(nodes: list[NodeRow], uuid: str) -> str:
 
 
 def _build_ws_proxy(node: NodeRow, uuid: str, index: int) -> str:
-    port = int(node.get("vlessPort") or DEFAULT_VLESS_PORT)
+    port = customer_connect_port(node)
     return "\n".join(
         [
             f"  - name: {_proxy_name(node, index)}",
             "    type: vless",
-            f"    server: {vless_connect_host(node)}",
+            f"    server: {customer_connect_host(node)}",
             f"    port: {port}",
             f"    uuid: {uuid}",
             "    network: ws",

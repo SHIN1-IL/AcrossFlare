@@ -38,6 +38,7 @@ const empty: AdminState = {
   provision: null,
   migrate: null,
   provisionSimulate: false,
+  chinaCheckRunning: false,
 };
 
 type Listener = () => void;
@@ -150,6 +151,7 @@ export async function refreshAdmin() {
         | "bootstrapQuota"
         | "bootstrapJobs"
         | "provisionSimulate"
+        | "chinaCheckRunning"
       >
     >(response);
     patch({
@@ -161,6 +163,7 @@ export async function refreshAdmin() {
       bootstrapQuota: data.bootstrapQuota ?? emptyQuota,
       bootstrapJobs: data.bootstrapJobs ?? [],
       provisionSimulate: Boolean(data.provisionSimulate),
+      chinaCheckRunning: Boolean(data.chinaCheckRunning),
     });
   })().finally(() => {
     adminSeeded = true;
@@ -169,6 +172,31 @@ export async function refreshAdmin() {
   });
 
   return refreshPromise;
+}
+
+export async function checkChinaReachability() {
+  const response = await fetch("/api/v1/admin/nodes/china-reachability", {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!response.ok) {
+    return { ok: false as const };
+  }
+
+  if (refreshPromise) {
+    await refreshPromise;
+  }
+
+  const started = Date.now();
+  while (Date.now() - started < 480_000) {
+    await refreshAdmin();
+    if (!getAdminState().chinaCheckRunning) {
+      return { ok: true as const };
+    }
+    await new Promise((resolve) => setTimeout(resolve, 4000));
+  }
+  await refreshAdmin();
+  return { ok: true as const };
 }
 
 export async function loadCustomerDetail(id: string) {
@@ -269,8 +297,13 @@ export function getCustomerById(id: string) {
   return memory.customers.find((customer) => customer.id === id) ?? null;
 }
 
-export function countNodeUsers(nodeId: string) {
-  return memory.customers.filter((customer) => customer.nodeIds.includes(nodeId)).length;
+export function countNodeUsers(nodeId: string, kind: "all" | "real" | "test" = "all") {
+  return memory.customers.filter((customer) => {
+    if (!customer.nodeIds.includes(nodeId)) return false;
+    if (kind === "real") return !customer.demo;
+    if (kind === "test") return Boolean(customer.demo);
+    return true;
+  }).length;
 }
 
 export function listPromoCodes() {
@@ -385,6 +418,8 @@ export async function addNode(input: {
   password: string;
   inboundId?: string;
   vlessPort?: string;
+  entryHost?: string;
+  entryPort?: string;
   realityPublicKey?: string;
   realityShortId?: string;
   realityServerName?: string;
@@ -418,6 +453,8 @@ export async function updateNode(
     password: string;
     inboundId?: string;
     vlessPort?: string;
+    entryHost?: string;
+    entryPort?: string;
     realityPublicKey?: string;
     realityShortId?: string;
     realityServerName?: string;

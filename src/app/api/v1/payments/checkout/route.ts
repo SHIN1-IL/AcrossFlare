@@ -2,9 +2,16 @@ import { NextResponse } from "next/server";
 import { PaymentProvider, PromoCodeStatus } from "@prisma/client";
 import { getAuthUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { alipayProvider, isSimulateEnabled } from "@/lib/payments/config";
+import { isSimulateEnabled } from "@/lib/payments/config";
 import { portoneCustomerPhone } from "@/lib/payments/portone";
-import { defaultPaymentMethod, parseAppLocale, parsePaymentMethod, quotePayment } from "@/lib/payments/quote";
+import {
+  checkoutProvider,
+  defaultPaymentMethod,
+  parseAppLocale,
+  parsePaymentMethod,
+  quotePayment,
+} from "@/lib/payments/quote";
+import { settlementCurrency } from "@/lib/payments/settlement";
 import { CheckoutStartError, startProviderCheckout } from "@/lib/payments/start";
 import { hasActiveService } from "@/lib/owned-service";
 import { poolHasOpenSeat } from "@/lib/provision/capacity";
@@ -101,13 +108,8 @@ export async function POST(request: Request) {
 
   const priced = quote.amount != null || !plan ? null : quotePayment(locale, method, plan);
   const amount = quote.amount ?? priced?.amount ?? 0;
-  const currency = quote.currency ?? priced?.currency ?? "KRW";
-  const provider =
-    quote.currency != null
-      ? method === "ALIPAY"
-        ? alipayProvider()
-        : PaymentProvider.PORTONE
-      : priced?.provider ?? PaymentProvider.PORTONE;
+  const currency = quote.currency ?? priced?.currency ?? settlementCurrency(locale, method);
+  const provider = checkoutProvider(locale, method);
   if (amount <= 0) {
     return NextResponse.json({ error: "invalid_request" }, { status: 400 });
   }

@@ -1,4 +1,4 @@
-import { NodeHealth, NodeRole, Product, SubscriptionStatus, type Node } from "@prisma/client";
+import { ChinaReachability, NodeHealth, NodeRole, Product, SubscriptionStatus, type Node } from "@prisma/client";
 import { describe, expect, it } from "vitest";
 import { toAdminCustomer, toAdminNode, toSignupOnlyCustomer } from "@/lib/admin-data";
 
@@ -53,6 +53,8 @@ describe("toAdminCustomer", () => {
     expect(customer.provisionStep).toBe("ready");
     expect(customer.signedUpAt).toBe("2026-07-15T00:00:00.000Z");
     expect(customer.signupOnly).toBe(false);
+    expect(customer.demo).toBe(false);
+    expect(toAdminCustomer({ ...row, id: "seed_g_demo" } as never, false).demo).toBe(true);
   });
 
   it("maps signup-only users without a subscription", () => {
@@ -141,11 +143,15 @@ describe("toAdminNode", () => {
       password: "seed-only",
       inboundId: null,
       vlessPort: 443,
+      entryHost: null,
+      entryPort: null,
       realityPublicKey: null,
       realityShortId: null,
       realityServerName: null,
       realityFingerprint: null,
       monthlyCostKrw: 0,
+      chinaReachability: ChinaReachability.UNKNOWN,
+      chinaCheckedAt: null,
       createdAt: new Date("2026-08-01T00:00:00.000Z"),
       updatedAt: new Date("2026-08-01T00:00:00.000Z"),
     } satisfies Node;
@@ -154,6 +160,8 @@ describe("toAdminNode", () => {
       hostMasked: "•••.•••.•••.22",
       port: 2053,
       inboundId: null,
+      entryHost: "",
+      entryPort: null,
       wiring: "placeholder",
     });
   });

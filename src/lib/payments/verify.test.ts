@@ -45,6 +45,18 @@ function portoneRequest(body: object, timestampSec = Math.floor(Date.now() / 100
   });
 }
 
+function lemonRequest(body: object, signature?: string) {
+  const raw = JSON.stringify(body);
+  return new Request("http://localhost/api/v1/payments/webhook", {
+    method: "POST",
+    headers: {
+      "x-signature": signature ?? hmacSha256Hex(secret, raw),
+      "x-event-name": "order_created",
+    },
+    body: raw,
+  });
+}
+
 function paymentwallRequest(params: Record<string, string>) {
   const entries = Object.entries(params)
     .filter(([key]) => key !== "sig")
@@ -62,6 +74,7 @@ describe("payments/verify", () => {
     process.env.STRIPE_WEBHOOK_SECRET = secret;
     process.env.PAYMENTWALL_SECRET = secret;
     process.env.PORTONE_WEBHOOK_SECRET = secret;
+    process.env.LEMONSQUEEZY_WEBHOOK_SECRET = secret;
   });
 
   afterEach(() => {
@@ -251,6 +264,62 @@ describe("payments/verify", () => {
     );
     expect(paid.currency).toBe("KRW");
     expect(paid.amount).toBe(19900);
+  });
+
+  it("accepts a paid Lemon Squeezy order and ignores pending or refunded events", async () => {
+    const paid = await verifyPaymentWebhook(
+      lemonRequest({
+        meta: {
+          event_name: "order_created",
+          custom_data: { payment_id: "pay_lemon" },
+        },
+        data: {
+          id: "42",
+          attributes: { status: "paid", currency: "USD", subtotal: 1500, total: 1650 },
+        },
+      })
+    );
+    expect(paid).toMatchObject({
+      eventId: "lemonsqueezy:42",
+      paymentId: "pay_lemon",
+      provider: PaymentProvider.LEMONSQUEEZY,
+      status: PaymentStatus.SUCCEEDED,
+      amount: 15,
+      currency: "USD",
+      externalId: "42",
+    });
+
+    await expect(
+      verifyPaymentWebhook(
+        lemonRequest({
+          meta: { event_name: "order_created", custom_data: { payment_id: "pay_lemon" } },
+          data: { id: "43", attributes: { status: "pending", currency: "USD", subtotal: 1500 } },
+        })
+      )
+    ).rejects.toMatchObject({ code: "ignored_event" } satisfies Partial<WebhookVerifyError>);
+
+    await expect(
+      verifyPaymentWebhook(
+        lemonRequest({
+          meta: { event_name: "order_refunded", custom_data: { payment_id: "pay_lemon" } },
+          data: { id: "42", attributes: { status: "refunded", currency: "USD", subtotal: 1500 } },
+        })
+      )
+    ).rejects.toMatchObject({ code: "ignored_event" } satisfies Partial<WebhookVerifyError>);
+  });
+
+  it("rejects a Lemon Squeezy webhook with the wrong signature", async () => {
+    await expect(
+      verifyPaymentWebhook(
+        lemonRequest(
+          {
+            meta: { event_name: "order_created", custom_data: { payment_id: "pay_lemon" } },
+            data: { id: "42", attributes: { status: "paid", currency: "USD", subtotal: 1500 } },
+          },
+          "deadbeef"
+        )
+      )
+    ).rejects.toMatchObject({ code: "invalid_signature" } satisfies Partial<WebhookVerifyError>);
   });
 
   it("ignores other Paymentwall pingback types", async () => {

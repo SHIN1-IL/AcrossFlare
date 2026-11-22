@@ -115,7 +115,7 @@ describe("quoteEsimAddon", () => {
     ).toMatchObject({ ok: false, error: "esim_disabled" });
   });
 
-  it("charges each language in its own currency and stays closed at zero", () => {
+  it("settles Korean cards in won and other checkouts in dollars", () => {
     expect(
       quoteEsimAddon({
         locale: "en",
@@ -140,7 +140,7 @@ describe("quoteEsimAddon", () => {
         products,
         ownsConnection: false,
       })
-    ).toMatchObject({ ok: true, amount: 128, currency: "CNY" });
+    ).toMatchObject({ ok: true, amount: 20, currency: "USD" });
 
     expect(
       quoteEsimAddon({

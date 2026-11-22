@@ -120,6 +120,23 @@ export function AdminHome() {
   return (
     <div className="mx-auto max-w-5xl">
       <AdminPageHeader title={t("homeTitle")} subtitle={t("homeSubtitle")} />
+      {summary && (summary.chinaBlockedGlobal > 0 || summary.chinaBlockedWorkspace > 0) ? (
+        <div className="mb-6 rounded-2xl border border-red-400/40 bg-red-400/10 px-4 py-3 text-sm text-red-200">
+          <p>{t("chinaHomeBanner", { count: summary.chinaBlockedGlobal + summary.chinaBlockedWorkspace })}</p>
+          <div className="mt-2 flex flex-wrap gap-3">
+            {summary.chinaBlockedGlobal > 0 ? (
+              <Link href="/admin/standard/nodes" className="underline underline-offset-2">
+                {t(adminTabMessageKey("standard"))}
+              </Link>
+            ) : null}
+            {summary.chinaBlockedWorkspace > 0 ? (
+              <Link href="/admin/workspace/nodes" className="underline underline-offset-2">
+                {t(adminTabMessageKey("workspace"))}
+              </Link>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
       <OpsHealthPanel owner={owner} />
       {canSeeCapacity && summary ? (
         <CapacityAlerts

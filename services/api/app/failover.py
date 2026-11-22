@@ -147,6 +147,8 @@ def fetch_failover_pool(conn: psycopg.Connection, product: str) -> list[dict[str
               host,
               role::text,
               "vlessPort",
+              "entryHost",
+              "entryPort",
               "realityPublicKey",
               "realityShortId",
               "realityServerName",
@@ -168,10 +170,12 @@ def fetch_failover_pool(conn: psycopg.Connection, product: str) -> list[dict[str
             "host": row[2],
             "role": row[3],
             "vlessPort": row[4],
-            "realityPublicKey": row[5],
-            "realityShortId": row[6],
-            "realityServerName": row[7],
-            "realityFingerprint": row[8],
+            "entryHost": row[5],
+            "entryPort": row[6],
+            "realityPublicKey": row[7],
+            "realityShortId": row[8],
+            "realityServerName": row[9],
+            "realityFingerprint": row[10],
         }
         for row in rows
     ]

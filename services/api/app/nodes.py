@@ -15,6 +15,8 @@ class NodeRow(TypedDict, total=False):
     host: str | None
     role: str
     vlessPort: int
+    entryHost: str | None
+    entryPort: int | None
     realityPublicKey: str | None
     realityShortId: str | None
     realityServerName: str | None
@@ -26,6 +28,25 @@ def vless_connect_host(node: NodeRow) -> str:
     if match:
         return match.group(1)
     return (node.get("ddns") or "").strip()
+
+
+def customer_connect_host(node: NodeRow) -> str:
+    entry = (node.get("entryHost") or "").strip()
+    if entry:
+        return entry
+    return vless_connect_host(node)
+
+
+def customer_connect_port(node: NodeRow) -> int:
+    entry_port = node.get("entryPort")
+    if entry_port is not None and str(entry_port).strip() != "":
+        try:
+            port = int(entry_port)
+        except (TypeError, ValueError):
+            port = 0
+        if 0 < port <= 65535:
+            return port
+    return int(node.get("vlessPort") or DEFAULT_VLESS_PORT)
 
 
 def has_reality_config(node: NodeRow) -> bool:
@@ -65,11 +86,14 @@ def pick_hosts(
 
 
 def node_row_from_db(row: dict[str, Any]) -> NodeRow:
+    entry_port = row.get("entryPort")
     return {
         "ddns": str(row.get("ddns") or ""),
         "host": row.get("host"),
         "role": str(row.get("role") or ""),
         "vlessPort": int(row.get("vlessPort") or DEFAULT_VLESS_PORT),
+        "entryHost": row.get("entryHost"),
+        "entryPort": int(entry_port) if entry_port is not None and str(entry_port).strip() != "" else None,
         "realityPublicKey": row.get("realityPublicKey"),
         "realityShortId": row.get("realityShortId"),
         "realityServerName": row.get("realityServerName"),

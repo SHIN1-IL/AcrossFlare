@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { AdminDrawer, fieldClass } from "@/components/admin/admin-drawer";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
@@ -16,6 +16,7 @@ import { REALITY_DEST_HOST } from "@/lib/provision/reality";
 import {
   addNode,
   bootstrapNode,
+  checkChinaReachability,
   clearMigrate,
   countNodeUsers,
   deleteNode,
@@ -26,8 +27,9 @@ import {
   setNodeSpare,
   updateNode,
 } from "@/lib/admin-store";
-import type { AdminNode, NodeRole, XuiProbeInbound } from "@/lib/admin";
-import { poolsForAdminService } from "@/lib/admin-overview";
+import type { AdminNode, ChinaReachability, NodeRole, XuiProbeInbound } from "@/lib/admin";
+import { chinaReachabilityRank } from "@/lib/china-reachability/classify";
+import { nodesForAdminService, poolsForAdminService } from "@/lib/admin-overview";
 import { HYBRID_POOL_ID } from "@/lib/provision/capacity-expand";
 import type { AdminServiceId } from "@/lib/admin-service";
 import type { ProductId } from "@/lib/plans";
@@ -43,6 +45,8 @@ const emptyDraft = {
   password: "",
   inboundId: "",
   vlessPort: "443",
+  entryHost: "",
+  entryPort: "",
   realityPublicKey: "",
   realityShortId: "",
   realityServerName: "",
@@ -75,8 +79,12 @@ export function NodeManager({
   bootstrapRequest?: { poolId: string; role: NodeRole } | null;
 }) {
   const t = useTranslations("admin");
+  const locale = useLocale();
   const { migrate, migrating, provisionSimulate, capacityPools, bootstrapQuota, customers } = useAdmin();
-  const nodes = listNodes(product);
+  const nodes =
+    service === "workspace"
+      ? listNodes(product)
+      : nodesForAdminService(service, listNodes(product), capacityPools ?? []);
   const scopedPools = poolsForAdminService(service, capacityPools ?? []);
   const requestedPool = bootstrapRequest?.poolId
     ? (capacityPools ?? []).find(
@@ -98,6 +106,8 @@ export function NodeManager({
   const [spareBusy, setSpareBusy] = useState(false);
   const [spareError, setSpareError] = useState("");
   const [spareNote, setSpareNote] = useState("");
+  const [chinaBusy, setChinaBusy] = useState(false);
+  const [chinaError, setChinaError] = useState("");
   const [draft, setDraft] = useState(emptyDraft);
   const [formError, setFormError] = useState("");
   const [probing, setProbing] = useState(false);
@@ -185,6 +195,52 @@ export function NodeManager({
       .map((group) => ({ poolName: pool.name, group }))
   );
   const bundleNodeIds = new Set(bundles.flatMap((bundle) => bundle.group.nodes.map((node) => node.id)));
+  const orderedNodes = [...nodes].sort(
+    (a, b) =>
+      chinaReachabilityRank(a.chinaReachability) - chinaReachabilityRank(b.chinaReachability) ||
+      a.name.localeCompare(b.name)
+  );
+  const chinaBlocked = orderedNodes.filter((node) => node.chinaReachability === "blocked");
+  const chinaPartial = orderedNodes.filter((node) => node.chinaReachability === "partial");
+
+  async function runChinaCheck() {
+    setChinaBusy(true);
+    setChinaError("");
+    const result = await checkChinaReachability();
+    setChinaBusy(false);
+    if (!result.ok) {
+      setChinaError(t("chinaCheckFail"));
+    }
+  }
+
+  function chinaTone(status: ChinaReachability): "ok" | "warn" | "alert" | "neutral" {
+    if (status === "open") {
+      return "ok";
+    }
+    if (status === "blocked") {
+      return "alert";
+    }
+    if (status === "partial" || status === "down") {
+      return "warn";
+    }
+    return "neutral";
+  }
+
+  function chinaLabel(status: ChinaReachability) {
+    if (status === "open") {
+      return t("chinaOpen");
+    }
+    if (status === "blocked") {
+      return t("chinaBlocked");
+    }
+    if (status === "partial") {
+      return t("chinaPartial");
+    }
+    if (status === "down") {
+      return t("chinaDown");
+    }
+    return t("chinaUnknown");
+  }
 
   function openCreate() {
     setEditing("new");
@@ -208,6 +264,8 @@ export function NodeManager({
       password: "",
       inboundId: node.inboundId ? String(node.inboundId) : "",
       vlessPort: String(node.vlessPort || 443),
+      entryHost: node.entryHost ?? "",
+      entryPort: node.entryPort == null ? "" : String(node.entryPort),
       realityPublicKey: node.realityPublicKey,
       realityShortId: node.realityShortId,
       realityServerName: node.realityServerName,
@@ -308,6 +366,9 @@ export function NodeManager({
         subtitle={t("nodesSubtitle")}
         action={
           <div className="flex flex-wrap gap-2">
+            <Button type="button" variant="outline" className="rounded-[10px]" disabled={chinaBusy} onClick={() => void runChinaCheck()}>
+              {chinaBusy ? t("chinaChecking") : t("chinaCheck")}
+            </Button>
             <Button type="button" className="rounded-[10px]" onClick={() => openBootstrap()}>
               {t("bootstrapNode")}
             </Button>
@@ -352,11 +413,16 @@ export function NodeManager({
             >
               <p className="font-medium text-foreground">{pool.name}</p>
               <p className="mt-1 text-muted-foreground">
-                {t("capacitySeats", {
-                  remaining: pool.seatsRemaining,
-                  used: pool.seatsUsed,
-                  max: pool.seatsMax,
-                })}
+                <span className="block">
+                  {t("capacityRemaining", { remaining: pool.seatsRemaining })}
+                </span>
+                <span className="mt-0.5 block text-xs">
+                  {t("capacitySplit", {
+                    used: pool.seatsUsed,
+                    max: pool.seatsMax,
+                    test: pool.seatsTest,
+                  })}
+                </span>
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
                 {t("capacitySelectable", { count: pool.maxSelectable })}
@@ -375,6 +441,19 @@ export function NodeManager({
             {t("addNode")}
           </Button>
         </div>
+      ) : null}
+      {chinaBlocked.length ? (
+        <p className="rounded-2xl border border-red-400/40 bg-red-400/10 px-4 py-3 text-sm text-red-200">
+          {t("chinaBanner", { count: chinaBlocked.length })}
+        </p>
+      ) : null}
+      {!chinaBlocked.length && chinaPartial.length ? (
+        <p className="rounded-2xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm text-amber-200">
+          {t("chinaPartialBanner", { count: chinaPartial.length })}
+        </p>
+      ) : null}
+      {chinaError ? (
+        <p className="rounded-2xl border border-red-400/40 bg-red-400/10 px-4 py-3 text-sm text-red-200">{chinaError}</p>
       ) : null}
       {degraded.length ? (
         <p className="rounded-2xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm text-amber-200">
@@ -400,7 +479,7 @@ export function NodeManager({
       ) : null}
 
       <div className="overflow-x-auto rounded-2xl border border-border">
-        <table className={`w-full text-left text-sm ${advanced ? "min-w-[1100px]" : "min-w-[760px]"}`}>
+        <table className={`w-full text-left text-sm ${advanced ? "min-w-[1280px]" : "min-w-[920px]"}`}>
           <thead className="border-b border-border bg-surface text-xs text-muted-foreground">
             <tr>
               <th className="px-4 py-3 font-medium">{t("nodeName")}</th>
@@ -409,14 +488,16 @@ export function NodeManager({
               {advanced ? <th className="px-4 py-3 font-medium">{t("panel")}</th> : null}
               {advanced ? <th className="px-4 py-3 font-medium">{t("wiring")}</th> : null}
               <th className="px-4 py-3 font-medium">{t("nodeStatus")}</th>
+              <th className="px-4 py-3 font-medium">{t("chinaColumn")}</th>
               <th className="px-4 py-3 font-medium">{t("users")}</th>
               <th className="px-4 py-3 font-medium" />
               {advanced ? <th className="px-4 py-3 font-medium" /> : null}
             </tr>
           </thead>
           <tbody>
-            {nodes.map((node) => {
-              const users = countNodeUsers(node.id);
+            {orderedNodes.map((node) => {
+              const users = countNodeUsers(node.id, "real");
+              const testUsers = countNodeUsers(node.id, "test");
               return (
                 <tr key={node.id} className="border-b border-border last:border-0">
                   <td className="px-4 py-3">{node.name}</td>
@@ -454,7 +535,37 @@ export function NodeManager({
                       tone={node.status === "online" ? "ok" : node.status === "degraded" ? "warn" : "neutral"}
                     />
                   </td>
-                  <td className="px-4 py-3 font-mono text-xs">{users}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-col items-start gap-1">
+                      <StatusPill label={chinaLabel(node.chinaReachability)} tone={chinaTone(node.chinaReachability)} />
+                      {node.chinaCheckedAt ? (
+                        <span className="text-[11px] text-muted-foreground">
+                          {new Date(node.chinaCheckedAt).toLocaleString(locale, {
+                            month: "numeric",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                      ) : null}
+                      <a
+                        href={`/api/v1/admin/nodes/${node.id}/china-probe`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[11px] text-primary underline-offset-2 hover:underline"
+                      >
+                        {t("chinaProbe")}
+                      </a>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 font-mono text-xs">
+                    <span>{users}</span>
+                    {testUsers > 0 ? (
+                      <span className="mt-0.5 block text-[11px] font-sans text-muted-foreground">
+                        {t("nodeTestUsers", { count: testUsers })}
+                      </span>
+                    ) : null}
+                  </td>
                   <td className="px-4 py-3 text-right">
                     {bundleNodeIds.has(node.id) ? null : (
                     <Button
@@ -924,6 +1035,25 @@ export function NodeManager({
               placeholder={editing && editing !== "new" ? t("passwordKeep") : ""}
               value={draft.password}
               onChange={(event) => setDraft({ ...draft, password: event.target.value })}
+            />
+          </Field>
+          <p className="text-xs font-medium tracking-wide text-primary uppercase">{t("entrySection")}</p>
+          <p className="text-xs text-muted-foreground">{t("entryHint")}</p>
+          <Field label={t("entryHost")}>
+            <input
+              className={fieldClass}
+              placeholder="gz-relay.example.com"
+              value={draft.entryHost}
+              onChange={(event) => setDraft({ ...draft, entryHost: event.target.value })}
+            />
+          </Field>
+          <Field label={t("entryPort")}>
+            <input
+              className={fieldClass}
+              inputMode="numeric"
+              placeholder={draft.vlessPort || "443"}
+              value={draft.entryPort}
+              onChange={(event) => setDraft({ ...draft, entryPort: event.target.value })}
             />
           </Field>
           <p className="text-xs font-medium tracking-wide text-primary uppercase">{t("realitySection")}</p>

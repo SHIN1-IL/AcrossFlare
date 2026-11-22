@@ -42,6 +42,7 @@ enum PaymentProvider {
   PORTONE
   STRIPE
   PAYMENTWALL
+  LEMONSQUEEZY
 }
 
 enum EsimOrderStatus {
@@ -64,6 +65,14 @@ enum NodeHealth {
   ONLINE
   DEGRADED
   OFFLINE
+}
+
+enum ChinaReachability {
+  UNKNOWN
+  OPEN
+  BLOCKED
+  DOWN
+  PARTIAL
 }
 
 enum InstanceGroupStatus {
@@ -196,12 +205,19 @@ model Node {
   password  String
   inboundId Int?
   vlessPort            Int     @default(443)
+  /// Customer connect address when a TCP relay sits in front of the panel host.
+  entryHost            String?
+  /// Customer connect port for that relay. Null keeps `vlessPort`.
+  entryPort            Int?
   realityPublicKey     String?
   realityShortId       String?
   realityServerName    String?
   realityFingerprint   String?
   /// Monthly VPS purchase cost in KRW. The owner margin card sums these.
   monthlyCostKrw       Int     @default(0)
+  /// Latest China TCP reachability of the customer connect address. Panel host stays on `host`.
+  chinaReachability    ChinaReachability @default(UNKNOWN)
+  chinaCheckedAt       DateTime?
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 

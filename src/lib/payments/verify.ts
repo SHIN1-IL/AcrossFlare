@@ -1,5 +1,6 @@
 import { PaymentProvider, PaymentStatus } from "@prisma/client";
 import {
+  lemonSqueezyWebhookSecret,
   paymentwallSecret,
   paymentWebhookSecret,
   portoneWebhookSecret,
@@ -57,6 +58,10 @@ export async function verifyPaymentWebhook(request: Request): Promise<VerifiedWe
 
   if (headers.get("x-acrossflare-signature")) {
     return verifyInternal(headers, rawBody);
+  }
+
+  if (headers.get("x-signature")) {
+    return verifyLemon(headers, rawBody);
   }
 
   throw new WebhookVerifyError("unknown_provider", 400);
@@ -314,8 +319,75 @@ function normalizePortoneCurrency(value?: string) {
   return upper.startsWith("CURRENCY_") ? upper.slice("CURRENCY_".length) : upper;
 }
 
+function verifyLemon(headers: Headers, rawBody: string): VerifiedWebhook {
+  const secret = lemonSqueezyWebhookSecret();
+  if (!secret) {
+    throw new WebhookVerifyError("missing_secret");
+  }
+
+  const signature = headers.get("x-signature") ?? "";
+  const expected = hmacSha256Hex(secret, rawBody);
+  if (!signature || !safeEqual(expected, signature)) {
+    throw new WebhookVerifyError("invalid_signature");
+  }
+
+  const body = parseJson(rawBody);
+  const meta = asRecord(body.meta) ?? {};
+  const eventName = optionalString(meta.event_name) ?? headers.get("x-event-name") ?? "";
+  if (eventName !== "order_created") {
+    throw new WebhookVerifyError("ignored_event", 200);
+  }
+
+  const data = asRecord(body.data) ?? {};
+  const attributes = asRecord(data.attributes) ?? {};
+  const status = (optionalString(attributes.status) ?? "").toLowerCase();
+  if (status !== "paid") {
+    throw new WebhookVerifyError("ignored_event", 200);
+  }
+
+  const custom = asRecord(meta.custom_data) ?? {};
+  const paymentId = paymentIdField(custom.payment_id) ?? paymentIdField(custom.paymentId);
+  const orderId = paymentIdField(data.id);
+  if (!paymentId || !orderId) {
+    throw new WebhookVerifyError("missing_payment_id", 400);
+  }
+
+  const currency = optionalString(attributes.currency)?.toUpperCase();
+  const subtotal = numberField(attributes, ["subtotal"]);
+  if (!currency || subtotal == null) {
+    throw new WebhookVerifyError("invalid_payload", 400);
+  }
+
+  return {
+    eventId: `lemonsqueezy:${orderId}`,
+    provider: PaymentProvider.LEMONSQUEEZY,
+    paymentId,
+    externalId: orderId,
+    status: PaymentStatus.SUCCEEDED,
+    amount: fromStripeMinorUnits(subtotal, currency),
+    currency,
+  };
+}
+
+function paymentIdField(value: unknown) {
+  if (typeof value === "string" && value.trim()) {
+    return value.trim();
+  }
+
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return String(value);
+  }
+
+  return undefined;
+}
+
 function asProvider(value: unknown): PaymentProvider | null {
-  if (value === PaymentProvider.PORTONE || value === PaymentProvider.STRIPE || value === PaymentProvider.PAYMENTWALL) {
+  if (
+    value === PaymentProvider.PORTONE ||
+    value === PaymentProvider.STRIPE ||
+    value === PaymentProvider.PAYMENTWALL ||
+    value === PaymentProvider.LEMONSQUEEZY
+  ) {
     return value;
   }
 

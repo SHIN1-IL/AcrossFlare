@@ -2,6 +2,9 @@ import { PaymentMethod, PaymentProvider, type Payment, type Plan } from "@prisma
 import { localePath } from "@/i18n/path";
 import type { AppLocale } from "@/i18n/routing";
 import {
+  lemonSqueezyApiKey,
+  lemonSqueezyStoreId,
+  lemonSqueezyVariantId,
   paymentwallProjectKey,
   paymentwallSecret,
   portoneChannelKey,
@@ -9,6 +12,7 @@ import {
   publicAppUrl,
   stripeSecretKey,
 } from "@/lib/payments/config";
+import { lemonCheckoutPayload } from "@/lib/payments/lemon";
 import { checkoutOrderName } from "@/lib/esim/catalog";
 import { getMerchant } from "@/lib/legal/merchant";
 import { md5Hex } from "@/lib/payments/crypto";
@@ -91,6 +95,15 @@ export async function startProviderCheckout(input: {
 
   const productName = input.plan?.name || input.orderName;
 
+  if (input.payment.provider === PaymentProvider.LEMONSQUEEZY) {
+    return {
+      redirectUrl: await createLemonCheckout(
+        { payment: input.payment, productName, email: input.email },
+        successUrl
+      ),
+    };
+  }
+
   if (input.payment.provider === PaymentProvider.STRIPE) {
     return {
       redirectUrl: await createStripeCheckout(
@@ -111,6 +124,53 @@ export async function startProviderCheckout(input: {
   }
 
   return { portone: createPortoneCheckout(input, successUrl) };
+}
+
+async function createLemonCheckout(
+  input: { payment: Payment; productName: string; email: string },
+  successUrl: string
+) {
+  const apiKey = lemonSqueezyApiKey();
+  const storeId = lemonSqueezyStoreId();
+  const variantId = lemonSqueezyVariantId();
+  if (!apiKey || !storeId || !variantId) {
+    throw new CheckoutStartError("lemonsqueezy_not_configured");
+  }
+
+  if (input.payment.currency !== "USD" || input.payment.amount <= 0) {
+    throw new CheckoutStartError("lemonsqueezy_checkout_failed");
+  }
+
+  const response = await fetch("https://api.lemonsqueezy.com/v1/checkouts", {
+    method: "POST",
+    headers: {
+      Accept: "application/vnd.api+json",
+      "Content-Type": "application/vnd.api+json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(
+      lemonCheckoutPayload({
+        storeId,
+        variantId,
+        email: input.email,
+        paymentId: input.payment.id,
+        name: input.productName,
+        amount: input.payment.amount,
+        currency: input.payment.currency,
+        redirectUrl: successUrl,
+      })
+    ),
+  });
+  const session = (await response.json().catch(() => null)) as {
+    data?: { attributes?: { url?: string } };
+  } | null;
+  const url = session?.data?.attributes?.url;
+
+  if (!response.ok || !url) {
+    throw new CheckoutStartError("lemonsqueezy_checkout_failed");
+  }
+
+  return url;
 }
 
 async function createStripeCheckout(

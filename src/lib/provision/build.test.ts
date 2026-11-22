@@ -66,6 +66,30 @@ describe("provision/build", () => {
     expect(yaml).toContain("#profile-web-page-url: https://acrossflare.com/dashboard");
   });
 
+  it("uses relay entry host and port in yaml when set", () => {
+    const node = {
+      ...realityNode("node-tokyo.acrossflare.com", NodeRole.PRIMARY),
+      host: "https://74.82.221.67:2053",
+      entryHost: "gz-relay.example.com",
+      entryPort: 24443,
+    };
+    const yaml = buildVlessYaml([node], "uuid-1");
+    expect(yaml).toContain("server: gz-relay.example.com");
+    expect(yaml).toContain("port: 24443");
+    expect(yaml).toContain("servername: dl.google.com");
+    expect(yaml).not.toContain("server: 74.82.221.67");
+    expect(previewSubscriptionProxies([node], false)).toEqual([
+      {
+        name: "node-tokyo",
+        server: "gz-relay.example.com",
+        port: 24443,
+        servername: "dl.google.com",
+      },
+    ]);
+    const share = vlessRealityShareLink(node, "uuid-1");
+    expect(share.startsWith("vless://uuid-1@gz-relay.example.com:24443?")).toBe(true);
+  });
+
   it("emits the REALITY public key as raw url-safe base64", () => {
     const raw = Buffer.from("ff".repeat(32), "hex");
     const padded = raw.toString("base64");

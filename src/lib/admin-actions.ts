@@ -168,6 +168,8 @@ export async function addAdminNode(input: {
   password: string;
   inboundId?: number | null;
   vlessPort?: number;
+  entryHost?: string | null;
+  entryPort?: number | string | null;
   realityPublicKey?: string;
   realityShortId?: string;
   realityServerName?: string;
@@ -193,6 +195,8 @@ export async function addAdminNode(input: {
       password: input.password,
       inboundId: parseInboundId(input.inboundId),
       vlessPort: parseVlessPort(input.vlessPort),
+      entryHost: trimOptional(input.entryHost ?? undefined),
+      entryPort: parseEntryPort(input.entryPort),
       realityPublicKey: trimOptional(input.realityPublicKey),
       realityShortId: trimOptional(input.realityShortId),
       realityServerName: trimOptional(input.realityServerName),
@@ -214,6 +218,8 @@ export async function updateAdminNode(
     password?: string;
     inboundId?: number | null;
     vlessPort?: number;
+    entryHost?: string | null;
+    entryPort?: number | string | null;
     realityPublicKey?: string;
     realityShortId?: string;
     realityServerName?: string;
@@ -247,6 +253,8 @@ export async function updateAdminNode(
       password: input.password ? input.password : existing.password,
       inboundId: input.inboundId === undefined ? existing.inboundId : parseInboundId(input.inboundId),
       vlessPort: input.vlessPort === undefined ? existing.vlessPort : parseVlessPort(input.vlessPort),
+      entryHost: input.entryHost === undefined ? existing.entryHost : trimOptional(input.entryHost ?? undefined),
+      entryPort: input.entryPort === undefined ? existing.entryPort : parseEntryPort(input.entryPort),
       realityPublicKey:
         input.realityPublicKey === undefined ? existing.realityPublicKey : trimOptional(input.realityPublicKey),
       realityShortId:
@@ -270,6 +278,17 @@ function parseVlessPort(value: number | undefined) {
   const parsed = Math.round(Number(value));
   if (!Number.isFinite(parsed) || parsed <= 0 || parsed > 65535) {
     return 443;
+  }
+  return parsed;
+}
+
+function parseEntryPort(value: number | string | null | undefined) {
+  if (value == null || value === "") {
+    return null;
+  }
+  const parsed = Math.round(Number(value));
+  if (!Number.isFinite(parsed) || parsed <= 0 || parsed > 65535) {
+    return null;
   }
   return parsed;
 }

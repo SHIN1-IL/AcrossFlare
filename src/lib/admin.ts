@@ -14,6 +14,7 @@ export type AdminPlan = Plan & {
 
 export type NodeRole = "primary" | "failover";
 export type NodeHealth = "online" | "degraded" | "offline";
+export type ChinaReachability = "unknown" | "open" | "blocked" | "down" | "partial";
 
 export type AdminNode = {
   id: string;
@@ -31,11 +32,15 @@ export type AdminNode = {
   passwordMasked: string;
   inboundId: number | null;
   vlessPort: number;
+  entryHost: string;
+  entryPort: number | null;
   realityPublicKey: string;
   realityShortId: string;
   realityServerName: string;
   realityFingerprint: string;
   wiring: NodeWiring;
+  chinaReachability: ChinaReachability;
+  chinaCheckedAt: string | null;
 };
 
 export type XuiProbeInbound = {
@@ -104,6 +109,8 @@ export type AdminCustomer = {
   signedUpAt: string;
   /** True when the row is a User with no subscription yet. */
   signupOnly?: boolean;
+  /** Seeded demo subscription. Shown apart from paying customers. */
+  demo?: boolean;
   credentials: CustomerCredentials | null;
   rotateHistory: RotateEvent[];
   planChange: PlanChangeJob | null;
@@ -175,6 +182,8 @@ export type AdminPoolCapacity = {
   seatsUsed: number;
   seatsMax: number;
   seatsRemaining: number;
+  /** Demo subscriptions on this pool. They do not reduce seatsRemaining. */
+  seatsTest: number;
   full: boolean;
   neededSlots: Array<{ role: "primary" | "failover"; count: number }>;
   recentBootstrapFailures: number;
@@ -230,6 +239,7 @@ export type AdminState = {
   provision: ProvisionSession | null;
   migrate: MigrateJob | null;
   provisionSimulate: boolean;
+  chinaCheckRunning: boolean;
 };
 
 export function maskSecret(value: string) {

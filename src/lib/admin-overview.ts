@@ -1,5 +1,7 @@
 import type { AdminBootstrapJob, AdminPoolCapacity } from "@/lib/admin";
-import type { AdminServiceId } from "@/lib/admin-service";
+import { catalogPlanIds, type AdminServiceId } from "@/lib/admin-service";
+import { getPlanById, type ProductId } from "@/lib/plans";
+import { nodeNameMatchesCode } from "@/lib/provision/node-match";
 
 const POOL_GLOBAL_STANDARD = "global-standard";
 const POOL_GLOBAL_HYBRID = "global-hybrid";
@@ -15,6 +17,42 @@ export function poolsForAdminService(service: AdminServiceId, pools: AdminPoolCa
   return pools.filter(
     (pool) => pool.id === POOL_MARKETING_DEFAULT || pool.product.toLowerCase() === "workspace"
   );
+}
+
+function poolMemberIds(service: AdminServiceId, pools: AdminPoolCapacity[]) {
+  return new Set(
+    poolsForAdminService(service, pools).flatMap((pool) =>
+      pool.groups.flatMap((group) => group.nodes.map((node) => node.id)),
+    ),
+  );
+}
+
+/** Standard and Hybrid share the global product, so the node table follows the seat pool and plan names. */
+export function nodesForAdminService<
+  T extends { id: string; product: ProductId; name: string; role: "primary" | "failover" },
+>(service: AdminServiceId, nodes: T[], pools: AdminPoolCapacity[]) {
+  if (service === "workspace") {
+    return nodes.filter((node) => node.product === "workspace");
+  }
+
+  const ownIds = poolMemberIds(service, pools);
+  const otherIds = poolMemberIds(service === "standard" ? "hybrid" : "standard", pools);
+  const codes = [
+    ...new Set(catalogPlanIds(service).flatMap((planId) => getPlanById(planId)?.nodes ?? [])),
+  ];
+
+  return nodes.filter((node) => {
+    if (node.product !== "global") {
+      return false;
+    }
+    if (ownIds.has(node.id)) {
+      return true;
+    }
+    if (otherIds.has(node.id)) {
+      return false;
+    }
+    return node.role === "primary" && codes.some((code) => nodeNameMatchesCode(node.name, code));
+  });
 }
 
 export function jobsForAdminService(service: AdminServiceId, jobs: AdminBootstrapJob[]) {

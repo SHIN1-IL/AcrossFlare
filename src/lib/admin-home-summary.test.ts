@@ -15,6 +15,7 @@ function pool(id: string, seatsRemaining: number): AdminPoolCapacity {
     seatsUsed: 1,
     seatsMax: 10,
     seatsRemaining,
+    seatsTest: 0,
     full: seatsRemaining === 0,
     neededSlots: [],
     recentBootstrapFailures: 0,
@@ -132,6 +133,7 @@ describe("presentAdminHomeSummary", () => {
       workspaceNodeCount: 0,
       capacityPools: [pool("global-standard", 3)],
       bootstrapQuota: { used: 20, limit: 20, recentFailures: 4 },
+      chinaBlockedGlobal: 3,
       subscriptions: [{ status: "failed", expiresAt: "2026-09-01T00:00:00.000Z", planId: "global-lite" }],
     });
 
@@ -144,6 +146,10 @@ describe("presentAdminHomeSummary", () => {
     expect(hidden.capacityPools).toEqual([]);
     expect(hidden.bootstrapQuota.used).toBe(0);
     expect(hidden.bootstrapQuota.limit).toBe(20);
+    expect(hidden.chinaBlockedGlobal).toBe(0);
+
+    const nodesOnly = presentAdminHomeSummary(summary, ["nodes"]);
+    expect(nodesOnly.chinaBlockedGlobal).toBe(3);
 
     const customersOnly = presentAdminHomeSummary(summary, ["customers"]);
     expect(customersOnly.services.standard.customerCount).toBe(2);

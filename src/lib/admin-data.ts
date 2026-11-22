@@ -1,4 +1,5 @@
 import {
+  type ChinaReachability as DbChinaReachability,
   NodeHealth,
   NodeRole,
   PaymentMethod,
@@ -23,6 +24,7 @@ import type {
   AdminPromoCode,
   CustomerCredentials,
   CustomerStatus,
+  ChinaReachability as UiChinaReachability,
   NodeHealth as UiNodeHealth,
   NodeRole as UiNodeRole,
 } from "@/lib/admin";
@@ -33,7 +35,7 @@ import { toPrismaProduct, toProductId } from "@/lib/product";
 import { appUrl, isProvisionSimulate } from "@/lib/provision/config";
 import { yamlUrlFor } from "@/lib/provision/build";
 import { nodeWiring } from "@/lib/provision/node-wiring";
-import { NODE_PROBE_USER_EMAIL, customerSubscriptionWhere } from "@/lib/subscription-scope";
+import { NODE_PROBE_USER_EMAIL, customerSubscriptionWhere, isDemoSubscription } from "@/lib/subscription-scope";
 
 type CustomerRow = Subscription & {
   user: { email: string; createdAt: Date };
@@ -85,11 +87,15 @@ export function toAdminNode(node: Node): AdminNode {
     passwordMasked: maskSecret(node.password),
     inboundId: node.inboundId,
     vlessPort: node.vlessPort,
+    entryHost: node.entryHost ?? "",
+    entryPort: node.entryPort,
     realityPublicKey: node.realityPublicKey ?? "",
     realityShortId: node.realityShortId ?? "",
     realityServerName: node.realityServerName ?? "",
     realityFingerprint: node.realityFingerprint ?? "",
     wiring: nodeWiring(node),
+    chinaReachability: toUiChina(node.chinaReachability),
+    chinaCheckedAt: node.chinaCheckedAt?.toISOString() ?? null,
   };
 }
 
@@ -121,6 +127,7 @@ export function toAdminCustomer(row: CustomerRow, includeSecrets = false): Admin
     createdAt: row.createdAt.toISOString(),
     signedUpAt: row.user.createdAt.toISOString(),
     signupOnly: false,
+    demo: isDemoSubscription(row.id),
     credentials: includeSecrets ? toCredentials(row) : null,
     rotateHistory: includeSecrets
       ? (row.rotateEvents ?? []).map((event) => ({
@@ -158,6 +165,7 @@ export function toSignupOnlyCustomer(user: {
     createdAt: at,
     signedUpAt: at,
     signupOnly: true,
+    demo: false,
     credentials: null,
     rotateHistory: [],
     planChange: null,
@@ -252,6 +260,21 @@ function toCredentials(row: CustomerRow): CustomerCredentials | null {
 
 function toUiRole(role: NodeRole): UiNodeRole {
   return role === NodeRole.FAILOVER ? "failover" : "primary";
+}
+
+function toUiChina(status: DbChinaReachability): UiChinaReachability {
+  switch (status) {
+    case "OPEN":
+      return "open";
+    case "BLOCKED":
+      return "blocked";
+    case "DOWN":
+      return "down";
+    case "PARTIAL":
+      return "partial";
+    default:
+      return "unknown";
+  }
 }
 
 function toUiHealth(status: NodeHealth): UiNodeHealth {

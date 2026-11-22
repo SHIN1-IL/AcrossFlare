@@ -30,6 +30,34 @@ export function vlessConnectHost(node: { ddns: string; host?: string | null }) {
   return node.ddns.trim();
 }
 
+/** Customer YAML/connect address. Relay entry stays as typed; panel host still uses IP extraction. */
+export function customerConnectHost(node: {
+  ddns: string;
+  host?: string | null;
+  entryHost?: string | null;
+}) {
+  const entry = (node.entryHost ?? "").trim();
+  if (entry) {
+    return entry;
+  }
+  return vlessConnectHost(node);
+}
+
+export function customerConnectPort(node: {
+  vlessPort?: number | null;
+  entryPort?: number | null;
+}) {
+  const entryPort = node.entryPort;
+  if (entryPort != null && Number.isFinite(entryPort) && entryPort > 0 && entryPort <= 65535) {
+    return Math.round(entryPort);
+  }
+  const port = node.vlessPort;
+  if (port != null && Number.isFinite(port) && port > 0 && port <= 65535) {
+    return Math.round(port);
+  }
+  return DEFAULT_VLESS_PORT;
+}
+
 export function hasRealityConfig(node: RealityFields) {
   return Boolean(node.realityPublicKey?.trim() && node.realityServerName?.trim());
 }

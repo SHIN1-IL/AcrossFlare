@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { esimAmountForLocale, planAmountForLocale } from "@/lib/esim/catalog";
-import { currencyForLocale } from "@/lib/payments/quote";
+import { settlementCurrency } from "@/lib/payments/settlement";
+import type { PaymentMethod } from "@/lib/account";
 import { planTerm, type Plan } from "@/lib/plans";
 import { formatMoney } from "@/lib/format-date";
 import type { AppLocale } from "@/i18n/routing";
@@ -30,6 +30,10 @@ type Offer = {
   };
 };
 
+function settlementAmount(prices: { priceKrw: number; priceUsd: number }, currency: string) {
+  return currency === "KRW" ? prices.priceKrw : prices.priceUsd;
+}
+
 function productLabel(t: ReturnType<typeof useTranslations<"checkout">>, id: string) {
   return id === "cn-10gb" ? t("esimProducts.cn-10gb") : t("esimProducts.cn-5gb");
 }
@@ -46,11 +50,13 @@ export function EsimCheckout({
   plan,
   ownsConnection,
   initialDataId,
+  method,
   onChange,
 }: {
   plan: Plan | null;
   ownsConnection: boolean;
   initialDataId?: string;
+  method: PaymentMethod;
   onChange: (choice: EsimCheckoutChoice) => void;
 }) {
   const t = useTranslations("checkout");
@@ -83,8 +89,8 @@ export function EsimCheckout({
   const year = plan ? planTerm(plan.id) === "year" : false;
   const bundle = Boolean(plan) && !year && !ownsConnection && plan?.product !== "workspace";
   const dataOnly = !plan;
-  const currency = currencyForLocale(locale);
-  const priced = (offer?.products ?? []).filter((item) => esimAmountForLocale(item, locale) > 0);
+  const currency = settlementCurrency(locale, method);
+  const priced = (offer?.products ?? []).filter((item) => settlementAmount(item, currency) > 0);
   const showData = priced.length > 0 && (dataOnly || bundle);
   const selected = priced.find((item) => item.id === dataId) ?? priced[0] ?? null;
   const includeConnection = Boolean(plan) && (year || (!ownsConnection && connectionOn));
@@ -92,16 +98,14 @@ export function EsimCheckout({
   const chargeAmount =
     includeData && selected
       ? (includeConnection && plan
-          ? planAmountForLocale(
+          ? settlementAmount(
               {
                 priceKrw: plan.prices.krw,
                 priceUsd: plan.prices.usd,
-                priceCny: plan.prices.cny,
-                priceJpy: plan.prices.jpy,
               },
-              locale
+              currency
             )
-          : 0) + esimAmountForLocale(selected, locale)
+          : 0) + settlementAmount(selected, currency)
       : null;
   const copy =
     locale === "ko" && offer
@@ -165,7 +169,7 @@ export function EsimCheckout({
                 onChange={() => setDataId(product.id)}
               />
               <span>
-                {productLabel(t, product.id)} · {formatMoney(locale, esimAmountForLocale(product, locale), currency)} · {product.days}
+                {productLabel(t, product.id)} · {formatMoney(locale, settlementAmount(product, currency), currency)} · {product.days}
                 {t("esimDays")}
               </span>
             </label>
@@ -192,7 +196,7 @@ export function EsimCheckout({
                     checked={selected.id === product.id}
                     onChange={() => setDataId(product.id)}
                   />
-                  {productLabel(t, product.id)} · {formatMoney(locale, esimAmountForLocale(product, locale), currency)}
+                  {productLabel(t, product.id)} · {formatMoney(locale, settlementAmount(product, currency), currency)}
                 </label>
               ))}
             </span>

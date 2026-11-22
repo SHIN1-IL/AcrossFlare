@@ -1,5 +1,3 @@
-import { PaymentProvider } from "@prisma/client";
-
 const TIMESTAMP_TOLERANCE_SEC = 60 * 5;
 
 export function webhookTimestampToleranceSec() {
@@ -46,12 +44,22 @@ export function portoneChannelKey() {
   return env("PORTONE_CHANNEL_KEY");
 }
 
-export function publicAppUrl() {
-  return (env("APP_URL") || env("NEXT_PUBLIC_APP_URL") || "http://localhost:3000").replace(/\/$/, "");
+export function lemonSqueezyApiKey() {
+  return env("LEMONSQUEEZY_API_KEY");
 }
 
-export function alipayProvider(): PaymentProvider {
-  return env("PAYMENT_ALIPAY_PROVIDER") === "paymentwall"
-    ? PaymentProvider.PAYMENTWALL
-    : PaymentProvider.STRIPE;
+export function lemonSqueezyStoreId() {
+  return env("LEMONSQUEEZY_STORE_ID");
+}
+
+export function lemonSqueezyVariantId() {
+  return env("LEMONSQUEEZY_VARIANT_ID");
+}
+
+export function lemonSqueezyWebhookSecret() {
+  return env("LEMONSQUEEZY_WEBHOOK_SECRET");
+}
+
+export function publicAppUrl() {
+  return (env("APP_URL") || env("NEXT_PUBLIC_APP_URL") || "http://localhost:3000").replace(/\/$/, "");
 }

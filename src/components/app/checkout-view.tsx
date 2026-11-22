@@ -21,6 +21,7 @@ import { isPublicCheckoutProduct, planPricePeriodKey } from "@/lib/plans";
 import { accountServiceRows, hasActiveService } from "@/lib/owned-service";
 import { publicServiceFromPlanId } from "@/lib/public-service";
 import type { PortOneCheckout } from "@/lib/payments/portone";
+import { usesLemonCheckout } from "@/lib/payments/settlement";
 import { EsimCheckout, type EsimCheckoutChoice } from "@/components/esim/esim-checkout";
 import { formatMoney } from "@/lib/format-date";
 import { cn } from "@/lib/utils";
@@ -32,6 +33,8 @@ const CHECKOUT_FAILURES = [
   "stripe_not_configured",
   "stripe_checkout_failed",
   "paymentwall_not_configured",
+  "lemonsqueezy_not_configured",
+  "lemonsqueezy_checkout_failed",
   "phone_required",
   "phone_invalid",
   "already_owned",
@@ -105,6 +108,8 @@ export function CheckoutView({
   }, []);
   const planPeriod = plan ? tPricing(planPricePeriodKey(plan.id)) : null;
   const [method, setMethod] = useState<PaymentMethod>(locale === "zh" ? "alipay" : "card");
+  const lemonCheckout = usesLemonCheckout(locale, method);
+  const portoneCard = method === "card" && !lemonCheckout;
   const [agreed, setAgreed] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [resolvedPromoCode, setResolvedPromoCode] = useState<string | undefined>(promoCode);
@@ -219,7 +224,7 @@ export function CheckoutView({
       return;
     }
 
-    if (method === "card" && !phoneNumber.trim()) {
+    if (portoneCard && !phoneNumber.trim()) {
       setError("phone_required");
       return;
     }
@@ -237,7 +242,7 @@ export function CheckoutView({
 
     setError(null);
     setErrorDetail(null);
-    setPayStatus(method === "card" ? "openingWindow" : "redirecting");
+    setPayStatus(portoneCard ? "openingWindow" : "redirecting");
     setPhase("processing");
 
     try {
@@ -269,6 +274,8 @@ export function CheckoutView({
             checkout.error === "stripe_not_configured" ||
             checkout.error === "stripe_checkout_failed" ||
             checkout.error === "paymentwall_not_configured" ||
+            checkout.error === "lemonsqueezy_not_configured" ||
+            checkout.error === "lemonsqueezy_checkout_failed" ||
             checkout.error === "phone_required" ||
             checkout.error === "phone_invalid" ||
             checkout.error === "already_owned" ||
@@ -413,11 +420,15 @@ export function CheckoutView({
             <p className="mt-2 font-mono text-3xl tracking-tight">
               {choice.chargeAmount != null || !plan ? (
                 formatMoney(locale, choice.chargeAmount ?? 0, choice.currency)
+              ) : lemonCheckout ? (
+                formatMoney(locale, plan.prices.usd, "USD")
               ) : (
                 <PriceAmount locale={locale} prices={plan.prices} />
               )}
             </p>
-            <p className="mt-1 text-xs text-muted-foreground">{t("taxIncluded")}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {lemonCheckout ? t("taxAtCheckout") : t("taxIncluded")}
+            </p>
             {plan && planPeriod && choice.chargeAmount == null ? (
               <PlanPeriodCaption period={planPeriod} className="mt-1" />
             ) : null}
@@ -432,6 +443,7 @@ export function CheckoutView({
               plan={plan}
               ownsConnection={ownsConnection}
               initialDataId={initialDataId}
+              method={method}
               onChange={onEsimChoice}
             />
           </div>
@@ -440,7 +452,7 @@ export function CheckoutView({
         {phase === "form" ? (
           <div className="mt-6 space-y-5">
             <PaymentTabs value={method} onChange={setMethod} />
-            {method === "card" ? (
+            {portoneCard ? (
               <label className="block space-y-1.5">
                 <span className="text-xs text-muted-foreground">{t("phoneLabel")}</span>
                 <input
@@ -480,10 +492,13 @@ export function CheckoutView({
                                     ? t("capacityFullAfterPay")
                               : error === "esim_rejected"
                                 ? t("esimRejected")
+                              : error === "lemonsqueezy_not_configured"
+                                ? t("payLemonNotReady")
                               : error === "portone_not_configured" ||
                                   error === "stripe_not_configured" ||
                                   error === "paymentwall_not_configured" ||
-                                  error === "stripe_checkout_failed"
+                                  error === "stripe_checkout_failed" ||
+                                  error === "lemonsqueezy_checkout_failed"
                                 ? t("payNotConfigured")
                                 : t("payFailed")}
                 </p>

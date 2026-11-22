@@ -1,11 +1,12 @@
 import { NodeRole } from "@prisma/client";
 import { randomBytes } from "node:crypto";
 import {
+  customerConnectHost,
+  customerConnectPort,
   DEFAULT_VLESS_PORT,
   hasRealityConfig,
   realityKeyForClient,
   VLESS_CLIENT_FLOW,
-  vlessConnectHost,
   type RealityFields,
 } from "@/lib/provision/reality";
 import { withBackupNotice } from "@/lib/provision/subscription";
@@ -17,6 +18,8 @@ export type YamlNode = {
   host?: string | null;
   role: NodeRole;
   vlessPort?: number | null;
+  entryHost?: string | null;
+  entryPort?: number | null;
 } & RealityFields;
 
 export function prismaNodeToYamlNode(node: {
@@ -24,6 +27,8 @@ export function prismaNodeToYamlNode(node: {
   host?: string | null;
   role: NodeRole;
   vlessPort?: number | null;
+  entryHost?: string | null;
+  entryPort?: number | null;
   realityPublicKey?: string | null;
   realityShortId?: string | null;
   realityServerName?: string | null;
@@ -34,6 +39,8 @@ export function prismaNodeToYamlNode(node: {
     host: node.host,
     role: node.role,
     vlessPort: node.vlessPort ?? DEFAULT_VLESS_PORT,
+    entryHost: node.entryHost,
+    entryPort: node.entryPort,
     realityPublicKey: node.realityPublicKey,
     realityShortId: node.realityShortId,
     realityServerName: node.realityServerName,
@@ -54,7 +61,7 @@ export function vlessRealityShareLink(node: YamlNode, uuid: string, remark?: str
     return "";
   }
 
-  const port = node.vlessPort ?? DEFAULT_VLESS_PORT;
+  const port = customerConnectPort(node);
   const query = new URLSearchParams({
     encryption: "none",
     flow: VLESS_CLIENT_FLOW,
@@ -66,7 +73,7 @@ export function vlessRealityShareLink(node: YamlNode, uuid: string, remark?: str
     type: "tcp",
   });
   const name = remark || node.ddns.split(".")[0] || "acrossflare";
-  return `vless://${uuid}@${vlessConnectHost(node)}:${port}?${query.toString()}#${encodeURIComponent(name)}`;
+  return `vless://${uuid}@${customerConnectHost(node)}:${port}?${query.toString()}#${encodeURIComponent(name)}`;
 }
 
 export function pickNodesForYaml(nodes: YamlNode[], failover: boolean) {
@@ -103,8 +110,8 @@ export type SubscriptionPreviewProxy = {
 export function previewSubscriptionProxies(nodes: YamlNode[], failover: boolean): SubscriptionPreviewProxy[] {
   return pickNodesForYaml(nodes, failover).map((node, index) => ({
     name: node.ddns.split(".")[0] || `node-${index}`,
-    server: vlessConnectHost(node),
-    port: node.vlessPort ?? DEFAULT_VLESS_PORT,
+    server: customerConnectHost(node),
+    port: customerConnectPort(node),
     servername: hasRealityConfig(node) ? node.realityServerName!.trim() : "",
   }));
 }
@@ -114,11 +121,11 @@ function proxyName(node: YamlNode, index: number) {
 }
 
 function buildRealityProxy(node: YamlNode, uuid: string, index: number) {
-  const port = node.vlessPort ?? DEFAULT_VLESS_PORT;
+  const port = customerConnectPort(node);
   const lines = [
     `  - name: ${proxyName(node, index)}`,
     `    type: vless`,
-    `    server: ${vlessConnectHost(node)}`,
+    `    server: ${customerConnectHost(node)}`,
     `    port: ${port}`,
     `    uuid: ${uuid}`,
     `    network: tcp`,
@@ -139,11 +146,11 @@ function buildRealityProxy(node: YamlNode, uuid: string, index: number) {
 }
 
 function buildWsProxy(node: YamlNode, uuid: string, index: number) {
-  const port = node.vlessPort ?? DEFAULT_VLESS_PORT;
+  const port = customerConnectPort(node);
   return [
     `  - name: ${proxyName(node, index)}`,
     `    type: vless`,
-    `    server: ${vlessConnectHost(node)}`,
+    `    server: ${customerConnectHost(node)}`,
     `    port: ${port}`,
     `    uuid: ${uuid}`,
     `    network: ws`,
