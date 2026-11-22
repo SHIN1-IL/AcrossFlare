@@ -5,6 +5,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { resolveLocale } from "@/i18n/locale";
 import { pickMessages } from "@/i18n/messages";
 import { routing } from "@/i18n/routing";
+import { NAVER_SITE_VERIFICATION, naverSiteVerificationMetadata, searchOrigin } from "@/lib/search-index";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -30,8 +31,10 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "meta" });
 
   return {
+    metadataBase: new URL(searchOrigin()),
     title: t("title"),
     description: t("description"),
+    ...naverSiteVerificationMetadata(process.env.NAVER_SITE_VERIFICATION?.trim() || NAVER_SITE_VERIFICATION),
     manifest: "/manifest.json",
     applicationName: "AcrossFlare Backup",
     appleWebApp: {
