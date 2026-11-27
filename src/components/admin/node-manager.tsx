@@ -12,6 +12,7 @@ import { StatusPill } from "@/components/app/status-pill";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useAdmin } from "@/hooks/use-admin";
+import { customerServicesForNodes } from "@/lib/admin-state";
 import { REALITY_DEST_HOST } from "@/lib/provision/reality";
 import {
   addNode,
@@ -80,7 +81,10 @@ export function NodeManager({
 }) {
   const t = useTranslations("admin");
   const locale = useLocale();
-  const { migrate, migrating, provisionSimulate, capacityPools, bootstrapQuota, customers } = useAdmin();
+  const { migrate, migrating, provisionSimulate, capacityPools, bootstrapQuota, customers } = useAdmin({
+    slices: ["nodes", "capacity", "customers"],
+    services: customerServicesForNodes(service),
+  });
   const nodes =
     service === "workspace"
       ? listNodes(product)

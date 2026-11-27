@@ -70,7 +70,7 @@ export function PlanManager({ service }: { service: AdminServiceId }) {
   const t = useTranslations("admin");
   const tPricing = useTranslations("pricing");
   const locale = useLocale() as AppLocale;
-  useAdmin();
+  useAdmin({ slices: ["plans"], services: [service] });
   const product = productForAdminService(service);
   const { catalog } = listPlansForService(service);
   const [draft, setDraft] = useState<Draft | null>(null);

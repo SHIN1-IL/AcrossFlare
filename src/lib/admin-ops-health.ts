@@ -184,8 +184,23 @@ export function computeOpsHealth(inputs: OpsHealthInputs): OpsHealth {
   };
 }
 
+export function opsHealthWindowStart(now: Date) {
+  return new Date(now.getTime() - ERROR_RATE_WINDOW_HOURS * 60 * 60 * 1000);
+}
+
+/** Error rate uses the last 24 hours. Lag also needs the run just before that window. */
+export function runsForOpsHealth(runs: TrafficSyncRunRow[], now: Date) {
+  const start = opsHealthWindowStart(now).getTime();
+  const sorted = [...runs].sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime());
+  const inWindow = sorted.filter((run) => run.completedAt.getTime() >= start);
+  const previous = sorted.find((run) => run.completedAt.getTime() < start) ?? null;
+  return previous ? [...inWindow, previous] : inWindow;
+}
+
 export async function getOpsHealth(): Promise<OpsHealth> {
-  const [activeGlobalUsers, syncRuns] = await Promise.all([
+  const now = new Date();
+  const windowStart = opsHealthWindowStart(now);
+  const [activeGlobalUsers, windowRuns, previousRun] = await Promise.all([
     prisma.subscription.count({
       where: {
         status: SubscriptionStatus.ACTIVE,
@@ -193,13 +208,17 @@ export async function getOpsHealth(): Promise<OpsHealth> {
       },
     }),
     prisma.trafficSyncRun.findMany({
-      where: {
-        completedAt: {
-          gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-        },
-      },
+      where: { completedAt: { gte: windowStart } },
       orderBy: { completedAt: "desc" },
-      take: 500,
+      select: {
+        completedAt: true,
+        subscriptions: true,
+        errors: true,
+      },
+    }),
+    prisma.trafficSyncRun.findFirst({
+      where: { completedAt: { lt: windowStart } },
+      orderBy: { completedAt: "desc" },
       select: {
         completedAt: true,
         subscriptions: true,
@@ -207,6 +226,7 @@ export async function getOpsHealth(): Promise<OpsHealth> {
       },
     }),
   ]);
+  const syncRuns = runsForOpsHealth(previousRun ? [...windowRuns, previousRun] : windowRuns, now);
 
   return computeOpsHealth({
     activeGlobalUsers,
@@ -215,6 +235,7 @@ export async function getOpsHealth(): Promise<OpsHealth> {
     trafficSyncEnabled: isTrafficSyncEnabled(),
     trafficSyncIntervalSeconds: trafficSyncIntervalSeconds(),
     expectSyncRuns: process.env.NODE_ENV === "production",
+    now,
   });
 }
 

@@ -20,6 +20,14 @@ import {
   productForAdminService,
   type AdminServiceId,
 } from "@/lib/admin-service";
+import {
+  ADMIN_STATE_PARTS,
+  adminServiceForCustomer,
+  isAdminSliceFresh,
+  loadedCustomerServices,
+  mergeAdminCustomers,
+  type AdminStatePart,
+} from "@/lib/admin-state";
 
 const emptyQuota: BootstrapQuota = {
   used: 0,
@@ -51,8 +59,18 @@ let publicVersion = 0;
 let provisionInFlight = false;
 let changeInFlight = false;
 let migrateInFlight = false;
-let refreshPromise: Promise<void> | null = null;
+let refreshQueue: Promise<void> = Promise.resolve();
 let adminSeeded = false;
+const sliceLoadedAt = new Map<string, number>();
+const loadedCustomerServiceSet = new Set<AdminServiceId>();
+
+function customerSliceKey(service: AdminServiceId) {
+  return `customers:${service}`;
+}
+
+export function areCustomersLoaded(service: AdminServiceId) {
+  return loadedCustomerServiceSet.has(service);
+}
 
 export function seedAdminState(
   state: Pick<
@@ -111,36 +129,78 @@ function patch(next: Partial<AdminState>) {
   emit();
 }
 
-function mergeCustomers(incoming: AdminCustomer[]) {
-  return incoming.map((customer) => {
-    const previous = memory.customers.find((item) => item.id === customer.id);
-    return {
-      ...customer,
-      planChange: previous?.planChange ?? customer.planChange,
-      credentials: customer.credentials ?? previous?.credentials ?? null,
-      rotateHistory: customer.rotateHistory?.length ? customer.rotateHistory : previous?.rotateHistory ?? [],
-      payments: customer.payments?.length ? customer.payments : previous?.payments ?? [],
-      auditLogs: customer.auditLogs?.length ? customer.auditLogs : previous?.auditLogs ?? [],
-    };
-  });
-}
-
 async function readJson<T>(response: Response) {
   return (await response.json().catch(() => ({}))) as T;
 }
 
-export async function refreshAdmin() {
-  if (refreshPromise) {
-    return refreshPromise;
+function loadedSlices(): AdminStatePart[] {
+  const slices = ADMIN_STATE_PARTS.filter((slice) =>
+    slice === "customers" ? loadedCustomerServiceSet.size > 0 : sliceLoadedAt.has(slice)
+  );
+  return slices.length ? [...slices] : [...ADMIN_STATE_PARTS];
+}
+
+export async function refreshAdmin(options?: {
+  force?: boolean;
+  slices?: AdminStatePart[];
+  services?: AdminServiceId[];
+}) {
+  const run = refreshQueue.then(() => refreshAdminNow(options));
+  refreshQueue = run.then(
+    () => undefined,
+    () => undefined
+  );
+  return run;
+}
+
+async function refreshAdminNow(options?: {
+  force?: boolean;
+  slices?: AdminStatePart[];
+  services?: AdminServiceId[];
+}) {
+  const explicit = Boolean(options?.slices);
+  const force = options?.force ?? !explicit;
+  const slices = options?.slices ?? loadedSlices();
+  const services = slices.includes("customers")
+    ? options?.services?.length
+      ? options.services
+      : loadedCustomerServices(loadedCustomerServiceSet)
+    : [];
+  const now = Date.now();
+  const dueSlices = slices.filter((slice) => {
+    if (slice === "customers") {
+      return services.some((service) => !isAdminSliceFresh(sliceLoadedAt.get(customerSliceKey(service)), now, force));
+    }
+    return !isAdminSliceFresh(sliceLoadedAt.get(slice), now, force);
+  });
+  const dueServices = services.filter(
+    (service) => !isAdminSliceFresh(sliceLoadedAt.get(customerSliceKey(service)), now, force)
+  );
+
+  if (!dueSlices.length && !dueServices.length) {
+    adminSeeded = true;
+    return;
   }
 
-  refreshPromise = (async () => {
-    const response = await fetch("/api/v1/admin/state", { credentials: "include" });
-    if (!response.ok) {
-      return;
-    }
+  const params = new URLSearchParams();
+  const parts = new Set(dueSlices);
+  if (dueServices.length) {
+    parts.add("customers");
+  }
+  params.set("parts", [...parts].join(","));
+  if (dueServices.length) {
+    params.set("services", dueServices.join(","));
+  }
 
-    const data = await readJson<
+  const response = await fetch(`/api/v1/admin/state?${params}`, { credentials: "include" });
+  adminSeeded = true;
+  if (!response.ok) {
+    emit();
+    return;
+  }
+
+  const data = await readJson<
+    Partial<
       Pick<
         AdminState,
         | "plans"
@@ -153,25 +213,53 @@ export async function refreshAdmin() {
         | "provisionSimulate"
         | "chinaCheckRunning"
       >
-    >(response);
-    patch({
-      plans: data.plans ?? [],
-      nodes: data.nodes ?? [],
-      customers: mergeCustomers(data.customers ?? []),
-      promoCodes: data.promoCodes ?? [],
-      capacityPools: data.capacityPools ?? [],
-      bootstrapQuota: data.bootstrapQuota ?? emptyQuota,
-      bootstrapJobs: data.bootstrapJobs ?? [],
-      provisionSimulate: Boolean(data.provisionSimulate),
-      chinaCheckRunning: Boolean(data.chinaCheckRunning),
-    });
-  })().finally(() => {
-    adminSeeded = true;
-    refreshPromise = null;
-    emit();
-  });
-
-  return refreshPromise;
+    >
+  >(response);
+  const next: Partial<AdminState> = {};
+  if (Array.isArray(data.plans)) {
+    next.plans = data.plans;
+    sliceLoadedAt.set("plans", now);
+  }
+  if (Array.isArray(data.nodes)) {
+    next.nodes = data.nodes;
+    sliceLoadedAt.set("nodes", now);
+  }
+  if (Array.isArray(data.promoCodes)) {
+    next.promoCodes = data.promoCodes;
+    sliceLoadedAt.set("promoCodes", now);
+  }
+  if (Array.isArray(data.capacityPools)) {
+    next.capacityPools = data.capacityPools;
+    sliceLoadedAt.set("capacity", now);
+  }
+  if (data.bootstrapQuota) {
+    next.bootstrapQuota = data.bootstrapQuota;
+  }
+  if (Array.isArray(data.bootstrapJobs)) {
+    next.bootstrapJobs = data.bootstrapJobs;
+    sliceLoadedAt.set("bootstrapJobs", now);
+  }
+  if (typeof data.provisionSimulate === "boolean") {
+    next.provisionSimulate = data.provisionSimulate;
+  }
+  if (typeof data.chinaCheckRunning === "boolean") {
+    next.chinaCheckRunning = data.chinaCheckRunning;
+  }
+  if (Array.isArray(data.customers) && dueServices.length) {
+    const refreshed = dueServices;
+    let customers = memory.customers;
+    for (const service of refreshed) {
+      customers = mergeAdminCustomers(
+        customers,
+        service,
+        data.customers.filter((customer) => adminServiceForCustomer(customer) === service)
+      );
+      loadedCustomerServiceSet.add(service);
+      sliceLoadedAt.set(customerSliceKey(service), now);
+    }
+    next.customers = customers;
+  }
+  patch(next);
 }
 
 export async function checkChinaReachability() {
@@ -181,10 +269,6 @@ export async function checkChinaReachability() {
   });
   if (!response.ok) {
     return { ok: false as const };
-  }
-
-  if (refreshPromise) {
-    await refreshPromise;
   }
 
   const started = Date.now();

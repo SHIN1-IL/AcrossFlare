@@ -12,7 +12,7 @@ import { useAdmin } from "@/hooks/use-admin";
 import { useSession } from "@/hooks/use-account";
 import { Link } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
-import { getLivePlan, listCustomersForService, listNodesForService, retryProvision } from "@/lib/admin-store";
+import { areCustomersLoaded, getLivePlan, listCustomersForService, listNodesForService, retryProvision } from "@/lib/admin-store";
 import type { CustomerStatus } from "@/lib/admin";
 import type { AdminServiceId } from "@/lib/admin-service";
 import {
@@ -76,7 +76,7 @@ export function CustomerTable({
   const t = useTranslations("admin");
   const locale = useLocale();
   const session = useSession();
-  useAdmin();
+  useAdmin({ slices: ["customers", "nodes"], services: [service] });
   const customers = listCustomersForService(service);
   const nodes = listNodesForService(service);
   const canProvision = Boolean(session?.permissions?.includes("provision"));
@@ -148,7 +148,9 @@ export function CustomerTable({
         }
       />
 
-      {customers.length === 0 ? (
+      {!areCustomersLoaded(service) && customers.length === 0 ? (
+        <div className="h-40 animate-pulse rounded-2xl bg-surface" />
+      ) : customers.length === 0 ? (
         <p className="rounded-2xl border border-border bg-card px-4 py-8 text-sm text-muted-foreground">
           {t("emptyCustomers")}
         </p>

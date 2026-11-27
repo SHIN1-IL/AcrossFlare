@@ -92,12 +92,8 @@ export function MarginCard() {
       });
     };
     load();
-    const timer = window.setInterval(load, 60_000);
-    window.addEventListener("focus", load);
     return () => {
       cancelled = true;
-      window.clearInterval(timer);
-      window.removeEventListener("focus", load);
     };
   }, [liveMonth]);
 

@@ -32,6 +32,8 @@ import { maskHost, maskSecret } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import type { Plan as UiPlan, ProductId } from "@/lib/plans";
 import { toPrismaProduct, toProductId } from "@/lib/product";
+import { adminServiceForCustomer, type AdminStatePart } from "@/lib/admin-state";
+import type { AdminServiceId } from "@/lib/admin-service";
 import { appUrl, isProvisionSimulate } from "@/lib/provision/config";
 import { yamlUrlFor } from "@/lib/provision/build";
 import { nodeWiring } from "@/lib/provision/node-wiring";
@@ -323,52 +325,89 @@ export function toAdminPromoCode(
   };
 }
 
-export async function listAdminState() {
+export async function listAdminState(input?: { parts?: AdminStatePart[]; services?: AdminServiceId[] }) {
+  const parts = new Set<AdminStatePart>(
+    input?.parts ?? ["plans", "nodes", "customers", "promoCodes", "capacity", "bootstrapJobs"]
+  );
+  const services = input?.services?.length ? input.services : null;
+  const wants = (part: AdminStatePart) => parts.has(part);
   const { listPoolCapacity } = await import("@/lib/provision/capacity");
   const { DAILY_BOOTSTRAP_LIMIT } = await import("@/lib/provision/capacity-expand");
   const { listRecentBootstrapJobs } = await import("@/lib/bootstrap/run");
+  const includeSignup = wants("customers") && (!services || services.includes("standard"));
   const [plans, nodes, subscriptions, promoCodes, signupOnlyUsers, capacity, bootstrapJobs] = await Promise.all([
-    prisma.plan.findMany({ orderBy: { name: "asc" } }),
-    prisma.node.findMany({ orderBy: { createdAt: "asc" } }),
-    prisma.subscription.findMany({
-      where: customerSubscriptionWhere,
-      include: customerListInclude(),
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.promoCode.findMany({
-      include: { plan: { select: { name: true, product: true } } },
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.user.findMany({
-      where: {
-        role: "USER",
-        email: { not: NODE_PROBE_USER_EMAIL },
-        subscriptions: { none: {} },
-      },
-      select: { id: true, email: true, createdAt: true },
-      orderBy: { createdAt: "desc" },
-    }),
-    listPoolCapacity().catch(() => null),
-    listRecentBootstrapJobs().catch(() => []),
+    wants("plans") ? prisma.plan.findMany({ orderBy: { name: "asc" } }) : Promise.resolve(null),
+    wants("nodes") ? prisma.node.findMany({ orderBy: { createdAt: "asc" } }) : Promise.resolve(null),
+    wants("customers")
+      ? prisma.subscription.findMany({
+          where: customerSubscriptionWhere,
+          include: customerListInclude(),
+          orderBy: { createdAt: "desc" },
+        })
+      : Promise.resolve(null),
+    wants("promoCodes")
+      ? prisma.promoCode.findMany({
+          include: { plan: { select: { name: true, product: true } } },
+          orderBy: { createdAt: "desc" },
+        })
+      : Promise.resolve(null),
+    includeSignup
+      ? prisma.user.findMany({
+          where: {
+            role: "USER",
+            email: { not: NODE_PROBE_USER_EMAIL },
+            subscriptions: { none: {} },
+          },
+          select: { id: true, email: true, createdAt: true },
+          orderBy: { createdAt: "desc" },
+        })
+      : Promise.resolve([]),
+    wants("capacity") ? listPoolCapacity().catch(() => null) : Promise.resolve(undefined),
+    wants("bootstrapJobs") ? listRecentBootstrapJobs().catch(() => []) : Promise.resolve(undefined),
   ]);
 
-  return {
-    plans: plans.map(toAdminPlan),
-    nodes: nodes.map(toAdminNode),
-    customers: [
+  const state: {
+    plans?: ReturnType<typeof toAdminPlan>[];
+    nodes?: ReturnType<typeof toAdminNode>[];
+    customers?: AdminCustomer[];
+    promoCodes?: AdminPromoCode[];
+    capacityPools?: Awaited<ReturnType<typeof listPoolCapacity>>["pools"];
+    bootstrapQuota?: { used: number; limit: number; recentFailures: number };
+    bootstrapJobs?: Awaited<ReturnType<typeof listRecentBootstrapJobs>>;
+    provisionSimulate: boolean;
+  } = { provisionSimulate: isProvisionSimulate() };
+
+  if (plans) {
+    state.plans = plans.map(toAdminPlan);
+  }
+  if (nodes) {
+    state.nodes = nodes.map(toAdminNode);
+  }
+  if (subscriptions) {
+    const customers = [
       ...subscriptions.map((row) => toAdminCustomer(row, false)),
       ...signupOnlyUsers.map(toSignupOnlyCustomer),
-    ],
-    promoCodes: promoCodes.map(toAdminPromoCode),
-    capacityPools: capacity?.pools ?? [],
-    bootstrapQuota: capacity?.bootstrap ?? {
+    ];
+    state.customers = services
+      ? customers.filter((customer) => services.includes(adminServiceForCustomer(customer)))
+      : customers;
+  }
+  if (promoCodes) {
+    state.promoCodes = promoCodes.map(toAdminPromoCode);
+  }
+  if (capacity !== undefined) {
+    state.capacityPools = capacity?.pools ?? [];
+    state.bootstrapQuota = capacity?.bootstrap ?? {
       used: 0,
       limit: DAILY_BOOTSTRAP_LIMIT,
       recentFailures: 0,
-    },
-    bootstrapJobs,
-    provisionSimulate: isProvisionSimulate(),
-  };
+    };
+  }
+  if (bootstrapJobs) {
+    state.bootstrapJobs = bootstrapJobs;
+  }
+
+  return state;
 }
 
 export async function getAdminCustomer(id: string) {

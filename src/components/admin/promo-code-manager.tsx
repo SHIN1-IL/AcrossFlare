@@ -14,7 +14,7 @@ import { getPlansByProduct } from "@/lib/plans";
 
 export function PromoCodeManager() {
   const t = useTranslations("admin");
-  useAdmin();
+  useAdmin({ slices: ["plans", "promoCodes"], services: ["workspace"] });
   const { catalog: liveCatalog } = listPlansForService("workspace");
   const catalog = getPlansByProduct("workspace");
   const planOptions = liveCatalog.length ? liveCatalog : catalog;

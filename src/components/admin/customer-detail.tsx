@@ -38,7 +38,7 @@ export function CustomerDetail({ service, id }: { service: AdminServiceId; id: s
   const tApp = useTranslations("app");
   const locale = useLocale();
   const session = useSession();
-  const { changing } = useAdmin();
+  const { changing } = useAdmin({ slices: ["plans", "nodes", "customers"], services: [service] });
   const customer = getCustomerById(id);
   const plans = listAllPlansForService(service);
   const nodes = listNodesForService(service);

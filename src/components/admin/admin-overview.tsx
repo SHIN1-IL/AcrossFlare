@@ -55,7 +55,10 @@ export function AdminOverview({ service }: { service: AdminServiceId }) {
   const permissions = session?.permissions ?? [];
   const canCustomers = permissions.includes("customers");
   const canNodes = owner || permissions.includes("nodes");
-  const { capacityPools, bootstrapQuota, bootstrapJobs } = useAdmin();
+  const { capacityPools, bootstrapQuota, bootstrapJobs } = useAdmin({
+    slices: ["capacity", "bootstrapJobs", "customers"],
+    services: [service],
+  });
   const pools = poolsForAdminService(service, capacityPools ?? []);
   const jobs = canNodes ? jobsForAdminService(service, bootstrapJobs ?? []).slice(0, 12) : [];
   const serviceCustomers = canCustomers ? listCustomersForService(service) : [];

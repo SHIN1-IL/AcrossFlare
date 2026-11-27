@@ -388,8 +388,30 @@ export async function listRecentBootstrapJobs(limit = 30) {
   const jobs = await prisma.nodeBootstrapJob.findMany({
     orderBy: { createdAt: "desc" },
     take: limit,
+    select: {
+      id: true,
+      status: true,
+      product: true,
+      role: true,
+      provider: true,
+      poolId: true,
+      groupId: true,
+      name: true,
+      ddnsHost: true,
+      sshHost: true,
+      sshPort: true,
+      sshUser: true,
+      panelPort: true,
+      vlessPort: true,
+      realityDest: true,
+      nodeId: true,
+      error: true,
+      createdAt: true,
+      updatedAt: true,
+      completedAt: true,
+    },
   });
-  return jobs.map(toAdminBootstrapJob);
+  return jobs.map((job) => ({ ...toAdminBootstrapJob({ ...job, log: "" }), log: "" }));
 }
 
 export function toAdminBootstrapJob(job: NodeBootstrapJob) {

@@ -22,7 +22,7 @@ import { AdminPlanOption } from "@/components/admin/admin-plan-label";
 export function ProvisionPanel({ service }: { service: AdminServiceId }) {
   const t = useTranslations("admin");
   const tApp = useTranslations("app");
-  const { provision, provisioning, provisionSimulate } = useAdmin();
+  const { provision, provisioning, provisionSimulate } = useAdmin({ slices: ["plans"], services: [service] });
   const product = productForAdminService(service);
   const plans = listAllPlansForService(service);
   const [email, setEmail] = useState("");

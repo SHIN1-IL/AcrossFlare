@@ -63,10 +63,10 @@ export function hasPermission(
 
 export function filterAdminState<
   T extends {
-    plans: unknown[];
-    nodes: unknown[];
-    customers: unknown[];
-    promoCodes: unknown[];
+    plans?: unknown[];
+    nodes?: unknown[];
+    customers?: unknown[];
+    promoCodes?: unknown[];
     bootstrapJobs?: unknown[];
   },
 >(state: T, permissions: readonly AdminPermission[]): T {
@@ -78,11 +78,11 @@ export function filterAdminState<
 
   return {
     ...state,
-    plans: canPlans ? state.plans : [],
-    customers: permissions.includes("customers") ? state.customers : [],
-    nodes: permissions.includes("nodes") ? state.nodes : [],
-    promoCodes: permissions.includes("codes") ? state.promoCodes : [],
-    ...(state.bootstrapJobs
+    ...("plans" in state ? { plans: canPlans ? state.plans : [] } : {}),
+    ...("customers" in state ? { customers: permissions.includes("customers") ? state.customers : [] } : {}),
+    ...("nodes" in state ? { nodes: permissions.includes("nodes") ? state.nodes : [] } : {}),
+    ...("promoCodes" in state ? { promoCodes: permissions.includes("codes") ? state.promoCodes : [] } : {}),
+    ...("bootstrapJobs" in state
       ? { bootstrapJobs: permissions.includes("nodes") ? state.bootstrapJobs : [] }
       : {}),
   };

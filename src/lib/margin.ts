@@ -112,6 +112,16 @@ export function paymentToKrw(payment: MarginPaymentInput): number {
   return Math.round((amount * payment.plan.priceKrw) / foreign);
 }
 
+/** Recurring rows count from their start month forward. One-time rows count in that month only. */
+export function marginAdjustmentWhere(month: string) {
+  return {
+    OR: [
+      { recurring: true, month: { lte: month } },
+      { recurring: false, month },
+    ],
+  };
+}
+
 export function adjustmentApplies(entry: { month: string; recurring: boolean }, month: string): boolean {
   if (!parseMonthKey(entry.month) || !parseMonthKey(month)) {
     return false;

@@ -3,6 +3,7 @@ import { AdminActionError } from "@/lib/admin-actions";
 import { prisma } from "@/lib/db";
 import {
   buildMarginSnapshot,
+  marginAdjustmentWhere,
   parseMonthKey,
   seoulMonthRange,
   type MarginSnapshot,
@@ -44,7 +45,10 @@ export async function getMarginSnapshot(month: string): Promise<MarginSnapshot> 
         },
       },
     }),
-    prisma.marginAdjustment.findMany({ orderBy: { createdAt: "asc" } }),
+    prisma.marginAdjustment.findMany({
+      where: marginAdjustmentWhere(key),
+      orderBy: { createdAt: "asc" },
+    }),
   ]);
 
   return buildMarginSnapshot({
