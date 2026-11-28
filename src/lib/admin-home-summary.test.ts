@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 import type { AdminPoolCapacity } from "@/lib/admin";
 import { adminQueueCounts } from "@/lib/admin-queue";
-import { buildAdminHomeSummary, presentAdminHomeSummary } from "@/lib/admin-home-summary";
+import {
+  buildAdminHomeSummary,
+  clearAdminHomeSummaryCache,
+  presentAdminHomeSummary,
+  readCachedAdminHomeSummary,
+  storeCachedAdminHomeSummary,
+} from "@/lib/admin-home-summary";
 
 const NOW = Date.parse("2026-08-01T00:00:00.000Z");
 
@@ -157,5 +163,25 @@ describe("presentAdminHomeSummary", () => {
     expect(customersOnly.services.standard.nodeCount).toBe(0);
     expect(customersOnly.services.standard.seatsRemaining).toBe(3);
     expect(customersOnly.capacityPools).toHaveLength(1);
+  });
+});
+
+describe("admin home summary cache", () => {
+  it("reuses the seat summary for 30 seconds", () => {
+    clearAdminHomeSummaryCache();
+    const summary = buildAdminHomeSummary({
+      now: NOW,
+      signupOnlyCount: 0,
+      subscriptions: [],
+      planIds: ["global-lite"],
+      globalNodeCount: 1,
+      workspaceNodeCount: 0,
+      capacityPools: [pool("global-standard", 4)],
+      bootstrapQuota: { used: 0, limit: 20, recentFailures: 0 },
+    });
+    storeCachedAdminHomeSummary(summary, 1_000);
+    expect(readCachedAdminHomeSummary(1_000 + 29_000)?.services.standard.seatsRemaining).toBe(4);
+    expect(readCachedAdminHomeSummary(1_000 + 30_000)).toBeNull();
+    clearAdminHomeSummaryCache();
   });
 });

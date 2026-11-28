@@ -7,6 +7,7 @@ import { adminQueueCounts } from "@/lib/admin-queue";
 import { ADMIN_SERVICES, adminServiceFromPlanId, catalogPlanIds, type AdminServiceId } from "@/lib/admin-service";
 import { prisma } from "@/lib/db";
 import { DAILY_BOOTSTRAP_LIMIT } from "@/lib/provision/capacity-expand";
+import { ADMIN_STATE_FRESH_MS } from "@/lib/admin-state";
 import { NODE_PROBE_USER_EMAIL, customerSubscriptionWhere } from "@/lib/subscription-scope";
 
 export type AdminHomeQueue = {
@@ -154,7 +155,34 @@ export function presentAdminHomeSummary(
   };
 }
 
+let cachedSummary: { at: number; data: AdminHomeSummary } | null = null;
+
+export function readCachedAdminHomeSummary(now = Date.now()) {
+  if (!cachedSummary || now - cachedSummary.at >= ADMIN_STATE_FRESH_MS) {
+    return null;
+  }
+  return cachedSummary.data;
+}
+
+export function storeCachedAdminHomeSummary(data: AdminHomeSummary, now = Date.now()) {
+  cachedSummary = { at: now, data };
+}
+
+export function clearAdminHomeSummaryCache() {
+  cachedSummary = null;
+}
+
 export async function loadAdminHomeSummary(): Promise<AdminHomeSummary> {
+  const cached = readCachedAdminHomeSummary();
+  if (cached) {
+    return cached;
+  }
+  const summary = await queryAdminHomeSummary();
+  storeCachedAdminHomeSummary(summary);
+  return summary;
+}
+
+async function queryAdminHomeSummary(): Promise<AdminHomeSummary> {
   const { listPoolCapacity } = await import("@/lib/provision/capacity");
   const [subscriptions, plans, nodes, signupOnlyCount, capacity] = await Promise.all([
     prisma.subscription.findMany({

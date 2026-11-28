@@ -4,6 +4,29 @@ set -euo pipefail
 
 COMPOSE=(docker compose --profile origin)
 
+# Return 0 when the file cannot change cached marketing HTML.
+keeps_storefront_cache() {
+  case "$1" in
+    src/components/admin/*|\
+    src/app/api/v1/admin/*|\
+    src/hooks/use-admin.ts|\
+    src/hooks/use-admin-home.ts|\
+    src/lib/admin-*|\
+    src/lib/margin.ts|\
+    src/lib/margin-data.ts|\
+    src/lib/bootstrap/run.ts|\
+    infra/scripts/deploy-origin-remote.sh)
+      return 0
+      ;;
+  esac
+  case "$1" in
+    *"(console)/admin/"*)
+      return 0
+      ;;
+  esac
+  return 1
+}
+
 find_project_dir() {
   for d in "/opt/acrossflare-app" "$HOME/acrossflare-app" "/root/acrossflare-app"; do
     if [[ -f "$d/docker-compose.yml" && -d "$d/.git" ]]; then
@@ -24,7 +47,23 @@ cd "$PROJECT_DIR"
 echo "==> Project: $PROJECT_DIR"
 
 echo "==> git pull"
+previous_head="$(git rev-parse HEAD)"
 git pull --ff-only origin main
+current_head="$(git rev-parse HEAD)"
+
+# Public HTML stays cached unless this deploy touches the storefront.
+# An admin-console-only change must not cold-start the homepage.
+storefront_changed=0
+if [[ "$previous_head" != "$current_head" ]]; then
+  while IFS= read -r path; do
+    [[ -z "$path" ]] && continue
+    if ! keeps_storefront_cache "$path"; then
+      storefront_changed=1
+      echo "==> storefront file changed: $path"
+      break
+    fi
+  done < <(git diff --name-only "$previous_head" "$current_head")
+fi
 
 if [[ -f .env ]]; then
   echo "==> .env production flags"
@@ -101,8 +140,12 @@ if [[ -f .env ]] && grep -q '^CLOUDFLARE_API_TOKEN=' .env 2>/dev/null && grep -q
   EDGE_ENV_FILE="$PROJECT_DIR/.env" bash "$PROJECT_DIR/infra/scripts/ensure-cloudflare-cache-rules.sh" || echo "WARN: cache rules update failed"
   echo "==> Cloudflare www redirect"
   EDGE_ENV_FILE="$PROJECT_DIR/.env" bash "$PROJECT_DIR/infra/scripts/ensure-cloudflare-www-redirect.sh" || echo "WARN: www redirect update failed"
-  echo "==> Cloudflare marketing purge"
-  EDGE_ENV_FILE="$PROJECT_DIR/.env" bash "$PROJECT_DIR/infra/scripts/purge-cloudflare-cache.sh" || echo "WARN: purge failed"
+  if [[ "$storefront_changed" -eq 1 ]]; then
+    echo "==> Cloudflare marketing purge"
+    EDGE_ENV_FILE="$PROJECT_DIR/.env" bash "$PROJECT_DIR/infra/scripts/purge-cloudflare-cache.sh" || echo "WARN: purge failed"
+  else
+    echo "==> keep marketing cache (no storefront files changed)"
+  fi
 else
   echo "==> skip Cloudflare purge (CLOUDFLARE_ZONE_ID / CLOUDFLARE_API_TOKEN not in .env)"
 fi
