@@ -15,7 +15,8 @@ keeps_storefront_cache() {
     src/lib/margin.ts|\
     src/lib/margin-data.ts|\
     src/lib/bootstrap/run.ts|\
-    infra/scripts/deploy-origin-remote.sh)
+    infra/scripts/deploy-origin-remote.sh|\
+    infra/scripts/deploy-from-mac.sh)
       return 0
       ;;
   esac

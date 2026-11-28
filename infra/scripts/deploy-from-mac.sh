@@ -62,6 +62,8 @@ ssh -o StrictHostKeyChecking=accept-new \
   -o PreferredAuthentications=password \
   -o PubkeyAuthentication=no \
   -o NumberOfPasswordPrompts=1 \
+  -o ServerAliveInterval=30 \
+  -o ServerAliveCountMax=120 \
   "$ORIGIN_HOST" bash -s < "$AF_REMOTE_BODY"
 
 echo "==> 완료"
